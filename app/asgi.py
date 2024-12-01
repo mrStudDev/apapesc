@@ -19,6 +19,7 @@ import os
     export ENV_TYPE=production
 """
 
+
 env_type = os.getenv('ENV_TYPE', 'local')  # Padrão é 'local'
 
 if env_type == 'production':
