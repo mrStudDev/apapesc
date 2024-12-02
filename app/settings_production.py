@@ -19,7 +19,7 @@ SECRET_KEY = env("SECRET_KEY", default="chave-padrao-insegura")
 
 
 DEBUG = env.bool("DEBUG", default=False)
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS_PROD", default=["127.0.0.1", "localhost", "34.42.200.239"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS_PROD", default=["127.0.0.1", "localhost", "34.57.129.54"])
 
 
 
