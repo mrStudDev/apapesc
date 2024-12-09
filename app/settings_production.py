@@ -149,3 +149,7 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_UNIQUE_EMAIL = True
 ACCOUNT_SIGNUP_FIELDS = ['first_name', 'last_name', 'email']
+
+
+# Sessão Logins
+LOGIN_REDIRECT_URL = '/'
