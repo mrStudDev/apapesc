@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block single_integrante %}
+<!-- Navbar (já configurada, incluímos no topo) -->
+{% include 'components/navbar_apapesc.html' %}
+<div class="container mx-auto my-6 p-6 bg-white shadow-md rounded-lg">
+    <h1 class="text-2xl font-bold text-gray-800 mb-4">Detalhes do Integrante</h1>
+
+    <div class="flex items-center mb-6">
+        {% if integrante.foto %}
+            <img src="{{ integrante.foto.url }}" alt="Foto do Integrante" class="w-32 h-32 rounded-full mr-4">
+        {% else %}
+            <div class="w-32 h-32 bg-gray-300 rounded-full mr-4 flex items-center justify-center text-gray-500">
+                Sem Foto
+            </div>
+        {% endif %}
+        <div>
+            <h2 class="text-xl font-semibold text-gray-700">{{ integrante.user.get_full_name }}</h2>
+            <p class="text-gray-500">{{ integrante.cargo.nome }}</p>
+        </div>
+    </div>
+    <h3 class="text-lg font-semibold text-gray-700">Vínculo</h3>
+    <ul class="list-disc list-inside text-gray-600 mb-6">
+        <li><strong>Apapesc:</strong> {{ apapesc.nome_fantasia|default:"Não vinculado" }}</li>
+        <li><strong>Repartição:</strong> {{ reparticao.nome_reparticao|default:"Não vinculado" }}</li>
+        <li><strong>Delegado:</strong> {{ delegado.user.first_name|default:"Sem delegado" }} {{ delegado.user.last_name }}</li>
+        <li><strong>Data Adnissão:</strong> {{ integrante.data_entrada|default:"Não cadastrado" }}</li>        
+        <li><strong>Data Saída:</strong> {{ integrante.data_saida|default:"Em atividade" }}</li>
+
+    </ul>   
+
+    <h3 class="text-lg font-semibold text-gray-700">Informações Pessoais</h3>
+    <ul class="list-disc list-inside text-gray-600 mb-6">
+        <li><strong>CPF:</strong> {{ integrante.cpf }}</li>
+        <li><strong>Celular:</strong> {{ integrante.celular }}</li>
+        <li><strong>Email:</strong> {{ integrante.email }}</li>
+        <li><strong>Data de Nascimento:</strong> {{ integrante.data_nascimento }}</li>
+        <li><strong>Naturalidade:</strong> {{ integrante.naturalidade }}</li>
+        <li><strong>RG:</strong> {{ integrante.rg_numero }}</li>
+        <li><strong>Órgão Emissor:</strong> {{ integrante.get_rg_orgao_display }}</li>
+        <li><strong>Data de Emissão:</strong> {{ integrante.rg_data_emissao }}</li>
+    </ul>
+
+    <h3 class="text-lg font-semibold text-gray-700">Endereço</h3>
+    <ul class="list-disc list-inside text-gray-600 mb-6">
+        <li><strong>Logradouro:</strong> {{ integrante.logradouro }}</li>
+        <li><strong>Bairro:</strong> {{ integrante.bairro }}</li>
+        <li><strong>Número:</strong> {{ integrante.numero }}</li>
+        <li><strong>Complemento:</strong> {{ integrante.complemento }}</li>
+        <li><strong>CEP:</strong> {{ integrante.cep }}</li>
+        <li><strong>Município:</strong> {{ integrante.municipio }}</li>
+        <li><strong>Estado:</strong> {{ integrante.get_uf_display }}</li>
+    </ul>
+    <!-- Botão de Voltar -->
+    <div class="mt-6">
+        <a href="{% url 'app_apapesc:list_integrante' %}" class="text-blue-500 hover:text-blue-700">
+            &larr; Voltar para a lista de Integrantes
+        </a>
+    </div>
+</div>
+
+
+{% endblock single_integrante %}

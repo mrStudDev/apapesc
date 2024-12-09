@@ -1,0 +1,192 @@
+{% load static %}
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<nav style="background-image: linear-gradient(90deg, rgba(42,111,200,1) 0%, rgba(51,51,200,1) 49%, rgba(33,36,168,0.9920343137254902) 100%); color: white;">
+    <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+        <!-- Logo -->
+        <a href="/" class="flex items-center">
+            <img src="{% static 'images/new_logo_apapesc_2024.png' %}" alt="Logo APAPESC" class="w-16 h-16 md:w-24 md:h-24 object-contain">
+        </a>
+
+        <!-- Botão do menu para dispositivos móveis -->
+        <div class="md:hidden">
+            <button id="menu-btn" class="text-2xl focus:outline-none">
+                <span class="material-icons">menu</span>
+            </button>
+        </div>
+
+        <!-- Menu para desktop -->
+        <div class="hidden md:flex space-x-6 items-center text-sm">
+            <!-- Dropdown Manager -->
+            <div class="relative group">
+                <button class="hover:text-gray-200 focus:outline-none">
+                    Manager
+                    <span class="material-icons align-middle">arrow_drop_down</span>
+                </button>
+                <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
+                    <a href="{% url 'app_manager:dashboard' %}" class="block px-4 py-2 hover:bg-gray-200">Dashboard</a>
+                    <a href="{% url 'app_manager:finances' %}" class="block px-4 py-2 hover:bg-gray-200">Finances</a>
+                </div>
+            </div>
+            <!-- Dropdown Listas -->
+            <div class="relative group">
+                <button class="hover:text-gray-200 focus:outline-none">
+                    Listas
+                    <span class="material-icons align-middle">arrow_drop_down</span>
+                </button>
+                <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">LG - Associados</a>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Ativos</a>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Aposentados</a>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Desassociados</a>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Clientes Especiais</a>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Candidatos</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="#embarcacoes" class="block px-4 py-2 hover:bg-gray-200">Embarcações</a>
+                    <a href="#embarcacoes" class="block px-4 py-2 hover:bg-gray-200">Licenças</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_apapesc:list_apapesc' %}" class="block px-4 py-2 hover:bg-gray-200">Apapesc</a>
+                    <a href="{% url 'app_apapesc:list_reparticao' %}" class="block px-4 py-2 hover:bg-gray-200">Repartições Apapesc</a>
+                    <a href="{% url 'app_apapesc:list_municipio' %}" class="block px-4 py-2 hover:bg-gray-200">Município /de<br>Circunscrição</a>
+                    <a href="{% url 'app_apapesc:list_integrante' %}" class="block px-4 py-2 hover:bg-gray-200">Integrantes Apapesc</a>
+                    <a href="{% url 'app_apapesc:ex_integrantes' %}" class="block px-4 py-2 hover:bg-gray-200">Ex-Integrantes</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_apapesc:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Users/Accounts</a>
+
+                </div>
+            </div>
+
+            <!-- Dropdown Cadastros -->
+            <div class="relative group">
+                <button class="hover:text-gray-200 focus:outline-none">
+                    Cadastrar
+                    <span class="material-icons align-middle">arrow_drop_down</span>
+                </button>
+                <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
+                    <a href="{% url 'app_apapesc:create_apapesc' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Apapesc</a>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Nova Associado</a>
+                    <a href="{% url 'app_apapesc:create_reparticao' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Repartição</a>
+                    <a href="#embarcacoes" class="block px-4 py-2 hover:bg-gray-200">Nova Embarcação</a>
+                    <a href="#licencas" class="block px-4 py-2 hover:bg-gray-200">Nova Licença</a>
+                    <a href="{% url 'app_apapesc:create_municipio' %}" class="block px-4 py-2 hover:bg-gray-200">Mun. Circunscrição</a>
+                    <!-- CADASTRA NOVO INTEGRANTE A PARTIR DE UM USUÁRIO -->
+                    <a href="{% url 'app_apapesc:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Integrante</a>
+
+                </div>
+            </div>
+
+            <!-- Tarefas  -->
+            <div class="relative group">
+                <button class="hover:text-gray-200 focus:outline-none">
+                    Tarefas
+                    <span class="material-icons align-middle">arrow_drop_down</span>
+                </button>
+                <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Lista de Tarefas</a>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Fluxo Board </a>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Nova Tarefa</a>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Tarefas Arquivadas</a>
+                </div>
+            </div>
+
+            <!-- Link para o login (somente quando o usuário não estiver autenticado) -->
+            {% if not user.is_authenticated %}
+                <a href="{% url 'account_login' %}" class="hover:text-gray-200">Login</a>
+            {% else %}
+                <a href="#" class="text-yellow-300"><strong style="font-size:12px;">{{ user.username }}</strong></a>
+                <!-- Chat  -->
+                <a href="#" class="hover:text-gray-200">Chat</a>
+                <!-- Logout  -->
+                <a href="{% url 'account_logout' %}" class="hover:text-gray-200">Logout</a>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+            <div class="relative">
+                <a href="#" class="hover:text-gray-200">
+                    <span class="material-icons">notifications</span>
+                    <span id="notificacaoBolinha" class="absolute top-0 right-0 bg-red-500 text-white rounded-full text-xs px-1">
+                    </span>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- ///////// Menu para dispositivos móveis CELULAR (oculto por padrão) /////////////// -->
+    <div id="mobile-menu" class="hidden bg-blue-500 md:hidden">
+        <!-- Usaremos detalhes para criar dropdowns no mobile -->
+        <details class="border-t border-blue-600">
+            <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Manager</summary>
+            <div class="bg-blue-600">
+                <a href="{% url 'app_manager:dashboard' %}" class="block px-6 py-2 hover:bg-blue-700">Dashboard</a>
+                <a href="{% url 'app_manager:finances' %}" class="block px-6 py-2 hover:bg-blue-700">Finances</a>
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Link</a>
+            </div>
+        </details>
+        <details class="border-t border-blue-600">
+            <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Lista</summary>
+            <div class="bg-blue-600">
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Associados</a>
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Ativos</a>
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Aposentados</a>
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Desassociados</a>
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Clientes Especiais</a>
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Candidatos</a>
+                <a href="#embarcacoes" class="block px-6 py-2 hover:bg-blue-700">Embarcações</a>
+                <a href="#licencas" class="block px-6 py-2 hover:bg-blue-700">Licenças</a>
+                <a href="{% url 'app_apapesc:list_reparticao' %}" class="block px-6 py-2 hover:bg-blue-700">Repartições Apapesc</a>
+                <a href="{% url 'app_apapesc:list_municipio' %}" class="block px-6 py-2 hover:bg-blue-700">Municipios Circunscrição</a>
+                <a href="{% url 'app_apapesc:list_integrante' %}" class="block px-6 py-2 hover:bg-blue-700">Integrantes Apapesc</a>                
+                <a href="{% url 'app_apapesc:list_users' %}" class="block px-6 py-2 hover:bg-blue-700">Users/Accounts</a>
+
+            </div>
+        </details>
+
+        <details class="border-t border-blue-600">
+            <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Cadastrar</summary>
+            <div class="bg-blue-600">
+                <a href="{% url 'app_apapesc:create_apapesc' %}" class="block px-6 py-2 hover:bg-blue-700">Nova Apapesc</a>
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Novo Associado</a>
+                <a href="{% url 'app_apapesc:create_reparticao' %}" class="block px-6 py-2 hover:bg-blue-700">Nova Repartição</a>
+                <a href="#embarcacoes" class="block px-6 py-2 hover:bg-blue-700">Nova Embarcação</a>
+                <a href="#licencas" class="block px-6 py-2 hover:bg-blue-700">Nova Licença</a>
+                <a href="{% url 'app_apapesc:create_municipio' %}" class="block px-6 py-2 hover:bg-blue-700">Mun. Circunscrição</a>
+
+                <!-- CADASTRA NOVO INTEGRANTE A PARTIR DE UM USUÁRIO -->
+                <a href="{% url 'app_apapesc:list_users' %}" class="block px-6 py-2 hover:bg-blue-700">Novo Integrante</a>
+            </div>
+        </details>
+        <!-- Tarefas  -->
+        <details class="border-t border-blue-600">
+            <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Tarefas</summary>
+            <div class="bg-blue-600">
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">lista Tarefas</a>
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Board</a>
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Nova Tarefa</a>
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Notificações</a>
+                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Tarefas Arquivadas</a>
+            </div>
+        </details>
+
+        <!-- Link de login para dispositivos móveis -->
+        {% if not user.is_authenticated %}
+            <a href="{% url 'account_login' %}" class="block px-4 py-2 hover:bg-blue-700">Login</a>
+        {% else %}
+            <a href="{% url 'account_logout' %}" class="block px-4 py-2 hover:bg-blue-700">Logout</a>
+            <a href="#" class="block px-4 py-2 hover:bg-blue-700"><strong class="text-yellow-300">Olá, {{user.username}}</strong></a>
+
+        {% endif %}
+    </div>
+</nav>
+
+<!-- Importar Google Material Icons -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.7/inputmask.min.js"></script>
+
+<script src="{% static 'js/notificacoes.js' %}"></script>
+<script src="{% static 'js/menu_mobile.js' %}"></script>
+

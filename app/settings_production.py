@@ -26,17 +26,23 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS_PROD", default=["127.0.0.1", "localhost"
 # Application definition
 
 INSTALLED_APPS = [
+    # Aplicativos de autenticação
+    'accounts', # App Accounts
+    'allauth',
+    'allauth.account',
+    # Aplicativos de Padrão do Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
-    # Externals
+    # Aplicativos Externos
     
     # Apps 
     'app_home',
+    'app_manager',
+    'app_apapesc',
 ]
 
 MIDDLEWARE = [
@@ -47,6 +53,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Middleware do allauth
+    'allauth.account.middleware.AccountMiddleware',    
 ]
 
 ROOT_URLCONF = 'app.urls'
@@ -133,3 +141,11 @@ MEDIA_URL = 'media/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_SIGNUP_FIELDS = ['first_name', 'last_name', 'email']

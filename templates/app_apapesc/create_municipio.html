@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block create_municipio %}
+<!-- Navbar -->
+{% include "components/navbar_apapesc.html" %}
+
+
+<div class="bg-gray-100">
+    <div class="container mx-auto my-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Adicionar Município</h1>
+        <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
+            {% csrf_token %}
+            <!-- Campos de Contato em duas colunas -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <!-- Campo UF -->
+                <div>
+                    <label for="id_uf" class="block text-sm font-medium text-gray-700 mb-1">Estado (UF)</label>
+                    <select
+                        name="{{ form.uf.name }}"
+                        id="{{ form.uf.id_for_label }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        {% for choice in form.uf.field.choices %}
+                            <option value="{{ choice.0 }}" {% if choice.0 == form.uf.value %}selected{% endif %}>
+                                {{ choice.1 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.uf.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <!-- Campo Nome do Município -->
+                <div>
+                    <label for="id_municipio" class="block text-sm font-medium text-gray-700 mb-1">Nome do Município</label>
+                    <input
+                        type="text"
+                        name="{{ form.municipio.name }}"
+                        id="{{ form.municipio.id_for_label }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Digite o nome do Município"
+                        value="{{ form.municipio.value|default:'' }}"
+                    >
+                    {% for error in form.municipio.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Botão de ação -->
+            <div class="mt-6">
+                <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full">
+                    Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock create_municipio %}

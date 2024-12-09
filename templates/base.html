@@ -6,18 +6,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Meu Projeto</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
+
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
+
 </head>
 
 <body class="font-sans">
+  <!--BLOCOS DO APP HOME -->
   {% block home %}
   {% endblock home %}
+  <!--########################################################################-->
+
+  
+  <!--BLOCOS DO APP MANAGER -->
+  {% block dashboard %}{% endblock dashboard %}
+  {% block finances_apapesc %}{% endblock finances_apapesc %}
+  <!--########################################################################-->
 
 
-</body>
+ <!--BLOCOS DO APP APAPESC -->
+ {% block list_users %}{% endblock list_users %}
+
+  {% block create_apapesc %}{% endblock create_apapesc %}
+  {% block delete_apapesc %}{% endblock delete_apapesc %}
+  {% block edit_apapesc %}{% endblock edit_apapesc %}
+  {% block list_apapesc %}{% endblock list_apapesc %}
+  {% block single_apapesc %}{% endblock single_apapesc %}
+
+  {% block create_integrante %}{% endblock create_integrante %}
+  {% block delete_integrante %}{% endblock delete_integrante %}
+  {% block edit_integrante %}{% endblock edit_integrante %}
+  {% block list_integrante %}{% endblock list_integrante %}
+  {% block single_integrante %}{% endblock single_integrante %}
+
+  {% block create_municipio %}{% endblock create_municipio %}
+  {% block delete_municipio %}{% endblock delete_municipio %}
+  {% block edit_municipio %}{% endblock edit_municipio %}
+  {% block list_municipio %}{% endblock list_municipio %}
+  {% block single_municipio %}{% endblock single_municipio %}
+
+  {% block create_reparticao %}{% endblock create_reparticao %}
+  {% block delete_reparticao %}{% endblock delete_reparticao %}
+  {% block edit_reparticao %}{% endblock edit_reparticao %}
+  {% block list_reparticao %}{% endblock list_reparticao %}
+  {% block single_reparticao %}{% endblock single_reparticao %}
+
+  {% block ex_integrantes %}{% endblock ex_integrantes %}
+
+  <!--########################################################################-->
+
+  
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.7/inputmask.min.js"></script>
+</body>
 </html>

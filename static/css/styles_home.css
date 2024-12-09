@@ -1,0 +1,45 @@
+.apapesc-title {
+    font-family: 'Roboto', sans-serif;
+    font-weight: 700; /* Peso da fonte */
+    font-size: 4rem; /* Tamanho base */
+    letter-spacing: 0.1em; /* Espaçamento entre letras */
+    text-transform: uppercase;
+    text-align: center;
+    background: linear-gradient(
+        60deg,
+        #145d3b, /* Verde */
+        #ffffff, /* Laranja */
+        #4299e1  /* Azul */
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    margin: 0 auto;
+    line-height: 1.2; /* Altura da linha */
+    animation: gradientAnimation 6s infinite linear; /* Movimento suave do gradiente */
+}
+
+@keyframes gradientAnimation {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+/* Estilização responsiva para ajustar o tamanho do título em telas maiores */
+@media (min-width: 768px) {
+    .apapesc-title {
+        font-size: 6rem; /* Tamanho maior em telas médias */
+    }
+}
+
+@media (min-width: 1024px) {
+    .apapesc-title {
+        font-size: 8rem; /* Tamanho ainda maior em telas grandes */
+    }
+}

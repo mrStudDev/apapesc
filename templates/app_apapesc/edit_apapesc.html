@@ -1,0 +1,361 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block edit_apapesc %}
+
+<!-- Navbar (já configurada, incluímos no topo) -->
+{% include 'components/navbar_apapesc.html' %}
+
+<div class="container mx-auto mt-8 p-4 bg-white shadow-md rounded">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Editar APAPESC</h1>
+    <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
+        {% csrf_token %}
+
+        <!-- Nome Fantasia -->
+        <div> 
+            <label for="id_nome_fantasia" class="block text-sm font-medium text-gray-700 mb-1">Nome Fantasia</label>
+            <input
+                type="text"
+                name="{{ form.nome_fantasia.name }}"
+                id="{{ form.nome_fantasia.id_for_label }}"
+                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Digite o nome fantasia"
+                value="{{ form.nome_fantasia.value|default:'' }}"
+            >
+            {% for error in form.nome_fantasia.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+
+        <!-- Razão Social -->
+        <div class="py-3"> 
+            <label for="id_razao_social" class="block text-sm font-medium text-gray-700 mb-1">Razão Social</label>
+            <input
+                type="text"
+                name="{{ form.razao_social.name }}"
+                id="{{ form.razao_social.id_for_label }}"
+                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Digite a razão social"
+                value="{{ form.razao_social.value|default:'' }}"
+            >
+            {% for error in form.razao_social.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <!-- Campos relacionados aos cargos -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+            <!-- Administrador -->
+            <div>
+                <label for="id_administrador" class="block text-sm font-medium text-gray-700 mb-1">Administrador</label>
+                <select
+                    name="{{ form.administrador.name }}"
+                    id="{{ form.administrador.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                    <option value="" {% if not form.administrador.value %}selected{% endif %}>Selecione um Administrador</option>
+                    {% for choice in form.administrador.field.queryset %}
+                        <option value="{{ choice.id }}" {% if choice.id == form.administrador.value %}selected{% endif %}>
+                            {{ choice.user.first_name }} {{ choice.user.last_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% for error in form.administrador.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Presidente -->
+            <div>
+                <label for="id_presidente" class="block text-sm font-medium text-gray-700 mb-1">Presidente</label>
+                <select
+                    name="{{ form.presidente.name }}"
+                    id="{{ form.presidente.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                    <option value="" {% if not form.presidente.value %}selected{% endif %}>Selecione um Presidente</option>
+                    {% for choice in form.presidente.field.queryset %}
+                        <option value="{{ choice.id }}" {% if choice.id == form.presidente.value %}selected{% endif %}>
+                            {{ choice.user.first_name }} {{ choice.user.last_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% for error in form.presidente.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Diretores -->
+        <div class="mt-6">
+            <label for="id_diretores" class="block text-sm font-medium text-gray-700 mb-1">Diretores</label>
+            <select
+                name="{{ form.diretores.name }}"
+                id="{{ form.diretores.id_for_label }}"
+                multiple
+                class="h-40 overflow-y-auto appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+                {% for choice in form.diretores.field.queryset %}
+                    <option value="{{ choice.id }}" {% if choice.id|stringformat:"s" in form.diretores.value|stringformat:"s" %}selected{% endif %}>
+                        {{ choice.user.first_name }} {{ choice.user.last_name }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% for error in form.diretores.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+
+        <!-- Fundadores -->
+        <div class="mt-6">
+            <label for="id_fundadores" class="block text-sm font-medium text-gray-700 mb-1">Fundadores</label>
+            <textarea
+                name="{{ form.fundadores.name }}"
+                id="{{ form.fundadores.id_for_label }}"
+                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Lista os fundadores separados por vírgulas ou linhas">{{ form.fundadores.value|default:'' }}</textarea>
+            {% for error in form.fundadores.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+
+        <!-- Campos em duas colunas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 py-3">
+            <!-- CNPJ -->
+            <div>
+                <label for="id_cnpj" class="block text-sm font-medium text-gray-700 mb-1">CNPJ</label>
+                <input
+                    type="text"
+                    name="{{ form.cnpj.name }}"
+                    id="{{ form.cnpj.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Digite o CNPJ"
+                    value="{{ form.cnpj.value|default:'' }}"
+                >
+                {% for error in form.cnpj.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Campo Celular -->
+            <div>
+                <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
+                <input
+                    type="text"
+                    name="{{ form.celular.name }}"
+                    id="{{ form.celular.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="(48)99999-9999"
+                    value="{{ form.celular.value|default:'' }}"
+                    oninput="mascaraTelefone(this)"
+                >
+
+                {% for error in form.celular.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div> 
+
+            <!-- Email -->
+            <div>
+                <label for="id_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                    type="email"
+                    name="{{ form.email.name }}"
+                    id="{{ form.email.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="exemplo@email.com"
+                    value="{{ form.email.value|default:'' }}"
+                >
+                {% for error in form.email.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Telefone -->
+            <div>
+                <label for="id_telefone" class="block text-sm font-medium text-gray-700 mb-1">Telefone</label>
+                <input
+                    type="text"
+                    name="{{ form.telefone.name }}"
+                    id="{{ form.telefone.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="(XX)XXXX-XXXX"
+                    value="{{ form.telefone.value|default:'' }}"
+                >
+                {% for error in form.telefone.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Endereço em duas colunas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
+            <!-- Logradouro -->
+            <div>
+                <label for="id_logradouro" class="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
+                <input
+                    type="text"
+                    name="{{ form.logradouro.name }}"
+                    id="{{ form.logradouro.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Ex: Rua, Servidão, Travessa"
+                    value="{{ form.logradouro.value|default:'' }}"
+                >
+                {% for error in form.logradouro.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+    
+            <!-- Campo Bairro -->
+            <div>
+                <label for="id_bairro" class="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+                <input
+                    type="text"
+                    name="{{ form.bairro.name }}"
+                    id="{{ form.bairro.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Digite o bairro"
+                    value="{{ form.bairro.value|default:'' }}"
+                >
+                {% for error in form.bairro.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+    
+            <!-- Campo Número -->
+            <div>
+                <label for="id_numero" class="block text-sm font-medium text-gray-700 mb-1">Número</label>
+                <input
+                    type="text"
+                    name="{{ form.numero.name }}"
+                    id="{{ form.numero.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Digite o número"
+                    value="{{ form.numero.value|default:'' }}"
+                >
+                {% for error in form.numero.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+    
+            <!-- Campo Complemento -->
+            <div>
+                <label for="id_complemento" class="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+                <input
+                    type="text"
+                    name="{{ form.complemento.name }}"
+                    id="{{ form.complemento.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Ex: Apto 101, Casa"
+                    value="{{ form.complemento.value|default:'' }}"
+                >
+                {% for error in form.complemento.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <!-- Campo CEP -->
+            <div>
+                <label for="id_cep" class="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+                <input
+                    type="text"
+                    name="{{ form.cep.name }}"
+                    id="{{ form.cep.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="00000-000"
+                    value="{{ form.cep.value|default:'' }}"
+                    oninput="mascaraCEP(this)"
+                >
+                {% for error in form.cep.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Campo Município -->
+            <div>
+                <label for="id_municipio" class="block text-sm font-medium text-gray-700 mb-1">Município</label>
+                <input
+                    type="text"
+                    name="{{ form.municipio.name }}"
+                    id="{{ form.municipio.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Digite o nome do município"
+                    value="{{ form.municipio.value|default:'' }}"
+                >
+                {% for error in form.municipio.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+    
+            <!-- Campo UF -->
+            <div>
+                <label for="id_uf" class="block text-sm font-medium text-gray-700 mb-1">Estado (UF)</label>
+                <select
+                    name="{{ form.uf.name }}"
+                    id="{{ form.uf.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                    {% for choice in form.uf.field.choices %}
+                        <option value="{{ choice.0 }}" {% if choice.0 == form.uf.value %}selected{% endif %}>
+                            {{ choice.1 }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% for error in form.uf.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-8">
+            <!-- Campo Data de Abertura -->
+            <div>
+                <label for="id_data_abertura" class="block text-sm font-medium text-gray-700 mb-1">Data de Abertura</label>
+                <input
+                    type="date"
+                    name="{{ form.data_abertura.name }}"
+                    id="id_data_abertura"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value="{{ form.initial.data_abertura|date:'Y-m-d' }}"
+                >
+                {% for error in form.data_abertura.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            
+            <!-- Campo Data de Encerramento -->
+            <div>
+                <label for="id_data_encerramento" class="block text-sm font-medium text-gray-700 mb-1">Data de Encerramento Unidade</label>
+                <input
+                    type="date"
+                    name="{{ form.data_encerramento.name }}"
+                    id="id_data_encerramento"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-red-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value="{{ form.initial.data_encerramento|date:'Y-m-d' }}"
+                >
+                <small>Este campo somente deve ser preenchido em caso de encerramento das atividades da Unidade.</small>
+                | <small> <strong>OBS: </strong>Certifique-se de que as Repartições e Associados vinculados, foram transferidos ou remanjados</small>
+                {% for error in form.data_encerramento.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Botão de ação -->
+        <div class="mt-6">
+            <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full">
+                Salvar
+            </button>
+        </div>
+    </form>
+</div>
+<!-- Footer -->
+{% include "components/footer_apapesc.html" %}
+<!-- Carregar o JavaScript separado em arquivos -->
+<script src="{% static 'js/mascaraTelefone.js' %}"></script>
+<script src="{% static 'js/municipio_select.js' %}"></script>
+<script src="{% static 'js/mascaraCEP.js' %}"></script>
+<script src="{% static 'js/formularioEventos.js' %}"></script>
+{% endblock edit_apapesc %}
+
+

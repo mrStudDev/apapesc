@@ -1,0 +1,392 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block edit_integrante %}
+<!-- Navbar -->
+{% include "components/navbar_apapesc.html" %}
+<div class="bg-gray-100">
+    <div class="container mx-auto my-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Editar Integrante</h1>
+        <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
+            {% csrf_token %}
+        
+            <!-- Exibir o nome do usuário selecionado -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Usuário - Nome - Email pessoal</label>
+                <div class="bg-gray-100 p-2 rounded-md">
+                    <span class="text-gray-500">{{ user.username }}</span>
+                    | <span class="text-green-500">{{ user.get_full_name|default:user.username }}</span>
+                    | <span class="text-blue-500">{{ user.email }}</span>
+                </div>
+            </div>
+        
+            <!-- Campo oculto para enviar o ID do usuário -->
+            <input type="hidden" name="user" value="{{ user.id }}">
+        
+            <!-- Campos em duas colunas -->
+      
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <!-- Campo CPF -->
+                <div>
+                    <label for="id_cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
+                    <input
+                        type="text"
+                        name="{{ form.cpf.name }}"
+                        id="{{ form.cpf.id_for_label }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="000.000.000-00"
+                        oninput="mascaraCPF(this)"
+                        value="{{ form.cpf.value|default:'' }}"
+                    >
+                    {% for error in form.cpf.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Campo Celular -->
+                <div>
+                    <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
+                    <input
+                        type="text"
+                        name="{{ form.celular.name }}"
+                        id="{{ form.celular.id_for_label }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="(48)99999-9999"
+                        value="{{ form.celular.value|default:'' }}"
+                        oninput="mascaraTelefone(this)"
+                    >
+
+                    {% for error in form.celular.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div> 
+            </div>
+            <!-- Campo Email -->
+            <div class="mb-6 py-2">
+                <label for="id_email" class="block text-sm font-medium text-gray-700 mb-1">Email - Profissional</label>
+                <input
+                    type="email"
+                    name="email"
+                    id="id_email"
+                    value="{{ form.email.value|default:'' }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="exemplo@email.com"
+                >
+                {% for error in form.email.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            
+
+            <!-- Exibir a foto atual -->
+            {% if form.instance.foto %}
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Foto Atual</label>
+                    <img src="{{ form.instance.foto.url }}" alt="Foto atual" class="w-24 h-24 object-cover rounded-md">
+                </div>
+            {% endif %}
+
+            <!-- Campo para upload de nova foto -->
+            <div class="mb-6">
+                <label for="id_foto" class="block text-sm font-medium text-gray-700 mb-1">Atualizar Foto</label>
+                <input
+                    type="file"
+                    name="foto"
+                    id="id_foto"
+                    class="block w-full text-gray-700"
+                >
+                {% for error in form.foto.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+        
+            <!-- Campos em duas colunas -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- Campo Data de Nescimento -->
+            <div>
+                <label for="id_data_nascimento" class="block text-sm font-medium text-gray-700 mb-1">
+                    Data de Nascimento
+                </label>
+                <input
+                    type="date"
+                    name="{{ form.data_nascimento.name }}"
+                    id="data_nascimento"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value="{{ form.data_nascimento.value|date:'Y-m-d' }}"
+                >
+                {% for error in form.data_nascimento.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <!-- Campo Naturalidade -->
+            <div>
+                <label for="id_naturalidade" class="block text-sm font-medium text-gray-700 mb-1">Naturalidade</label>
+                <input
+                    type="text"
+                    name="{{ form.naturalidade.name }}"
+                    id="id_naturalidade"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Cidade de origem"
+                    value="{{ form.naturalidade.value|default:'' }}"
+                >
+                {% for error in form.naturalidade.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            </div>
+            
+            <!-- Campos RG -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <!-- Campo Número do RG -->
+                <div>
+                    <label for="id_rg_numero" class="block text-sm font-medium text-gray-700 mb-1">Número do RG</label>
+                    <input
+                        type="text"
+                        name="{{ form.rg_numero.name }}"
+                        id="id_rg_numero"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Número do RG"
+                        value="{{ form.rg_numero.value|default:'' }}"
+                    >
+                    {% for error in form.rg_numero.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Campo Órgão Emissor do RG -->
+                <div>
+                    <label for="id_rg_orgao" class="block text-sm font-medium text-gray-700 mb-1">Órgão Emissor</label>
+                    <select
+                        name="rg_orgao"
+                        id="id_rg_orgao"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        {% for choice in form.rg_orgao.field.choices %}
+                            <option value="{{ choice.0 }}" {% if choice.0 == form.rg_orgao.value %}selected{% endif %}>
+                                {{ choice.1 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.rg_orgao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            
+                <!-- Campo Data de Emissão -->
+                <div>
+                    <label for="id_rg_data_emissao" class="block text-sm font-medium text-gray-700 mb-1">
+                        Data de Emissão
+                    </label>
+                    <input
+                        type="date"
+                        name="{{ form.rg_data_emissao.name }}"
+                        id="rg_data_emissao"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        value="{{ form.rg_data_emissao.value|date:'Y-m-d' }}"
+                    >
+                    {% for error in form.rg_data_emissao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+            <!-- Campo Cargo -->
+            <div class="py-2">
+                <label for="id_cargo" class="block text-sm font-medium text-gray-700 mb-1">Cargo</label>
+                <select
+                    name="{{ form.cargo.name }}"
+                    id="{{ form.cargo.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                    <option value="" {% if not form.cargo.value %}selected{% endif %}>Selecione um Cargo</option>
+                    {% for choice in form.cargo.field.queryset %}
+                        <option value="{{ choice.id }}" {% if choice.id == form.cargo.value %}selected{% endif %}>
+                            {{ choice.nome }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% for error in form.cargo.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Campo Repartição-->
+            <div class="py-2">
+                <label for="id_reparticao" class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
+                <select
+                    name="{{ form.reparticao.name }}"
+                    id="{{ form.reparticao.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                    <option value="" {% if not form.reparticao.value %}selected{% endif %}>Selecione uma Repartição</option>
+                    {% for choice in form.reparticao.field.queryset %}
+                        <option value="{{ choice.id }}" {% if choice.id == form.reparticao.value %}selected{% endif %}>
+                            {{ choice.nome_reparticao }}
+                        </option>
+                    {% endfor %}
+                </select>
+                {% for error in form.cargo.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-8">
+            <!-- Campo Data de Entrada -->
+            <div>
+                <label for="id_data_entrada" class="block text-sm font-medium text-gray-700 mb-1">
+                    Data de Entrada / Admissão
+                </label>
+                <input
+                    type="date"
+                    name="{{ form.data_entrada.name }}"
+                    id="id_data_entrada"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    value="{{ form.data_entrada.value|date:'Y-m-d' }}"
+                >
+                {% for error in form.data_entrada.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+                <!-- Campo Data de Saída -->
+                <div>
+                    <label for="id_rg_data_saida" class="block text-sm font-medium text-gray-700 mb-1">Data de Saída</label>
+                    <input
+                        type="date"
+                        name="data_saida"
+                        id="id_data_saida"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-red-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                    {% for error in form.data_saida.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                
+            </div>                              
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-8">
+                <!-- Campo Logradouro -->
+                <div>
+                    <label for="id_logradouro" class="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
+                    <input
+                        type="text"
+                        name="{{ form.logradouro.name }}"
+                        id="{{ form.logradouro.id_for_label }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Ex: Rua, Servidão, Travessa"
+                        value="{{ form.logradouro.value|default:'' }}"
+                    >
+                    {% for error in form.logradouro.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+        
+                <!-- Campo Bairro -->
+                <div>
+                    <label for="id_bairro" class="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+                    <input
+                        type="text"
+                        name="{{ form.bairro.name }}"
+                        id="{{ form.bairro.id_for_label }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Digite o bairro"
+                        value="{{ form.bairro.value|default:'' }}"
+                    >
+                    {% for error in form.bairro.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+        
+                <!-- Campo Número -->
+                <div>
+                    <label for="id_numero" class="block text-sm font-medium text-gray-700 mb-1">Número</label>
+                    <input
+                        type="text"
+                        name="{{ form.numero.name }}"
+                        id="{{ form.numero.id_for_label }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Digite o número"
+                        value="{{ form.numero.value|default:'' }}"
+                    >
+                    {% for error in form.numero.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+        
+                <!-- Campo Complemento -->
+                <div>
+                    <label for="id_complemento" class="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+                    <input
+                        type="text"
+                        name="{{ form.complemento.name }}"
+                        id="{{ form.complemento.id_for_label }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Ex: Apto 101, Casa"
+                        value="{{ form.complemento.value|default:'' }}"
+                    >
+                    {% for error in form.complemento.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <!-- Campo CEP -->
+                <div>
+                    <label for="id_cep" class="block text-sm font-medium text-gray-700 mb-1">CEP</label>
+                    <input
+                        type="text"
+                        name="{{ form.cep.name }}"
+                        id="{{ form.cep.id_for_label }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="00000-000"
+                        value="{{ form.cep.value|default:'' }}"
+                        oninput="mascaraCEP(this)"
+                    >
+                    {% for error in form.cep.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <!-- Campo Município -->
+                <div>
+                    <label for="id_municipio" class="block text-sm font-medium text-gray-700 mb-1">Município</label>
+                    <input
+                        type="text"
+                        name="{{ form.municipio.name }}"
+                        id="{{ form.municipio.id_for_label }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        placeholder="Digite o nome do município"
+                        value="{{ form.municipio.value|default:'' }}"
+                    >
+                    {% for error in form.municipio.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+        
+                <!-- Campo UF -->
+                <div>
+                    <label for="id_uf" class="block text-sm font-medium text-gray-700 mb-1">Estado (UF)</label>
+                    <select
+                        name="{{ form.uf.name }}"
+                        id="{{ form.uf.id_for_label }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                        {% for choice in form.uf.field.choices %}
+                            <option value="{{ choice.0 }}" {% if choice.0 == form.uf.value %}selected{% endif %}>
+                                {{ choice.1 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% for error in form.uf.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>           
+            <!-- Botão de Ação -->
+            <div class="mt-6">
+                <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full">
+                    Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'js/mascaraTelefone.js' %}"></script>
+<script src="{% static 'js/mascaraCPF.js' %}"></script>
+<script src="{% static 'js/mascaraCEP.js' %}"></script>
+{% endblock edit_integrante %}

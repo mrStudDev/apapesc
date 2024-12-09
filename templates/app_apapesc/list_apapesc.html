@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block list_apapesc %}
+<!-- Navbar (já configurada, incluímos no topo) -->
+{% include 'components/navbar_apapesc.html' %}
+
+<div class="container mx-auto py-6">
+    <h1 class="text-2xl font-bold mb-4">Lista de Apapesc</h1>
+    <div class="bg-white shadow rounded-lg p-6">
+        <table class="min-w-full border-collapse border border-gray-200">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border px-4 py-2 text-left">Nome Fantasia</th>
+                    <th class="border px-4 py-2 text-left">CNPJ</th>
+                    <th class="border px-4 py-2 text-left">Email</th>
+                    <th class="border px-4 py-2 text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apapesc in apapesc_list %}
+                <tr class="hover:bg-gray-50">
+                    <td class="border px-4 py-2">{{ apapesc.nome_fantasia }}</td>
+                    <td class="border px-4 py-2">{{ apapesc.cnpj }}</td>
+                    <td class="border px-4 py-2">{{ apapesc.email }}</td>
+                    <td class="border px-4 py-2 text-center">
+                        <a href="{% url 'app_apapesc:single_apapesc' apapesc.id %}" class="text-blue-500 hover:underline">Detalhes</a> |
+                        <a href="{% url 'app_apapesc:edit_apapesc' apapesc.id %}" class="text-yellow-500 hover:underline">Editar</a> |
+                        <a href="#" class="text-red-500 hover:underline">Excluir</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="border px-4 py-2 text-center text-gray-500">
+                        Nenhuma Apapesc cadastrada.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="mt-4">
+            <a href="{% url 'app_apapesc:create_apapesc' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+                Adicionar Nova Apapesc
+            </a>
+        </div>
+    </div>
+</div>
+
+
+{% endblock list_apapesc %}
