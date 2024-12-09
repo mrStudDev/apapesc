@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block single_cargo %}
+<!-- Navbar (já configurada, incluímos no topo) -->
+{% include 'components/navbar_apapesc.html' %}
+
+<div class="container mx-auto mt-8">
+    <h1 class="text-2xl font-bold mb-4">Detalhes do Cargo</h1>
+    <div class="bg-white p-6 rounded shadow-md">
+        <p><strong>Nome:</strong> {{ cargo.nome }}</p>
+    </div>
+
+    <!-- Ações -->
+    <div class="mt-4">
+        <a href="{% url 'app_apapesc:edit_cargo' cargo.id %}" class="bg-yellow-500 text-white py-2 px-4 rounded hover:bg-yellow-600">
+            Editar
+        </a>
+        <a href="{% url 'app_apapesc:delete_cargo' cargo.id %}" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+            Excluir
+        </a>
+        <a href="{% url 'app_apapesc:list_cargo' %}" class="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600">
+            Voltar
+        </a>
+    </div>
+</div>
+{% endblock single_cargo %}

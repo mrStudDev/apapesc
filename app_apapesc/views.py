@@ -68,9 +68,31 @@ def reintegrate_integrante(request):
 # Views Cargos
 class CargoscListView(ListView):
     model = CargosModel
-    template_name = 'app_apapesc/list_cargos.html'
+    template_name = 'app_apapesc/list_cargo.html'
     context_object_name = 'cargos_list'
 
+class CargoDetailView(DeleteView):
+    model = CargosModel
+    template_name = 'app_apapesc/single_cargo.html'
+    context_object_name = 'cargo'
+    
+class CargoCreateView(CreateView):
+    model = CargosModel
+    template_name = 'app_apapesc/create_cargo.html'
+    fields = '__all__'
+    success_url = reverse_lazy('app_apapesc:list_cargo')    
+    
+
+class CargoUpdateView(UpdateView):
+    model = CargosModel
+    template_name = 'app_apapesc/edit_cargo.html'
+    fields = '__all__'
+    success_url = reverse_lazy('app_apapesc:list_cargos')
+
+class CargoDeleteView(DeleteView):
+    model = CargosModel
+    template_name = 'app_apapesc/delete_cargo.html'
+    success_url = reverse_lazy('app_apapesc:list_cargo')
 
 
 # Views Apapesc

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block delete_cargo %}
+<!-- Navbar (já configurada, incluímos no topo) -->
+{% include 'components/navbar_apapesc.html' %}
+
+<div class="container mx-auto mt-8">
+    <h1 class="text-2xl font-bold mb-4">Excluir Cargo</h1>
+    <p>Tem certeza que deseja excluir o cargo <strong>{{ object.nome }}</strong>?</p>
+    <form method="post" class="mt-4">
+        {% csrf_token %}
+        <button type="submit" class="bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">
+            Confirmar Exclusão
+        </button>
+        <a href="{% url 'app_apapesc:list_cargo' %}" class="bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600">
+            Cancelar
+        </a>
+    </form>
+</div>
+{% endblock delete_cargo %}

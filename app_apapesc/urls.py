@@ -1,13 +1,36 @@
 from django.urls import path
 from . import views
 from .views import (
-    ApapescListView, ApapescDetailView, ApapescCreateView, ApapescUpdateView, ApapescDeleteView,
-    IntegrantesListView, IntegrantesDetailView, IntegrantesCreateView, IntegrantesUpdateView, IntegrantesDeleteView,
-    MunicipiosListView, MunicipiosDetailView, MunicipiosCreateView, MunicipiosUpdateView, MunicipiosDeleteView,
-    ReparticoesListView, ReparticoesDetailView, ReparticoesCreateView, ReparticoesUpdateView, ReparticoesDeleteView,
-    UserListView, ExIntegrantesListView,
+    ApapescListView, 
+    ApapescDetailView,
+    ApapescCreateView,
+    ApapescUpdateView,
+    ApapescDeleteView,
+    IntegrantesListView,
+    IntegrantesDetailView,
+    IntegrantesCreateView,
+    IntegrantesUpdateView,
+    IntegrantesDeleteView,
+    MunicipiosListView,
+    MunicipiosDetailView,
+    MunicipiosCreateView,
+    MunicipiosUpdateView,
+    MunicipiosDeleteView,
+    ReparticoesListView,
+    ReparticoesDetailView,
+    ReparticoesCreateView,
+    ReparticoesUpdateView,
+    ReparticoesDeleteView,
+    UserListView,
+    ExIntegrantesListView,
+    CargoscListView,
+    CargoDetailView,
+    CargoUpdateView,
+    CargoDeleteView,
+    CargoCreateView,
 )
 
+# App Space Name
 app_name = 'app_apapesc'
 
 urlpatterns = [
@@ -26,6 +49,13 @@ urlpatterns = [
     path('integrantes/<int:pk>/delete/', IntegrantesDeleteView.as_view(), name='delete_integrante'),
     
     path('ex-integrantes/', ExIntegrantesListView.as_view(), name='ex_integrantes'),
+    
+    # Cargos URLs
+    path('cargos/', CargoscListView.as_view(), name='list_cargo'),
+    path('cargos/create/', CargoCreateView.as_view(), name='create_cargo'),
+    path('cargos/<int:pk>/', CargoDetailView.as_view(), name='single_cargo'),
+    path('cargos/<int:pk>/edit/', CargoUpdateView.as_view(), name='edit_cargo'),
+    path('cargos/<int:pk>/delete/', CargoDeleteView.as_view(), name='delete_cargo'),
 
     # Municipios URLs
     path('municipios/', MunicipiosListView.as_view(), name='list_municipio'),
