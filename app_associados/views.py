@@ -14,7 +14,7 @@ from app_associados.models import AssociadoModel
 from accounts.mixins import GroupPermissionRequiredMixin 
 import logging
 from django.contrib.auth.models import Group
-
+from app_documentos.models import Documento
 
 logger = logging.getLogger(__name__)
 
@@ -185,6 +185,12 @@ class SingleAssociadoView(GroupPermissionRequiredMixin, DetailView):
         'Auxiliar da Repartição',
         ]
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        associado = self.object  # Associado atual
+        context['documentos'] = Documento.objects.filter(associado=associado)
+        return context
+    
 # Editar Associado
 class EditAssociadoView(GroupPermissionRequiredMixin, UpdateView):
     model = AssociadoModel

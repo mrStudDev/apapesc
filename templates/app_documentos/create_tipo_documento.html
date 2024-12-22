@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Criar novo TIPO de documento{% endblock title %}
+
+{% block create_tipo_documento %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+    {% endif %}
+<main class="flex-grow">
+    <div class="container mx-auto my-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Criar Tipo de Documento</h1>
+
+        <form method="post" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
+            {% csrf_token %}
+            {{ form.as_p }}
+            
+            <div class="mt-6">
+                <button
+                    type="submit"
+                    class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full"
+                >
+                    Salvar Tipo de Documento
+                </button>
+            </div>
+        </form>
+    </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock create_tipo_documento %}

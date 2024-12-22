@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'app_manager',
     'app_associacao',
     'app_associados',
+    'app_documentos',  
     
     # Editor
     'app_editor',
@@ -158,4 +159,6 @@ ACCOUNT_SIGNUP_FIELDS = ['first_name', 'last_name', 'email']
 
 
 # Sessão Logins
-LOGIN_REDIRECT_URL = '/'
+#ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/custom-login-redirect/'  # Redireciona após logout
+LOGIN_REDIRECT_URL = '/accounts/custom-login-redirect/'  # Redireciona após login
+#ACCOUNT_SIGNUP_REDIRECT_URL = '/accounts/custom-login-redirect/'  # Redireciona após cadastro

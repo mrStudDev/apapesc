@@ -21,6 +21,32 @@
             <p class="text-gray-500">{{ integrante.cargo.nome }}</p>
         </div>
     </div>
+        <!-- Links de Ações -->
+        <div class="flex justify-center space-x-2 mb-4">
+            <!-- Botão Lista -->
+            <a href="{% url 'app_associacao:list_integrante' %}"
+            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300"
+            title="Lista de Integrantes">
+                <i class="material-icons" style="font-size: 24px; color:blue">list</i>
+                <span class="sr-only">Lista</span> Lista
+            </a>
+    
+            <!-- Botão Editar -->
+            <a href="{% url 'app_associacao:edit_integrante' integrante.pk %}"
+            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400"
+            title="Editar Integrante">
+                <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
+                <span class="sr-only">Editar</span> Editar
+            </a>
+    
+            <!-- Botão Upload -->
+            <a href="{% url 'app_documentos:upload_documento' 'integrante' integrante.pk %}"
+            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400"
+            title="Upload de Documento">
+                <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
+                <span class="sr-only">Upload</span> Upload Doc
+            </a>
+        </div>
     <h3 class="text-lg font-semibold text-gray-700">Vínculo</h3>
     <ul class="list-disc list-inside text-gray-600 mb-6">
         <li><strong>Associação:</strong> {{ associacao.nome_fantasia|default:"Não vinculado" }}</li>
@@ -53,6 +79,70 @@
         <li><strong>Município:</strong> {{ integrante.municipio }}</li>
         <li><strong>Estado:</strong> {{ integrante.get_uf_display }}</li>
     </ul>
+    <!-- Seção: Documentos -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-4">Documentos do Integrante</h2>
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md text-white 
+                        {% if message.tags == 'success' %}
+                            bg-green-500
+                        {% elif message.tags == 'error' %}
+                            bg-red-500
+                        {% elif message.tags == 'info' %}
+                            bg-blue-500
+                        {% else %}
+                            bg-gray-500
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% if documentos %}
+            <ul class="space-y-4">
+                {% for documento in documentos %}
+                <li id="documento-{{ documento.id }}"  data-id="{{ documento.id }}"  class="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="material-icons text-gray-500 mr-2" style="font-size: 20px;">insert_drive_file</i>
+                        <div>
+                            <a href="{{ documento.arquivo.url }}" target="_blank" class="text-blue-500 font-semibold hover:underline">
+                            {{ documento.nome }}
+                            </a>
+                            <p class="text-gray-600 text-sm mt-1">Data de Upload: <strong> {{ documento.data_upload|date:"d/m/Y H:i" }}</strong></p>
+                            <p class="text-gray-600 text-sm mt-1">Extensão do Documento: <strong>{{ documento.arquivo.url|slice:"-3:" }}</strong></p> <!-- Novo -->
+                            <p class="text-gray-600 text-sm mt-1">* {{ documento.descricao|truncatechars:71 }}</p>
+
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <!-- Link para Download do Documento -->
+                        <a href="{{ documento.arquivo.url }}" download class="hover:text-green-500" title="Baixar Documento">
+                            <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
+                        </a>
+                        <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
+                            <i class="material-icons" style="font-size: 18px; color:green"> phone_android</i>
+                        </a>
+                        <a href="{% url 'app_documentos:criar_copia_pdf' documento.pk %}" title="Fazer Cópia em PDF" onclick="suaFuncaoAutomatizar()"> <!-- Adicione o link para a sua função -->
+                            <i class="material-icons" style="font-size: 20px; color:orange;">picture_as_pdf</i>
+                        </a>
+                        <a href="{% url 'app_documentos:delete_documento' documento.pk %}" 
+                        class="text-red-500 hover:text-red-700" title="Deletar">
+                            <i class="material-icons" style="font-size: 20px;">delete</i>
+                        </a>
+
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+        {% else %}
+            <p class="text-gray-600">Nenhum documento disponível para este Integrante.</p>
+        {% endif %}
+    </div>    
     <!-- Botão de Voltar -->
     <div class="mt-6">
         <a href="{% url 'app_associacao:list_integrante' %}" class="text-blue-500 hover:text-blue-700">

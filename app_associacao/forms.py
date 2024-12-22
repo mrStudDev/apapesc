@@ -123,17 +123,22 @@ class IntegranteForm(forms.ModelForm):
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
+        # Recupera o usuário do kwargs
+        user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
-        excluded_groups = ['Associados da Associação', 'User Vip'] # Grupos a serem excluídos
+        self.fields['user'].initial = user
+        # Configura o queryset do campo 'group' para excluir determinados grupos
+        excluded_groups = ['Associados da Associação', 'User Vip']  # Grupos a serem excluídos
         self.fields['group'].queryset = Group.objects.exclude(name__in=excluded_groups).order_by('name')
+
+        # Configura os querysets dos outros campos relacionados
+        self.fields['associacao'].queryset = AssociacaoModel.objects.all()
         self.fields['cargo'].queryset = CargosModel.objects.all()
         self.fields['reparticao'].queryset = ReparticoesModel.objects.all()
-        
-        # Preencher o grupo inicial para o usuário relacionado
-        if self.instance and self.instance.user:
-            user_groups = self.instance.user.groups.all()
-            if user_groups.exists():
-                self.fields['group'].initial = user_groups.first()  # Seleciona o primeiro grupo como inicial
+
+        # Se um usuário for passado, use suas informações (caso necessário no formulário)
+        if user:
+            self.fields['email'].initial = user.email
                         
     # Validação dos dígitos verificadores do CPF
     def calcular_digito(cpf_parcial):

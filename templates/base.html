@@ -15,17 +15,16 @@
 
 <body class="font-sans min-h-screen flex flex-col">
   <!--BLOCOS DO APP HOME -->
-  {% block home %}
-  {% endblock home %}
+  {% block home %}{% endblock home %}
   <!--########################################################################-->
 
   
   <!--BLOCOS DO APP MANAGER -->
-  <!--Superusers -->
+  <!--Blocos Superusers -->
   {% block dashboard %}{% endblock dashboard %}
   {% block finances_associacao %}{% endblock finances_associacao %}
   
-  <!--BGroups -->
+  <!--Blocos Groups -->
   {% block dashboard_Presidente %}{% endblock dashboard_Presidente %}
   {% block dashboard_Diretores %}{% endblock dashboard_Diretores %}  
   {% block dashboard_administradores %}{% endblock dashboard_administradores %}
@@ -38,38 +37,31 @@
 
  <!--BLOCOS DO APP Associação -->
  {% block list_users %}{% endblock list_users %}
-
   {% block create_associacao %}{% endblock create_associacao %}
   {% block delete_associacao %}{% endblock delete_associacao %}
   {% block edit_associacao %}{% endblock edit_associacao %}
   {% block list_associacao %}{% endblock list_associacao %}
   {% block single_associacao %}{% endblock single_associacao %}
-
   {% block create_integrante %}{% endblock create_integrante %}
   {% block delete_integrante %}{% endblock delete_integrante %}
   {% block edit_integrante %}{% endblock edit_integrante %}
   {% block list_integrante %}{% endblock list_integrante %}
   {% block single_integrante %}{% endblock single_integrante %}
-
   {% block create_cargo %}{% endblock create_cargo %}
   {% block delete_cargo %}{% endblock delete_cargo %}
   {% block edit_cargo %}{% endblock edit_cargo %}
   {% block list_cargo %}{% endblock list_cargo %}
   {% block single_cargo %}{% endblock single_cargo %}
-
-
   {% block create_municipio %}{% endblock create_municipio %}
   {% block delete_municipio %}{% endblock delete_municipio %}
   {% block edit_municipio %}{% endblock edit_municipio %}
   {% block list_municipio %}{% endblock list_municipio %}
   {% block single_municipio %}{% endblock single_municipio %}
-
   {% block create_reparticao %}{% endblock create_reparticao %}
   {% block delete_reparticao %}{% endblock delete_reparticao %}
   {% block edit_reparticao %}{% endblock edit_reparticao %}
   {% block list_reparticao %}{% endblock list_reparticao %}
   {% block single_reparticao %}{% endblock single_reparticao %}
-
   {% block ex_integrantes %}{% endblock ex_integrantes %}
   <!--########################################################################-->
 
@@ -78,21 +70,23 @@
   {% block delete_associado %}{% endblock delete_associado %}
   {% block edit_associado %}{% endblock edit_associado %}
   {% block single_associado %}{% endblock single_associado %}
-
   {% block list_GeralAssociados %}{% endblock list_GeralAssociados %}
   {% block list_ativo %}{% endblock list_ativo %}
   {% block list_aposentado %}{% endblock list_aposentado %}  
   {% block list_canditado %}{% endblock list_canditado %}
   {% block list_desassociado %}{% endblock list_desassociado %}
-  {% block list_clienteEspecial %}{% endblock list_clienteEspecial %}
-   
+  {% block list_clienteEspecial %}{% endblock list_clienteEspecial %}   
   {% block search_associado %}{% endblock search_associado %}
-
-
   {% block list_PorAssociacao %}{% endblock list_PorAssociacao %}
   {% block list_PorReparticao %}{% endblock list_PorReparticao %}
+  <!--########################################################################-->
 
 
+  <!--BLOCOS DO APP DOCUMENTOS -->  
+  {% block upload_documentos %}{% endblock upload_documentos %}
+  {% block create_tipo_documento %}{% endblock create_tipo_documento %}
+  {% block list_TipoDocumento %}{% endblock list_TipoDocumento %}
+  {% block delete_documento %}{% endblock delete_documento %}
   <!--########################################################################-->
 
 

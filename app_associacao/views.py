@@ -11,7 +11,8 @@ from app_associados.models import AssociadoModel
 from app_associacao.forms import IntegranteForm
 from accounts.mixins import GroupPermissionRequiredMixin 
 from django.contrib.auth.models import Group
-
+from app_documentos.models import Documento
+from django.http import Http404
 
 from .models import (
     AssociacaoModel,
@@ -206,7 +207,7 @@ class IntegrantesDetailView(GroupPermissionRequiredMixin, DetailView):
         context['reparticao'] = integrante.reparticao
         context['associacao'] = integrante.reparticao.associacao if integrante.reparticao else None
         context['delegado'] = integrante.reparticao.delegado if integrante.reparticao else None
-
+        context['documentos'] = Documento.objects.filter(integrante=integrante)
         return context
 
 
@@ -218,27 +219,91 @@ class IntegrantesCreateView(GroupPermissionRequiredMixin, CreateView):
     group_required = [
         'Superuser',
         'Admin da Associação',
-        ]
-        
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user_id = self.request.GET.get('user_id')  # Obtém o ID do usuário da URL
+        # Inclua outros grupos se necessário
+    ]
+
+    def get_form_kwargs(self):
+        """
+        Adiciona o usuário ao kwargs do formulário, caso o `user_id` seja passado na URL.
+        """
+        kwargs = super().get_form_kwargs()
+        user_id = self.request.GET.get('user_id')
         if user_id:
-            context['user'] = User.objects.get(id=user_id)
+            try:
+                kwargs['user'] = User.objects.get(id=user_id)
+            except User.DoesNotExist:
+                messages.error(self.request, "Usuário não encontrado.")
+                # Você pode redirecionar ou tratar de outra forma
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """
+        Insere no contexto o usuário selecionado (via URL), para usar no template
+        e no formulário.
+        """
+        context = super().get_context_data(**kwargs)
+        user_id = self.request.GET.get('user_id')
+        if user_id:
+            try:
+                user = User.objects.get(id=user_id)
+                context['user'] = user
+
+                # Ajuste o formulário para preencher campos iniciais com dados do user
+                form = context.get('form')
+                if form:
+                    form.initial['email'] = user.email
+            except User.DoesNotExist:
+                context['user'] = None
+                messages.error(self.request, "Usuário não encontrado.")
+        
+        # Em caso de POST, repassa os dados do formulário
+        if self.request.method == "POST":
+            context['form'] = self.form_class(self.request.POST)
+        else:
+            context['form'] = self.get_form()
+
         return context
 
     def form_valid(self, form):
-        # Recupera o usuário com base no ID enviado no formulário
-        user = User.objects.get(id=self.request.POST.get('user'))
-        form.instance.user = user  # Associa o usuário ao IntegrantesModel
+        user_id = self.request.GET.get('user_id')
+        if not user_id:
+            messages.error(self.request, "Erro: Nenhum usuário selecionado para integrar.")
+            return self.form_invalid(form)
 
-        # Adiciona o usuário ao grupo selecionado
-        group = form.cleaned_data.get('group')  # Recupera o grupo selecionado no formulário
-        if group:
+        try:
+            user = User.objects.get(id=user_id)
+            form.instance.user = user  # Define o user no IntegrantesModel
+
+            # Se quiser atualizar o email do usuário
+            user_email = form.cleaned_data.get('email')
+            if user_email and user.email != user_email:
+                user.email = user_email
+                user.save()
+
+            # Exemplo: adiciona o usuário a algum grupo (caso faça sentido)
+            group = form.cleaned_data['group']
             user.groups.add(group)
 
-        # Retorna a lógica existente
+        except User.DoesNotExist:
+            messages.error(self.request, "Usuário não encontrado.")
+            return self.form_invalid(form)
+
+        # Salva o novo integrante e retorna sucesso
+        self.object = form.save()
+        messages.success(self.request, "Integrante criado com sucesso!")
+        
+        # Se quiser tratar botões diferentes ("save_and_continue", etc.)
+        if "save_and_continue" in self.request.POST:
+            return redirect(reverse('app_associacao:edit_integrante', kwargs={'pk': self.object.pk}))
+        elif "save_and_view" in self.request.POST:
+            return redirect(reverse('app_associacao:single_integrante', kwargs={'pk': self.object.pk}))
+
         return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('app_associacao:list_integrante')
+
+
 
 
 class IntegrantesUpdateView(GroupPermissionRequiredMixin, UpdateView):

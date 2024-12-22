@@ -45,7 +45,7 @@
         </a>
 
         <!-- Botão Upload -->
-        <a href="#"
+        <a href="{% url 'app_documentos:upload_documento' 'associado' associado.pk %}"
         class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400"
         title="Upload de Documento">
             <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
@@ -884,6 +884,25 @@
     <!-- Seção: Documentos -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-4">Documentos do Associado</h2>
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md text-white 
+                        {% if message.tags == 'success' %}
+                            bg-green-500
+                        {% elif message.tags == 'error' %}
+                            bg-red-500
+                        {% elif message.tags == 'info' %}
+                            bg-blue-500
+                        {% else %}
+                            bg-gray-500
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
         {% if documentos %}
             <ul class="space-y-4">
                 {% for documento in documentos %}
@@ -906,17 +925,17 @@
                         <a href="{{ documento.arquivo.url }}" download class="hover:text-green-500" title="Baixar Documento">
                             <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
                         </a>
-                        <a href="#" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
+                        <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
                             <i class="material-icons" style="font-size: 18px; color:green"> phone_android</i>
                         </a>
-                        <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Fazer Cópia em PDF" onclick="suaFuncaoAutomatizar()"> <!-- Adicione o link para a sua função -->
+                        <a href="{% url 'app_documentos:criar_copia_pdf' documento.pk %}" title="Fazer Cópia em PDF" onclick="suaFuncaoAutomatizar()"> <!-- Adicione o link para a sua função -->
                             <i class="material-icons" style="font-size: 20px; color:orange;">picture_as_pdf</i>
-                            </a>
-                        <a href="#" class="text-red-500 hover:text-red-700" title="Deletar"
-                            data-url="{% url 'app_documentos:delete_documento' documento.id %}"
-                            onclick="deletarDocumento(this); return false;">
+                        </a>
+                        <a href="{% url 'app_documentos:delete_documento' documento.pk %}" 
+                        class="text-red-500 hover:text-red-700" title="Deletar">
                             <i class="material-icons" style="font-size: 20px;">delete</i>
                         </a>
+
                     </div>
                 </li>
                 {% endfor %}

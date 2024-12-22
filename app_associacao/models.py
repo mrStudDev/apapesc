@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.core.validators import RegexValidator
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 UF_CHOICES = [
     ('AC', 'Acre'), ('AL', 'Alagoas'), ('AP', 'Amapá'), ('AM', 'Amazonas'),
@@ -51,7 +52,7 @@ class IntegrantesModel(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE,
-        related_name="integrante"
+        related_name="integrante",
     )
     cpf = models.CharField(
         max_length=14,
