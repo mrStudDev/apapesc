@@ -1,4 +1,4 @@
-.apapesc-title {
+.associacao-title {
     font-family: 'Roboto', sans-serif;
     font-weight: 700; /* Peso da fonte */
     font-size: 4rem; /* Tamanho base */
@@ -31,15 +31,24 @@
     }
 }
 
-/* Estilização responsiva para ajustar o tamanho do título em telas maiores */
-@media (min-width: 768px) {
-    .apapesc-title {
-        font-size: 6rem; /* Tamanho maior em telas médias */
+
+/* Ajustes para telas menores */
+@media (max-width: 1024px) {
+    .associacao-title {
+        font-size: 3rem; /* Diminui o tamanho da fonte */
     }
 }
 
-@media (min-width: 1024px) {
-    .apapesc-title {
-        font-size: 8rem; /* Tamanho ainda maior em telas grandes */
+@media (max-width: 768px) {
+    .associacao-title {
+        font-size: 2.5rem;
+        letter-spacing: 0.08em; /* Reduz o espaçamento entre letras */
+    }
+}
+
+@media (max-width: 480px) {
+    .associacao-title {
+        font-size: 2rem;
+        letter-spacing: 0.05em;
     }
 }

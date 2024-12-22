@@ -1,0 +1,78 @@
+{% load static %}
+
+<footer class="bg-gray-900 text-white">
+    <div class="container mx-auto py-10">
+      <!-- Seção Superior -->
+      <div class="md:flex md:justify-between md:items-start space-y-6 md:space-y-0">
+        <!-- Logo e Descrição -->
+        <div class="flex-shrink-0">
+          <a href="#" class="flex items-center space-x-3">
+            <img src="{% static 'images/new_logo_apapesc_2024.png' %}" alt="Logo APAPESC" class="h-8 rounded-md" alt="Logo" />
+            <span class="text-2xl font-semibold">APAPESC</span>
+          </a>
+          <p class="mt-4 text-sm text-gray-400">
+            Seu parceiro confiável em soluções digitais.
+          </p>
+        </div>
+  
+        <!-- Links Rápidos -->
+        <div class="grid grid-cols-2 gap-8 sm:grid-cols-3">
+          <div>
+            <h3 class="text-sm font-semibold uppercase">Recursos</h3>
+            <ul class="mt-4 space-y-2 text-gray-400">
+              <li><a href="#" class="hover:underline">Documentação</a></li>
+              <li><a href="#" class="hover:underline">APIs</a></li>
+              <li><a href="#" class="hover:underline">Tutoriais</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold uppercase">Social</h3>
+            <ul class="mt-4 space-y-2 text-gray-400">
+              <li><a href="#" class="hover:underline">GitHub</a></li>
+              <li><a href="#" class="hover:underline">Discord</a></li>
+              <li><a href="#" class="hover:underline">Twitter</a></li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold uppercase">Legal</h3>
+            <ul class="mt-4 space-y-2 text-gray-400">
+              <li><a href="#" class="hover:underline">Política de Privacidade</a></li>
+              <li><a href="#" class="hover:underline">Termos de Uso</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Linha Separadora -->
+      <hr class="my-6 border-gray-700" />
+  
+      <!-- Seção Inferior -->
+      <div class="flex flex-col md:flex-row md:justify-between md:items-center space-y-4 md:space-y-0">
+        <!-- Direitos Autorais -->
+        <p class="text-sm text-gray-400">
+          © 2023 Flowbite™. Todos os direitos reservados.
+        </p>
+  
+        <!-- Redes Sociais -->
+        <div class="flex space-x-6">
+          <a href="#" class="text-gray-400 hover:text-white" aria-label="Facebook">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.656 9.129 8.438 9.878v-6.988H7.898v-2.89h2.54v-2.195c0-2.507 1.493-3.89 3.777-3.89 1.095 0 2.239.195 2.239.195v2.453h-1.261c-1.244 0-1.63.772-1.63 1.562v1.876h2.773l-.443 2.89h-2.33v6.988C18.344 21.129 22 16.991 22 12z" />
+            </svg>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-white" aria-label="Twitter">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M24 4.557a9.9 9.9 0 01-2.828.775A4.932 4.932 0 0023.337 3.1a9.83 9.83 0 01-3.127 1.195 4.919 4.919 0 00-8.379 4.482A13.957 13.957 0 011.671 3.149 4.917 4.917 0 003.1 9.725 4.9 4.9 0 01.964 9.13v.062a4.92 4.92 0 003.946 4.827 4.902 4.902 0 01-2.223.084 4.922 4.922 0 004.598 3.417A9.876 9.876 0 010 20.225a13.924 13.924 0 007.548 2.209c9.057 0 14.01-7.508 14.01-14.01 0-.213-.005-.426-.014-.637A10.012 10.012 0 0024 4.557z" />
+            </svg>
+          </a>
+          <a href="#" class="text-gray-400 hover:text-white" aria-label="GitHub">
+            <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 .5C5.373.5.5 5.373.5 12a11.502 11.502 0 008.212 10.963c.6.111.819-.26.819-.577v-2.18c-3.338.726-4.04-1.608-4.04-1.608-.546-1.39-1.333-1.759-1.333-1.759-1.091-.745.084-.729.084-.729 1.205.084 1.84 1.238 1.84 1.238 1.072 1.841 2.812 1.308 3.496.998.109-.777.42-1.308.764-1.61-2.667-.303-5.467-1.333-5.467-5.934 0-1.31.468-2.38 1.235-3.222-.123-.303-.534-1.523.117-3.176 0 0 1.008-.322 3.3 1.228a11.506 11.506 0 016.008 0c2.292-1.55 3.3-1.228 3.3-1.228.651 1.653.241 2.873.118 3.176.767.842 1.235 1.912 1.235 3.222 0 4.61-2.803 5.627-5.475 5.921.431.372.815 1.105.815 2.223v3.292c0 .319.22.693.825.576A11.503 11.503 0 0023.5 12C23.5 5.373 18.627.5 12 .5z" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+</footer>

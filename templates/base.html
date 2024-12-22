@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Meu Projeto</title>
+  <title>{% block title %}Título Padrão{% endblock title %}</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
@@ -13,7 +13,7 @@
 
 </head>
 
-<body class="font-sans">
+<body class="font-sans min-h-screen flex flex-col">
   <!--BLOCOS DO APP HOME -->
   {% block home %}
   {% endblock home %}
@@ -21,19 +21,29 @@
 
   
   <!--BLOCOS DO APP MANAGER -->
+  <!--Superusers -->
   {% block dashboard %}{% endblock dashboard %}
-  {% block finances_apapesc %}{% endblock finances_apapesc %}
+  {% block finances_associacao %}{% endblock finances_associacao %}
+  
+  <!--BGroups -->
+  {% block dashboard_Presidente %}{% endblock dashboard_Presidente %}
+  {% block dashboard_Diretores %}{% endblock dashboard_Diretores %}  
+  {% block dashboard_administradores %}{% endblock dashboard_administradores %}
+  {% block dashboard_delegados %}{% endblock dashboard_delegados %}
+  {% block dashboard_AuxAssociacao %}{% endblock dashboard_AuxAssociacao %}
+  {% block dashboard_AuxReparticao %}{% endblock dashboard_AuxReparticao %}
+  {% block dashboard_Associados %}{% endblock dashboard_Associados%}
   <!--########################################################################-->
 
 
- <!--BLOCOS DO APP APAPESC -->
+ <!--BLOCOS DO APP Associação -->
  {% block list_users %}{% endblock list_users %}
 
-  {% block create_apapesc %}{% endblock create_apapesc %}
-  {% block delete_apapesc %}{% endblock delete_apapesc %}
-  {% block edit_apapesc %}{% endblock edit_apapesc %}
-  {% block list_apapesc %}{% endblock list_apapesc %}
-  {% block single_apapesc %}{% endblock single_apapesc %}
+  {% block create_associacao %}{% endblock create_associacao %}
+  {% block delete_associacao %}{% endblock delete_associacao %}
+  {% block edit_associacao %}{% endblock edit_associacao %}
+  {% block list_associacao %}{% endblock list_associacao %}
+  {% block single_associacao %}{% endblock single_associacao %}
 
   {% block create_integrante %}{% endblock create_integrante %}
   {% block delete_integrante %}{% endblock delete_integrante %}
@@ -61,12 +71,41 @@
   {% block single_reparticao %}{% endblock single_reparticao %}
 
   {% block ex_integrantes %}{% endblock ex_integrantes %}
+  <!--########################################################################-->
+
+  <!--BLOCOS DO APP ASSOCIADOS -->
+  {% block create_associado %}{% endblock create_associado %}
+  {% block delete_associado %}{% endblock delete_associado %}
+  {% block edit_associado %}{% endblock edit_associado %}
+  {% block single_associado %}{% endblock single_associado %}
+
+  {% block list_GeralAssociados %}{% endblock list_GeralAssociados %}
+  {% block list_ativo %}{% endblock list_ativo %}
+  {% block list_aposentado %}{% endblock list_aposentado %}  
+  {% block list_canditado %}{% endblock list_canditado %}
+  {% block list_desassociado %}{% endblock list_desassociado %}
+  {% block list_clienteEspecial %}{% endblock list_clienteEspecial %}
+   
+  {% block search_associado %}{% endblock search_associado %}
+
+
+  {% block list_PorAssociacao %}{% endblock list_PorAssociacao %}
+  {% block list_PorReparticao %}{% endblock list_PorReparticao %}
+
 
   <!--########################################################################-->
 
-  
+
+  <!--BLOCOS DO APP EDITOR -->
+  {% block create_nota %}{% endblock create_nota %}
+  {% block list_nota %}{% endblock list_nota %}
+  <!--########################################################################-->
+
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.7/inputmask.min.js"></script>
+
+
 </body>
 </html>

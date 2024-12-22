@@ -42,7 +42,12 @@ INSTALLED_APPS = [
     # Apps 
     'app_home',
     'app_manager',
-    'app_apapesc',
+    'app_associacao',
+    'app_associados',
+    
+    # Editor
+    'app_editor',
+    
 ]
 
 MIDDLEWARE = [
@@ -70,6 +75,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'accounts.context_processors.group_context',
             ],
         },
     },

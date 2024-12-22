@@ -14,14 +14,34 @@
             <a href="#membership" class="hover:text-gray-200">Associe-se</a>
             <a href="#contact" class="hover:text-gray-200">Contato</a>
 
-            <!-- Link para o login (somente quando o usuário não estiver autenticado) -->
             {% if not user.is_authenticated %}
-                <a href="{% url 'account_login' %}" class="hover:text-gray-200">Login</a>
+            <a href="{% url 'account_login' %}" class="hover:text-gray-200">Login</a>
             {% else %}
-                <a href="{% url 'account_logout' %}" class="hover:text-gray-200">Logout</a>
-                <a href="#" class="hover:bg-blue-700"><strong class="text-yellow-300">Olá, {{user.username}}</strong></a>
-                <a href="{% url 'app_manager:dashboard' %}" class="hover:text-gray-200">Dash</a>
+            <a href="{% url 'account_logout' %}" class="hover:text-gray-200">Logout</a>
+            <a href="#" class="hover:bg-blue-700"><strong class="text-yellow-300">Olá, {{ user.username }}</strong></a>
+                <!-- Dashboards-->
+                {% if is_superuser %}
+                    <a href="{% url 'app_manager:super_dashboard' %}" class="hover:text-gray-200">S-Dash</a>
+                {% elif is_admin_associacao %}
+                    <a href="{% url 'app_manager:admin_dashboard' %}" class="hover:text-gray-200">A-Dash</a>
+                {% elif is_delegado_reparticao %}
+                    <a href="{% url 'app_manager:delegado_dashboard' %}" class="hover:text-gray-200">D-Dash</a>
+                {% elif is_diretor_associacao %}
+                    <a href="{% url 'app_manager:diretor_associacao_dashboard' %}" class="hover:text-gray-200">Dir-Dash</a>
+                {% elif is_presidente_associacao %}
+                    <a href="{% url 'app_manager:presidente_associacao_dashboard' %}" class="hover:text-gray-200">Pres-Dash</a>
+                {% elif is_auxiliar_associacao %}
+                    <a href="{% url 'app_manager:auxiliar_associacao_dashboard' %}" class="hover:text-gray-200">AuxAss-Dash</a>
+                {% elif is_auxiliar_reparticao %}
+                        <a href="{% url 'app_manager:auxiliar_reparticao_dashboard' %}" class="hover:text-gray-200">AuxRepart-Dash</a>
+                {% elif is_associado_associacao %}
+                    <a href="{% url 'app_manager:associado_dashboard' %}" class="hover:text-gray-200">Associado-Dash</a>
+                {% else %}
+                    <a href="#" class="hover:text-gray-200">Planos</a>
+                {% endif %}
             {% endif %}
+        
+        
         </div>
 
         <!-- Botão do menu para dispositivos móveis -->
@@ -45,7 +65,7 @@
             <a href="{% url 'account_login' %}" class="block px-4 py-2 hover:bg-blue-700">Login</a>
         {% else %}
             <a href="{% url 'account_logout' %}" class="block px-4 py-2 hover:bg-blue-700">Logout</a>
-            <a href="{% url 'app_manager:dashboard' %}" class="block px-4 py-2 hover:bg-blue-700">Dash</a>
+            <a href="{% url 'app_manager:admin_dashboard' %}" class="block px-4 py-2 hover:bg-blue-700">Dash</a>
             <a href="#" class="block px-4 py-2 hover:bg-blue-700"><strong class="text-yellow-300">Olá, {{user.username}}</strong></a>
 
         {% endif %}

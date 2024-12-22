@@ -1,0 +1,134 @@
+<!-- filepath: /home/marcos/Projects/apapesc/templates/app_associados/list_por_reparticao.html -->
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Lista Por Repartição{% endblock title %}
+
+{% block list_PorReparticao %}
+<!-- Navbar -->
+{% include "components/navbar_delegados.html" %}
+
+<main class="flex-grow">
+    <div class="container mx-auto mt-8">
+        <h2 class="text-2xl font-bold mb-6">Lista Por Repartição</h2>
+        <!-- Campo de busca -->
+        <form method="get" action="{% url 'app_associados:list_por_reparticao' %}" class="mb-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4">
+            <!-- Campo de busca -->
+            <input 
+                type="text" 
+                name="q" 
+                placeholder="Buscar: nome, email, CPF" 
+                value="{{ request.GET.q }}" 
+                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+        
+            <!-- Associação (Desabilitado) -->
+            <select 
+                name="associacao" 
+                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 bg-gray-100 cursor-not-allowed" 
+                disabled
+            >
+                {% for associacao in associacoes %}
+                    <option value="{{ associacao.id }}" selected>
+                        {{ associacao.nome_fantasia }}
+                    </option>
+                {% endfor %}
+            </select>
+        
+            <!-- Repartição (Desabilitado) -->
+            <select 
+                name="reparticao" 
+                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 bg-gray-100 cursor-not-allowed" 
+                disabled
+            >
+                {% for reparticao in reparticoes %}
+                    <option value="{{ reparticao.id }}" selected>
+                        {{ reparticao.nome_reparticao }}
+                    </option>
+                {% endfor %}
+            </select>
+        
+            <!-- Filtro de Status -->
+            <select 
+                name="status" 
+                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+                <option value="">Todos os Status</option>
+                {% for status_key, status_value in status_choices %}
+                    <option value="{{ status_key }}" {% if status_key == selected_status %}selected{% endif %}>
+                        {{ status_value }}
+                    </option>
+                {% endfor %}
+            </select>
+        
+            <!-- Botão de Filtro -->
+            <button 
+                type="submit" 
+                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-white leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-blue-400"
+            >
+                Filtrar
+            </button>
+        </form>
+        
+        <!-- Lista de associados -->
+        <div class="bg-white p-4 rounded-md shadow-md">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Associados</h3>
+                <a href="{% url 'app_associacao:list_users' %}" class="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded">
+                    Adicionar Associado
+                </a>
+            </div>
+
+            <table class="table-auto w-full border border-gray-200 text-sm rounded-md overflow-hidden">
+                <thead class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
+                    <tr>
+                        <th class="px-4 py-2 border">Nome</th>
+                        <th class="px-4 py-2 border">CPF</th>
+                        <th class="px-4 py-2 border">Celular</th>
+                        <th class="px-4 py-2 border">Email</th>
+                        <th class="px-4 py-2 border text-center">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for associado in associados %}
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-4 py-2 border">{{ associado.user.get_full_name }}</td>
+                            <td class="px-4 py-2 border">{{ associado.cpf }}</td>
+                            <td class="px-4 py-2 border">{{ associado.celular }}</td>
+                            <td class="px-4 py-2 border">{{ associado.email }}</td>
+                            <td class="px-4 py-2 border text-center flex justify-center space-x-2">
+                                <a href="{% url 'app_associados:single_associado' associado.pk %}" 
+                                class="text-blue-500 hover:text-blue-700" 
+                                title="Ver Detalhes">
+                                    <i class="material-icons">visibility</i>
+                                </a>
+                                <a href="{% url 'app_associados:edit_associado' associado.pk %}" 
+                                class="text-yellow-500 hover:text-yellow-700" 
+                                title="Editar">
+                                    <i class="material-icons">edit</i>
+                                </a>
+                                <a href="https://wa.me/{{ associado.celular_clean }}" target="_blank" 
+                                    class="text-green-600 hover:text-green-800" 
+                                    title="WhatsApp">
+                                    <i class="material-icons">phone</i>
+                                </a>
+                                <a href="mailto:{{ associado.email }}" 
+                                class="text-purple-500 hover:text-purple-700" 
+                                title="Enviar Email">
+                                    <i class="material-icons">email</i>
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    {% block empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-gray-500">Lista Geral de Associados.</td>
+                        </tr>
+                    {% endblock empty %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock list_PorReparticao %}

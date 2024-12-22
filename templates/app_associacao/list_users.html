@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lista de Usuários{% endblock title %}
+
+{% block list_users %}
+<!-- Navbar -->
+{% include "components/navbar_associacao.html" %}
+<main class="flex-grow">
+    <div class="container mx-auto mt-8">
+        <h1 class="text-2xl font-bold mb-4">Lista de Usuários</h1>
+
+        <!-- Campo de busca -->
+        <form method="get" action="{% url 'app_associacao:list_users' %}" class="mb-6 flex space-x-2">
+            <input 
+                type="text" 
+                name="q" 
+                placeholder="Buscar por nome, sobrenome ou email" 
+                value="{{ request.GET.q }}" 
+                class="flex-1 border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+            <button 
+                type="submit" 
+                class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+            >
+                Buscar
+            </button>
+        </form>
+
+        <!-- Tabela de usuários -->
+        <table class="table-auto w-full border border-gray-200 text-sm">
+            <thead>
+                <tr class="bg-gray-200 text-left">
+                    <th class="border border-gray-400 px-2 py-1">Nome</th>
+                    <th class="border border-gray-400 px-2 py-1">Cargo</th>
+                    <th class="border border-gray-400 px-2 py-1">Username</th>
+                    <th class="border border-gray-400 px-2 py-1">Email</th>
+                    <th class="border border-gray-400 px-2 py-1">Ações - Integrantes</th>
+                    <th class="border border-gray-400 px-2 py-1">Ações - Associados</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr class="hover:bg-blue-100">
+                        <td class="border border-gray-400 px-2 py-1">{{ user.get_full_name }}</td>
+                        <td class="border border-gray-400 px-2 py-1">{{user.integrante.cargo}}</td>                
+                        <td class="border border-gray-400 px-2 py-1">{{user.username}}</td>  
+                        <td class="border border-gray-400 px-2 py-1">{{ user.email }}</td>
+
+                        <!-- Coluna para Integrantes -->
+                        <td class="border border-gray-400 px-2 py-1 text-center">
+                            {% if user.id in integrantes_ativos_ids %}
+                                <span class="text-gray-500">Já é um integrante ativo</span>
+                            {% elif user.id in integrantes_desligados_ids %}
+                                <a href="{% url 'app_associacao:reintegration_integrante' %}?user_id={{ user.id }}" 
+                                    class="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded text-xs">
+                                    Reintegrar
+                                </a>
+                            {% else %}
+                                <a href="{% url 'app_associacao:create_integrante' %}?user_id={{ user.id }}" 
+                                    class="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded text-xs">
+                                    Tornar Integrante
+                                </a>
+                            {% endif %}
+                        </td>
+                        <!-- Coluna para Associados -->
+                        <td class="border border-gray-400 px-2 py-1 text-center">
+                            {% if user.id in associados_ids %}
+                                <span class="text-gray-500">Já é um associado</span>
+                            {% else %}
+                                <a href="{% url 'app_associados:create_associado' %}?user_id={{ user.id }}" 
+                                    class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded text-xs">
+                                    Tornar Associado
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4">Nenhum usuário encontrado.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+        <!-- Paginação -->
+        <div class="mt-4">
+            {% if is_paginated %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                        <a href="?q={{ request.GET.q }}&page={{ page_obj.previous_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Anterior</a>
+                    {% endif %}
+                    <span class="mx-2">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                    {% if page_obj.has_next %}
+                        <a href="?q={{ request.GET.q }}&page={{ page_obj.next_page_number }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Próximo</a>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div>
+    </div><br>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const buttons = document.querySelectorAll(".select-user-btn");
+        buttons.forEach(button => {
+            button.addEventListener("click", function (e) {
+                e.preventDefault();
+                const userId = this.getAttribute("data-user-id");
+                console.log("Usuário selecionado:", userId);
+                // Aqui você pode enviar o ID do usuário selecionado ao backend ou preencher um formulário oculto.
+            });
+        });
+    });
+</script>
+{% endblock list_users %}

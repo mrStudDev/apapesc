@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Lista Municípios{% endblock title %}
+{% block list_municipio %}
+<!-- Navbar -->
+{% include "components/navbar_associacao.html" %}
+<div class="container mx-auto py-6">
+    <h1 class="text-2xl font-bold mb-4 text-gray-800">Lista de Municípios</h1>
+    <div class="bg-white shadow rounded-lg p-6">
+        <table class="min-w-full border-collapse border border-gray-200">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="border px-4 py-2 text-left text-sm font-medium text-gray-700">Nome do Município</th>
+                    <th class="border px-4 py-2 text-left text-sm font-medium text-gray-700">Estado</th>
+                    <th class="border px-4 py-2 text-center text-sm font-medium text-gray-700">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for municipio in municipios_list %}
+                <tr class="hover:bg-gray-50">
+                    <td class="border px-4 py-2 text-gray-700">{{ municipio.municipio }}</td>
+                    <td class="border px-4 py-2 text-gray-700">{{ municipio.uf }}</td>
+                    <td class="border px-4 py-2 text-center">
+                        <a href="{% url 'app_associacao:single_municipio' municipio.id %}" class="text-blue-500 hover:underline">Ver</a>
+                        <a href="{% url 'app_associacao:edit_municipio' municipio.id %}" class="text-yellow-500 hover:underline ml-2">Editar</a>
+                        <a href="{% url 'app_associacao:delete_municipio' municipio.id %}" class="text-red-500 hover:underline ml-2">Excluir</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if not municipio_list %}
+        <p class="text-gray-500 mt-4 text-center">Nenhum município encontrado.</p>
+        {% endif %}
+    </div>
+    <div class="mt-4">
+        <a href="{% url 'app_associacao:create_municipio' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            Adicionar Novo Município
+        </a>
+    </div>
+</div>
+{% endblock list_municipio %}

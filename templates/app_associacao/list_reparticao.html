@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block list_reparticao %}
+<!-- Navbar (já configurada, incluímos no topo) -->
+{% include 'components/navbar_associacao.html' %}
+<div class="container mx-auto py-4">
+    <h1 class="text-2xl font-bold mb-6">Lista de Repartições</h1>
+
+    <table class="table-auto w-full border-collapse border border-gray-300">
+        <thead>
+            <tr class="bg-gray-100">
+                <th class="border border-gray-300 px-4 py-2">Nome</th>
+                <th class="border border-gray-300 px-4 py-2">Município Sede</th>
+                <th class="border border-gray-300 px-4 py-2">Delegado</th>
+                <th class="border border-gray-300 px-4 py-2">Telefone</th>
+                <th class="border border-gray-300 px-4 py-2">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reparticao in reparticoes_list %}
+            <tr class="hover:bg-gray-50">
+                <td class="border border-gray-300 px-4 py-2">
+                    <a href="{% url 'app_associacao:single_reparticao' reparticao.id %}" class="text-blue-500 hover:underline">
+                        {{ reparticao.nome_reparticao }}
+                    </a>
+                </td>
+                <td class="border border-gray-300 px-4 py-2">
+                    {{ reparticao.municipio_sede|default:"Sem município" }}
+                </td>
+                <td class="border border-gray-300 px-4 py-2">
+                    {{ reparticao.delegado.user.get_full_name|default:"Sem delegado" }}
+                </td>
+                <td class="border border-gray-300 px-4 py-2">
+                    {{ reparticao.celular }}
+                </td>
+                <td class="border border-gray-300 px-4 py-2">
+                    <a href="{% url 'app_associacao:edit_reparticao' reparticao.id %}" class="text-yellow-500 hover:underline">Editar</a> |
+                    <a href="{% url 'app_associacao:delete_reparticao' reparticao.id %}" class="text-red-500 hover:underline">Excluir</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center text-gray-500 py-4">Nenhuma repartição encontrada.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="mt-4">
+        <a href="{% url 'app_associacao:create_reparticao' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            Adicionar Nova Repartição
+        </a>
+    </div>
+</div>
+{% endblock list_reparticao %}

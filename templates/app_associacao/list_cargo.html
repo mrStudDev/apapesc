@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block  list_cargo %}
+<!-- Navbar (já configurada, incluímos no topo) -->
+{% include 'components/navbar_associacao.html' %}
+
+<div class="container mx-auto mt-8">
+    <h1 class="text-2xl font-bold mb-4">Lista de Cargos</h1>
+
+    <!-- Botão de criar novo cargo -->
+    <div class="mb-6">
+        <a href="{% url 'app_associacao:create_cargo' %}" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">
+            Criar Novo Cargo
+        </a>
+    </div>
+
+    <!-- Tabela de cargos -->
+    <table class="table-auto w-full border-collapse border border-gray-300">
+        <thead>
+            <tr class="bg-gray-200">
+                <th class="border px-4 py-2 text-left">Nome do Cargo</th>
+                <th class="border px-4 py-2 text-center">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cargo in cargos_list %}
+            <tr class="hover:bg-gray-100">
+                <td class="border px-4 py-2">{{ cargo.nome }}</td>
+                <td class="border px-4 py-2 text-center">
+                    <a href="{% url 'app_associacao:single_cargo' cargo.id %}" class="text-blue-500 hover:underline">Visualizar</a> |
+                    <a href="{% url 'app_associacao:edit_cargo' cargo.id %}" class="text-yellow-500 hover:underline">Editar</a> |
+                    <a href="{% url 'app_associacao:delete_cargo' cargo.id %}" class="text-red-500 hover:underline">Excluir</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2" class="text-center py-4">Nenhum cargo encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock list_cargo %}

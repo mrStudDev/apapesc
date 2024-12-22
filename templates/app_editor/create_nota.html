@@ -1,0 +1,43 @@
+{% load static %}
+{% block create_nota %}
+<h2 class="text-lg font-semibold mb-4">Adicionar Nota</h2>
+<form method="post" class="bg-white p-6 rounded-md shadow-md" enctype="multipart/form-data">
+    {% csrf_token %}
+    
+    <!-- Campo de Título -->
+    <div class="mb-4">
+        {{ form.titulo.label_tag }}
+        {{ form.titulo }}
+        {% for error in form.titulo.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+        {% endfor %}
+    </div>
+
+    <!-- Toolbar do editor -->
+    <div class="toolbar mb-4">
+        <button type="button" onclick="formatText('formatBlock', 'h1')" class="btn">Título</button>
+        <button type="button" onclick="formatText('formatBlock', 'h2')" class="btn">Subtítulo</button>        
+        <button type="button" onclick="formatText('bold')" class="btn">B</button>
+        <button type="button" onclick="formatText('italic')" class="btn">I</button>
+        <button type="button" onclick="formatText('underline')" class="btn">U</button>
+        <button type="button" onclick="formatText('insertOrderedList')" class="btn">Lista Númérica</button>
+        <button type="button" onclick="formatText('insertUnorderedList')" class="btn">Lista</button>
+        <button type="button" onclick="formatText('createLink', prompt('Digite uma URL:'))" class="btn">Link</button>
+
+        <button type="button" onclick="addBlockquote()" class="btn">Comentário</button>
+    </div>
+    
+
+    <!-- Editor de Conteúdo -->
+    <div id="editor" contenteditable="true" class="border border-gray-300 rounded-md p-3"></div>
+    <input type="hidden" id="hidden-editor" name="content">
+    
+    <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded">Salvar</button>
+</form>
+<!-- CSS do Editor -->
+<link rel="stylesheet" href="{% static 'css/editor.css' %}">
+<!-- JS do Editor -->
+<script src="{% static 'js/editor.js' %}"></script>
+
+
+{% endblock create_nota %}

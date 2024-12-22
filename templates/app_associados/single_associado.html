@@ -1,0 +1,1052 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Detalhes do Associado(a){% endblock title %}
+
+{% block single_associado %}
+
+<link rel="stylesheet" href="{% static 'css/editor.css' %}">
+<!-- Navbar -->
+{% if is_superuser %}
+    {% include "components/navbar_associacao.html" %}
+{% elif is_admin_associacao %}
+    {% include "components/navbar_administradores.html" %}
+{% elif is_delegado_reparticao %}
+    {% include "components/navbar_delegados.html" %}
+{% endif %}
+
+<!-- Hero Section -->
+<div class="bg-blue-500 text-white pt-12 pb-8 px-4 text-center">
+    {% if associado.foto %}
+        <img src="{{ associado.foto.url }}" alt="Foto do associado" class="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg">
+    {% endif %}
+    <h1 class="text-4xl font-bold">{{ associado.user.get_full_name }}</h1>
+    <p class="text-xl mt-2">Associado desde {{ associado.data_filiacao|date:'Y'  }}</p>
+</div>
+
+<!-- Conteúdo Principal -->
+<div class="container mx-auto py-6 px-4 max-w-5xl">
+
+    <!-- Links de Ações -->
+    <div class="flex justify-center space-x-2 mb-4">
+        <!-- Botão Lista -->
+        <a href="{% url 'app_associados:list_geral_associado' %}"
+        class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300"
+        title="Lista de Associados">
+            <i class="material-icons" style="font-size: 24px; color:blue">list</i>
+            <span class="sr-only">Lista</span> Lista
+        </a>
+
+        <!-- Botão Editar -->
+        <a href="{% url 'app_associados:edit_associado' associado.pk %}"
+        class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400"
+        title="Editar Associado">
+            <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
+            <span class="sr-only">Editar</span> Editar
+        </a>
+
+        <!-- Botão Upload -->
+        <a href="#"
+        class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400"
+        title="Upload de Documento">
+            <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
+            <span class="sr-only">Upload</span> Upload Doc
+        </a>
+    </div>
+    <!-- Seção: Vinculos do Associaso -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Detalhes da Filiação</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- ASsociação-->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">location_city</i>
+                <div>
+                    <strong class="text-gray-700">Vinculado à Associação:</strong>
+                    <span id="nome-associacao-{{ associado.pk }}" class="text-gray-800">{{ associado.associacao }}</span>
+                </div>
+            </div>
+
+            <!-- Repartição -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">location_city</i>
+                <div>
+                    <strong class="text-gray-700">Vinculado à Repartição:</strong>
+                    <span id="nome-reparticao-{{ associado.pk }}" class="text-gray-800">{{ associado.reparticao }}</span>
+                </div>
+            </div>
+
+            <!-- Circunscrição -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">public</i>
+                <div>
+                    <strong class="text-gray-700">Circunscrição - Área de Atuação:</strong>
+                    <span id="municipio_circunscricao-{{ associado.pk }}" class="text-gray-800">{{ associado.municipio_circunscricao }}</span>
+                </div>
+            </div>
+
+            <!-- Delegado Responsável -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">supervisor_account</i>
+                <div>
+                    <strong class="text-gray-700">Delegado / Responsável:</strong>
+                    <span id="delegado-{{ associado.pk }}" class="text-gray-800">{{ associado.reparticao.delegado }}</span>
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">assignment_turned_in</i>
+                <div>
+                    <strong class="text-gray-700">Status de Atividade:</strong>
+                    <span id="status-{{ associado.pk }}" class="text-gray-800">{{ associado.status }}</span>
+                </div>
+            </div>
+
+            <!-- Data da Filiação -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">date_range</i>
+                <div>
+                    <strong class="text-gray-700">Data da Filiação:</strong>
+                    <div class="flex items-center">
+                        <span id="data-filiacao-{{ associado.pk }}" class="text-gray-800">{{ associado.data_filiacao|date:"d/m/Y" }}</span>
+                        <button onclick="copyToClipboard('data-filiacao-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção: Informações Pessoais -->
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Informações Pessoais</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- Nome -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">person</i>
+                <div>
+                    <strong class="text-gray-700">Nome:</strong>
+                    <div class="flex items-center">
+                        <span id="nome-{{ associado.pk }}" class="text-gray-800">{{ associado.user.get_full_name }}</span>
+                        <button onclick="copyToClipboard('nome-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+            <!-- Celular -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">phone</i>
+                <div>
+                    <strong class="text-gray-700">Celular Pessoal:</strong>
+                    <div class="flex items-center">
+                        <span id="celular-{{ associado.pk }}" class="text-gray-800">{{ associado.celular }}</span>
+                        <button onclick="copyToClipboard('celular-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Celular -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">phone</i>
+                <div>
+                    <strong class="text-gray-700">Celular Correspondências:</strong>
+                    <div class="flex items-center">
+                        <span id="celular_correspondencia-{{ associado.pk }}" class="text-gray-800">{{ associado.celular_correspondencia }}</span>
+                        <button onclick="copyToClipboard('celular_correspondencia-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sexo Biológico -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">wc</i>
+                <div>
+                    <strong class="text-gray-700">Sexo Biológico:</strong>
+                    <span class="text-gray-800">{{ associado.sexo_biologico }}</span>
+                </div>
+            </div>
+
+            <!-- Estado Civil -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">wc</i>
+                <div>
+                    <strong class="text-gray-700">Estado Civil:</strong>
+                    <span class="text-gray-800">{{ associado.estado_civil }}</span>
+                </div>
+            </div>
+
+            <!-- Escolaridade -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">school</i>
+                <div>
+                    <strong class="text-gray-700">Escolaridade:</strong>
+                    <span class="text-gray-800">{{ associado.escolaridade }}</span>
+                </div>
+            </div>
+
+            <!-- Profissão -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">work</i>
+                <div>
+                    <strong class="text-gray-700">Profissão:</strong>
+                    <span class="text-gray-800">{{ associado.profissao.nome }}</span>
+                </div>
+            </div>
+
+            <!-- Etnia -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">person</i>
+                <div>
+                    <strong class="text-gray-700">Etnia:</strong>
+                    <span class="text-gray-800">{{ associado.etnia }}</span>
+                </div>
+            </div>
+
+            <!-- Filiação - Mẽe -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">person</i>
+                <div>
+                    <strong class="text-gray-700">Mãe:</strong>
+                    <span class="text-gray-800">{{ associado.nome_mae }}</span>
+                </div>
+            </div>
+            <!-- Filiação - Pai -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">person</i>
+                <div>
+                    <strong class="text-gray-700">Pai:</strong>
+                    <span class="text-gray-800">{{ associado.nome_pai }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seção: Logins e Senhas -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Usuários e Senhas</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            <!-- CPF -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-red-500" style="font-size: 24px;">fingerprint</i>
+                <div>
+                    <strong class="text-gray-700">Usuário Gov - CPF:</strong>
+                    <div class="flex items-center">
+                        <span id="cpf-{{ associado.pk }}" class="text-gray-800">{{ associado.cpf }}</span>
+                        <button onclick="copyToClipboard('cpf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-orange-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Senha Gov -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-red-500" style="font-size: 24px;">lock</i>
+                <div>
+                    <strong class="text-gray-700">Senha Gov:</strong>
+                    <div class="flex items-center">
+                        <span id="senha-gov-{{ associado.pk }}" class="text-gray-800">{{ associado.senha_gov }}</span>
+                        <button onclick="copyToClipboard('senha-gov-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-red-500" style="font-size: 24px;">email</i>
+                <div>
+                    <strong class="text-gray-700">Usuário Google - Email:</strong>
+                    <div class="flex items-center">
+                        <span id="email-{{ associado.pk }}" class="text-gray-800">{{ associado.email }}</span>
+                        <button onclick="copyToClipboard('email-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-purple-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Usuário Google -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-red-500" style="font-size: 24px;">g_translate</i>
+                <div>
+                    <strong class="text-gray-700">Senha Google:</strong>
+                    <div class="flex items-center">
+                        <span id="senha-google-{{ associado.pk }}" class="text-gray-800">{{ associado.senha_google }}</span>
+                        <button onclick="copyToClipboard('senha-google-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Seção: Documentos do Associado -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentos - RG</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            <!-- RG Número -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">fingerprint</i>
+                <div>
+                    <strong class="text-gray-700">RG Número:</strong>
+                    <div class="flex items-center">
+                        <span id="rg-numero-{{ associado.pk }}" class="text-gray-800">{{ associado.rg_numero }}</span>
+                        <button onclick="copyToClipboard('rg-numero-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Órgão Expeditor -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">account_balance</i>
+                <div>
+                    <strong class="text-gray-700">Órgão Expeditor:</strong>
+                    <div class="flex items-center">
+                        <span id="rg-orgao-{{ associado.pk }}" class="text-gray-800">{{ associado.rg_orgao }}</span>
+                        <button onclick="copyToClipboard('rg-orgao-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data de Emissão -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">event</i>
+                <div>
+                    <strong class="text-gray-700">Data de Emissão:</strong>
+                    <div class="flex items-center">
+                        <span id="rg-data-emissao-{{ associado.pk }}" class="text-gray-800">{{ associado.rg_data_emissao|date:"d/m/Y" }}</span>
+                        <button onclick="copyToClipboard('rg-data-emissao-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Naturalidade -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">place</i>
+                <div>
+                    <strong class="text-gray-700">Naturalidade:</strong>
+                    <div class="flex items-center">
+                        <span id="naturalidade-{{ associado.pk }}" class="text-gray-800">{{ associado.naturalidade }}</span>
+                        <button onclick="copyToClipboard('naturalidade-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-purple-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data de Nascimento -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">cake</i>
+                <div>
+                    <strong class="text-gray-700">Nascimento:</strong>
+                    <div class="flex items-center">
+                        <span 
+                            id="data_nascimento-{{ associado.pk }}" 
+                            class="text-gray-800">{{ associado.data_nascimento|date:"d/m/Y" }}
+                        </span>
+                        <button onclick="copyToClipboard('data_nascimento-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-pink-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Seção: Documentos Cidadão -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentos do Cidadão</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            <!-- NIT -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-yellow-500" style="font-size: 24px;">account_balance_wallet</i>
+                <div>
+                    <strong class="text-gray-700">NIT:</strong>
+                    <div class="flex items-center">
+                        <span id="nit-{{ associado.pk }}" class="text-gray-800">{{ associado.nit }}</span>
+                        <button onclick="copyToClipboard('nit-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PIS -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-yellow-500" style="font-size: 24px;">work</i>
+                <div>
+                    <strong class="text-gray-700">PIS:</strong>
+                    <div class="flex items-center">
+                        <span id="pis-{{ associado.pk }}" class="text-gray-800">{{ associado.pis }}</span>
+                        <button onclick="copyToClipboard('pis-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Título de Eleitor -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-yellow-500" style="font-size: 24px;">how_to_vote</i>
+                <div>
+                    <strong class="text-gray-700">Título de Eleitor:</strong>
+                    <div class="flex items-center">
+                        <span id="titulo-eleitor-{{ associado.pk }}" class="text-gray-800">{{ associado.titulo_eleitor }}</span>
+                        <button onclick="copyToClipboard('titulo-eleitor-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Número Caepef -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-yellow-500" style="font-size: 24px;">description</i>
+                <div>
+                    <strong class="text-gray-700">CAEPEF:</strong>
+                    <div class="flex items-center">
+                        <span id="caepef-{{ associado.pk }}" class="text-gray-800">{{ associado.caepef }}</span>
+                        <button onclick="copyToClipboard('caepef-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Número CEI  -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-yellow-500" style="font-size: 24px;">description</i>
+                <div>
+                    <strong class="text-gray-700">CEI:</strong>
+                    <div class="flex items-center">
+                        <span id="cei-{{ associado.pk }}" class="text-gray-800">{{ associado.cei }}</span>
+                        <button onclick="copyToClipboard('cei-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Seção: Documentação Profissional - RGP -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentação Profissional - RGP</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            <!-- RGP -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-purple-500" style="font-size: 24px;">badge</i>
+                <div>
+                    <strong class="text-gray-700">RGP:</strong>
+                    <div class="flex items-center">
+                        <span id="rgp-{{ associado.pk }}" class="text-gray-800">{{ associado.rgp }}</span>
+                        <button onclick="copyToClipboard('rgp-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data de Emissão (RGP) -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-purple-500" style="font-size: 24px;">calendar_today</i>
+                <div>
+                    <strong class="text-gray-700">Data de Emissão:</strong>
+                    <div class="flex items-center">
+                        <span id="rgp-data-emissao-{{ associado.pk }}" class="text-gray-800">{{ associado.rgp_data_emissao|date:"d/m/Y" }}</span>
+                        <button onclick="copyToClipboard('rgp-data-emissao-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Primeiro Registro -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-purple-500" style="font-size: 24px;">history</i>
+                <div>
+                    <strong class="text-gray-700">Primeiro Registro:</strong>
+                    <div class="flex items-center">
+                        <span id="primeiro-registro-{{ associado.pk }}" class="text-gray-800">{{ associado.primeiro_registro|date:"d/m/Y" }}</span>
+                        <button onclick="copyToClipboard('primeiro-registro-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MAPA (RGP) -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-purple-500" style="font-size: 24px;">work_outline</i>
+                <div>
+                    <strong class="text-gray-700">MPA:</strong>
+                    <div class="flex items-center">
+                        <span id="rgp-mpa-{{ associado.pk }}" class="text-gray-800">{{ associado.rgp_mpa }}</span>
+                        <button onclick="copyToClipboard('rgp-mpa-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-purple-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Seção: Documentação Trabalho - CTPS -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentação Trabalho - CTPS</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            <!-- CTPS -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">assignment</i>
+                <div>
+                    <strong class="text-gray-700">CTPS:</strong>
+                    <div class="flex items-center">
+                        <span id="ctps-{{ associado.pk }}" class="text-gray-800">{{ associado.ctps }}</span>
+                        <button onclick="copyToClipboard('ctps-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Série CTPS -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">folder</i>
+                <div>
+                    <strong class="text-gray-700">Série CTPS:</strong>
+                    <div class="flex items-center">
+                        <span id="ctps-serie-{{ associado.pk }}" class="text-gray-800">{{ associado.ctps_serie }}</span>
+                        <button onclick="copyToClipboard('ctps-serie-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data de Emissão (CTPS) -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">event</i>
+                <div>
+                    <strong class="text-gray-700">Data de Emissão:</strong>
+                    <div class="flex items-center">
+                        <span id="ctps-data-emissao-{{ associado.pk }}" class="text-gray-800">{{ associado.ctps_data_emissao|date:"d/m/Y" }}</span>
+                        <button onclick="copyToClipboard('ctps-data-emissao-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UF CTPS -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">public</i>
+                <div>
+                    <strong class="text-gray-700">UF:</strong>
+                    <div class="flex items-center">
+                        <span id="ctps-uf-{{ associado.pk }}" class="text-gray-800">{{ associado.ctps_uf }}</span>
+                        <button onclick="copyToClipboard('ctps-uf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-purple-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Seção: Documento de Habilitação (CNH) -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documento Habilitação - CNH</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            <!-- CNH -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-orange-500" style="font-size: 24px;">drive_eta</i>
+                <div>
+                    <strong class="text-gray-700">CNH:</strong>
+                    <div class="flex items-center">
+                        <span id="cnh-{{ associado.pk }}" class="text-gray-800">{{ associado.cnh }}</span>
+                        <button onclick="copyToClipboard('cnh-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data de Emissão da CNH -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-orange-500" style="font-size: 24px;">event</i>
+                <div>
+                    <strong class="text-gray-700">Data de Emissão (CNH):</strong>
+                    <div class="flex items-center">
+                        <span id="cnh-data-emissao-{{ associado.pk }}" class="text-gray-800">{{ associado.cnh_data_emissao|date:"d/m/Y" }}</span>
+                        <button onclick="copyToClipboard('cnh-data-emissao-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Seção: Endereço -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Endereço</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            <!-- Logradouro -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-gray-500" style="font-size: 24px;">location_on</i>
+                <div>
+                    <strong class="text-gray-700">Logradouro:</strong>
+                    <div class="flex items-center">
+                        <span id="logradouro-{{ associado.pk }}" class="text-gray-800">{{ associado.logradouro }}</span>
+                        <button onclick="copyToClipboard('logradouro-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bairro -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-gray-500" style="font-size: 24px;">map</i>
+                <div>
+                    <strong class="text-gray-700">Bairro:</strong>
+                    <div class="flex items-center">
+                        <span id="bairro-{{ associado.pk }}" class="text-gray-800">{{ associado.bairro }}</span>
+                        <button onclick="copyToClipboard('bairro-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Número -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-gray-500" style="font-size: 24px;">format_list_numbered</i>
+                <div>
+                    <strong class="text-gray-700">Número:</strong>
+                    <div class="flex items-center">
+                        <span id="numero-{{ associado.pk }}" class="text-gray-800">{{ associado.numero }}</span>
+                        <button onclick="copyToClipboard('numero-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complemento -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-gray-500" style="font-size: 24px;">notes</i>
+                <div>
+                    <strong class="text-gray-700">Complemento:</strong>
+                    <div class="flex items-center">
+                        <span id="complemento-{{ associado.pk }}" class="text-gray-800">{{ associado.complemento }}</span>
+                        <button onclick="copyToClipboard('complemento-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-purple-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CEP -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-gray-500" style="font-size: 24px;">mail_outline</i>
+                <div>
+                    <strong class="text-gray-700">CEP:</strong>
+                    <div class="flex items-center">
+                        <span id="cep-{{ associado.pk }}" class="text-gray-800">{{ associado.cep }}</span>
+                        <button onclick="copyToClipboard('cep-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Município -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-gray-500" style="font-size: 24px;">location_city</i>
+                <div>
+                    <strong class="text-gray-700">Município:</strong>
+                    <div class="flex items-center">
+                        <span id="municipio-{{ associado.pk }}" class="text-gray-800">{{ associado.municipio }}</span>
+                        <button onclick="copyToClipboard('municipio-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- UF -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-gray-500" style="font-size: 24px;">public</i>
+                <div>
+                    <strong class="text-gray-700">UF:</strong>
+                    <div class="flex items-center">
+                        <span id="uf-{{ associado.pk }}" class="text-gray-800">{{ associado.uf }}</span>
+                        <button onclick="copyToClipboard('uf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-purple-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Seção: Produção Média Anual -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Produção Média Anual</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            <!-- Espécie 1 -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">emoji_nature</i>
+                <div>
+                    <strong class="text-gray-700">Espécie 1:</strong>
+                    <div class="flex items-center">
+                        <span id="especie1-{{ associado.pk }}" class="text-gray-800">{{ associado.especie1 }}</span>
+                        <button onclick="copyToClipboard('especie1-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantidade 1 -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-blue-500" style="font-size: 24px;">scale</i>
+                <div>
+                    <strong class="text-gray-700">Quantidade 1 (Kg):</strong>
+                    <div class="flex items-center">
+                        <span id="quantidade1-{{ associado.pk }}" class="text-gray-800">{{ associado.quantidade1 }}</span>
+                        <button onclick="copyToClipboard('quantidade1-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Espécie 2 -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-purple-500" style="font-size: 24px;">emoji_nature</i>
+                <div>
+                    <strong class="text-gray-700">Espécie 2:</strong>
+                    <div class="flex items-center">
+                        <span id="especie2-{{ associado.pk }}" class="text-gray-800">{{ associado.especie2 }}</span>
+                        <button onclick="copyToClipboard('especie2-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantidade 2 -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-purple-500" style="font-size: 24px;">scale</i>
+                <div>
+                    <strong class="text-gray-700">Quantidade 2 (Kg):</strong>
+                    <div class="flex items-center">
+                        <span id="quantidade2-{{ associado.pk }}" class="text-gray-800">{{ associado.quantidade2 }}</span>
+                        <button onclick="copyToClipboard('quantidade2-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Espécie 3 -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-orange-500" style="font-size: 24px;">emoji_nature</i>
+                <div>
+                    <strong class="text-gray-700">Espécie 3:</strong>
+                    <div class="flex items-center">
+                        <span id="especie3-{{ associado.pk }}" class="text-gray-800">{{ associado.especie3 }}</span>
+                        <button onclick="copyToClipboard('especie3-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantidade 3 -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-orange-500" style="font-size: 24px;">scale</i>
+                <div>
+                    <strong class="text-gray-700">Quantidade 3 (Kg):</strong>
+                    <div class="flex items-center">
+                        <span id="quantidade3-{{ associado.pk }}" class="text-gray-800">{{ associado.quantidade3 }}</span>
+                        <button onclick="copyToClipboard('quantidade3-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Espécie 4 -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">emoji_nature</i>
+                <div>
+                    <strong class="text-gray-700">Espécie 4:</strong>
+                    <div class="flex items-center">
+                        <span id="especie4-{{ associado.pk }}" class="text-gray-800">{{ associado.especie4 }}</span>
+                        <button onclick="copyToClipboard('especie4-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantidade 4 -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-green-500" style="font-size: 24px;">scale</i>
+                <div>
+                    <strong class="text-gray-700">Quantidade 4 (Kg):</strong>
+                    <div class="flex items-center">
+                        <span id="quantidade4-{{ associado.pk }}" class="text-gray-800">{{ associado.quantidade4 }}</span>
+                        <button onclick="copyToClipboard('quantidade4-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Espécie 5 -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-yellow-500" style="font-size: 24px;">emoji_nature</i>
+                <div>
+                    <strong class="text-gray-700">Espécie 5:</strong>
+                    <div class="flex items-center">
+                        <span id="especie5-{{ associado.pk }}" class="text-gray-800">{{ associado.especie5 }}</span>
+                        <button onclick="copyToClipboard('especie5-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantidade 5 -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-yellow-500" style="font-size: 24px;">scale</i>
+                <div>
+                    <strong class="text-gray-700">Quantidade 5 (Kg):</strong>
+                    <div class="flex items-center">
+                        <span id="quantidade5-{{ associado.pk }}" class="text-gray-800">{{ associado.quantidade5 }}</span>
+                        <button onclick="copyToClipboard('quantidade5-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- Seção: Anotações -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <i class="material-icons text-gray-500" style="font-size: 24px;">notes</i>
+        <h2 class="text-base font-semibold text-gray-700 mb-4">Anotações</h2><hr>
+        <div id="editor">
+            {{ associado.content | safe }}
+        </div>
+    </div>
+
+    <!-- Seção: Documentos -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-4">Documentos do Associado</h2>
+        {% if documentos %}
+            <ul class="space-y-4">
+                {% for documento in documentos %}
+                <li id="documento-{{ documento.id }}"  data-id="{{ documento.id }}"  class="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="material-icons text-gray-500 mr-2" style="font-size: 20px;">insert_drive_file</i>
+                        <div>
+                            <a href="{{ documento.arquivo.url }}" target="_blank" class="text-blue-500 font-semibold hover:underline">
+                            {{ documento.nome }}
+                            </a>
+                            <p class="text-gray-600 text-sm mt-1">Data de Upload: <strong> {{ documento.data_upload|date:"d/m/Y H:i" }}</strong></p>
+                            <p class="text-gray-600 text-sm mt-1">Extensão do Documento: <strong>{{ documento.arquivo.url|slice:"-3:" }}</strong></p> <!-- Novo -->
+                            <p class="text-gray-600 text-sm mt-1">* {{ documento.descricao|truncatechars:71 }}</p>
+
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <!-- Link para Download do Documento -->
+                        <a href="{{ documento.arquivo.url }}" download class="hover:text-green-500" title="Baixar Documento">
+                            <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
+                        </a>
+                        <a href="#" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
+                            <i class="material-icons" style="font-size: 18px; color:green"> phone_android</i>
+                        </a>
+                        <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Fazer Cópia em PDF" onclick="suaFuncaoAutomatizar()"> <!-- Adicione o link para a sua função -->
+                            <i class="material-icons" style="font-size: 20px; color:orange;">picture_as_pdf</i>
+                            </a>
+                        <a href="#" class="text-red-500 hover:text-red-700" title="Deletar"
+                            data-url="{% url 'app_documentos:delete_documento' documento.id %}"
+                            onclick="deletarDocumento(this); return false;">
+                            <i class="material-icons" style="font-size: 20px;">delete</i>
+                        </a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+        {% else %}
+            <p class="text-gray-600">Nenhum documento disponível para este associado.</p>
+        {% endif %}
+    </div>
+
+    <!-- Seção: Automação e Geração de Declarações-->
+    <div class="flex flex-col items-center space-y-6 mb-6">
+        <h2 class="text-2xl font-bold text-gray-700 mb-4">GERAR DECLARAÇÕES</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl">
+            <!-- Declaração de Filiação -->
+            <a href="#"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Filiação</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
+                </div>
+            </a>
+
+            <!-- Declaração de Atividade Pesqueira -->
+            <a href="#"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Atividade Pesqueira</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
+                </div>
+            </a>
+
+            <!-- Declaração de Residência -->
+            <a href="#"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Residência</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
+                </div>
+            </a>
+
+            <!-- Declaração de Hipossuficiência -->
+            <a href="#"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Hipossuficiência</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl">
+            <!-- Procuração Jurídica -->
+            <a href="#"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-gray-800">Procuração Jurídica</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a procuração.</p>
+                </div>
+            </a>
+
+            <!-- Termo de Compromisso -->
+            <a href="#"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-gray-800">Termo de Compromisso</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar o termo de compromisso.</p>
+                </div>
+            </a>
+
+            <!-- Certificado de Registro-->
+            <a href="#"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-gray-800">Certificado de Registro</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar o certificado de registro.</p>
+                </div>
+            </a>
+
+            <!-- Alguma Certificação -->
+            <a href="#"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-gray-800">Alguma Certificação </h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Links de Ações -->
+    <div class="flex justify-center space-x-2 mb-4">
+        <!-- Botão Lista -->
+        <a href="{% url 'app_associados:list_geral_associado' %}"
+           class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300"
+           title="Lista de Associados">
+            <i class="material-icons" style="font-size: 24px; color:blue">list</i>
+            <span class="sr-only">Lista Geral</span> Lista
+        </a>
+
+        <!-- Botão Editar -->
+        <a href="{% url 'app_associados:edit_associado' associado.pk %}"
+           class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400"
+           title="Editar Associado">
+            <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
+            <span class="sr-only">Editar</span> Editar
+        </a>
+
+
+        <!-- Botão Upload -->
+        <a href="#"
+        class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400"
+        title="Upload de Documento">
+            <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
+            <span class="sr-only">Upload</span> Upload Doc
+        </a>
+
+            <a href="#"
+            class="flex items-center justify-center bg-red-500 text-white py-2 px-3 rounded-md hover:bg-red-600"
+            title="Upload de Documento">
+                <i class="material-icons" style="font-size: 24px; color:white">delete</i>
+                <span class="sr-only">Dletar Associado</span> Deletar Associado
+            </a>
+        </div>
+        <a href="{% url 'app_associados:list_geral_associado' %}" class="text-blue-500 hover:underline">Voltar à lista</a>
+    </div>
+</div>
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+<script src="{% static 'js/copy_to_clipboard.js' %}"></script>
+{% endblock single_associado %}

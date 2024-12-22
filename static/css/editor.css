@@ -1,0 +1,101 @@
+
+h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+
+}
+
+/* Estilo para Subtítulo */
+h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin: 0.5rem 0;
+
+}
+
+#editor ul,
+#editor ol {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+#editor ol {
+    list-style-type: decimal;
+}
+
+/* Estilo para Comentário */
+blockquote {
+    font-style: italic;
+    color: #d68d8d;
+    border-left: 4px solid #ccc;
+    padding-left: 10px;
+    margin: 0.5rem 0;
+}
+
+.toolbar {
+    margin-bottom: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+.toolbar .btn {
+    padding: 5px 10px;
+    background-color: #f3f3f3;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.toolbar .btn:hover {
+    background-color: #e0e0e0;
+}
+
+#editor {
+    font-size: 18px;
+    color: inherit;
+    line-height: 1.5;
+    min-height: 250px;
+    height: auto;
+
+    padding: 10px;
+
+}
+
+#editor:focus {
+    outline: 2px solid #4a90e2;
+}
+
+/* Links no editor */
+#editor a {
+    color: #007bff; /* Azul padrão */
+    text-decoration: underline; /* Sublinhado */
+    cursor: pointer; /* Cursor de link */
+}
+
+#editor a:hover {
+    color: #0056b3; /* Azul mais escuro no hover */
+}
+
+/* Links no single view (ou outro container específico) */
+div.text-gray-600 a {
+    color: #007bff; /* Azul padrão */
+    text-decoration: underline; /* Sublinhado */
+    cursor: pointer; /* Cursor de link */
+}
+
+div.text-gray-600 a:hover {
+    color: #0056b3; /* Azul mais escuro no hover */
+}
+
+
+/* Links dentro do conteúdo das notas */
+div.text-gray-600 a {
+    color: #007bff;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+div.text-gray-600 a:hover {
+    color: #0056b3;
+}

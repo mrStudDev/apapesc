@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{reparticao.nome_reparticao}}{% endblock title %}
+{% block single_reparticao %}
+<!-- Navbar (já configurada, incluímos no topo) -->
+{% include 'components/navbar_associacao.html' %}
+<div class="container mx-auto mt-8 p-4 bg-white shadow-md rounded">
+    <!-- Cabeçalho -->
+    <div class="text-center mb-4">
+        <h1 class="text-3xl font-extrabold text-gray-800">
+            Repartição Vinculada à:
+        </h1>
+        <h2 class="text-2xl text-blue-600 font-semibold mt-2">
+            {{ reparticao.associacao.nome_fantasia }}
+        </h2>
+        <p class="text-gray-700 text-lg mt-1">
+            ({{ reparticao.associacao.razao_social }})
+        </p>
+    </div>
+
+    <!-- Nome da Repartição -->
+    <div class="text-center mt-4">
+        <h2 class="text-xl font-bold text-gray-800">
+            {{ reparticao.nome_reparticao }}
+        </h2>
+    </div>
+
+    <!-- Município Sede -->
+    <div class="text-center mt-2">
+        <p class="text-gray-500">
+            <span class="font-medium">Município Sede:</span> 
+            <span class="text-blue-500 font-medium">{{ reparticao.municipio_sede }}</span>
+        </p>
+    </div>
+
+    <!-- Divisor -->
+    <hr class="my-6 border-t-2 border-gray-200">
+
+    <!-- Detalhes do Delegado -->
+    <div class="mb-4">
+        <h2 class="text-xl font-semibold text-gray-700">Delegado</h2>
+        {% if reparticao.delegado %}
+            <p class="text-gray-600">Nome: {{ reparticao.delegado.user.get_full_name }}</p>
+            <p class="text-gray-600">Email: {{ reparticao.delegado.email }}</p>
+            <p class="text-gray-600">Celular: {{ reparticao.delegado.celular }}</p>
+        {% else %}
+            <p class="text-gray-500 italic">Nenhum delegado associado a esta repartição.</p>
+        {% endif %}
+    </div>
+
+    <!-- Informações de Contato -->
+    <div class="mb-4">
+        <h2 class="text-xl font-semibold text-gray-700">Informações de Contato</h2>
+        <p class="text-gray-600">Celular: {{ reparticao.celular }}</p>
+        <p class="text-gray-600">Email: {{ reparticao.email }}</p>
+    </div>
+
+    <!-- Endereço da Repartição -->
+    <div class="mb-4">
+        <h2 class="text-xl font-semibold text-gray-700">Endereço</h2>
+        <p class="text-gray-600">{{ reparticao.logradouro }}, {{ reparticao.numero }}</p>
+        <p class="text-gray-600">{{ reparticao.bairro }}</p>
+        <p class="text-gray-600">CEP: {{ reparticao.cep }}</p>
+        <p class="text-gray-600">{{ reparticao.municipio_sede }}, {{ reparticao.uf }}</p>
+    </div>
+
+    <!-- Municípios de Circunscrição -->
+    <div class="mb-4">
+        <h2 class="text-xl font-semibold text-gray-700">Municípios de Circunscrição</h2>
+        {% if municipios_circunscricao %}
+            <ul class="list-disc pl-5 text-gray-600">
+                {% for municipio in municipios_circunscricao %}
+                    <li>{{ municipio.municipio }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-gray-500 italic">Nenhum município de circunscrição associado.</p>
+        {% endif %}
+    </div>
+    <!-- Datas-->
+    <div class="mb-4">
+        <h2 class="text-xl font-semibold text-gray-700">Datas</h2>
+        <p class="text-gray-600">Abertura: {{ reparticao.data_abertura }}</p>
+        <p class="text-gray-600">Encerramento: {{ reparticao.data_encerramento }}</p>
+
+    </div>
+    <!-- Botão de Voltar -->
+    <div class="mt-6">
+        <a href="{% url 'app_associacao:list_reparticao' %}" class="text-blue-500 hover:text-blue-700">
+            &larr; Voltar para a lista de repartições
+        </a>
+    </div>
+</div>
+{% endblock single_reparticao %}

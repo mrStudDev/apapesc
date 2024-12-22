@@ -2,17 +2,20 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Super-Dashboard{% endblock title %}
+
 {% block dashboard %}
 
 <body class="font-sans bg-gray-100 text-gray-900" xmlns="http://www.w3.org/1999/html">
 
-  <!-- Navbar (já configurada, incluímos no topo) -->
-  {% include 'components/navbar_apapesc.html' %}
+    <!-- Navbar -->
+    {% include "components/navbar_associacao.html" %}
 
   <!-- Container geral para o conteúdo -->
   <div class="flex flex-col min-h-screen max-w-7xl mx-auto px-6 py-8">
     <!-- Área de conteúdo principal -->
     <div class="flex-1 p-6">
+        <div class="text-gray-400">Super-Dashboard</div>      
       <!-- Painéis de dados -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
 
@@ -199,7 +202,7 @@
                 <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
                     <h3 class="text-gray-700 font-semibold text-sm">Quadro de Integrantes</h3>
                     <p class="text-gray-600 text-sm mt-2">
-                        Integrantes Ativos: <strong class="text-blue-600 text-sm mt-2">{{ total_integrantes }}</strong>
+                        Integrantes Operando: <strong class="text-blue-600 text-sm mt-2">{{ total_integrantes }}</strong>
                     </p>
                     <p class="text-gray-600 text-sm mt-2">
                       Ex-Integrantes: <strong class="text-red-600 text-sm mt-2">{{ ex_integrantes }}</strong>
@@ -238,7 +241,34 @@
             </div>
         </div>
     </div>
+    <!-- Painel de Detalhes com tabelas adicionais -->
+    <div class="bg-white p-8 mt-12 rounded-lg shadow-lg">
+      <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">Associações</h2>
 
+      <p class="mt-2 text-gray-600">Contagem de associados por associação.</p>
+      <div class="overflow-x-auto mt-4">
+          <table class="min-w-full bg-white border border-gray-300 rounded-md">
+              <thead class="bg-gray-100">
+                  <tr>
+                      <th class="py-3 px-4 border-b text-left text-gray-700 font-semibold">Associação</th>
+                      <th class="py-3 px-4 border-b text-left text-gray-700 font-semibold">Associados</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  {% for associacao in associados_por_associacao %}
+                      <tr class="border-b">
+                          <td class="py-2 px-4">{{ associacao.associacao__nome_fantasia }}</td>
+                          <td class="py-2 px-4">{{ associacao.associados_count }}</td>
+                      </tr>
+                  {% empty %}
+                      <tr>
+                          <td colspan="2" class="py-2 px-4 text-center text-gray-500">Nenhuma associação encontrada.</td>
+                      </tr>
+                  {% endfor %}
+              </tbody>
+          </table>
+      </div>
+    </div>
     <!-- Painel de Detalhes com tabelas adicionais -->
     <div class="bg-white p-8 mt-12 rounded-lg shadow-lg">
       <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">Repartições e Municípios</h2>
@@ -249,10 +279,8 @@
         <div>
           <h3 class="text-xl font-semibold text-gray-800">Repartições</h3>
           <div>
-            <p class="font-medium text-gray-700">Total Repartições:</p>
-            <p>{{ total_reparticoes }}</p>
+            <p class="mt-2 text-gray-600">Contagem de associados por repartição.</p>
           </div>
-          <p class="mt-2 text-gray-600">Contagem de associados por repartição.</p>
           <div class="overflow-x-auto mt-4">
             <table class="min-w-full bg-white border border-gray-300 rounded-md">
               <thead class="bg-gray-100">
@@ -280,10 +308,6 @@
         <!-- Tabela de Municípios de Circunscrição -->
         <div>
           <h3 class="text-xl font-semibold text-gray-800">Municípios de Circunscrição</h3>
-          <div>
-            <p class="font-medium text-gray-700">Total Municipios:</p>
-            <p>{{ total_municipios }}</p>
-          </div>
           <p class="mt-2 text-gray-600">Contagem de associados por município.</p>
           <div class="overflow-x-auto mt-4">
             <table class="min-w-full bg-white border border-gray-300 rounded-md">
@@ -381,5 +405,5 @@
 <script src="{% static 'js/chartMunicipios.js' %}"></script>
 
  <!-- Footer -->
-  {% include "components/footer_apapesc.html" %}
+  {% include "components/footer_associacao.html" %}
 {% endblock dashboard %}
