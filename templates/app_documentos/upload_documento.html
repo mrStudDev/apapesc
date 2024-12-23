@@ -15,10 +15,22 @@
     <div class="container mx-auto my-8">
         <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Upload de Documento</h1>
         <!-- Exibir o nome do proprietário -->
-        <div class="mb-6 p-4 bg-green-300 border border-gray-300 rounded-md max-w-md mx-auto">
+        <div class="mb-6 p-4 bg-gray-200 border border-gray-300 rounded-md max-w-md mx-auto">
             <p class="text-gray-700">
                 <strong>Proprietário do Documento:</strong>
                 {{ owner.user.get_full_name }}
+            </p>
+        </div>      
+        <div class="mb-6 p-6 bg-yellow-100 border-l-4 border-yellow-500 rounded-md mx-auto shadow-md max-w-3xl">
+            <h3 class="text-xl font-bold text-yellow-800 mb-2">Tipo ou Nome?</h3>
+            <p class="text-gray-800 leading-relaxed">
+                Se o documento que você deseja 
+                enviar não se encaixa em nenhum dos tipos disponíveis, você pode optar por dar um 
+                nome ao documento. Para isso, basta deixar o campo <strong>"Tipo do Documento"</strong> vazio e preencher o campo 
+                <strong>"Nome do Documento"</strong>.<br> 
+
+                Você também pode adicionar à lista de tipos um novo tipo de documento. 
+                Veja as instruções abaixo do formulário.
             </p>
         </div>
         <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
@@ -26,13 +38,13 @@
 
                 <!-- Tipo do Documento -->
                 <div class="mb-4">
-                    <label for="id_tipo_doc" class="block text-sm font-medium text-gray-700 mb-1">Tipo do Documento</label>
+                    <label for="id_tipo_doc" class="block text-sm font-medium text-gray-700 mb-1">Tipo do Documento (Os tipos são nomes pré-definidos para documentos.)</label>
                     <select
                         name="{{ form.tipo_doc.name }}"
                         id="{{ form.tipo_doc.id_for_label }}"
                         class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                        <option value="" {% if not form.tipo_doc.value %}selected{% endif %}>Selecione um Tipo</option>
+                        <option value="" {% if not form.tipo_doc.value %}selected{% endif %}>Vazio</option>
                         {% for tipo in form.tipo_doc.field.queryset %}
                             <option value="{{ tipo.id }}" {% if tipo.id|stringformat:"s" == form.tipo_doc.value|stringformat:"s" %}selected{% endif %}>
                                 {{ tipo }}
@@ -43,7 +55,7 @@
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-
+                 
                 <!-- Nome do Documento -->
                 <div id="nome-doc-field" class="mb-4">
                     <label for="id_nome" class="block text-sm font-medium text-gray-700 mb-1">Nome do Documento</label>
@@ -101,6 +113,37 @@
             </div>
         </form>
     </div>
+    <br><br>
+    <div class="mb-6 p-6 bg-blue-100 border-l-4 border-blue-500 rounded-md mx-auto shadow-md max-w-3xl">
+        <h3 class="text-xl font-bold text-blue-800 mb-2">Instruções sobre Tipos e Nomes de Documentos</h3>
+        <p class="text-gray-800 leading-relaxed mb-4">
+            Os <strong>tipos pré-definidos</strong> de documentos são projetados para facilitar o envio de 
+            documentos corriqueiros e repetitivos, como comprovantes padrão, 
+            recibos, documentos pessoais, protocolos, documentos comuns do governo. Esses tipos são úteis 
+            porque permitem uma categorização consistente e simplificada.
+        </p>
+        <p class="text-gray-800 leading-relaxed mb-4">
+            No entanto, é importante considerar que <strong>a criação de novos tipos de documentos só deve ser 
+                feita se o upload desse tipo de documento se tornar um processo habitual</strong>. Por exemplo, 
+                novos documentos podem surgir devido à criação de um procedimento interno específico ou uma 
+                exigência legal do estado. Nesses casos, a criação de um novo tipo é recomendada para manter 
+                a organização e facilitar futuras submissões.
+        </p>
+        <p class="text-gray-800 leading-relaxed">
+            Se você estiver lidando com um documento pontual ou único, <strong>não é necessário criar um novo 
+                tipo</strong>. Nesses casos, você pode optar por dar um nome ao documento diretamente, 
+                deixando o campo <strong>"Tipo do Documento"</strong> vazio e preenchendo apenas o campo <strong>
+                    "Nome do Documento"</strong>. Isso evita que a lista de tipos fique extensa e desorganizada, 
+                    comprometendo a usabilidade.
+        </p>
+    </div>
+    <div class="text-center mt-6">
+        <a href="{% url 'app_documentos:create_tipo_documento' %}" 
+           class="inline-block bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-blue-800 transition duration-300">
+            Criar Novo Tipo de Documento
+        </a>
+    </div>
+    
 </main>
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}

@@ -229,9 +229,6 @@ class IntegrantesCreateView(GroupPermissionRequiredMixin, CreateView):
     ]
 
     def get_form_kwargs(self):
-        """
-        Adiciona o usuário ao kwargs do formulário, caso o `user_id` seja passado na URL.
-        """
         kwargs = super().get_form_kwargs()
         user_id = self.request.GET.get('user_id')
         if user_id:
@@ -239,30 +236,19 @@ class IntegrantesCreateView(GroupPermissionRequiredMixin, CreateView):
                 kwargs['user'] = User.objects.get(id=user_id)
             except User.DoesNotExist:
                 messages.error(self.request, "Usuário não encontrado.")
-                # Você pode redirecionar ou tratar de outra forma
         return kwargs
 
     def get_context_data(self, **kwargs):
-        """
-        Insere no contexto o usuário selecionado (via URL), para usar no template
-        e no formulário.
-        """
         context = super().get_context_data(**kwargs)
         user_id = self.request.GET.get('user_id')
         if user_id:
             try:
                 user = User.objects.get(id=user_id)
                 context['user'] = user
-
-                # Ajuste o formulário para preencher campos iniciais com dados do user
-                form = context.get('form')
-                if form:
-                    form.initial['email'] = user.email
             except User.DoesNotExist:
                 context['user'] = None
                 messages.error(self.request, "Usuário não encontrado.")
-        
-        # Em caso de POST, repassa os dados do formulário
+
         if self.request.method == "POST":
             context['form'] = self.form_class(self.request.POST)
         else:
@@ -278,26 +264,16 @@ class IntegrantesCreateView(GroupPermissionRequiredMixin, CreateView):
 
         try:
             user = User.objects.get(id=user_id)
-            form.instance.user = user  # Define o user no IntegrantesModel
-
-            # Se quiser atualizar o email do usuário
-            user_email = form.cleaned_data.get('email')
-            if user_email and user.email != user_email:
-                user.email = user_email
-                user.save()
-
-            # Exemplo: adiciona o usuário a algum grupo (caso faça sentido)
-            group = form.cleaned_data['group']
-            user.groups.add(group)
-
+            form.instance.user = user  # Associa o User ao IntegrantesModel
         except User.DoesNotExist:
             messages.error(self.request, "Usuário não encontrado.")
             return self.form_invalid(form)
 
-        # Salva o novo integrante e retorna sucesso
+        # Remove qualquer lógica que altere o email do User.
+        # Salva apenas o modelo de integrantes.
         self.object = form.save()
         messages.success(self.request, "Integrante criado com sucesso!")
-        
+
         # Se quiser tratar botões diferentes ("save_and_continue", etc.)
         if "save_and_continue" in self.request.POST:
             return redirect(reverse('app_associacao:edit_integrante', kwargs={'pk': self.object.pk}))
@@ -315,13 +291,21 @@ class IntegrantesCreateView(GroupPermissionRequiredMixin, CreateView):
 class IntegrantesUpdateView(GroupPermissionRequiredMixin, UpdateView):
     model = IntegrantesModel
     template_name = 'app_associacao/edit_integrante.html'
-    form_class = IntegranteForm 
+    form_class = IntegranteForm
     success_url = reverse_lazy('app_associacao:list_integrante')
     group_required = [
         'Superuser',
         'Admin da Associação',
-        ]
-    
+    ]
+
+    def get_initial(self):
+        initial = super().get_initial()
+        # Preenche o campo 'group' com o grupo do usuário relacionado
+        user_groups = self.object.user.groups.all()
+        if user_groups.exists():
+            initial['group'] = user_groups.first()  # Assume que o usuário está em apenas um grupo
+        return initial
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Obter o usuário relacionado ao integrante
@@ -335,6 +319,7 @@ class IntegrantesUpdateView(GroupPermissionRequiredMixin, UpdateView):
             self.object.user.groups.clear()  # Remove todos os grupos existentes
             self.object.user.groups.add(group)  # Adiciona o grupo selecionado
         return super().form_valid(form)
+
     
     
 class IntegrantesDeleteView(GroupPermissionRequiredMixin, ListView):

@@ -1,11 +1,30 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% block title %}Lista de Cargos{% endblock title %}
 {% block  list_cargo %}
 <!-- Navbar (já configurada, incluímos no topo) -->
 {% include 'components/navbar_associacao.html' %}
 
 <div class="container mx-auto mt-8">
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
     <h1 class="text-2xl font-bold mb-4">Lista de Cargos</h1>
 
     <!-- Botão de criar novo cargo -->

@@ -137,8 +137,8 @@ class IntegranteForm(forms.ModelForm):
         self.fields['reparticao'].queryset = ReparticoesModel.objects.all()
 
         # Se um usuário for passado, use suas informações (caso necessário no formulário)
-        if user:
-            self.fields['email'].initial = user.email
+        #if user:
+            #self.fields['email'].initial = user.email
                         
     # Validação dos dígitos verificadores do CPF
     def calcular_digito(cpf_parcial):

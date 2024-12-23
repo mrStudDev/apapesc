@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Lista Tipo-Doc{% endblock title %}
+{% block title %}Tipos de Documentos{% endblock title %}
 {% block list_TipoDocumento %}
     <!-- Navbar -->
     {% if is_superuser %}
@@ -39,6 +39,12 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+        <div class="text-center mt-6">
+            <a href="{% url 'app_documentos:create_tipo_documento' %}" 
+               class="inline-block bg-gradient-to-r from-blue-500 to-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg hover:from-blue-600 hover:to-blue-800 transition duration-300">
+                Criar Novo Tipo de Documento
+            </a>
         </div>
     </main>
 

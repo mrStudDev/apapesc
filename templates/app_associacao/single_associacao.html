@@ -12,9 +12,7 @@
     </h1>
         <!-- Cabeçalho -->
     <div class="text-center mb-4 py-4">
-        <h1 class="text-xl font-extrabold text-gray-100 underline">
-            Repartição Vinculada à:
-        </h1>
+
         <h2 class="text-2xl text-white font-bold mt-2">
             {{ associacao.razao_social }}
         </h2>
@@ -81,7 +79,7 @@
 
         <!-- Card Endereço -->
         <div class="p-6 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-3 text-gray-700">Endereço</h2>
+            <h2 class="text-xl font-semibold mb-3 text-gray-700">Endereço da Associação</h2>
             <p><strong>Logradouro:</strong> {{ associacao.logradouro }}</p>
             <p><strong>Bairro:</strong> {{ associacao.bairro }}</p>
             <p><strong>Número:</strong> {{ associacao.numero }}</p>
@@ -91,9 +89,9 @@
             <p><strong>UF:</strong> {{ associacao.uf }}</p>
         </div>
 
-        <!-- Card Cargos -->
+        <!-- Card Diretoria-->
         <div class="p-6 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-3 text-gray-700">Cargos</h2>
+            <h2 class="text-xl font-semibold mb-3 text-gray-700">Diretoria</h2>
             <p><strong>Administrador:</strong> {{ associacao.administrador }}</p>
             <p><strong>Presidente:</strong> {{ associacao.presidente }}</p>
             <p><strong>Diretores:</strong>
