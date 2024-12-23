@@ -5,58 +5,174 @@
 {% block single_associacao %}
 <!-- Navbar (já configurada, incluímos no topo) -->
 {% include 'components/navbar_associacao.html' %}
-<div class="container mx-auto py-6">
-    <h1 class="text-2xl font-bold mb-4">Detalhes da Associação</h1>
-    <div class="bg-white shadow rounded-lg p-6">
-        <!-- Informações Básicas -->
-        <h2 class="text-xl font-semibold mb-3">Informações Básicas</h2>
-        <p><strong>Nome Fantasia:</strong> {{ associacao.nome_fantasia }}</p>
-        <p><strong>Razão Social:</strong> {{ associacao.razao_social }}</p>
-        <p><strong>CNPJ:</strong> {{ associacao.cnpj }}</p>
-
-        <!-- Contato -->
-        <h2 class="text-xl font-semibold mt-6 mb-3">Contato</h2>
-        <p><strong>Celular:</strong> {{ associacao.celular }}</p>
-        <p><strong>Email:</strong> {{ associacao.email }}</p>
-        <p><strong>Telefone:</strong> {{ associacao.telefone }}</p>
-
-        <!-- Endereço -->
-        <h2 class="text-xl font-semibold mt-6 mb-3">Endereço</h2>
-        <p><strong>Logradouro:</strong> {{ associacao.logradouro }}</p>
-        <p><strong>Bairro:</strong> {{ associacao.bairro }}</p>
-        <p><strong>Número:</strong> {{ associacao.numero }}</p>
-        <p><strong>Complemento:</strong> {{ associacao.complemento }}</p>
-        <p><strong>CEP:</strong> {{ associacao.cep }}</p>
-        <p><strong>Município:</strong> {{ associacao.municipio }}</p>
-        <p><strong>UF:</strong> {{ associacao.uf }}</p>
-
-        <!-- Cargos -->
-        <h2 class="text-xl font-semibold mt-6 mb-3">Cargos</h2>
-        <p><strong>Administrador:</strong> {{ associacao.administrador }}</p>
-        <p><strong>Presidente:</strong> {{ associacao.presidente }}</p>
-        <p><strong>Diretores:</strong>
-            {% for diretor in associacao.diretores.all %}
-                {{ diretor }},
-            {% empty %}
-                Nenhum diretor registrado.
-            {% endfor %}
+<!-- Hero Section -->
+<div class="bg-gray-800 text-white pt-12 pb-8 px-4 text-center">
+    <h1 class="text-4xl font-bold text-gray-800 bg-yellow-200 inline-block px-4 py-1 rounded-md">
+        {{ associacao.nome_fantasia }}
+    </h1>
+        <!-- Cabeçalho -->
+    <div class="text-center mb-4 py-4">
+        <h1 class="text-xl font-extrabold text-gray-100 underline">
+            Repartição Vinculada à:
+        </h1>
+        <h2 class="text-2xl text-white font-bold mt-2">
+            {{ associacao.razao_social }}
+        </h2>
+        <p class="text-white text-lg mt-1">
+            ({{ associacao.razao_social }})
         </p>
-
-        <!-- Fundadores -->
-        <h2 class="text-xl font-semibold mt-6 mb-3">Fundadores</h2>
-        <p>{{ associacao.fundadores }}</p>
-
-        <!-- Datas -->
-        <h2 class="text-xl font-semibold mt-6 mb-3">Datas</h2>
-        <p><strong>Data de Abertura:</strong> {{ associacao.data_abertura|date:"d/m/Y" }}</p>
-        <p><strong>Última Encerramento:</strong> {{ associacao.data_encerramento|date:"d/m/Y" }}</p>    <!-- Botão de Voltar -->
-        <div class="mt-6">
-            <a href="{% url 'app_associacao:list_associacao' %}" class="text-blue-500 hover:text-blue-700">
-                &larr; Voltar para a lista Associação
-            </a>
-        </div>
     </div>
 </div>
 
+<div class="container mx-auto py-6">
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="p-4 rounded-md text-white 
+                {% if message.tags == 'success' %}
+                    bg-green-500
+                {% elif message.tags == 'error' %}
+                    bg-red-500
+                {% elif message.tags == 'info' %}
+                    bg-blue-500
+                {% else %}
+                    bg-gray-500
+                {% endif %}
+            ">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
+    <!-- Links de Ações -->
+    <div class="flex justify-center space-x-2 mb-4">
+        <a href="{% url 'app_associados:list_geral_associado' %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300" title="Lista de Associados">
+            <i class="material-icons" style="font-size: 24px; color:blue">list</i>
+            <span class="sr-only">Lista</span> Lista
+        </a>
+        <a href="{% url 'app_associacao:edit_associacao' associacao.pk %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400" title="Editar Associado">
+            <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
+            <span class="sr-only">Editar</span> Editar
+        </a>
+        <a href="{% url 'app_documentos:upload_documento' 'associacao' associacao.pk %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400" title="Upload de Documento">
+            <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
+            <span class="sr-only">Upload</span> Upload Doc
+        </a>
+    </div>
+
+    <!-- Cards de Informações -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Card Informações Básicas -->
+        <div class="p-6 bg-white shadow-md rounded">
+            <h2 class="text-xl font-semibold mb-3 text-gray-700">Informações Básicas</h2>
+            <p><strong>Nome Fantasia:</strong> {{ associacao.nome_fantasia }}</p>
+            <p><strong>Razão Social:</strong> {{ associacao.razao_social }}</p>
+            <p><strong>CNPJ:</strong> {{ associacao.cnpj }}</p>
+        </div>
+
+        <!-- Card Contato -->
+        <div class="p-6 bg-white shadow-md rounded">
+            <h2 class="text-xl font-semibold mb-3 text-gray-700">Contato</h2>
+            <p><strong>Celular:</strong> {{ associacao.celular }}</p>
+            <p><strong>Email:</strong> {{ associacao.email }}</p>
+            <p><strong>Telefone:</strong> {{ associacao.telefone }}</p>
+        </div>
+
+        <!-- Card Endereço -->
+        <div class="p-6 bg-white shadow-md rounded">
+            <h2 class="text-xl font-semibold mb-3 text-gray-700">Endereço</h2>
+            <p><strong>Logradouro:</strong> {{ associacao.logradouro }}</p>
+            <p><strong>Bairro:</strong> {{ associacao.bairro }}</p>
+            <p><strong>Número:</strong> {{ associacao.numero }}</p>
+            <p><strong>Complemento:</strong> {{ associacao.complemento }}</p>
+            <p><strong>CEP:</strong> {{ associacao.cep }}</p>
+            <p><strong>Município:</strong> {{ associacao.municipio }}</p>
+            <p><strong>UF:</strong> {{ associacao.uf }}</p>
+        </div>
+
+        <!-- Card Cargos -->
+        <div class="p-6 bg-white shadow-md rounded">
+            <h2 class="text-xl font-semibold mb-3 text-gray-700">Cargos</h2>
+            <p><strong>Administrador:</strong> {{ associacao.administrador }}</p>
+            <p><strong>Presidente:</strong> {{ associacao.presidente }}</p>
+            <p><strong>Diretores:</strong>
+                {% for diretor in associacao.diretores.all %}
+                    {{ diretor }},
+                {% empty %}
+                    Nenhum diretor registrado.
+                {% endfor %}
+            </p>
+        </div>
+
+        <!-- Card Fundadores -->
+        <div class="p-6 bg-white shadow-md rounded">
+            <h2 class="text-xl font-semibold mb-3 text-gray-700">Fundadores</h2>
+            <p>{{ associacao.fundadores }}</p>
+        </div>
+
+        <!-- Card Datas -->
+        <div class="p-6 bg-white shadow-md rounded">
+            <h2 class="text-xl font-semibold mb-3 text-gray-700">Datas</h2>
+            <p><strong>Data de Abertura:</strong> {{ associacao.data_abertura|date:"d/m/Y" }}</p>
+            <p><strong>Última Encerramento:</strong> {{ associacao.data_encerramento|date:"d/m/Y" }}</p>
+        </div>
+    </div>
+
+    <!-- Botão de Voltar -->
+    <div class="mt-6 text-center">
+        <a href="{% url 'app_associacao:list_associacao' %}" class="text-blue-500 hover:text-blue-700">
+            &larr; Voltar para a lista Associação
+        </a>
+    </div>
+
+     <!-- Seção: Documentos -->
+     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-4">Documentos da Associação</h2>
+
+        {% if documentos %}
+            <ul class="space-y-4">
+                {% for documento in documentos %}
+                <li id="documento-{{ documento.id }}"  data-id="{{ documento.id }}"  class="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="material-icons text-gray-500 mr-2" style="font-size: 20px;">insert_drive_file</i>
+                        <div>
+                            <a href="{{ documento.arquivo.url }}" target="_blank" class="text-blue-500 font-semibold hover:underline">
+                            {{ documento.nome }}
+                            </a>
+                            <p class="text-gray-600 text-sm mt-1">Data de Upload: <strong> {{ documento.data_upload|date:"d/m/Y H:i" }}</strong></p>
+                            <p class="text-gray-600 text-sm mt-1">Extensão do Documento: <strong>{{ documento.arquivo.url|slice:"-3:" }}</strong></p> <!-- Novo -->
+                            <p class="text-gray-600 text-sm mt-1">* {{ documento.descricao|truncatechars:71 }}</p>
+
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <!-- Link para Download do Documento -->
+                        <a href="{{ documento.arquivo.url }}" download class="hover:text-green-500" title="Baixar Documento">
+                            <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
+                        </a>
+                        <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
+                            <i class="material-icons" style="font-size: 18px; color:green"> phone_android</i>
+                        </a>
+                        <a href="{% url 'app_documentos:criar_copia_pdf' documento.pk %}" title="Fazer Cópia em PDF" onclick="suaFuncaoAutomatizar()"> <!-- Adicione o link para a sua função -->
+                            <i class="material-icons" style="font-size: 20px; color:orange;">picture_as_pdf</i>
+                        </a>
+                        <a href="{% url 'app_documentos:delete_documento' documento.pk %}" 
+                        class="text-red-500 hover:text-red-700" title="Deletar">
+                            <i class="material-icons" style="font-size: 20px;">delete</i>
+                        </a>
+
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+
+        {% else %}
+            <p class="text-gray-600">Nenhum documento disponível para este Integrante.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% include "components/footer_associacao.html" %}
 {% endblock single_associacao %}

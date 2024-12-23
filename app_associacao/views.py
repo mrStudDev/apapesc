@@ -147,6 +147,12 @@ class AssociacaoDetailView(GroupPermissionRequiredMixin, DetailView):
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
         ]
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        associacao = self.get_object()
+        context['documentos'] = Documento.objects.filter(associacao=associacao)
+        return context
+    
 
 class AssociacaoCreateView(GroupPermissionRequiredMixin, CreateView):
     model = AssociacaoModel
@@ -446,6 +452,7 @@ class ReparticoesDetailView(GroupPermissionRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['municipios_circunscricao'] = self.object.municipios_circunscricao.all()
+        context['documentos'] = Documento.objects.filter(reparticao=self.object)
         return context
 
 class ReparticoesCreateView(GroupPermissionRequiredMixin, CreateView):

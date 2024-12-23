@@ -6,7 +6,7 @@ from django.views.generic import CreateView, ListView, DetailView, UpdateView, V
 from accounts.mixins import GroupPermissionRequiredMixin 
 from .models import Documento, TipoDocumentoModel
 from app_associados.models import AssociadoModel
-from app_associacao.models import IntegrantesModel
+from app_associacao.models import IntegrantesModel, AssociacaoModel, ReparticoesModel
 from .forms import DocumentoForm, TipoDocumentoForm
 from django.urls import reverse_lazy
 from django.shortcuts import redirect
@@ -22,6 +22,7 @@ from reportlab.lib.pagesizes import A4
 from PIL import Image
 from django.contrib import messages
 from django.utils import timezone
+import datetime
 
 # Create your views here.
 
@@ -47,6 +48,10 @@ class DocumentoUploadView(GroupPermissionRequiredMixin, CreateView):
             self.owner = get_object_or_404(AssociadoModel, id=obj_id)
         elif tipo == 'integrante':
             self.owner = get_object_or_404(IntegrantesModel, id=obj_id)
+        elif tipo == 'associacao':
+            self.owner = get_object_or_404(AssociacaoModel, id=obj_id)
+        elif tipo == 'reparticao':
+            self.owner = get_object_or_404(ReparticoesModel, id=obj_id)
         else:
             raise Http404("Tipo de proprietário inválido.")
 
@@ -58,6 +63,10 @@ class DocumentoUploadView(GroupPermissionRequiredMixin, CreateView):
             form.instance.associado = self.owner
         elif isinstance(self.owner, IntegrantesModel):
             form.instance.integrante = self.owner
+        elif isinstance(self.owner, AssociacaoModel):
+            form.instance.associacao = self.owner
+        elif isinstance(self.owner, ReparticoesModel):
+            form.instance.reparticao = self.owner
 
         # Validação extra: Garante que pelo menos o tipo ou o nome seja fornecido
         if not form.instance.tipo_doc and not form.instance.nome:
@@ -79,6 +88,10 @@ class DocumentoUploadView(GroupPermissionRequiredMixin, CreateView):
             return reverse('app_associados:single_associado', kwargs={'pk': self.owner.pk})
         elif isinstance(self.owner, IntegrantesModel):
             return reverse('app_associacao:single_integrante', kwargs={'pk': self.owner.pk})
+        elif isinstance(self.owner, AssociacaoModel):
+            return reverse('app_associacao:single_associacao', kwargs={'pk': self.owner.pk})
+        elif isinstance(self.owner, ReparticoesModel):
+            return reverse('app_associacao:single_reparticao', kwargs={'pk': self.owner.pk})
 
 
 class TipoDocumentoCreateView(CreateView):
@@ -137,7 +150,6 @@ class DocumentoDetailView(GroupPermissionRequiredMixin, DetailView):
 
 
 
-
 class DocumentoDeleteView(GroupPermissionRequiredMixin, View):
     group_required = [
         'Superuser',
@@ -161,6 +173,8 @@ class DocumentoDeleteView(GroupPermissionRequiredMixin, View):
         # Determina o redirecionamento com base no proprietário do documento
         associado = documento.associado
         integrante = documento.integrante
+        associcao = documento.associacao
+        reparticao = documento.reparticao
 
         try:
             documento.delete()
@@ -168,6 +182,10 @@ class DocumentoDeleteView(GroupPermissionRequiredMixin, View):
                 return redirect(reverse('app_associados:single_associado', kwargs={'pk': associado.pk}))
             elif integrante:
                 return redirect(reverse('app_associacao:single_integrante', kwargs={'pk': integrante.pk}))
+            elif associcao:
+                return redirect(reverse('app_associacao:single_associacao', kwargs={'pk': associcao.pk}))
+            elif reparticao:
+                return redirect(reverse('app_associacao:single_reparticao', kwargs={'pk': reparticao.pk}))
             else:
                 return redirect('app_home:home')  # Fallback para a página inicial
         except Exception as e:
@@ -179,16 +197,25 @@ def criar_copia_pdf(request, pk):
     try:
         documento = Documento.objects.get(pk=pk)
 
-        # Verifica se o documento está relacionado a um associado ou integrante
+        # Verifica se o documento está relacionado a um associado, integrante ou associação
         associado = getattr(documento, 'associado', None)
         integrante = getattr(documento, 'integrante', None)
+        associacao = getattr(documento, 'associacao', None)
+        reparticao = getattr(documento, 'reparticao', None)
 
-        if not associado and not integrante:
-            return JsonResponse({'success': False, 'message': 'Documento não associado a nenhum proprietário válido.'})
-
+        if not associado and not integrante and not associacao and not reparticao:
+            messages.error(request, 'Documento não associado a nenhum proprietário válido.')
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        
         # Determina o proprietário e o nome do documento
-        owner_name = f"{associado.user.first_name} {associado.user.last_name}" if associado else f"{integrante.user.first_name} {integrante.user.last_name}"
-
+        if associado:
+            owner_name = f"{associado.user.first_name} {associado.user.last_name}"
+        elif integrante:
+            owner_name = f"{integrante.user.first_name} {integrante.user.last_name}"
+        elif associacao:
+            owner_name = associacao.nome_fantasia
+        elif reparticao:
+            owner_name = reparticao.nome_reparticao
 
         # Verifica se o tipo está definido, caso contrário, usa o nome do documento
         tipo_nome = documento.tipo_doc.tipo if documento.tipo_doc else documento.nome
@@ -197,7 +224,6 @@ def criar_copia_pdf(request, pk):
 
         pdf_name = f"{tipo_nome.replace(' ', '_')}_{owner_name.replace(' ', '_')}_copia.pdf"
         pdf_path = os.path.join(settings.MEDIA_ROOT, "documentos", pdf_name)
-
 
         # Cria o diretório se não existir
         os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
@@ -264,8 +290,9 @@ def criar_copia_pdf(request, pk):
 
             # Verifica se a conversão foi bem-sucedida
             if result.returncode != 0:
-                return JsonResponse({'success': False, 'message': f'Erro na conversão do documento: {result.stderr.decode("utf-8")}'})
-
+                messages.error(request, f'Erro na conversão do documento: {result.stderr.decode("utf-8")}')
+                return redirect(request.META.get('HTTP_REFERER', '/'))
+            
             # O LibreOffice salva o PDF com o mesmo nome do arquivo DOCX, mas com extensão .pdf
             original_pdf_name = os.path.splitext(os.path.basename(docx_path))[0] + '.pdf'
             original_pdf_path = os.path.join(os.path.dirname(pdf_path), original_pdf_name)
@@ -275,18 +302,24 @@ def criar_copia_pdf(request, pk):
 
         else:
             messages.error(request, 'Formato de arquivo não suportado.')
-            return redirect('app_home:home')
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        
+        # Formata a data atual
+
 
         # Salva o PDF no banco de dados sem duplicar o nome do proprietário
-        base_nome = documento.nome.split(f" - {owner_name}")[0]  # Remove o nome duplicado
+
         documento_copia = Documento.objects.create(
             associado=associado if associado else None,
             integrante=integrante if integrante else None,
+            associacao=associacao if associacao else None,
+            reparticao=reparticao if reparticao else None,
             tipo_doc=documento.tipo_doc,
-            nome=f"Cópia - {base_nome} - {timezone.now().strftime('%Y-%m-%d')}",
+            nome=documento.nome,
             arquivo=f"documentos/{pdf_name}",
-            descricao=f"Cópia PDF - Documento gerado automaticamente - {base_nome}"
+            descricao=f"Cópia PDF - Documento gerado automaticamente - {documento.nome}"
         )
+        
 
         # Define a mensagem de sucesso
         messages.success(request, 'Cópia em PDF do documento, foi criada com sucesso!')
@@ -296,10 +329,14 @@ def criar_copia_pdf(request, pk):
             return redirect(reverse('app_associados:single_associado', kwargs={'pk': associado.pk}))
         elif integrante:
             return redirect(reverse('app_associacao:single_integrante', kwargs={'pk': integrante.pk}))
+        elif associacao:
+            return redirect(reverse('app_associacao:single_associacao', kwargs={'pk': associacao.pk}))
+        elif reparticao:
+            return redirect(reverse('app_associacao:single_reparticao', kwargs={'pk': reparticao.pk}))
 
     except Documento.DoesNotExist:
         messages.error(request, 'Documento não encontrado.')
-        return redirect('app_home:home')
+        return redirect(request.META.get('HTTP_REFERER', '/'))
     except Exception as e:
         messages.error(request, f'Erro ao criar a cópia do documento: {str(e)}')
-        return redirect('app_home:home')
+        return redirect(request.META.get('HTTP_REFERER', '/'))

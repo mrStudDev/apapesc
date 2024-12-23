@@ -4,85 +4,169 @@
 {% block single_reparticao %}
 <!-- Navbar (já configurada, incluímos no topo) -->
 {% include 'components/navbar_associacao.html' %}
-<div class="container mx-auto mt-8 p-4 bg-white shadow-md rounded">
-    <!-- Cabeçalho -->
-    <div class="text-center mb-4">
-        <h1 class="text-3xl font-extrabold text-gray-800">
-            Repartição Vinculada à:
-        </h1>
-        <h2 class="text-2xl text-blue-600 font-semibold mt-2">
-            {{ reparticao.associacao.nome_fantasia }}
-        </h2>
-        <p class="text-gray-700 text-lg mt-1">
-            ({{ reparticao.associacao.razao_social }})
-        </p>
-    </div>
-
-    <!-- Nome da Repartição -->
-    <div class="text-center mt-4">
-        <h2 class="text-xl font-bold text-gray-800">
+    <!-- Hero Section -->
+    <div class="bg-gray-800 text-white pt-12 pb-8 px-4 text-center">
+        <h1 class="text-4xl font-bold text-gray-800 bg-yellow-200 inline-block px-4 py-1 rounded-md">
             {{ reparticao.nome_reparticao }}
-        </h2>
+        </h1>
+            <!-- Cabeçalho -->
+        <div class="text-center mb-4 py-4">
+            <h1 class="text-xl font-extrabold text-gray-100 underline">
+                Repartição Vinculada à:
+            </h1>
+            <h2 class="text-3xl text-white font-bold mt-2">
+                {{ reparticao.associacao.nome_fantasia }}
+            </h2>
+            <p class="text-white text-lg mt-1">
+                ({{ reparticao.associacao.razao_social }})
+            </p>
+        </div>
     </div>
 
-    <!-- Município Sede -->
-    <div class="text-center mt-2">
-        <p class="text-gray-500">
-            <span class="font-medium">Município Sede:</span> 
-            <span class="text-blue-500 font-medium">{{ reparticao.municipio_sede }}</span>
-        </p>
+<div class="container mx-auto mt-8 p-4 bg-gray-100 shadow-md rounded">
+    {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Links de Ações -->
+    <div class="flex justify-center space-x-2 mb-4">
+        <a href="{% url 'app_associacao:list_reparticao' %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300" title="Lista de Associados">
+            <i class="material-icons" style="font-size: 24px; color:blue">list</i>
+            <span class="sr-only">Lista</span> Lista
+        </a>
+        <a href="{% url 'app_associacao:edit_reparticao' reparticao.pk %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400" title="Editar Associado">
+            <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
+            <span class="sr-only">Editar</span> Editar
+        </a>
+        <a href="{% url 'app_documentos:upload_documento' 'reparticao' reparticao.pk %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400" title="Upload de Documento">
+            <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
+            <span class="sr-only">Upload</span> Upload Doc
+        </a>
     </div>
 
-    <!-- Divisor -->
-    <hr class="my-6 border-t-2 border-gray-200">
+    <!-- Cards de Informações -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <!-- Card Município Sede -->
+        <div class="p-4 bg-gray-50 shadow-md rounded">
+            <h3 class="text-lg font-semibold text-gray-700">Município Sede</h3>
+            <p class="text-gray-600">
+                <span class="font-medium">Município:</span> 
+                <span class="text-blue-500">{{ reparticao.municipio_sede }}</span>
+            </p>
+        </div>
 
-    <!-- Detalhes do Delegado -->
-    <div class="mb-4">
-        <h2 class="text-xl font-semibold text-gray-700">Delegado</h2>
-        {% if reparticao.delegado %}
-            <p class="text-gray-600">Nome: {{ reparticao.delegado.user.get_full_name }}</p>
-            <p class="text-gray-600">Email: {{ reparticao.delegado.email }}</p>
-            <p class="text-gray-600">Celular: {{ reparticao.delegado.celular }}</p>
-        {% else %}
-            <p class="text-gray-500 italic">Nenhum delegado associado a esta repartição.</p>
-        {% endif %}
+        <!-- Card Delegado -->
+        <div class="p-4 bg-gray-50 shadow-md rounded">
+            <h3 class="text-lg font-semibold text-gray-700">Delegado</h3>
+            {% if reparticao.delegado %}
+                <p class="text-gray-600">Nome: {{ reparticao.delegado.user.get_full_name }}</p>
+                <p class="text-gray-600">Email: {{ reparticao.delegado.email }}</p>
+                <p class="text-gray-600">Celular: {{ reparticao.delegado.celular }}</p>
+            {% else %}
+                <p class="text-gray-500 italic">Nenhum delegado associado a esta repartição.</p>
+            {% endif %}
+        </div>
+
+        <!-- Card Informações de Contato -->
+        <div class="p-4 bg-gray-50 shadow-md rounded">
+            <h3 class="text-lg font-semibold text-gray-700">Informações de Contato</h3>
+            <p class="text-gray-600">Celular: {{ reparticao.celular }}</p>
+            <p class="text-gray-600">Email: {{ reparticao.email }}</p>
+        </div>
+
+        <!-- Card Endereço -->
+        <div class="p-4 bg-gray-50 shadow-md rounded">
+            <h3 class="text-lg font-semibold text-gray-700">Endereço</h3>
+            <p class="text-gray-600">{{ reparticao.logradouro }}, {{ reparticao.numero }}</p>
+            <p class="text-gray-600">{{ reparticao.bairro }}</p>
+            <p class="text-gray-600">CEP: {{ reparticao.cep }}</p>
+            <p class="text-gray-600">{{ reparticao.municipio_sede }}, {{ reparticao.uf }}</p>
+        </div>
+
+        <!-- Card Municípios de Circunscrição -->
+        <div class="p-4 bg-gray-50 shadow-md rounded">
+            <h3 class="text-lg font-semibold text-gray-700">Municípios de Circunscrição</h3>
+            {% if municipios_circunscricao %}
+                <ul class="list-disc pl-5 text-gray-600">
+                    {% for municipio in municipios_circunscricao %}
+                        <li>{{ municipio.municipio }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-500 italic">Nenhum município de circunscrição associado.</p>
+            {% endif %}
+        </div>
+
+        <!-- Card Datas -->
+        <div class="p-4 bg-gray-50 shadow-md rounded">
+            <h3 class="text-lg font-semibold text-gray-700">Datas</h3>
+            <p class="text-gray-600">Abertura: {{ reparticao.data_abertura }}</p>
+            <p class="text-gray-600">Encerramento: {{ reparticao.data_encerramento }}</p>
+        </div>
     </div>
+<br>
 
-    <!-- Informações de Contato -->
-    <div class="mb-4">
-        <h2 class="text-xl font-semibold text-gray-700">Informações de Contato</h2>
-        <p class="text-gray-600">Celular: {{ reparticao.celular }}</p>
-        <p class="text-gray-600">Email: {{ reparticao.email }}</p>
-    </div>
+     <!-- Seção: Documentos -->
+     <div class="bg-gray-50 p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-4">Documentos da Repartição</h2>
 
-    <!-- Endereço da Repartição -->
-    <div class="mb-4">
-        <h2 class="text-xl font-semibold text-gray-700">Endereço</h2>
-        <p class="text-gray-600">{{ reparticao.logradouro }}, {{ reparticao.numero }}</p>
-        <p class="text-gray-600">{{ reparticao.bairro }}</p>
-        <p class="text-gray-600">CEP: {{ reparticao.cep }}</p>
-        <p class="text-gray-600">{{ reparticao.municipio_sede }}, {{ reparticao.uf }}</p>
-    </div>
+        {% if documentos %}
+            <ul class="space-y-4">
+                {% for documento in documentos %}
+                <li id="documento-{{ documento.id }}"  data-id="{{ documento.id }}"  class="bg- bg-gray-50 p-4 rounded-lg shadow-md flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="material-icons text-gray-500 mr-2" style="font-size: 20px;">insert_drive_file</i>
+                        <div>
+                            <a href="{{ documento.arquivo.url }}" target="_blank" class="text-blue-500 font-semibold hover:underline">
+                            {{ documento.nome }}
+                            </a>
+                            <p class="text-gray-600 text-sm mt-1">Data de Upload: <strong> {{ documento.data_upload|date:"d/m/Y H:i" }}</strong></p>
+                            <p class="text-gray-600 text-sm mt-1">Extensão do Documento: <strong>{{ documento.arquivo.url|slice:"-3:" }}</strong></p> <!-- Novo -->
+                            <p class="text-gray-600 text-sm mt-1">* {{ documento.descricao|truncatechars:71 }}</p>
 
-    <!-- Municípios de Circunscrição -->
-    <div class="mb-4">
-        <h2 class="text-xl font-semibold text-gray-700">Municípios de Circunscrição</h2>
-        {% if municipios_circunscricao %}
-            <ul class="list-disc pl-5 text-gray-600">
-                {% for municipio in municipios_circunscricao %}
-                    <li>{{ municipio.municipio }}</li>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <!-- Link para Download do Documento -->
+                        <a href="{{ documento.arquivo.url }}" download class="hover:text-green-500" title="Baixar Documento">
+                            <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
+                        </a>
+                        <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
+                            <i class="material-icons" style="font-size: 18px; color:green"> phone_android</i>
+                        </a>
+                        <a href="{% url 'app_documentos:criar_copia_pdf' documento.pk %}" title="Fazer Cópia em PDF" onclick="suaFuncaoAutomatizar()"> <!-- Adicione o link para a sua função -->
+                            <i class="material-icons" style="font-size: 20px; color:orange;">picture_as_pdf</i>
+                        </a>
+                        <a href="{% url 'app_documentos:delete_documento' documento.pk %}" 
+                        class="text-red-500 hover:text-red-700" title="Deletar">
+                            <i class="material-icons" style="font-size: 20px;">delete</i>
+                        </a>
+
+                    </div>
+                </li>
                 {% endfor %}
             </ul>
-        {% else %}
-            <p class="text-gray-500 italic">Nenhum município de circunscrição associado.</p>
-        {% endif %}
-    </div>
-    <!-- Datas-->
-    <div class="mb-4">
-        <h2 class="text-xl font-semibold text-gray-700">Datas</h2>
-        <p class="text-gray-600">Abertura: {{ reparticao.data_abertura }}</p>
-        <p class="text-gray-600">Encerramento: {{ reparticao.data_encerramento }}</p>
 
+        {% else %}
+            <p class="text-gray-600">Nenhum documento disponível para este Integrante.</p>
+        {% endif %}
     </div>
     <!-- Botão de Voltar -->
     <div class="mt-6">
@@ -91,4 +175,5 @@
         </a>
     </div>
 </div>
+{% include "components/footer_associacao.html" %}
 {% endblock single_reparticao %}

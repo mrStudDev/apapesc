@@ -1,106 +1,121 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title %}Detalhes do Integrante{% endblock title %}
 
 {% block single_integrante %}
 <!-- Navbar (já configurada, incluímos no topo) -->
 {% include 'components/navbar_associacao.html' %}
-<div class="container mx-auto my-6 p-6 bg-white shadow-md rounded-lg">
-    <h1 class="text-2xl font-bold text-gray-800 mb-4">Detalhes do Integrante</h1>
-
-    <div class="flex items-center mb-6">
+<!-- Hero Section -->
+<!-- Hero Section -->
+<div class="bg-gray-800 text-white pt-12 pb-8 px-4">
+    <!-- Foto e Cargo -->
+    <div class="flex flex-col items-center justify-center mt-6">
+        <!-- Nome do Integrante -->
+        <h1 class="text-4xl font-bold text-gray-800 bg-yellow-200 inline-block px-4 py-1 rounded-md text-center">
+            {{ integrante.user.get_full_name }}
+        </h1>
+        <br>
         {% if integrante.foto %}
-            <img src="{{ integrante.foto.url }}" alt="Foto do Integrante" class="w-32 h-32 rounded-full mr-4">
+            <img src="{{ integrante.foto.url }}" alt="Foto do Integrante" class="w-32 h-32 rounded-full shadow-md mb-4">
         {% else %}
-            <div class="w-32 h-32 bg-gray-300 rounded-full mr-4 flex items-center justify-center text-gray-500">
+            <div class="w-32 h-32 bg-gray-300 rounded-full flex items-center justify-center text-gray-500 shadow-md mb-4">
                 Sem Foto
             </div>
         {% endif %}
-        <div>
-            <h2 class="text-xl font-semibold text-gray-700">{{ integrante.user.get_full_name }}</h2>
-            <p class="text-gray-500">{{ integrante.cargo.nome }}</p>
+        <p class="text-lg font-medium text-gray-50 mt-2">
+            {{ integrante.cargo.nome }}
+        </p>
+    </div>
+</div>
+
+
+
+<div class="container mx-auto my-6 p-6 bg-white shadow-md rounded-lg">
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="p-4 rounded-md text-white 
+                {% if message.tags == 'success' %}
+                    bg-green-500
+                {% elif message.tags == 'error' %}
+                    bg-red-500
+                {% elif message.tags == 'info' %}
+                    bg-blue-500
+                {% else %}
+                    bg-gray-500
+                {% endif %}
+            ">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Links de Ações -->
+    <div class="flex justify-center space-x-2 mb-6">
+        <a href="{% url 'app_associacao:list_integrante' %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300" title="Lista de Integrantes">
+            <i class="material-icons" style="font-size: 24px; color:blue">list</i>
+            <span class="sr-only">Lista</span> Lista
+        </a>
+        <a href="{% url 'app_associacao:edit_integrante' integrante.pk %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400" title="Editar Integrante">
+            <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
+            <span class="sr-only">Editar</span> Editar
+        </a>
+        <a href="{% url 'app_documentos:upload_documento' 'integrante' integrante.pk %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400" title="Upload de Documento">
+            <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
+            <span class="sr-only">Upload</span> Upload Doc
+        </a>
+    </div>
+
+    <!-- Cards de Informações -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Card Vínculo -->
+        <div class="p-6 bg-white shadow-md rounded">
+            <h3 class="text-lg font-semibold text-gray-700">Vínculo</h3>
+            <ul class="list-disc list-inside text-gray-600">
+                <li><strong>Associação:</strong> {{ associacao.nome_fantasia|default:"Não vinculado" }}</li>
+                <li><strong>Repartição:</strong> {{ reparticao.nome_reparticao|default:"Não vinculado" }}</li>
+                <li><strong>Delegado:</strong> {{ delegado.user.first_name|default:"Sem delegado" }} {{ delegado.user.last_name }}</li>
+                <li><strong>Data Admissão:</strong> {{ integrante.data_entrada|default:"Não cadastrado" }}</li>
+                <li><strong>Data Saída:</strong> {{ integrante.data_saida|default:"Em atividade" }}</li>
+            </ul>
+        </div>
+
+        <!-- Card Informações Pessoais -->
+        <div class="p-6 bg-white shadow-md rounded">
+            <h3 class="text-lg font-semibold text-gray-700">Informações Pessoais</h3>
+            <ul class="list-disc list-inside text-gray-600">
+                <li><strong>CPF:</strong> {{ integrante.cpf }}</li>
+                <li><strong>Celular:</strong> {{ integrante.celular }}</li>
+                <li><strong>Email:</strong> {{ integrante.email }}</li>
+                <li><strong>Data de Nascimento:</strong> {{ integrante.data_nascimento }}</li>
+                <li><strong>Naturalidade:</strong> {{ integrante.naturalidade }}</li>
+                <li><strong>RG:</strong> {{ integrante.rg_numero }}</li>
+                <li><strong>Órgão Emissor:</strong> {{ integrante.get_rg_orgao_display }}</li>
+                <li><strong>Data de Emissão:</strong> {{ integrante.rg_data_emissao }}</li>
+            </ul>
+        </div>
+
+        <!-- Card Endereço -->
+        <div class="p-6 bg-white shadow-md rounded">
+            <h3 class="text-lg font-semibold text-gray-700">Endereço</h3>
+            <ul class="list-disc list-inside text-gray-600">
+                <li><strong>Logradouro:</strong> {{ integrante.logradouro }}</li>
+                <li><strong>Bairro:</strong> {{ integrante.bairro }}</li>
+                <li><strong>Número:</strong> {{ integrante.numero }}</li>
+                <li><strong>Complemento:</strong> {{ integrante.complemento }}</li>
+                <li><strong>CEP:</strong> {{ integrante.cep }}</li>
+                <li><strong>Município:</strong> {{ integrante.municipio }}</li>
+                <li><strong>Estado:</strong> {{ integrante.get_uf_display }}</li>
+            </ul>
         </div>
     </div>
-        <!-- Links de Ações -->
-        <div class="flex justify-center space-x-2 mb-4">
-            <!-- Botão Lista -->
-            <a href="{% url 'app_associacao:list_integrante' %}"
-            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300"
-            title="Lista de Integrantes">
-                <i class="material-icons" style="font-size: 24px; color:blue">list</i>
-                <span class="sr-only">Lista</span> Lista
-            </a>
-    
-            <!-- Botão Editar -->
-            <a href="{% url 'app_associacao:edit_integrante' integrante.pk %}"
-            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400"
-            title="Editar Integrante">
-                <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
-                <span class="sr-only">Editar</span> Editar
-            </a>
-    
-            <!-- Botão Upload -->
-            <a href="{% url 'app_documentos:upload_documento' 'integrante' integrante.pk %}"
-            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400"
-            title="Upload de Documento">
-                <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
-                <span class="sr-only">Upload</span> Upload Doc
-            </a>
-        </div>
-    <h3 class="text-lg font-semibold text-gray-700">Vínculo</h3>
-    <ul class="list-disc list-inside text-gray-600 mb-6">
-        <li><strong>Associação:</strong> {{ associacao.nome_fantasia|default:"Não vinculado" }}</li>
-        <li><strong>Repartição:</strong> {{ reparticao.nome_reparticao|default:"Não vinculado" }}</li>
-        <li><strong>Delegado:</strong> {{ delegado.user.first_name|default:"Sem delegado" }} {{ delegado.user.last_name }}</li>
-        <li><strong>Data Adnissão:</strong> {{ integrante.data_entrada|default:"Não cadastrado" }}</li>        
-        <li><strong>Data Saída:</strong> {{ integrante.data_saida|default:"Em atividade" }}</li>
 
-    </ul>   
-
-    <h3 class="text-lg font-semibold text-gray-700">Informações Pessoais</h3>
-    <ul class="list-disc list-inside text-gray-600 mb-6">
-        <li><strong>CPF:</strong> {{ integrante.cpf }}</li>
-        <li><strong>Celular:</strong> {{ integrante.celular }}</li>
-        <li><strong>Email:</strong> {{ integrante.email }}</li>
-        <li><strong>Data de Nascimento:</strong> {{ integrante.data_nascimento }}</li>
-        <li><strong>Naturalidade:</strong> {{ integrante.naturalidade }}</li>
-        <li><strong>RG:</strong> {{ integrante.rg_numero }}</li>
-        <li><strong>Órgão Emissor:</strong> {{ integrante.get_rg_orgao_display }}</li>
-        <li><strong>Data de Emissão:</strong> {{ integrante.rg_data_emissao }}</li>
-    </ul>
-
-    <h3 class="text-lg font-semibold text-gray-700">Endereço</h3>
-    <ul class="list-disc list-inside text-gray-600 mb-6">
-        <li><strong>Logradouro:</strong> {{ integrante.logradouro }}</li>
-        <li><strong>Bairro:</strong> {{ integrante.bairro }}</li>
-        <li><strong>Número:</strong> {{ integrante.numero }}</li>
-        <li><strong>Complemento:</strong> {{ integrante.complemento }}</li>
-        <li><strong>CEP:</strong> {{ integrante.cep }}</li>
-        <li><strong>Município:</strong> {{ integrante.municipio }}</li>
-        <li><strong>Estado:</strong> {{ integrante.get_uf_display }}</li>
-    </ul>
     <!-- Seção: Documentos -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-4">Documentos do Integrante</h2>
-        {% if messages %}
-            <div class="mb-4">
-                {% for message in messages %}
-                    <div class="p-4 rounded-md text-white 
-                        {% if message.tags == 'success' %}
-                            bg-green-500
-                        {% elif message.tags == 'error' %}
-                            bg-red-500
-                        {% elif message.tags == 'info' %}
-                            bg-blue-500
-                        {% else %}
-                            bg-gray-500
-                        {% endif %}
-                    ">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-            {% endif %}
+
         {% if documentos %}
             <ul class="space-y-4">
                 {% for documento in documentos %}
@@ -151,5 +166,5 @@
     </div>
 </div>
 
-
+{% include "components/footer_associacao.html" %}
 {% endblock single_integrante %}
