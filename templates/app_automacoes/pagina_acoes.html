@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lista de Arquivos - Automação{% endblock title %}
+
+
+{% block pag_acoes %}
+{% include 'components/navbar_associacao.html' %}
+<main class="flex-grow">
+    <div class="flex items-center justify-center bg-gray-100 py-10">
+        <div class="container max-w-md bg-white p-6 rounded-lg shadow-lg">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Página de Ações</h1>
+            <p class="text-gray-600 text-center mb-6">Escolha uma ação para este documento gerado:</p>
+
+            <ul class="space-y-4">
+                <!-- Download -->
+                <li class="flex items-center bg-blue-50 p-4 rounded-lg hover:shadow-md">
+                    <i class="material-icons text-blue-500 text-2xl mr-3">file_download</i>
+                    <div>
+                        <a href="{{ pdf_url }}" class="text-blue-600 font-semibold hover:underline" download>
+                            Baixar Declaração
+                        </a>
+                        <p class="text-sm text-gray-600">Faça o download do arquivo PDF da declaração.</p>
+                    </div>
+                </li>
+
+                <!-- Enviar por Email -->
+                <li class="flex items-center bg-green-50 p-4 rounded-lg hover:shadow-md">
+                    <i class="material-icons text-green-500 text-2xl mr-3">email</i>
+                    <div>
+                        <a href="mailto:?subject=Documento&body=Segue o Documento no link: {{ pdf_url }}"
+                        class="text-green-600 font-semibold hover:underline">
+                            Enviar por Email
+                        </a>
+                        <p class="text-sm text-gray-600">Envie a declaração diretamente para um email.</p>
+                    </div>
+                </li>
+
+                <!-- Enviar por WhatsApp -->
+                <li class="flex items-center bg-teal-50 p-4 rounded-lg hover:shadow-md">
+                    <i class="material-icons text-teal-500 text-2xl mr-3">whatsapp</i>
+                    <div>
+                        <a href="https://api.whatsapp.com/send?text=Segue o documento no link: {{ pdf_url }}"
+                        target="_blank" class="text-teal-600 font-semibold hover:underline">
+                            Enviar por WhatsApp
+                        </a>
+                        <p class="text-sm text-gray-600">Compartilhe a declaração via WhatsApp.</p>
+                    </div>
+                </li>
+            </ul>
+                        <!-- Link para voltar ao associado -->
+            <div class="flex items-center justify-center bg-gray-100 py-10">
+                {% if associado %}
+                    <a href="{% url 'app_associados:single_associado' associado.id %}" class="text-blue-500 font-semibold hover:underline">
+                        Voltar para os detalhes do associado
+                    </a>
+                {% else %}
+                    <p>Informações do associado não disponíveis.</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</main>
+
+{% include 'components/footer_associacao.html' %}
+{% endblock pag_acoes %}

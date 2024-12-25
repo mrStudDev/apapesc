@@ -11,6 +11,7 @@ from .models import(
     CargosModel,
     
 )
+from app_associados.models import ProfissoesModel
 
 
 class AssociacaoForm(forms.ModelForm):
@@ -127,6 +128,11 @@ class IntegranteForm(forms.ModelForm):
         user = kwargs.pop('user', None)
         super().__init__(*args, **kwargs)
         self.fields['user'].initial = user
+        
+        # Configura o valor inicial para o campo 'group'
+        if self.instance.pk and self.instance.user.groups.exists():
+            self.fields['group'].initial = self.instance.user.groups.first()
+            
         # Configura o queryset do campo 'group' para excluir determinados grupos
         excluded_groups = ['Associados da Associação', 'User Vip']  # Grupos a serem excluídos
         self.fields['group'].queryset = Group.objects.exclude(name__in=excluded_groups).order_by('name')
@@ -135,6 +141,7 @@ class IntegranteForm(forms.ModelForm):
         self.fields['associacao'].queryset = AssociacaoModel.objects.all()
         self.fields['cargo'].queryset = CargosModel.objects.all()
         self.fields['reparticao'].queryset = ReparticoesModel.objects.all()
+        self.fields['profissao'].queryset = ProfissoesModel.objects.all()
 
         # Se um usuário for passado, use suas informações (caso necessário no formulário)
         #if user:
@@ -153,21 +160,22 @@ class IntegranteForm(forms.ModelForm):
     
     def clean_cep(self):
         cep = self.cleaned_data.get('cep')
-        # Se o CEP não for preenchido, retorna None ou string vazia
         if not cep:
-            return cep  # Retorna o valor original sem validar
-        # Remove o hífen e valida se o valor tem apenas dígitos
+            return cep  
+        
         numeros = ''.join(c for c in cep if c.isdigit())
+        
         if len(numeros) != 8:
             raise ValidationError("O CEP deve conter exatamente 8 dígitos.")
-
-        return numeros
+        
+        return f"{numeros[:5]}-{numeros[5:]}"
 
     def clean_data_nascimento(self):
         data = self.cleaned_data.get('data_nascimento')
         if not data:
-            return None  # Permita valores nulos
+            return self.initial.get('data_nascimento') or self.instance.data_nascimento
         return data
+
 
     def clean_data_emissao(self):
         data = self.cleaned_data.get('data_emissao')

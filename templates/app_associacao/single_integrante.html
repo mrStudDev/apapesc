@@ -76,9 +76,12 @@
             <ul class="list-disc list-inside text-gray-600">
                 <li><strong>Associação:</strong> {{ associacao.nome_fantasia|default:"Não vinculado" }}</li>
                 <li><strong>Repartição:</strong> {{ reparticao.nome_reparticao|default:"Não vinculado" }}</li>
-                <li><strong>Delegado:</strong> {{ delegado.user.first_name|default:"Sem delegado" }} {{ delegado.user.last_name }}</li>
+                <li><strong>Delegado da Repertição:</strong> {{ delegado.user.first_name|default:"Sem delegado" }} {{ delegado.user.last_name }}</li>
+                <hr class="my-2">
+                <li><strong>Cargo:</strong> {{ integrante.cargo.nome }}</li>
+                <li><strong>Grupo:</strong> {{ integrante.group }}</li>
                 <li><strong>Data Admissão:</strong> {{ integrante.data_entrada|default:"Não cadastrado" }}</li>
-                <li><strong>Data Saída:</strong> {{ integrante.data_saida|default:"Em atividade" }}</li>
+                <li><strong>Data Saída:</strong> {{ integrante.data_saida|default:"Integrante em atividade" }}</li>
             </ul>
         </div>
 
@@ -87,8 +90,6 @@
             <h3 class="text-lg font-semibold text-gray-700">Informações Pessoais</h3>
             <ul class="list-disc list-inside text-gray-600">
                 <li><strong>CPF:</strong> {{ integrante.cpf }}</li>
-                <li><strong>Celular:</strong> {{ integrante.celular }}</li>
-                <li><strong>Email:</strong> {{ integrante.email }}</li>
                 <li><strong>Data de Nascimento:</strong> {{ integrante.data_nascimento }}</li>
                 <li><strong>Naturalidade:</strong> {{ integrante.naturalidade }}</li>
                 <li><strong>RG:</strong> {{ integrante.rg_numero }}</li>
@@ -110,6 +111,18 @@
                 <li><strong>Estado:</strong> {{ integrante.get_uf_display }}</li>
             </ul>
         </div>
+        <!-- Outras Infos-->
+        <div class="p-6 bg-white shadow-md rounded">
+            <h3 class="text-lg font-semibold text-gray-700">Dados</h3>
+            <ul class="list-disc list-inside text-gray-600">
+                <li><strong>Celular:</strong> {{ integrante.celular }}</li>
+                <li><strong>Email:</strong> {{ integrante.email }}</li>
+                <li><strong>Profissão:</strong> {{ integrante.profissao }}</li>
+                <li><strong>Estado Civil:</strong> {{ integrante.estado_civil }}</li>
+                <li><strong>Nacionalidade:</strong> {{ integrante.nacionalidade }}</li>
+
+            </ul>
+        </div>        
     </div>
 
     <!-- Seção: Documentos -->

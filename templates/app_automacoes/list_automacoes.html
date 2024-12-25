@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lista de Arquivos - Automação{% endblock title %}
+
+{% block list_automacoes %}
+{% include 'components/navbar_associacao.html' %}
+<main class="flex-grow">
+    <div class="max-w-6xl mx-auto px-6">
+        <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center py-4">Lista de Arquivos - Automação</h1>
+
+        <!-- Tabela de Declarações de Residência -->
+        <section class="mb-10">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Declarações de Residência</h2>
+            <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">ID</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">PDF Base</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Última Atualização</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for declaracao in declaracoes_residencia %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
+                            <td class="py-3 px-4 text-blue-500 text-sm">
+                                <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                            </td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma declaração de residência encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tabela de Declarações de Filiação -->
+        <section class="mb-10">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Declarações de Filiação</h2>
+            <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">ID</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">PDF Base</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Última Atualização</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for declaracao in declaracoes_filiacao %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
+                            <td class="py-3 px-4 text-blue-500 text-sm">
+                                <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                            </td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma declaração de filiação encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tabela de Declarações de Atividade Pesqueira -->
+        <section class="mb-10">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Declarações de Atividade Pesqueira</h2>
+            <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">ID</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">PDF Base</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Última Atualização</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for declaracao in declaracoes_atividade_pesqueira %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
+                            <td class="py-3 px-4 text-blue-500 text-sm">
+                                <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                            </td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma declaração de atv. pesqueira encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <!-- Tabela de Declarações de Hipossuficiência -->
+        <section class="mb-10">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Declarações de Hipossuficiência</h2>
+            <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">ID</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">PDF Base</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Última Atualização</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for declaracao in declaracoes_hipossuficiencia %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
+                            <td class="py-3 px-4 text-blue-500 text-sm">
+                                <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                            </td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma declaração de hipossuficiência encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <!-- Tabela de Procuração Jurídica -->
+        <section class="mb-10">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Procuração Jurídica</h2>
+            <div class="overflow-x-auto bg-white shadow-md rounded-lg">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">ID</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">PDF Base</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Última Atualização</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for procuracao in procuracoes_procuracao_juridica %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ procuracao.id }}</td>
+                            <td class="py-3 px-4 text-blue-500 text-sm">
+                                <a href="{{ procuracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                            </td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ procuracao.atualizado_em }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma Procuração Jurídica encontrada.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>        
+    </div>
+</main>
+
+{% include "components/footer_associacao.html" %}
+{% endblock list_automacoes %}

@@ -44,7 +44,8 @@ INSTALLED_APPS = [
     'app_manager',
     'app_associacao',
     'app_associados',
-    'app_documentos',  
+    'app_documentos',
+    'app_automacoes',
     
     # Editor
     'app_editor',

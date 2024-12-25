@@ -139,6 +139,8 @@ class ProfissoesModel(models.Model):
         unique=True, 
         verbose_name="Profissão"
     )
+    def __str__(self):
+        return self.nome
 
 # Create your models here.
 class AssociadoModel(models.Model):

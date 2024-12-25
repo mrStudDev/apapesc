@@ -160,6 +160,20 @@ class AssociacaoCreateView(GroupPermissionRequiredMixin, CreateView):
     fields = '__all__'
     success_url = reverse_lazy('app_associacao:list_associacao')
     group_required = ['Superuser',]
+
+    def form_valid(self, form):
+        self.object = form.save()
+
+        if "save_and_continue" in self.request.POST:
+            return redirect('app_associacao:edit_associacao', pk=self.object.pk)
+
+        if "save_and_view" in self.request.POST:
+            return redirect('app_associacao:single_associacao', pk=self.object.pk)
+
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('app_associacao:single_associacao', kwargs={'pk': self.object.pk})  
     
 class AssociacaoUpdateView(GroupPermissionRequiredMixin, UpdateView):
     model = AssociacaoModel
@@ -269,6 +283,16 @@ class IntegrantesCreateView(GroupPermissionRequiredMixin, CreateView):
             messages.error(self.request, "Usuário não encontrado.")
             return self.form_invalid(form)
 
+        self.object = form.save(commit=False)
+        
+        # Atualiza os grupos do usuário conforme o selecionado
+        # Captura o grupo do formulário e associa ao usuário
+        group = form.cleaned_data.get('group')
+        if group:
+            user.groups.clear()  # Remove todos os grupos existentes
+            user.groups.add(group) 
+
+
         # Remove qualquer lógica que altere o email do User.
         # Salva apenas o modelo de integrantes.
         self.object = form.save()
@@ -279,13 +303,14 @@ class IntegrantesCreateView(GroupPermissionRequiredMixin, CreateView):
             return redirect(reverse('app_associacao:edit_integrante', kwargs={'pk': self.object.pk}))
         elif "save_and_view" in self.request.POST:
             return redirect(reverse('app_associacao:single_integrante', kwargs={'pk': self.object.pk}))
-
+        
+        # Salva o objeto IntegrantesModel no banco de dados
+        self.object = form.save()
+        messages.success(self.request, "Integrante criado com sucesso!")
         return super().form_valid(form)
 
     def get_success_url(self):
         return reverse_lazy('app_associacao:list_integrante')
-
-
 
 
 class IntegrantesUpdateView(GroupPermissionRequiredMixin, UpdateView):
@@ -297,7 +322,12 @@ class IntegrantesUpdateView(GroupPermissionRequiredMixin, UpdateView):
         'Superuser',
         'Admin da Associação',
     ]
-
+    def get_form_kwargs(self):
+        """Adiciona o usuário ao formulário, se necessário."""
+        kwargs = super().get_form_kwargs()
+        kwargs['instance'] = self.get_object()
+        return kwargs
+    
     def get_initial(self):
         initial = super().get_initial()
         # Preenche o campo 'group' com o grupo do usuário relacionado
@@ -473,7 +503,7 @@ class ReparticoesUpdateView(GroupPermissionRequiredMixin, UpdateView):
         'Superuser',
         'Admin da Associação',
         ]
-    
+
     def form_valid(self, form):
         self.object = form.save()
 

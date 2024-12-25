@@ -29,6 +29,7 @@ urlpatterns = [
     path('associacao/', include('app_associacao.urls', namespace='app_associacao')),
     path('associados/', include('app_associados.urls', namespace='app_associados')),
     path('documentos/', include('app_documentos.urls', namespace='app_documentos')),
+    path('automacoes/', include('app_automacoes.urls', namespace='app_automacoes')),
     path('editor/', include('app_editor.urls', namespace='app_editor')),
     
     

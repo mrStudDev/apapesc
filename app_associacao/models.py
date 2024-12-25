@@ -4,6 +4,7 @@ from django.core.validators import RegexValidator
 from django.utils import timezone
 from django.contrib.auth.models import User
 
+
 UF_CHOICES = [
     ('AC', 'Acre'), ('AL', 'Alagoas'), ('AP', 'Amapá'), ('AM', 'Amazonas'),
     ('BA', 'Bahia'), ('CE', 'Ceará'), ('DF', 'Distrito Federal'),
@@ -46,6 +47,21 @@ EMISSOR_RG_CHOICES = [
     ('UF', 'UF'),
     ('Não declarado', 'Não declarado'),
 ]
+ESTADO_CIVIL_CHOICES = [
+    ('solteiro', 'solteiro'),
+    ('solteira', 'solteira'),
+    ('casado', 'casado'),
+    ('casada', 'casada'),
+    ('divorciado', 'divorciado'),
+    ('divorciada', 'divorciada'),
+    ('viúvo', 'viúvo'),
+    ('viúva', 'viúva'),
+    ('união estável', 'união estável'),  # Mantido original para consistência
+    ('separado judicialmente', 'separado judicialmente'),
+    ('separada judicialmente', 'separada judicialmente'),
+    ('Não declarado', 'Não declarado'),
+
+]
 
 # INTEGRANTES
 class IntegrantesModel(models.Model):
@@ -78,6 +94,32 @@ class IntegrantesModel(models.Model):
         blank=True, 
         null=True
     )
+    oab = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="OAB"   
+    )    
+    nacionalidade = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name="Nacionalidade"   
+    )
+    estado_civil = models.CharField(
+        max_length=50, 
+        choices=ESTADO_CIVIL_CHOICES, 
+        blank=True, null=True, 
+        verbose_name="Estado Civil",
+        default="Não declarado",
+    )
+    profissao = models.ForeignKey(
+        'app_associados.ProfissoesModel',  # Referência por string para evitar circularidade
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Profissão",
+    )    
     data_nascimento = models.DateField(
         blank=True, 
         null=True, 
@@ -98,7 +140,8 @@ class IntegrantesModel(models.Model):
         max_length=50,
         choices=EMISSOR_RG_CHOICES,
         default='Não declarado', 
-        verbose_name="RG-Orgão Emissor"
+        verbose_name="RG-Orgão Emissor",
+        blank=True, null=True
     )
     rg_data_emissao = models.DateField(
         blank=True, 
@@ -160,7 +203,7 @@ class IntegrantesModel(models.Model):
     )
     cep = models.CharField(
         max_length=9,  # Apenas números (sem o hífen)
-        validators=[RegexValidator(r'^\d{5}-\d{3}$', 'CEP deve estar no formato 00000-000.')],
+        validators=[RegexValidator(r'^\d{5}-\d{3}$', 'CEP deve estar no formato 00000-000')],
         default="", 
         blank=True, 
         null=True,

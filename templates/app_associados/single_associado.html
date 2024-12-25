@@ -952,7 +952,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl">
             <!-- Declaração de Filiação -->
-            <a href="#"
+            <a href="{% url 'app_automacoes:gerar_declaracao_filiado' associado.id %}"
                class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
                 <div class="text-center">
                     <h3 class="text-lg font-semibold text-gray-800">Declaração de Filiação</h3>
@@ -961,7 +961,7 @@
             </a>
 
             <!-- Declaração de Atividade Pesqueira -->
-            <a href="#"
+            <a href="{% url 'app_automacoes:gerar_declaracao_atividade_pesqueira' associado.id %}"
                class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
                 <div class="text-center">
                     <h3 class="text-lg font-semibold text-gray-800">Declaração de Atividade Pesqueira</h3>
@@ -970,7 +970,7 @@
             </a>
 
             <!-- Declaração de Residência -->
-            <a href="#"
+            <a href="{% url 'app_automacoes:gerar_declaracao_residencia' associado.id %}"
                class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
                 <div class="text-center">
                     <h3 class="text-lg font-semibold text-gray-800">Declaração de Residência</h3>
@@ -979,7 +979,7 @@
             </a>
 
             <!-- Declaração de Hipossuficiência -->
-            <a href="#"
+            <a href="{% url 'app_automacoes:gerar_declaracao_hipo' associado.id %}"
                class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
                 <div class="text-center">
                     <h3 class="text-lg font-semibold text-gray-800">Declaração de Hipossuficiência</h3>
@@ -990,7 +990,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl">
             <!-- Procuração Jurídica -->
-            <a href="#"
+            <a href="{% url 'app_automacoes:gerar_procuracao_juridica' associado.id %}"
                class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
                 <div class="text-center">
                     <h3 class="text-lg font-semibold text-gray-800">Procuração Jurídica</h3>
@@ -998,21 +998,21 @@
                 </div>
             </a>
 
-            <!-- Termo de Compromisso -->
-            <a href="#"
-               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
-                <div class="text-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Termo de Compromisso</h3>
-                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar o termo de compromisso.</p>
-                </div>
-            </a>
-
             <!-- Certificado de Registro-->
             <a href="#"
                class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
                 <div class="text-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Certificado de Registro</h3>
-                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar o certificado de registro.</p>
+                    <h3 class="text-lg font-semibold text-gray-800">Aguardando</h3>
+                    <p class="text-sm text-gray-600 mt-2">O que eu posso gerar para você?</p>
+                </div>
+            </a>
+
+            <!-- Termo de Compromisso -->
+            <a href="#"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <h3 class="text-lg font-semibold text-gray-800">Aguardando</h3>
+                    <p class="text-sm text-gray-600 mt-2">O que eu posso gerar para você?</p>
                 </div>
             </a>
 
@@ -1020,8 +1020,8 @@
             <a href="#"
                class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
                 <div class="text-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Alguma Certificação </h3>
-                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
+                    <h3 class="text-lg font-semibold text-gray-800">Aguardando</h3>
+                    <p class="text-sm text-gray-600 mt-2">O que eu posso gerar para você?</p>
                 </div>
             </a>
         </div>

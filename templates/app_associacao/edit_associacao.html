@@ -12,7 +12,7 @@
     <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Editar Associação</h1>
     <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
         {% csrf_token %}
-
+        <h2 class="text-lg font-bold mb-4">Dados Principais</h2>
         <!-- Nome Fantasia -->
         <div> 
             <label for="id_nome_fantasia" class="block text-sm font-medium text-gray-700 mb-1">Nome Fantasia</label>
@@ -20,7 +20,7 @@
                 type="text"
                 name="{{ form.nome_fantasia.name }}"
                 id="{{ form.nome_fantasia.id_for_label }}"
-                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Digite o nome fantasia"
                 value="{{ form.nome_fantasia.value|default:'' }}"
             >
@@ -29,7 +29,6 @@
             {% endfor %}
         </div>
 
-
         <!-- Razão Social -->
         <div class="py-3"> 
             <label for="id_razao_social" class="block text-sm font-medium text-gray-700 mb-1">Razão Social</label>
@@ -37,7 +36,7 @@
                 type="text"
                 name="{{ form.razao_social.name }}"
                 id="{{ form.razao_social.id_for_label }}"
-                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Digite a razão social"
                 value="{{ form.razao_social.value|default:'' }}"
             >
@@ -45,7 +44,59 @@
                 <p class="text-red-500 text-xs mt-1">{{ error }}</p>
             {% endfor %}
         </div>
+
+        <!-- Campos em duas colunas -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 py-3">
+            <!-- CNPJ -->
+            <div>
+                <label for="id_cnpj" class="block text-sm font-medium text-gray-700 mb-1">CNPJ</label>
+                <input
+                    type="text"
+                    name="{{ form.cnpj.name }}"
+                    id="{{ form.cnpj.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Digite o CNPJ"
+                    value="{{ form.cnpj.value|default:'' }}"
+                >
+                {% for error in form.cnpj.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+            <!-- Campo Celular -->
+            <div>
+                <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
+                <input
+                    type="text"
+                    name="{{ form.celular.name }}"
+                    id="{{ form.celular.id_for_label }}"
+                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="(48)99999-9999"
+                    value="{{ form.celular.value|default:'' }}"
+                    oninput="mascaraTelefone(this)"
+                >
+
+                {% for error in form.celular.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Fundadores -->
+        <div class="mt-6">
+            <label for="id_fundadores" class="block text-sm font-medium text-gray-700 mb-1">Fundadores</label>
+            <textarea
+                name="{{ form.fundadores.name }}"
+                id="{{ form.fundadores.id_for_label }}"
+                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Lista os fundadores separados por vírgulas ou linhas">{{ form.fundadores.value|default:'' }}</textarea>
+            {% for error in form.fundadores.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+            {% endfor %}
+        </div>
+        <br><hr><br>
         <!-- Campos relacionados aos cargos -->
+        <small>Certifique-se de o Administrado(a), Presidente, Diretor(a) ou Diretores, já foram cadastrados como integrantes.</small>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-6">
             <!-- Administrador -->
             <div>
@@ -107,57 +158,10 @@
                 <p class="text-red-500 text-xs mt-1">{{ error }}</p>
             {% endfor %}
         </div>
-
-
-        <!-- Fundadores -->
-        <div class="mt-6">
-            <label for="id_fundadores" class="block text-sm font-medium text-gray-700 mb-1">Fundadores</label>
-            <textarea
-                name="{{ form.fundadores.name }}"
-                id="{{ form.fundadores.id_for_label }}"
-                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Lista os fundadores separados por vírgulas ou linhas">{{ form.fundadores.value|default:'' }}</textarea>
-            {% for error in form.fundadores.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-            {% endfor %}
-        </div>
-
+        <br><br>
         <!-- Campos em duas colunas -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 py-3">
-            <!-- CNPJ -->
-            <div>
-                <label for="id_cnpj" class="block text-sm font-medium text-gray-700 mb-1">CNPJ</label>
-                <input
-                    type="text"
-                    name="{{ form.cnpj.name }}"
-                    id="{{ form.cnpj.id_for_label }}"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Digite o CNPJ"
-                    value="{{ form.cnpj.value|default:'' }}"
-                >
-                {% for error in form.cnpj.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-
-            <!-- Campo Celular -->
-            <div>
-                <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
-                <input
-                    type="text"
-                    name="{{ form.celular.name }}"
-                    id="{{ form.celular.id_for_label }}"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="(48)99999-9999"
-                    value="{{ form.celular.value|default:'' }}"
-                    oninput="mascaraTelefone(this)"
-                >
-
-                {% for error in form.celular.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div> 
-
+        <h2 class="text-lg font-bold mb-4">Dados Complementares</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <!-- Email -->
             <div>
                 <label for="id_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
