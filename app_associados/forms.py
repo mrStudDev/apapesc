@@ -10,13 +10,256 @@ class AssociadoForm(forms.ModelForm):
     class Meta:
         model = AssociadoModel
         fields = '__all__'
-     
-        
-class AssociadoForm(forms.ModelForm):
-    class Meta:
-        model = AssociadoModel
-        fields = '__all__'
+        widgets = {
+            # Informações Vinculo
+            'associacao': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            'reparticao': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            'municipio_circunscricao': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'data_filiacao': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }, format='%Y-%m-%d'),
+            'status': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            'data_desfilicao': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }, format='%Y-%m-%d'),
+            
+            #Informações de Contato - Documentos e informações de Principais
+            'celular': forms.TextInput(attrs={
+                'placeholder': '(99)99999-9999',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'oninput': 'mascaraTelefone(this)',  # Chama a função de máscara para celular
+            }),
+            'celular_correspondencia': forms.TextInput(attrs={
+                'placeholder': '(99)99999-9999',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'oninput': 'mascaraTelefone(this)',  # Chama a função de máscara para celular
+            }),              
+            'cpf': forms.TextInput(attrs={
+                'id': 'id_cpf',
+                'placeholder': '000.000.000-00',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'oninput': 'mascaraCPF(this)',  # Chama a função de máscara para CPF
+            }),
+            'senha_gov': forms.TextInput(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'email': forms.EmailInput(attrs={
+                'placeholder': 'exemplo@email.com',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-blue-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'senha_google': forms.TextInput(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+                   
+            # Documento RG
+            'rg_numero': forms.TextInput(attrs={
+                'placeholder': 'Digite somente números 0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'rg_orgao': forms.Select(attrs={
+                'placeholder': 'SSP/UF',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'rg_data_emissao': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),
+            'naturalidade': forms.TextInput(attrs={
+                'placeholder': 'Local de nascimento',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'data_nascimento': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),
+            
+            # Documentação de Habilitação CNH
+            'cnh': forms.TextInput(attrs={
+                'placeholder': 'Digite somente números 00000000',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'cnh_data_emissao': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),
+                        
+            # Informações Pessoais
+            'foto': forms.FileInput(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'sexo_biologico': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'etnia': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'escolaridade': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'nome_mae': forms.TextInput(attrs={
+                'placeholder': 'Nome da Mãe',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'nome_pai': forms.TextInput(attrs={
+                'placeholder': 'Nome da Pai',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'estado_civil': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'profissao': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            
+            # Informações de Singulares de Atividade do Associado
+            'recolhe_inss': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'recebe_seguro': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),            
 
+            # Identificacoes Oficiais/Números Cidadão INSS/NIT/PIS/TITULO
+            'nit': forms.TextInput(attrs={
+                'placeholder': 'Digite somente números 0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'pis': forms.TextInput(attrs={
+                'placeholder': 'Digite somente números 0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'caepef': forms.TextInput(attrs={
+                'placeholder': 'Digite somente números 0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'cei': forms.TextInput(attrs={
+                'placeholder': 'Digite somente números 0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'titulo_eleitor': forms.TextInput(attrs={
+                'placeholder': 'Digite somente números 0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            
+            # Documentação Profissional
+            'rgp': forms.TextInput(attrs={
+                'placeholder': 'SCH00000000',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'rgp_data_emissao': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),
+            'primeiro_registro': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),
+            'rgp_mpa': forms.TextInput(attrs={
+                'placeholder': 'EX: MPA',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+
+            # Documentação de Trabalho
+            'ctps': forms.TextInput(attrs={
+                'placeholder': 'Digite somente números 0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'ctps_serie': forms.TextInput(attrs={
+                'placeholder': '',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'ctps_data_emissao': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),
+            'ctps_uf': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+
+            # Dados de Produção Média Anual
+            'especie1': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'quantidade1': forms.TextInput(attrs={
+                'placeholder': '000.000,00',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            'especie2': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'quantidade2': forms.TextInput(attrs={
+                'placeholder': '000.000,00',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            'especie3': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'quantidade3': forms.TextInput(attrs={
+                'placeholder': '000.000,00',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            'especie4': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'quantidade4': forms.TextInput(attrs={
+                'placeholder': '000.000,00',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            'especie5': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'quantidade5': forms.TextInput(attrs={
+                'placeholder': '000.000,00',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            
+            # Endereço residencial
+            'logradouro': forms.TextInput(attrs={
+                'placeholder': 'Rua / Servidão / Avenida',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'bairro': forms.TextInput(attrs={
+                'placeholder': 'Bévili-Rios / Vila Joana / Jardim das Flores',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'numero': forms.TextInput(attrs={
+                'placeholder': '0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'complemento': forms.TextInput(attrs={
+                'placeholder': 'Casa / Apto 71 / Quarto 10',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'cep': forms.TextInput(attrs={
+                'placeholder': '00000-000',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'oninput': 'mascaraCEP(this)'  # Chama a função de máscara para CEP
+            }),
+            'municipio': forms.TextInput(attrs={
+                'placeholder': 'Nome da cidade',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'uf': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            # Atualização de Dados
+            'data_atualizacao': forms.DateInput(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),            
+
+        }
+
+        
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None) 
         super().__init__(*args, **kwargs)
@@ -91,7 +334,6 @@ class AssociadoForm(forms.ModelForm):
             raise ValidationError("CPF inválido.")
 
         return numeros
-     
 
     def clean_celular(self):
         celular = self.cleaned_data.get('celular')
@@ -120,7 +362,11 @@ class AssociadoForm(forms.ModelForm):
         if not data:
             return None  # Permita valores nulos
         return data
-
+    def clean_data_filiacao(self):
+        data = self.cleaned_data.get('data_filiacao')
+        if not data:
+            return None  # Permita valores nulos
+        return data
     def clean_rg_data_emissao(self):
         data = self.cleaned_data.get('rg_data_emissao')
         if not data:

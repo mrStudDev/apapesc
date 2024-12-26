@@ -13,18 +13,111 @@ from .models import(
 )
 from app_associados.models import ProfissoesModel
 
-
 class AssociacaoForm(forms.ModelForm):
+    diretores = forms.ModelMultipleChoiceField(
+        queryset=IntegrantesModel.objects.all(),
+        required=False,
+        widget=forms.SelectMultiple(
+            attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'size': '15',
+            }
+        ),
+        label="Diretores"
+    )
+            
     class Meta:
+
         model = AssociacaoModel
         fields = '__all__'
+        widgets = {
+            'nome_fantasia': forms.TextInput(attrs={
+                'placeholder': 'Digite o Nome Fantasia',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm'
+            }),
+
+            'razao_social': forms.TextInput(attrs={
+                'placeholder': 'Nome Fantasia',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'email': forms.EmailInput(attrs={
+                'placeholder': 'exemplo@email.com',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-blue-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),            
+            'cnpj': forms.TextInput(attrs={
+                'placeholder': '00.000.000/0000-00 Numero do CNPJ',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'celular': forms.TextInput(attrs={
+                'placeholder': '(99)99999-9999',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'oninput': 'mascaraTelefone(this)',  # Chama a função de máscara para celular
+            }),
+            'telefone': forms.TextInput(attrs={
+                'placeholder': 'telefone (00) 0000-0000',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),            
+            'data_abertura': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),
+            'data_encerramento': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),                                                          
+            'fundadores': forms.Textarea(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'administrador': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            'presidente': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+           
+            # Endereço Associação
+            'logradouro': forms.TextInput(attrs={
+                'placeholder': 'Rua / Servidão / Avenida',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'bairro': forms.TextInput(attrs={
+                'placeholder': 'Bévili-Rios / Vila Joana / Jardim das Flores',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'numero': forms.TextInput(attrs={
+                'placeholder': '0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'complemento': forms.TextInput(attrs={
+                'placeholder': 'Casa / Apto 71 / Quarto 10',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'cep': forms.TextInput(attrs={
+                'placeholder': '00000-000',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'oninput': 'mascaraCEP(this)'
+            }),
+            'municipio': forms.TextInput(attrs={
+                'placeholder': 'Nome da cidade',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'uf': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),                                         
+        }
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['associacao'].queryset = AssociacaoModel.objects.all()
-        # Ajustar o campo associacao para exibir o nome_fantasia
-        self.fields['diretores'].queryset = AssociacaoModel.objects.all()
+        if self.instance and self.instance.pk:
+            self.fields['diretores'].initial = self.instance.diretores.all()
 
+    def clean_diretores(self):
+        diretores = self.cleaned_data.get('diretores')
+        # Se quiser obrigar a ter pelo menos 1, tudo bem.
+        if not diretores:
+            raise forms.ValidationError("Selecione ao menos um diretor.")
+        return diretores
 
     def clean_data_abertura(self):
         data = self.cleaned_data.get('data_abertura')
@@ -40,15 +133,15 @@ class AssociacaoForm(forms.ModelForm):
     
     def clean_cep(self):
         cep = self.cleaned_data.get('cep')
-        # Se o CEP não for preenchido, retorna None ou string vazia
         if not cep:
-            return cep  # Retorna o valor original sem validar
-        # Remove o hífen e valida se o valor tem apenas dígitos
+            return cep  
+        
         numeros = ''.join(c for c in cep if c.isdigit())
+        
         if len(numeros) != 8:
             raise ValidationError("O CEP deve conter exatamente 8 dígitos.")
-
-        return numeros  # Retorna apenas os números do celular
+        
+        return f"{numeros[:5]}-{numeros[5:]}"
     
     def clean_celular(self):
         celular = self.cleaned_data.get('celular')
@@ -62,12 +155,87 @@ class AssociacaoForm(forms.ModelForm):
         return celular_formatado
 
 class ReparticaoForm(forms.ModelForm):
+    municipios_circunscricao = forms.ModelMultipleChoiceField(
+        queryset=ReparticoesModel.objects.all(),
+        required=False,
+        widget=forms.SelectMultiple(
+            attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'size': '15',
+            }
+        ),
+        label="municipios_circunscricao"
+    )    
     class Meta:
         model = ReparticoesModel
         fields = '__all__'
+        widgets = {
+            'associacao': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),            
+            'nome_reparticao': forms.TextInput(attrs={
+                'placeholder': 'Repartição de "Nome do Município',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-3 px-4 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm'
+            }),
+            'email': forms.EmailInput(attrs={
+                'placeholder': 'exemplo@email.com',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-blue-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),               
+            'celular': forms.TextInput(attrs={
+                'placeholder': '(99)99999-9999',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'oninput': 'mascaraTelefone(this)',  # Chama a função de máscara para celular
+            }),  
+            'municipio_sede': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),  
+            'delegado': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),               
+            # Endereço Repartição
+            'logradouro': forms.TextInput(attrs={
+                'placeholder': 'Rua / Servidão / Avenida',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'bairro': forms.TextInput(attrs={
+                'placeholder': 'Bévili-Rios / Vila Joana / Jardim das Flores',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'numero': forms.TextInput(attrs={
+                'placeholder': '0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'complemento': forms.TextInput(attrs={
+                'placeholder': 'Casa / Apto 71 / Quarto 10',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'cep': forms.TextInput(attrs={
+                'placeholder': '00000-000',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'oninput': 'mascaraCEP(this)'
+            }),
+            'municipio': forms.TextInput(attrs={
+                'placeholder': 'Nome da cidade',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'uf': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),               
+            'data_abertura': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),
+            'data_encerramento': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),                               
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['municipios_circunscricao'].initial = self.instance.municipios_circunscricao.all()
+
         # Ajustar o campo associacao para exibir o nome_fantasia
         self.fields['associacao'].queryset = AssociacaoModel.objects.all()
         self.fields['associacao'].label_from_instance = lambda obj: obj.nome_fantasia
@@ -76,7 +244,14 @@ class ReparticaoForm(forms.ModelForm):
         self.fields['municipios_circunscricao'].queryset = MunicipiosModel.objects.all()
         self.fields['nome_reparticao'].queryset = ReparticoesModel.objects.all()
 
-            
+    def clean_municipios_circunscricao(self):
+        municipios_circunscricao = self.cleaned_data.get('municipios_circunscricao')
+        # Se quiser obrigar a ter pelo menos 1, tudo bem.
+        if not municipios_circunscricao:
+            raise forms.ValidationError("Selecione ao menos um Município.")
+        return municipios_circunscricao
+    
+                
     def clean_celular(self):
         celular = self.cleaned_data.get('celular')
         # Remove caracteres não numéricos da string, como parênteses, hífens e espaços
@@ -90,15 +265,15 @@ class ReparticaoForm(forms.ModelForm):
     
     def clean_cep(self):
         cep = self.cleaned_data.get('cep')
-        # Se o CEP não for preenchido, retorna None ou string vazia
         if not cep:
-            return cep  # Retorna o valor original sem validar
-        # Remove o hífen e valida se o valor tem apenas dígitos
+            return cep  
+        
         numeros = ''.join(c for c in cep if c.isdigit())
+        
         if len(numeros) != 8:
             raise ValidationError("O CEP deve conter exatamente 8 dígitos.")
-
-        return numeros  # Retorna apenas os números do celular
+        
+        return f"{numeros[:5]}-{numeros[5:]}"
     
     def clean_data_abertura(self):
         data = self.cleaned_data.get('data_abertura')
@@ -117,12 +292,122 @@ class IntegranteForm(forms.ModelForm):
         queryset=Group.objects.all().order_by('name'),
         required=True,
         label="Grupo",
-        help_text="Selecione o grupo ao qual o integrante será adicionado."
+        help_text="Selecione o grupo ao qual o integrante será adicionado.",
+        widget=forms.Select(
+            attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }
+        )
     )
+    
     class Meta:
         model = IntegrantesModel
         fields = '__all__'
-
+        widgets = {
+            'associacao': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            'reparticao': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),   
+            'cargo': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),                                             
+            # Informações Pessoais
+            'cpf': forms.TextInput(attrs={
+                'id': 'id_cpf',
+                'placeholder': '000.000.000-00',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'oninput': 'mascaraCPF(this)',  # Chama a função de máscara para CPF
+            }),
+            'email': forms.EmailInput(attrs={
+                'placeholder': 'exemplo@email.com',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-blue-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),               
+            'celular': forms.TextInput(attrs={
+                'placeholder': '(99)99999-9999',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'oninput': 'mascaraTelefone(this)',  # Chama a função de máscara para celular
+            }), 
+            'oab': forms.TextInput(attrs={
+                'placeholder': 'Digite somente números 0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'nacionalidade': forms.TextInput(attrs={
+                'placeholder': 'País de Origem - brasileiro(a)',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),            
+            # Documento RG
+            'rg_numero': forms.TextInput(attrs={
+                'placeholder': 'Digite somente números 0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'rg_orgao': forms.Select(attrs={
+                'placeholder': 'SSP/UF',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'rg_data_emissao': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),
+            'naturalidade': forms.TextInput(attrs={
+                'placeholder': 'Local de nascimento',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'data_nascimento': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),                      
+            # Informações Pessoais
+            'foto': forms.FileInput(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'estado_civil': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'profissao': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+                    
+            # Endereço Repartição
+            'logradouro': forms.TextInput(attrs={
+                'placeholder': 'Rua / Servidão / Avenida',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'bairro': forms.TextInput(attrs={
+                'placeholder': 'Bévili-Rios / Vila Joana / Jardim das Flores',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'numero': forms.TextInput(attrs={
+                'placeholder': '0123456789',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'complemento': forms.TextInput(attrs={
+                'placeholder': 'Casa / Apto 71 / Quarto 10',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'cep': forms.TextInput(attrs={
+                'placeholder': '00000-000',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'oninput': 'mascaraCEP(this)'
+            }),
+            'municipio': forms.TextInput(attrs={
+                'placeholder': 'Nome da cidade',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),
+            'uf': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),     
+            'data_entrada': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),
+            'data_saida': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),                           
+        }
+        
     def __init__(self, *args, **kwargs):
         # Recupera o usuário do kwargs
         user = kwargs.pop('user', None)
@@ -157,6 +442,20 @@ class IntegranteForm(forms.ModelForm):
             raise ValidationError("CPF inválido.")
 
         return numeros
+    def clean_cpf(self):
+        cpf = self.cleaned_data.get('cpf')
+        if not cpf:
+            return cpf  # Retorna sem validação adicional se CPF estiver vazio
+
+        # Verifica se o CPF já existe em outra instância
+        queryset = IntegrantesModel.objects.filter(cpf=cpf)
+        if self.instance and self.instance.pk:
+            # Exclui o próprio objeto da verificação
+            queryset = queryset.exclude(pk=self.instance.pk)
+
+        if queryset.exists():
+            raise forms.ValidationError("Este CPF já está cadastrado em outro associado.")
+        return cpf
     
     def clean_cep(self):
         cep = self.cleaned_data.get('cep')

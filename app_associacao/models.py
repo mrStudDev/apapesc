@@ -87,7 +87,7 @@ class IntegrantesModel(models.Model):
     email = models.EmailField(
         blank=True, 
         null=True, 
-        verbose_name="E-mail"
+        verbose_name="E-mail Profissonal"
     )
     foto = models.ImageField(
         upload_to='fotos_associados/', 
@@ -500,7 +500,9 @@ class ReparticoesModel(models.Model):
         MunicipiosModel,
         max_length=100, 
         default="", 
-        blank=True
+        blank=True,
+        related_name="municipios_circunscricao",
+        verbose_name="Municipios Circinscrição"
     )
     # Datas
     data_abertura = models.DateField(

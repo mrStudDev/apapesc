@@ -26,176 +26,123 @@
 
         <!-- Vinculos do Associado -->
         <h2 class="text-lg font-bold mb-4  py-4">Vículos do Associado</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Unidade ASSOCIAÇÂO -->
-            <div>
-                <label for="id_associacao" class="block text-sm font-medium text-gray-700 mb-1">Associação</label>
-                <select
-                    name="associacao"
-                    id="id_associacao"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                <option value="" {% if not form.associacao.value %}selected{% endif %}>Selecione a Associação</option>
-                {% for choice in form.associacao.field.queryset %}
-                    <option value="{{ choice.id }}" {% if choice.id == form.associacao.value %}selected{% endif %}>
-                        {{ choice.nome_fantasia }}
-                    </option>
-                {% endfor %}
-                </select>
-                {% for error in form.associacao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Repartição -->
-            <div>
-                <label for="id_reparticao" class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
-                <select
-                    name="{{ form.reparticao.name }}" 
-                    id="{{ form.reparticao.id_for_label }}"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value="{{ form.reparticao.value|default:'' }}"
-                >
-                <option value="" {% if not form.reparticao.value %}selected{% endif %}>Selecione a Repartição</option>
-                {% for choice in form.reparticao.field.queryset %}
-                    <option value="{{ choice.id }}" {% if choice.id == form.reparticao.value %}selected{% endif %}>
-                        {{ choice.nome_reparticao }}
-                    </option>
-                {% endfor %}
-            </select>
-                {% for error in form.reparticao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Município de Circunscrição  -->
-            <div>
-                <label for="id_municipio_circunscricao" class="block text-sm font-medium text-gray-700 mb-1">Município de Circusncrição /Atuação</label>
-                <select 
-                name="{{ form.municipio_circunscricao.name }}" 
-                id="{{ form.municipio_circunscricao.id_for_label }}"
-                class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                <option value="" {% if not form.municipio_circunscricao.value %}selected{% endif %}>Selecione o Município</option>
-                {% for choice in form.municipio_circunscricao.field.queryset %}
-                    <option value="{{ choice.id }}" {% if choice.id == form.municipio_circunscricao.value %}selected{% endif %}>
-                        {{ choice.municipio }}
-                    </option>
-                {% endfor %}
-            </select>
-                {% for error in form.municipio_circunscricao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Campo Data Da Filiação -->
-            <div>
-                <label for="id_data_filiacao" class="block text-sm font-medium text-gray-700 mb-1">Data da Filiação</label>
-                <input
-                    type="date"
-                    name="{{ form.data_filiacao.name }}"
-                    id="id_data_filiacao"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value="{{ form.data_filiacao.value|default:'' }}"
-                >
-                {% for error in form.data_filiacao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>                                                                              
-        </div>
-        <br><hr>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            <!-- Celular -->
-            <div>
-                <label for="id_celular" class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
-                <input
-                    type="text"
-                    name="{{ form.celular.name }}"
-                    id="id_celular"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="(48)99999-9999"
-                    value="{{ form.celular.value|default:'' }}"
-                    oninput="mascaraTelefone(this)"
-                >
-                {% for error in form.celular.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Celular Correspondência -->
-            <div>
-                <label for="id_celular_correspondencia" class="block text-sm font-medium text-gray-700 mb-1">Celular Correspondências</label>
-                <input
-                    type="text"
-                    name="{{ form.celular_correspondencia.name }}"
-                    id="id_celular_correspondencia"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="(48)99999-9999"
-                    value="{{ form.celular_correspondencia.value|default:'' }}"
-                    oninput="mascaraTelefone(this)"
-                >
-                {% for error in form.celular_correspondencia.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>            
+            <!--Dados Principais -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Associação1 -->
+                <div class="mb-4">
+                    <label for="{{ form.associacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.associacao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.associacao }}
+                    </div>
+                    {% for error in form.associacao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
 
-            <!-- CPF -->
-            <div>
-                <label for="id_cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-                <input
-                    type="text"
-                    name="{{ form.cpf.name }}"
-                    id="id_cpf"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="000.000.000-00"
-                    value="{{ form.cpf.value|default:'' }}"
-                    oninput="mascaraCPF(this)"
-                >
-                {% for error in form.cpf.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Senha Gov -->
-            <div>
-                <label for="id_senha_gov" class="block text-sm font-medium text-gray-700 mb-1">Senha Gov</label>
-                <input
-                    type="text"
-                    name="{{ form.senha_gov.name }}"
-                    id="id_senha_gov"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Senha Gov"
-                    value="{{ form.senha_gov.value|default:'' }}"
-                >
-                {% for error in form.senha_gov.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- E-mail -->
-            <div>
-                <label for="id_email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                <input
-                    type="email"
-                    name="{{ form.email.name }}"
-                    id="id_email"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-blue-300 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value="{{ form.initial.email|default:form.email.value|default:'' }}"
-                    readonly
-                >
-                {% for error in form.email.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>            
-            <!-- Senha Google -->
-            <div>
-                <label for="id_senha_google" class="block text-sm font-medium text-gray-700 mb-1">Senha Google</label>
-                <input
-                    type="text"
-                    name="{{ form.senha_google.name }}"
-                    id="id_senha_google"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Senha Google"
-                    value="{{ form.senha_google.value|default:'' }}"
-                >
-                {% for error in form.senha_google.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
+                <div class="mb-4">
+                    <label for="{{ form.reparticao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.reparticao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.reparticao }}
+                    </div>
+                    {% for error in form.reparticao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.municipio_circunscricao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.municipio_circunscricao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.municipio_circunscricao }}
+                    </div>
+                    {% for error in form.municipio_circunscricao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                
+                <div class="mb-4">
+                    <label for="{{ form.data_filiacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.data_filiacao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.data_filiacao }}
+                    </div>
+                    {% for error in form.data_filiacao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.cpf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.cpf.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.cpf }}
+                    </div>
+                    <small class="text-gray-400 text-xs mt-1"> Obrigatório</small>
+                    {% for error in form.cpf.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.celular.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.celular }}
+                    </div>
+                    <small class="text-gray-400 text-xs mt-1"> Obrigatório</small>
+                    {% for error in form.celular.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.celular_correspondencia.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.celular_correspondencia.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.celular_correspondencia }}
+                    </div>
+                    {% for error in form.celular_correspondencia.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.email.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.email }}
+                    </div>
+                    {% for error in form.email.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.senha_gov.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.senha_gov.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.senha_gov }}
+                    </div>
+                    {% for error in form.senha_gov.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.senha_google.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.senha_google.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.senha_google }}
+                    </div>
+                    {% for error in form.senha_google.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>             
             </div>
             <button
                 type="submit"

@@ -1,1072 +1,753 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block title %}Editar Associado{% endblock title %}
+
+
 {% block edit_associado %}
 <!-- Navbar (já configurada, incluímos no topo) -->
 {% include 'components/navbar_associacao.html' %}
-
 <div class="container mx-auto mt-8 bg-gray-100" style="max-width: 980px;">
     <h1 class="text-2xl font-bold mb-4 text-center py-2">Editar Associado</h1>
     <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded shadow-md">
         {% csrf_token %}
         {{ form.errors }}
+        {% if form.non_field_errors %}
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
         <!-- Informações Pessoais -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <!-- Exibir o nome do usuário selecionado -->
             <h2 class="text-xl font-bold mb-4">
                 {{ associado.user.get_full_name }}
-                <hr class="border-t-4 rounded-lg my-6">
+            <hr class="border-t-4 rounded-lg my-6">
             </h2>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-700 mb-1">
-                    Usuário selecionado: Username | Nome | Email Pessoal
+                Usuário selecionado: Username | Nome | Email Pessoal
                 </label>
                 <div class="bg-gray-100 p-2 rounded-md">
                     <span class="text-gray-500">{{ associado.user.username }}</span> 
-                    | <span class="text-green-500">{{ associado.user.get_full_name }}</span>
-                    | <span class="text-blue-500">{{ associado.user.email }}</span>
+                    <span class="text-green-500">{{ associado.user.get_full_name }}</span>
+                    <span class="text-blue-500">{{ associado.user.email }}</span>
                 </div>
             </div>
         </div>
-        <!-- Vinculos do Associado -->
-        <h2 class="text-lg font-bold mb-4">Vículos do Associado</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Unidade Associação -->
-            <div>
-                <label for="id_associacao" class="block text-sm font-medium text-gray-700 mb-1">Associação</label>
-                <select
-                    name="associacao"
-                    id="id_associacao"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    {% for choice in form.associacao.field.choices %}
-                        <option value="{{ choice.0 }}" {% if choice.0 == form.associacao.value %}selected{% endif %}>
-                            {{ choice.1 }}
-                        </option>
-                    {% endfor %}
-                </select>
-                {% for error in form.associacao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Repartição -->
-            <div>
-                <label for="id_reparticao" class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
-                <select
-                    name="reparticao"
-                    id="id_reparticao"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    {% for choice in form.reparticao.field.choices %}
-                        <option value="{{ choice.0 }}" {% if choice.0 == form.reparticao.value %}selected{% endif %}>
-                            {{ choice.1 }}
-                        </option>
-                    {% endfor %}
-                </select>
-                {% for error in form.reparticao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Município de Circunscrição  -->
-            <div>
-                <label for="id_municipio_circunscricao" class="block text-sm font-medium text-gray-700 mb-1">Município de Circusncrição /Atuação</label>
-                <select
-                    name="municipio_circunscricao"
-                    id="id_municipio_circunscricao"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    {% for choice in form.municipio_circunscricao.field.choices %}
-                        <option value="{{ choice.0 }}" {% if choice.0 == form.municipio_circunscricao.value %}selected{% endif %}>
-                            {{ choice.1 }}
-                        </option>
-                    {% endfor %}
-                </select>
-                {% for error in form.municipio_circunscricao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Campo Data Da Filiação -->
-            <div>
-                <label for="id_data_filiacao" class="block text-sm font-medium text-gray-700 mb-1">Data da Filiação</label>
-                <input
-                    type="date"
-                    name="{{ form.data_filiacao.name }}"
-                    id="id_data_filiacao"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value="{{ form.data_filiacao.value|date:'Y-m-d' }}"
-                >
-                {% for error in form.data_filiacao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>                  
-            <!-- Status  -->
-            <div>
-                <label for="id_status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select
-                    name="status"
-                    id="id_status"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    {% for choice in form.status.field.choices %}
-                        <option value="{{ choice.0 }}" {% if choice.0 == form.status.value %}selected{% endif %}>
-                            {{ choice.1 }}
-                        </option>
-                    {% endfor %}
-                </select>
-                {% for error in form.status.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Campo Data Da Filiação -->
-            <div>
-                <label for="id_data_desfiliacao" class="block text-sm font-medium text-gray-700 mb-1">Data da Desfiliação</label>
-                <input
-                    type="date"
-                    name="{{ form.data_desfiliacao.name }}"
-                    id="id_data_desfiliacao"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-red-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value="{{ form.data_desfiliacao.value|date:'Y-m-d' }}"
-                >
-                {% for error in form.data_desfiliacao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>                                                               
-        </div>        
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
-            <!-- Celular -->
-            <div>
-                <label for="id_celular" class="block text-sm font-medium text-gray-700 mb-1">Celular</label>
-                <input
-                    type="text"
-                    name="{{ form.celular.name }}"
-                    id="id_celular"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="(48)99999-9999"
-                    value="{{ form.celular.value|default:'' }}"
-                    oninput="mascaraTelefone(this)"
-                >
-                {% for error in form.celular.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Celular Correspondência -->
-            <div>
-                <label for="id_celular_correspondencia" class="block text-sm font-medium text-gray-700 mb-1">Celular Correspondências</label>
-                <input
-                    type="text"
-                    name="{{ form.celular_correspondencia.name }}"
-                    id="id_celular_correspondencia"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="(48)99999-9999"
-                    value="{{ form.celular_correspondencia.value|default:'' }}"
-                    oninput="mascaraTelefone(this)"
-                >
-                {% for error in form.celular_correspondencia.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>            
-
-            <!-- CPF -->
-            <div>
-                <label for="id_cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF</label>
-                <input
-                    type="text"
-                    name="{{ form.cpf.name }}"
-                    id="id_cpf"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="000.000.000-00"
-                    value="{{ form.cpf.value|default:'' }}"
-                    oninput="mascaraCPF(this)"
-                >
-                {% for error in form.cpf.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Senha Gov -->
-            <div>
-                <label for="id_senha_gov" class="block text-sm font-medium text-gray-700 mb-1">Senha Gov</label>
-                <input
-                    type="text"
-                    name="{{ form.senha_gov.name }}"
-                    id="id_senha_gov"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Senha Gov"
-                    value="{{ form.senha_gov.value|default:'' }}"
-                >
-                {% for error in form.senha_gov.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- E-mail -->
-            <div>
-                <label for="id_email" class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
-                <input
-                    type="email"
-                    name="{{ form.email.name }}"
-                    id="id_email"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-300 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="exemplo@email.com"
-                    value="{{ form.email.value|default:'' }}"
-                    readonly
-                >
-                {% for error in form.email.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>            
-            <!-- Senha Google -->
-            <div>
-                <label for="id_senha_google" class="block text-sm font-medium text-gray-700 mb-1">Senha Google</label>
-                <input
-                    type="text"
-                    name="{{ form.senha_google.name }}"
-                    id="id_senha_google"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-green-500 font-bold leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Senha Google"
-                    value="{{ form.senha_google.value|default:'' }}"
-                >
-                {% for error in form.senha_google.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-        </div>
-        <br><hr>
-
-        <h2 class="text-lg font-bold mb-4 py-4">Documento de Identificação RG</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            
-            <!-- RG -->
-            <div>
-                <label for="id_rg_numero" class="block text-sm font-medium text-gray-700 mb-1">Número do RG</label>
-                <input
-                    type="text"
-                    name="{{ form.rg_numero.name }}"
-                    id="id_rg_numero"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Digite o número do RG"
-                    value="{{ form.rg_numero.value|default:'' }}"
-                >
-                {% for error in form.rg_numero.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-
-            <!-- Órgão Emissor -->
-            <div>
-                <label for="id_rg_orgao" class="block text-sm font-medium text-gray-700 mb-1">Órgão Emissor RG</label>
-                <select
-                    name="rg_orgao"
-                    id="id_rg_orgao"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                    {% for choice in form.rg_orgao.field.choices %}
-                        <option value="{{ choice.0 }}" {% if choice.0 == form.rg_orgao.value %}selected{% endif %}>
-                            {{ choice.1 }}
-                        </option>
-                    {% endfor %}
-                </select>
-                {% for error in form.rg_orgao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Campo Data de Emissão -->
-            <div>
-                <label for="id_rg_data_emissao" class="block text-sm font-medium text-gray-700 mb-1">Data de Emissão / Expedição</label>
-                <input
-                    type="date"
-                    name="{{ form.rg_data_emissao.name }}"
-                    id="id_rg_data_emissao"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value="{{ form.rg_data_emissao.value|date:'Y-m-d' }}"
-                >
-                {% for error in form.rg_data_emissao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>            
-            <div>
-                <label for="id_data_nascimento" class="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
-                <input
-                    type="date"
-                    name="{{ form.data_nascimento.name }}"
-                    id="id_data_nascimento"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value="{{ form.data_nascimento.value|date:'Y-m-d' }}"
-                >
-                {% for error in form.data_nascimento.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Campo Naturalidade -->
-            <div>
-                <label for="id_naturalidade" class="block text-sm font-medium text-gray-700 mb-1">Naturalidade / Nascimento</label>
-                <input
-                    type="text"
-                    name="{{ form.naturalidade.name }}"
-                    id="id_naturalidade"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Cidade de origem"
-                    value="{{ form.naturalidade.value|default:'' }}"
-                >
-                {% for error in form.naturalidade.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>            
-        </div>
-        <br><hr>
-        <h2 class="text-lg font-bold mb-4 py-4">Carteira de Habilitação</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Carteira de Habilitação - CNH-->
-            <div>
-                <label for="id_cnh" class="block text-sm font-medium text-gray-700 mb-1">Número da CNH</label>
-                <input
-                    type="text"
-                    name="{{ form.cnh.name }}"
-                    id="id_cnh"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Digite o número do CTPS"
-                    value="{{ form.cnh.value|default:'' }}"
-                >
-                {% for error in form.cnh.errors %}
-                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-            <!-- Campo Data Emissão da CNH -->
-            <div>
-                <label for="id_cnh_data_emissao" class="block text-sm font-medium text-gray-700 mb-1">Data Emissão CNH</label>
-                <input
-                    type="date"
-                    name="{{ form.cnh_data_emissao.name }}"
-                    id="id_cnh_data_emissao"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    value="{{ form.cnh_data_emissao.value|date:'Y-m-d' }}"
-                >
-                {% for error in form.cnh_data_emissao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-        </div>
-        <br><hr>          
-        <!-- Dados Pessoais -->
-        <div class="mt-6">
-            <h2 class="text-lg font-bold mb-4">Dados Pessoais</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Exibir a foto atual -->
-                {% if form.instance.foto %}
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Foto Atual</label>
-                        <img src="{{ form.instance.foto.url }}" alt="Foto atual" class="w-24 h-24 object-cover rounded-md">
+        <div class="border-b border-gray-300 pb-6 mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Vínculos</h2>
+            <!--Dados Principais -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Associação1 -->
+                <div class="mb-4">
+                    <label for="{{ form.associacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.associacao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.associacao }}
                     </div>
-                {% endif %}
-                <!-- Foto -->                
-                <div>
-                    <label for="id_foto" class="block text-sm font-medium text-gray-700 mb-1">Foto</label>
-                    <input
-                        type="file"
-                        name="{{ form.foto.name }}"
-                        id="id_foto"
-                        class="border rounded-md w-full py-2 px-3"
-                        accept="image/*"
-                    >
+                    {% for error in form.associacao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.reparticao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.reparticao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.reparticao }}
+                    </div>
+                    {% for error in form.reparticao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.municipio_circunscricao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.municipio_circunscricao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.municipio_circunscricao }}
+                    </div>
+                    {% for error in form.municipio_circunscricao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                
+                <div class="mb-4">
+                    <label for="{{ form.data_filiacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.data_filiacao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.data_filiacao }}
+                    </div>
+                    {% for error in form.data_filiacao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.cpf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.cpf.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.cpf }}
+                    </div>
+                    <small class="text-gray-400 text-xs mt-1"> Obrigatório</small>
+                    {% for error in form.cpf.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.celular.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.celular }}
+                    </div>
+                    <small class="text-gray-400 text-xs mt-1"> Obrigatório</small>
+                    {% for error in form.celular.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.celular_correspondencia.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.celular_correspondencia.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.celular_correspondencia }}
+                    </div>
+                    {% for error in form.celular_correspondencia.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.email.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.email }}
+                    </div>
+                    {% for error in form.email.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.senha_gov.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.senha_gov.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.senha_gov }}
+                    </div>
+                    {% for error in form.senha_gov.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.senha_google.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.senha_google.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.senha_google }}
+                    </div>
+                    {% for error in form.senha_google.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <!-- Status do Associado  -->
+                <div class="mb-4">
+                    <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.status.label }}
+                    </label>
+                    <small>Determine o Status </small>
+                    <div class="mt-1">
+                        {{ form.status }}
+                    </div>
+                    {% for error in form.status.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                
+            </div>
+            <!--Daocumento RG  -->
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Documento RG</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                
+                <div class="mb-4">
+                    <label for="{{ form.rg_numero.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.rg_numero.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.rg_numero }}
+                    </div>
+                    {% for error in form.rg_numero.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.rg_orgao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.rg_orgao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.rg_orgao }}
+                    </div>
+                    {% for error in form.rg_orgao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.rg_data_emissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.rg_data_emissao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.rg_data_emissao }}
+                    </div>
+                    {% for error in form.rg_data_emissao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div> 
+                <div class="mb-4">
+                    <label for="{{ form.naturalidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.naturalidade.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.naturalidade }}
+                    </div>
+                    {% for error in form.naturalidade.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.data_nascimento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.data_nascimento.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.data_nascimento }}
+                    </div>
+                    {% for error in form.data_nascimento.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                
+                                                                  
+            </div> 
+            <!--Documento Habilitação  -->
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Documento CNH</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label for="{{ form.cnh.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.cnh.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.cnh }}
+                    </div>
+                    {% for error in form.cnh.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.cnh_data_emissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.cnh_data_emissao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.cnh_data_emissao }}
+                    </div>
+                    {% for error in form.cnh_data_emissao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                           
+            </div> 
+
+            <!--Dados Complementares -->
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Dados Complementares</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label for="{{ form.foto.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.foto.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.foto }}
+                    </div>
                     {% for error in form.foto.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}                    
+                    {% endfor %}
                 </div>
-                <!-- Campo Sexo Biológico -->
-                <div>
-                    <label for="id_sexo_biologico" class="block text-sm font-medium text-gray-700 mb-1">Sexo Biológico</label>
-                    <select
-                        name="sexo_biologico"
-                        id="id_sexo_biologico"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.sexo_biologico.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.sexo_biologico.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                <div class="mb-4">
+                    <label for="{{ form.sexo_biologico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.sexo_biologico.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.sexo_biologico }}
+                    </div>
                     {% for error in form.sexo_biologico.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- Campo Etnia-->
-                <div>
-                    <label for="id_etnia" class="block text-sm font-medium text-gray-700 mb-1">Etnia</label>
-                    <select
-                        name="etnia"
-                        id="id_etnia"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.etnia.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.etnia.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                <div class="mb-4">
+                    <label for="{{ form.etnia.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.etnia.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.etnia }}
+                    </div>
                     {% for error in form.etnia.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- Campo Escolaridade-->
-                <div>
-                    <label for="id_escolaridade" class="block text-sm font-medium text-gray-700 mb-1">Escolaridade</label>
-                    <select
-                        name="escolaridade"
-                        id="id_escolaridade"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.escolaridade.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.escolaridade.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                <div class="mb-4">
+                    <label for="{{ form.escolaridade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.escolaridade.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.escolaridade }}
+                    </div>
                     {% for error in form.escolaridade.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>
-                <!-- Campo Estado Civil -->
-                <div>
-                    <label for="id_estado_civil" class="block text-sm font-medium text-gray-700 mb-1">Estado Civil</label>
-                    <select
-                        name="estado_civil"
-                        id="id_estado_civil"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.estado_civil.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.estado_civil.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                </div>   
+                <div class="mb-4">
+                    <label for="{{ form.estado_civil.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.estado_civil.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.estado_civil }}
+                    </div>
                     {% for error in form.estado_civil.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- Campo Profissão -->
-                <div class="py-2">
-                    <label for="id_profissao" class="block text-sm font-medium text-gray-700 mb-1">Profissão</label>
-                    <select
-                        name="{{ form.profissao.name }}"
-                        id="{{ form.profissao.id_for_label }}"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="" {% if not form.profissao.value %}selected{% endif %}>Selecione uma Profissão</option>
-                        {% for choice in form.profissao.field.queryset %}
-                            <option value="{{ choice.id }}" {% if choice.id|stringformat:"s" == form.profissao.value|stringformat:"s" %}selected{% endif %}>
-                                {{ choice.nome }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                <div class="mb-4">
+                    <label for="{{ form.profissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.profissao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.profissao }}
+                    </div>
                     {% for error in form.profissao.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- Campo Nome Do Pai -->
-                <div>
-                    <label for="id_nome_pai" class="block text-sm font-medium text-gray-700 mb-1">Nome do Pai</label>
-                    <input
-                        type="text"
-                        name="{{ form.nome_pai.name }}"
-                        id="id_nome_pai"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Nome do Pai"
-                        value="{{ form.nome_pai.value|default:'' }}"
-                    >
-                    {% for error in form.nome_pai.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <!-- Campo Nome Da Mãe -->
-                <div>
-                    <label for="id_nome_mae" class="block text-sm font-medium text-gray-700 mb-1">Nome da Mãe</label>
-                    <input
-                        type="text"
-                        name="{{ form.nome_mae.name }}"
-                        id="id_nome_mae"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Nome da Mãe"
-                        value="{{ form.nome_mae.value|default:'' }}"
-                    >
+                <div class="mb-4">
+                    <label for="{{ form.nome_mae.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.nome_mae.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.nome_mae }}
+                    </div>
                     {% for error in form.nome_mae.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>
+                </div>    
+                <div class="mb-4">
+                    <label for="{{ form.nome_pai.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.nome_pai.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.nome_pai }}
+                    </div>
+                    {% for error in form.nome_pai.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                                                                               
             </div>
-            <br><hr>
-            <h2 class="text-lg font-bold mb-4 py-4">Informações Singulares</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Informações: Recolhe INSS -->
-                <div>
-                    <label for="id_recolhe_inss" class="block text-sm font-medium text-gray-700 mb-1">Recolhe INSS?</label>
-                    <select
-                        name="recolhe_inss"
-                        id="id_recolhe_inss"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.recolhe_inss.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.recolhe_inss.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
+            <!--Dados Dingulares de Atividade -->
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Dados Singulares de Atividade</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label for="{{ form.recolhe_inss.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.recolhe_inss.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.recolhe_inss }}
+                    </div>
                     {% for error in form.recolhe_inss.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- Informações: Recbe Seguro Defeso? -->
-                <div>
-                    <label for="id_recebe_seguro" class="block text-sm font-medium text-gray-700 mb-1">Recebe Seguro Defeso?</label>
-                    <select
-                        name="recebe_seguro"
-                        id="id_recebe_seguro"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.recebe_seguro.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.recebe_seguro.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                <div class="mb-4">
+                    <label for="{{ form.recebe_seguro.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.recebe_seguro.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.recebe_seguro }}
+                    </div>
                     {% for error in form.recebe_seguro.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>                
-            </div>
-            <br><hr>
-            <h2 class="text-lg font-bold mb-4 py-4">Identificadores Oficiais</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- NIT -->
-                <div>
-                    <label for="id_nit" class="block text-sm font-medium text-gray-700 mb-1">Número do NIT</label>
-                    <input
-                        type="text"
-                        name="{{ form.nit.name }}"
-                        id="id_nit"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite o número do NIT"
-                        value="{{ form.nit.value|default:'' }}"
-                    >
+                </div>                    
+            </div> 
+            <!--Documentos Oficiais - Cidadão -->
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Documentows e Números Oficiais</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label for="{{ form.nit.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.nit.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.nit }}
+                    </div>
                     {% for error in form.nit.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>
-                <!-- PIS -->
-                <div>
-                    <label for="id_pis" class="block text-sm font-medium text-gray-700 mb-1">Número do PIS</label>
-                    <input
-                        type="text"
-                        name="{{ form.pis.name }}"
-                        id="id_pis"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite o número do PIS"
-                        value="{{ form.pis.value|default:'' }}"
-                    >
+                </div>    
+                <div class="mb-4">
+                    <label for="{{ form.pis.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.pis.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.pis }}
+                    </div>
                     {% for error in form.pis.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>
-                <!-- CEI -->
-                <div>
-                    <label for="id_cei" class="block text-sm font-medium text-gray-700 mb-1">Número do CEI</label>
-                    <input
-                        type="text"
-                        name="{{ form.cei.name }}"
-                        id="id_cei"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite o número do CEI"
-                        value="{{ form.cei.value|default:'' }}"
-                    >
-                    {% for error in form.cei.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <!-- CAEPEF -->
-                <div>
-                    <label for="id_caepef" class="block text-sm font-medium text-gray-700 mb-1">Número do CAEPEF</label>
-                    <input
-                        type="text"
-                        name="{{ form.caepef.name }}"
-                        id="id_caepef"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite o número do CAEPEF"
-                        value="{{ form.caepef.value|default:'' }}"
-                    >
+                </div> 
+                <div class="mb-4">
+                    <label for="{{ form.caepef.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.caepef.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.caepef }}
+                    </div>
                     {% for error in form.caepef.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                    </div>
+                <div class="mb-4">
+                    <label for="{{ form.cei.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.cei.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.cei }}
+                    </div>
+                    {% for error in form.cei.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- TITULO ELEITOR-->
-                <div>
-                    <label for="id_titulo_eleitor" class="block text-sm font-medium text-gray-700 mb-1">Título de Eleitor</label>
-                    <input
-                        type="text"
-                        name="{{ form.titulo_eleitor.name }}"
-                        id="id_titulo_eleitor"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite o número do Tútulo de Eleitor"
-                        value="{{ form.titulo_eleitor.value|default:'' }}"
-                    >
+                <div class="mb-4">
+                    <label for="{{ form.titulo_eleitor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.titulo_eleitor.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.titulo_eleitor }}
+                    </div>
                     {% for error in form.titulo_eleitor.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>                                                                 
+                </div>              
             </div>
-            <br><hr>
-            <h2 class="text-lg font-bold mb-4 py-4">Registro de Pescador(a)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- RGP-->
-                <div>
-                    <label for="id_rgp" class="block text-sm font-medium text-gray-700 mb-1">Registro Geral de Pescador</label>
-                    <input
-                        type="text"
-                        name="{{ form.rgp.name }}"
-                        id="id_rgp"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite o número do RGP"
-                        value="{{ form.rgp.value|default:'' }}"
-                    >
+            <!--Documentos Profissionais RGP -->
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Documentação Profissional - RGP</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label for="{{ form.rgp.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.rgp.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.rgp }}
+                    </div>
                     {% for error in form.rgp.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- Mapa-->
-                <div>
-                    <label for="id_rgp_mpa" class="block text-sm font-medium text-gray-700 mb-1">Mapa</label>
-                    <input
-                        type="text"
-                        name="{{ form.rgp_mpa.name }}"
-                        id="id_rgp_mpa"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite o MAPA do RGP"
-                        value="{{ form.rgp_mpa.value|default:'' }}"
-                    >
-                    {% for error in form.rgp_mpa.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <!-- Campo RGP Data de Emissão -->
-                <div>
-                    <label for="id_rgp_data_emissao" class="block text-sm font-medium text-gray-700 mb-1">Data de Emissão / Expedição</label>
-                    <input
-                        type="date"
-                        name="{{ form.rgp_data_emissao.name }}"
-                        id="id_rgp_data_emissao"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value="{{ form.rgp_data_emissao.value|date:'Y-m-d' }}"
-                    >
+                <div class="mb-4">
+                    <label for="{{ form.rgp_data_emissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.rgp_data_emissao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.rgp_data_emissao }}
+                    </div>
                     {% for error in form.rgp_data_emissao.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- Campo RGP Data Primeiro Registro -->
-                <div>
-                    <label for="id_primeiro_registro" class="block text-sm font-medium text-gray-700 mb-1">Data Primeiro Registro</label>
-                    <input
-                        type="date"
-                        name="{{ form.primeiro_registro.name }}"
-                        id="id_primeiro_registro"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value="{{ form.primeiro_registro.value|date:'Y-m-d' }}"
-                    >
+                <div class="mb-4">
+                    <label for="{{ form.primeiro_registro.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.primeiro_registro.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.primeiro_registro }}
+                    </div>
                     {% for error in form.primeiro_registro.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>                  
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.rgp_mpa.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.rgp_mpa.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.rgp_mpa }}
+                    </div>
+                    {% for error in form.rgp_mpa.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
             </div>
-            <br><hr>
-            <h2 class="text-lg font-bold mb-4 py-4">Carteira de Trabalho</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Carteira de Trabalho - CTPS-->
-                <div>
-                    <label for="id_ctps" class="block text-sm font-medium text-gray-700 mb-1">Número da CTPS</label>
-                    <input
-                        type="text"
-                        name="{{ form.ctps.name }}"
-                        id="id_ctps"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite o número do CTPS"
-                        value="{{ form.ctps.value|default:'' }}"
-                    >
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Documentação Trabalho - CTPS</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label for="{{ form.ctps.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.ctps.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.ctps }}
+                    </div>
                     {% for error in form.ctps.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- Carteira de Trabalho Série -->
-                <div>
-                    <label for="id_ctps_serie" class="block text-sm font-medium text-gray-700 mb-1">Série CTPS</label>
-                    <input
-                        type="text"
-                        name="{{ form.ctps_serie.name }}"
-                        id="id_ctps_serie"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Série CTPS"
-                        value="{{ form.ctps_serie.value|default:'' }}"
-                    >
+                <div class="mb-4">
+                    <label for="{{ form.ctps_serie.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.ctps_serie.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.ctps_serie }}
+                    </div>
                     {% for error in form.ctps_serie.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- Campo Data Emissão da CTPS -->
-                <div>
-                    <label for="id_ctps_data_emissao" class="block text-sm font-medium text-gray-700 mb-1">Data Emissão CTPS</label>
-                    <input
-                        type="date"
-                        name="{{ form.ctps_data_emissao.name }}"
-                        id="id_ctps_data_emissao"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        value="{{ form.ctps_data_emissao.value|date:'Y-m-d' }}"
-                    >
+                <div class="mb-4">
+                    <label for="{{ form.ctps_data_emissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.ctps_data_emissao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.ctps_data_emissao }}
+                    </div>
                     {% for error in form.ctps_data_emissao.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>
-                <!-- CTPS - UF  -->
-                <div>
-                    <label for="id_ctps_uf" class="block text-sm font-medium text-gray-700 mb-1">CTPS UF</label>
-                    <select
-                        name="ctps_uf"
-                        id="id_ctps_uf"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.ctps_uf.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.ctps_uf.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                    </div>
+                <div class="mb-4">
+                    <label for="{{ form.ctps_uf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.ctps_uf.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.ctps_uf }}
+                    </div>
                     {% for error in form.ctps_uf.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>                                                           
+                </div>                    
             </div>
-            <br><hr>
-            
-            <h2 class="text-lg font-bold mb-4 py-4">Espécies e Quantidades <span class="text-yellow-500">0.000,00</span></h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Espécie 1 -->
-                <div>
-                    <label for="id_especie1" class="block text-sm font-medium text-gray-700 mb-1">Espécie 1 - Ex: Pampo</label>
-                    <select
-                        name="{{ form.especie1.name }}"
-                        id="id_especie1"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.especie1.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.especie1.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    {% for error in form.especie1.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div>
-                    <label for="id_quantidade1" class="block text-sm font-medium text-gray-700 mb-1">Quantidade 1 - Ex: 190,00</label>
-                    <input
-                        type="text"
-                        name="{{ form.quantidade1.name }}"
-                        id="id_quantidade1"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite a quantidade em Kg"
-                        value="{{ form.quantidade1.value|default:'' }}"
-                    ><small>Use "<strong>.</strong>" para milhares e "<strong>,</strong>" para dezenas.</small>
-                    {% for error in form.quantidade1.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <!-- Espécie 2 -->
-                <div>
-                    <label for="id_especie2" class="block text-sm font-medium text-gray-700 mb-1">Espécie 2 - Ex: Abrótea</label>
-                    <select
-                        name="{{ form.especie2.name }}"
-                        id="id_especie2"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.especie2.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.especie2.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    {% for error in form.especie2.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div>
-                    <label for="id_quantidade2" class="block text-sm font-medium text-gray-700 mb-1">Quantidade 2 - Ex: 3.800,00 Kg</label>
-                    <input
-                        type="text"
-                        name="{{ form.quantidade2.name }}"
-                        id="id_quantidade2"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite a quantidade em Kg"
-                        value="{{ form.quantidade2.value|default:'' }}"
-                    >
-                    {% for error in form.quantidade2.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <!-- Espécie 3 -->
-                <div>
-                    <label for="id_especie3" class="block text-sm font-medium text-gray-700 mb-1">Espécie 3 - Ex: Tainha</label>
-                    <select
-                        name="{{ form.especie3.name }}"
-                        id="id_especie3"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.especie3.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.especie3.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    {% for error in form.especie3.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div>
-                    <label for="id_quantidade3" class="block text-sm font-medium text-gray-700 mb-1">Quantidade 3 - Ex: 4.100,00 Kg</label>
-                    <input
-                        type="text"
-                        name="{{ form.quantidade3.name }}"
-                        id="id_quantidade3"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite a quantidade em Kg"
-                        value="{{ form.quantidade3.value|default:'' }}"
-                    >
-                    {% for error in form.quantidade3.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <!-- Espécie 4-->
-                <div>
-                    <label for="id_especie4" class="block text-sm font-medium text-gray-700 mb-1">Espécie 4 - Ex: Anchova</label>
-                    <select
-                        name="{{ form.especie4.name }}"
-                        id="id_especie4"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.especie4.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.especie4.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    {% for error in form.especie4.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div>
-                    <label for="id_quantidade4" class="block text-sm font-medium text-gray-700 mb-1">Quantidade 4 - Ex: 3.200,00 Kg</label>
-                    <input
-                        type="text"
-                        name="{{ form.quantidade4.name }}"
-                        id="id_quantidade4"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite a quantidade em Kg"
-                        value="{{ form.quantidade4.value|default:'' }}"
-                    >
-                    {% for error in form.quantidade4.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>                
-                <!-- Espécie 5-->
-                <div>
-                    <label for="id_especie5" class="block text-sm font-medium text-gray-700 mb-1">Espécie 5 - Ex: Robalo</label>
-                    <select
-                        name="{{ form.especie5.name }}"
-                        id="id_especie5"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.especie5.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.especie3.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    {% for error in form.especie5.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div>
-                    <label for="id_quantidade5" class="block text-sm font-medium text-gray-700 mb-1">Quantidade 5 - Ex: 300,00 Kg</label>
-                    <input
-                        type="text"
-                        name="{{ form.quantidade5.name }}"
-                        id="id_quantidade5"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite a quantidade em Kg"
-                        value="{{ form.quantidade5.value|default:'' }}"
-                    >
-                    {% for error in form.quantidade5.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                </div> 
-            </div>
-            
-
-            <!-- Endereço -->
-            <h2 class="text-lg font-bold mb-4  py-4">Endereço</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Campo Logradouro -->
-                <div>
-                    <label for="id_logradouro" class="block text-sm font-medium text-gray-700 mb-1">Logradouro</label>
-                    <input
-                        type="text"
-                        name="{{ form.logradouro.name }}"
-                        id="{{ form.logradouro.id_for_label }}"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Ex: Rua, Servidão, Travessa"
-                        value="{{ form.logradouro.value|default:'' }}"
-                    >
+            <!-- Seção Endereço do Associado -->
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Endereço</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="mb-4">
+                    <label for="{{ form.logradouro.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.logradouro.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.logradouro }}
+                    </div>
                     {% for error in form.logradouro.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>
-        
-                <!-- Campo Bairro -->
-                <div>
-                    <label for="id_bairro" class="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
-                    <input
-                        type="text"
-                        name="{{ form.bairro.name }}"
-                        id="{{ form.bairro.id_for_label }}"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite o bairro"
-                        value="{{ form.bairro.value|default:'' }}"
-                    >
+                </div> 
+                <div class="mb-4">
+                    <label for="{{ form.bairro.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.bairro.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.bairro }}
+                    </div>
                     {% for error in form.bairro.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-        
-                <!-- Campo Número -->
-                <div>
-                    <label for="id_numero" class="block text-sm font-medium text-gray-700 mb-1">Número</label>
-                    <input
-                        type="text"
-                        name="{{ form.numero.name }}"
-                        id="{{ form.numero.id_for_label }}"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite o número"
-                        value="{{ form.numero.value|default:'' }}"
-                    >
+                <div class="mb-4">
+                    <label for="{{ form.numero.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.numero.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.numero }}
+                    </div>
                     {% for error in form.numero.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-        
-                <!-- Campo Complemento -->
-                <div>
-                    <label for="id_complemento" class="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
-                    <input
-                        type="text"
-                        name="{{ form.complemento.name }}"
-                        id="{{ form.complemento.id_for_label }}"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Ex: Apto 101, Casa"
-                        value="{{ form.complemento.value|default:'' }}"
-                    >
+                <div class="mb-4">
+                    <label for="{{ form.complemento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.complemento.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.complemento }}
+                    </div>
                     {% for error in form.complemento.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- Campo CEP -->
-                <div>
-                    <label for="id_cep" class="block text-sm font-medium text-gray-700 mb-1">CEP</label>
-                    <input
-                        type="text"
-                        name="{{ form.cep.name }}"
-                        id="{{ form.cep.id_for_label }}"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="00000-000"
-                        value="{{ form.cep.value|default:'' }}"
-                        oninput="mascaraCEP(this)"
-                    >
+                <div class="mb-4">
+                    <label for="{{ form.cep.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.cep.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.cep }}
+                    </div>
                     {% for error in form.cep.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <!-- Campo Município -->
-                <div>
-                    <label for="id_municipio" class="block text-sm font-medium text-gray-700 mb-1">Município</label>
-                    <input
-                        type="text"
-                        name="{{ form.municipio.name }}"
-                        id="{{ form.municipio.id_for_label }}"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite o nome do município"
-                        value="{{ form.municipio.value|default:'' }}"
-                    >
+                <div class="mb-4">
+                    <label for="{{ form.municipio.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.municipio.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.municipio }}
+                    </div>
                     {% for error in form.municipio.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-        
-                <!-- Campo UF -->
-                <div>
-                    <label for="id_uf" class="block text-sm font-medium text-gray-700 mb-1">Estado (UF)</label>
-                    <select
-                        name="{{ form.uf.name }}"
-                        id="{{ form.uf.id_for_label }}"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        {% for choice in form.uf.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.uf.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
-                    </select>
+                <div class="mb-4">
+                    <label for="{{ form.uf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.uf.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.uf }}
+                    </div>
                     {% for error in form.uf.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
+                </div>                
+            </div>
+            <!-- Produção Anual  -->
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Endereço</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">        
+                <div class="mb-4">
+                    <label for="{{ form.especie1.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.especie1.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.especie1 }}
+                    </div>
+                    {% for error in form.status.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                    </div>
+                <div class="mb-4">
+                    <label for="{{ form.quantidade1.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.quantidade1.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.quantidade1 }}
+                    </div>
+                    {% for error in form.status.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div> 
+                <div class="mb-4">
+                    <label for="{{ form.especie2.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.especie2.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.especie2 }}
+                    </div>
+                    {% for error in form.status.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
                 </div>
+                <div class="mb-4">
+                    <label for="{{ form.quantidade2.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.quantidade2.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.quantidade2 }}
+                    </div>
+                    {% for error in form.status.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.especie3.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.especie3.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.especie3 }}
+                    </div>
+                    {% for error in form.status.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                    </div>
+                <div class="mb-4">
+                    <label for="{{ form.quantidade3.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.quantidade3.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.quantidade3 }}
+                    </div>
+                    {% for error in form.status.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div> 
+                <div class="mb-4">
+                    <label for="{{ form.especie4.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.especie4.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.especie4 }}
+                    </div>
+                    {% for error in form.status.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                    </div>
+                <div class="mb-4">
+                    <label for="{{ form.quantidade4.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.quantidade4.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.quantidade4 }}
+                    </div>
+                    {% for error in form.status.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.especie5.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.especie5.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.especie5 }}
+                    </div>
+                    {% for error in form.status.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.quantidade5.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.quantidade5.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.quantidade5 }}
+                    </div>
+                    {% for error in form.status.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                                                                            
             </div>
-            <br><hr>
-            <div>
-                {% include 'components/my_editor.html' %}
+            <div class="border-b border-gray-300 pb-6 mb-6">
+                   <h2 class="text-xl font-semibold text-gray-700 mb-4">Anotações</h2>
+                <!-- Campos da Seção 4 -->
+                <div class="mt-1 w-full" style="max-width: 100%; padding: 0; margin: 0;">
+                    {% include 'components/my_editor.html' %}
+                </div>   
+            </div>             
+            <!-- Botões de Ação -->
+            <div class="mt-8 flex justify-end space-x-4">
+                <a href="#" class="text-blue-500 hover:underline">
+                    Cancelar
+                </a>
+                <!-- Botão para salvar e ir para a página de detalhe -->
+                <button
+                    type="submit"
+                    name="save_and_view"
+                    value="1"
+                    class="bg-blue-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    Salvar e Visualizar
+                </button>
             </div>
-
-
-            <!-- Botão de ação -->
-            <button
-                type="submit"
-                name="save_and_view
-                value="1"
-                class="bg-blue-400 hover:bg-green-500 text-white font-medium text-xl py-2 px-4 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-300 shadow-sm transition-all duration-200">
-                Salvar e Visualizar
-            </button>
-
         </div>
-
-        {% if form.non_field_errors %}
-        <div class="text-red-500 text-xs mt-1">
-            {% for error in form.non_field_errors %}
-                <p class="text-red-500">{{ error }}</p>
-            {% endfor %}
-        </div>
-    {% endif %}
-    
     </form>
-    {% if messages %}
-        <div class="alert alert-success">
-            {% for message in messages %}
-                <p class="text-green-500">{{ message }}</p>
-            {% endfor %}
-        </div>
-    {% endif %}
-    {% if form.non_field_errors %}
-        <div class="text-red-500 text-xs mt-1">
-            {% for error in form.non_field_errors %}
-                <p class="text-red-500">{{ error }}</p>
-            {% endfor %}
-        </div>
-    {% endif %}    
 </div>
-
+{% include 'components/footer_associacao.html' %}
 <!-- CSS do Editor -->
 <link rel="stylesheet" href="{% static 'css/editor.css' %}">
 <!-- JS do Editor -->

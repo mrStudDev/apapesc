@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.utils.timezone import now
 from django.contrib.auth.models import User
 from app_associados.models import AssociadoModel
-from app_associacao.forms import IntegranteForm
+from app_associacao.forms import IntegranteForm, AssociacaoForm, ReparticaoForm
 from accounts.mixins import GroupPermissionRequiredMixin 
 from django.contrib.auth.models import Group
 from app_documentos.models import Documento
@@ -157,20 +157,27 @@ class AssociacaoDetailView(GroupPermissionRequiredMixin, DetailView):
 class AssociacaoCreateView(GroupPermissionRequiredMixin, CreateView):
     model = AssociacaoModel
     template_name = 'app_associacao/create_associacao.html'
-    fields = '__all__'
+    form_class = AssociacaoForm
     success_url = reverse_lazy('app_associacao:list_associacao')
     group_required = ['Superuser',]
 
     def form_valid(self, form):
-        self.object = form.save()
+        # Deixe o Django cuidar do salvamento do ManyToMany
+        response = super().form_valid(form)
+        # Aqui, `self.object` já foi salvo e o M2M (diretores) também
+        messages.success(self.request, "Associação salva com sucesso!")
 
+        # Lógica de redirecionamento
         if "save_and_continue" in self.request.POST:
+            messages.info(self.request, "Redirecionando para edição da associação.")
             return redirect('app_associacao:edit_associacao', pk=self.object.pk)
 
         if "save_and_view" in self.request.POST:
+            messages.info(self.request, "Redirecionando para visualização da associação.")
             return redirect('app_associacao:single_associacao', pk=self.object.pk)
-
-        return super().form_valid(form)
+        
+        # Se nenhum botão especial foi clicado, retorna o fluxo normal
+        return response
 
     def get_success_url(self):
         return reverse_lazy('app_associacao:single_associacao', kwargs={'pk': self.object.pk})  
@@ -178,10 +185,16 @@ class AssociacaoCreateView(GroupPermissionRequiredMixin, CreateView):
 class AssociacaoUpdateView(GroupPermissionRequiredMixin, UpdateView):
     model = AssociacaoModel
     template_name = 'app_associacao/edit_associacao.html'
-    fields = '__all__'
+    form_class = AssociacaoForm
     success_url = reverse_lazy('app_associacao:list_associacao')
-    group_required = ['Superuser',]    
+    group_required = ['Superuser',]
 
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(self.request, "Associação atualizada com sucesso!")
+        return response
+    
+    
 class AssociacaoDeleteView(GroupPermissionRequiredMixin, DeleteView):
     model = AssociacaoModel
     template_name = 'app_associacao/delete_associacao.html'
@@ -371,7 +384,6 @@ class ExIntegrantesListView(GroupPermissionRequiredMixin, ListView):
         ]
     
     def get_queryset(self):
-        # Retorna apenas ex-integrantes (com data de saída preenchida)
         return IntegrantesModel.objects.filter(data_saida__isnull=False)
 
 
@@ -473,7 +485,7 @@ class ReparticoesDetailView(GroupPermissionRequiredMixin, DetailView):
 class ReparticoesCreateView(GroupPermissionRequiredMixin, CreateView):
     model = ReparticoesModel
     template_name = 'app_associacao/create_reparticao.html'
-    fields = '__all__'
+    form_class = ReparticaoForm
     success_url = reverse_lazy('app_associacao:list_reparticao')
     group_required = [
         'Superuser',
@@ -481,23 +493,30 @@ class ReparticoesCreateView(GroupPermissionRequiredMixin, CreateView):
         ]    
     
     def form_valid(self, form):
-        self.object = form.save()
 
+        response = super().form_valid(form)
+        
+        messages.success(self.request, "Repartição salva com sucesso!")
+        
         if "save_and_continue" in self.request.POST:
+            messages.info(self.request, "Redirecionando para edição da Repartição.")
             return redirect('app_associacao:edit_reparticao', pk=self.object.pk)
 
         if "save_and_view" in self.request.POST:
+            messages.info(self.request, "Redirecionando para visualização da Repartição.")
             return redirect('app_associacao:single_reparticao', pk=self.object.pk)
 
-        return super().form_valid(form)
+        return response   
 
     def get_success_url(self):
-        return reverse_lazy('app_associados:detalhe_associado', kwargs={'pk': self.object.pk})    
+        return reverse_lazy('app_associacao:single_reparticao', kwargs={'pk': self.object.pk})    
+    
+   
 
 class ReparticoesUpdateView(GroupPermissionRequiredMixin, UpdateView):
     model = ReparticoesModel
     template_name = 'app_associacao/edit_reparticao.html'
-    fields = '__all__'
+    form_class = ReparticaoForm
     success_url = reverse_lazy('app_associacao:list_reparticao')
     group_required = [
         'Superuser',
@@ -505,20 +524,26 @@ class ReparticoesUpdateView(GroupPermissionRequiredMixin, UpdateView):
         ]
 
     def form_valid(self, form):
-        self.object = form.save()
-
+        response = super().form_valid(form)
+        
+        messages.success(self.request, "Repartição salva com sucesso!")
+        
         if "save_and_continue" in self.request.POST:
+            messages.info(self.request, "Redirecionando para edição da Repartição.")
             return redirect('app_associacao:edit_reparticao', pk=self.object.pk)
 
         if "save_and_view" in self.request.POST:
+            messages.info(self.request, "Redirecionando para visualização da Repartição.")
             return redirect('app_associacao:single_reparticao', pk=self.object.pk)
 
-        return super().form_valid(form)
+        return response   
+
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['form'] = self.get_form()
         return context
+    
     
 class ReparticoesDeleteView(GroupPermissionRequiredMixin, DeleteView):
     model = ReparticoesModel
