@@ -31,6 +31,7 @@ urlpatterns = [
     path('documentos/', include('app_documentos.urls', namespace='app_documentos')),
     path('automacoes/', include('app_automacoes.urls', namespace='app_automacoes')),
     path('tarefas/', include('app_tarefas.urls', namespace='app_tarefas')),
+
     path('editor/', include('app_editor.urls', namespace='app_editor')),
     
     

@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from app_associados.models import AssociadoModel
-
+from app_tarefas.models import TarefaModel
 
 
 class TipoDocumentoModel(models.Model):
@@ -35,7 +35,13 @@ class Documento(models.Model):
         on_delete=models.CASCADE,
         null=True, blank=True,
         related_name='reparticao_documentos'
-    )      
+    )
+    tarefa = models.ForeignKey(
+        'app_tarefas.TarefaModel',
+        on_delete=models.CASCADE,
+        null=True, blank=True,
+        related_name='tarefa_documentos'        
+    )
     tipo_doc = models.ForeignKey(
         'TipoDocumentoModel',
         on_delete=models.SET_NULL,
@@ -61,6 +67,8 @@ class Documento(models.Model):
             nome_proprietario = self.associacao.nome_fantasia
         elif self.reparticao:
             nome_proprietario = self.reparticao.nome_reparticao
+        elif self.tarefa:
+            nome_proprietario = self.tarefa.titulo
         else:
             raise ValueError("Documento deve estar associado a um Associado, Integrante ou Associação.")
 
@@ -88,6 +96,8 @@ class Documento(models.Model):
             return f"{self.nome} - Associacao: {self.associacao.nome_fantasia}"
         elif self.reparticao:
             return f"{self.nome} - Repartição: {self.reparticao.nome_reparticao}"
+        elif self.tarefa:
+            return f"{self.nome} - Tarefa: {self.tarefa.titulo}"
         else:
             return f"{self.nome} - Sem proprietário definido"
 

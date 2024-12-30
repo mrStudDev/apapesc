@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Fluxo-Board Tarefa{% endblock title %}
+
+{% block board_tarefa %}
+<!-- Board tarefa -->
+{% include 'components/navbar_associacao.html' %}
+<main class="flex-grow">
+    
+    <!-- Container Principal -->
+    <div class="container mx-auto py-6 px-4">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Fluxo de Tarefas</h1>
+        <div class="mb-6 bg-gray-100 p-4 rounded-lg shadow-md">
+
+            <ul class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <li class="text-center">
+                    <span class="block text-lg font-bold text-red-600">{{ contagem_tarefas.pendentes }}</span>
+                    <span class="text-sm text-gray-600">Pendentes</span>
+                </li>
+                <li class="text-center">
+                    <span class="block text-lg font-bold text-blue-600">{{ contagem_tarefas.em_andamento }}</span>
+                    <span class="text-sm text-gray-600">Em Andamento</span>
+                </li>
+                <li class="text-center">
+                    <span class="block text-lg font-bold text-green-600">{{ contagem_tarefas.concluidas }}</span>
+                    <span class="text-sm green-gray-600">Concluídas</span>
+                </li>
+                <li class="text-center">
+                    <span class="block text-lg font-bold text-yellow-400">{{ contagem_tarefas.devolvidas }}</span>
+                    <span class="text-sm text-gray-600">Devolvidas</span>
+                </li>
+            </ul>
+        </div>
+        
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Coluna Pendentes -->
+            <div id="coluna-pendente" class="bg-red-100 p-4 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold text-red-700 mb-4">Pendentes</h2>
+                <div class="coluna-conteudo">
+                    {% for tarefa in pendentes %}
+                        <div id="card-{{ tarefa.id }}" class="bg-white p-3 mb-3 rounded-md shadow hover:shadow-lg transition-shadow duration-200">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold">{{ tarefa.titulo }}</p>
+                                    <p class="text-sm text-gray-600">{{ tarefa.criado_por.username }}</p>
+                                    <p class="text-xs text-gray-500">{{ tarefa.data_criacao|date:"d/m/Y H:i" }}</p>
+                                    <p class="text-sm text-gray-600">{{ tarefa.responsavel.integrante }}</p>
+                                </div>
+                                <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" title="Ver Detalhes">
+                                    <i class="material-icons text-blue-500 hover:text-blue-700">visibility</i>
+                                </a>
+                            </div>
+                            <div class="mt-3 flex space-x-2">
+                                <button
+                                    class="text-blue-500 hover:text-yellow-700"
+                                    onclick="alterarStatus({{ tarefa.id }}, 'em_andamento')"
+                                    title="Mover para Em Andamento">
+                                    <i class="material-icons">play_arrow</i>
+                                </button>
+                                <button 
+                                    class="text-green-500 hover:text-green-700" 
+                                    onclick="alterarStatus({{ tarefa.id }}, 'concluida')" 
+                                    title="Mover para Concluída">
+                                    <i class="material-icons">check_circle</i>
+                                </button>
+                                <button 
+                                    class="text-gray-500 hover:text-gray-700" 
+                                    onclick="alterarStatus({{ tarefa.id }}, 'devolvida')" 
+                                    title="Mover para Devolvida">
+                                    <i class="material-icons">arrow_circle_right</i>
+                                </button>
+                                
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-500">Nenhuma tarefa pendente.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Coluna Em Andamento -->
+            <div id="coluna-em_andamento" class="bg-blue-100 p-4 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold text-blue-700 mb-4">Em Andamento</h2>
+                <div class="coluna-conteudo">
+                    {% for tarefa in em_andamento %}
+                        <div id="card-{{ tarefa.id }}" class="bg-white p-3 mb-3 rounded-md shadow hover:shadow-lg transition-shadow duration-200">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold">{{ tarefa.titulo }}</p>
+                                    <p class="text-sm text-gray-600">{{ tarefa.criado_por.username }}</p>
+                                    <p class="text-xs text-gray-500">{{ tarefa.data_criacao|date:"d/m/Y H:i" }}</p>
+                                    <p class="text-sm text-gray-600">{{ tarefa.responsavel.integrante }}</p>
+                                </div>
+                                <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" title="Ver Detalhes">
+                                    <i class="material-icons text-blue-500 hover:text-blue-700">visibility</i>
+                                </a>
+                            </div>
+                            <div class="mt-3 flex space-x-2">
+                                <button
+                                    class="text-red-500 hover:text-green-700"
+                                    onclick="alterarStatus({{ tarefa.id }}, 'pendente')"
+                                    title="Mover para Pendente">
+                                    <i class="material-icons">restore</i>
+                                </button>
+                                <button 
+                                    class="text-green-500 hover:text-green-700" 
+                                    onclick="alterarStatus({{ tarefa.id }}, 'concluida')" 
+                                    title="Mover para Concluída">
+                                    <i class="material-icons">check_circle</i>
+                                </button>
+                                <button 
+                                    class="text-gray-500 hover:text-gray-700" 
+                                    onclick="alterarStatus({{ tarefa.id }}, 'devolvida')" 
+                                    title="Mover para Devolvida">
+                                    <i class="material-icons">arrow_circle_right</i>
+                                </button>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-500">Nenhuma tarefa em andamento.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Coluna Concluídas -->
+            <div id="coluna-concluida" class="bg-green-100 p-4 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold text-green-700 mb-4">Concluídas</h2>
+                <div class="coluna-conteudo">
+                    {% for tarefa in concluidas %}
+                        <div id="card-{{ tarefa.id }}" class="bg-white p-3 mb-3 rounded-md shadow hover:shadow-lg transition-shadow duration-200">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold">{{ tarefa.titulo }}</p>
+                                    <p class="text-sm text-gray-600">{{ tarefa.criado_por.username }}</p>
+                                    <p class="text-xs text-gray-500">{{ tarefa.data_criacao|date:"d/m/Y H:i" }}</p>
+                                    <p class="text-sm text-gray-600">{{ tarefa.responsavel.integrante }}</p>
+                                </div>
+                                <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" title="Ver Detalhes">
+                                    <i class="material-icons text-blue-500 hover:text-blue-700">visibility</i>
+                                </a>
+                            </div>
+                            <div class="mt-3 flex space-x-2">
+                                <button 
+                                    class="text-red-500 hover:text-green-700" 
+                                    onclick="alterarStatus({{ tarefa.id }}, 'pendente')" 
+                                    title="Mover para Pendente">
+                                    <i class="material-icons">restore</i>
+                                </button>
+                                <button 
+                                    class="text-blue-500 hover:text-yellow-700" 
+                                    onclick="alterarStatus({{ tarefa.id }}, 'em_andamento')" 
+                                    title="Mover para Em Andamento">
+                                    <i class="material-icons">fast_rewind</i>
+                                </button>
+                                <button 
+                                    class="text-gray-500 hover:text-gray-700" 
+                                    onclick="alterarStatus({{ tarefa.id }}, 'devolvida')" 
+                                    title="Mover para Devolvida">
+                                    <i class="material-icons">arrow_circle_right</i>
+                                </button>
+                            </div>
+
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-500">Nenhuma tarefa concluída.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Coluna Devolvidas -->
+            <div id="coluna-devolvida" class="bg-yellow-100 p-4 rounded-lg shadow-md">
+                <h2 class="text-xl font-bold text-gray-700 mb-4">Devolvidas</h2>
+                <div class="coluna-conteudo">
+                    {% for tarefa in devolvidas %}
+                        <div id="card-{{ tarefa.id }}" class="bg-white p-3 mb-3 rounded-md shadow hover:shadow-lg transition-shadow duration-200">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="font-bold">{{ tarefa.titulo }}</p>
+                                    <p class="text-sm text-gray-600">{{ tarefa.criado_por.username }}</p>
+                                    <p class="text-xs text-gray-500">{{ tarefa.data_criacao|date:"d/m/Y H:i" }}</p>
+                                    <p class="text-sm text-gray-600">{{ tarefa.responsavel.integrante }}</p>
+                                </div>
+                                <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" title="Ver Detalhes">
+                                    <i class="material-icons text-blue-500 hover:text-blue-700">visibility</i>
+                                </a>
+                            </div>
+                            <div class="mt-3 flex space-x-2">
+                                <button class="text-red-500 hover:text-green-700" onclick="alterarStatus({{ tarefa.id }}, 'pendente')" title="Mover para Pendente">
+                                    <i class="material-icons">restore</i>
+                                </button>
+                                <button class="text-blue-500 hover:text-yellow-700" onclick="alterarStatus({{ tarefa.id }}, 'em_andamento')" title="Mover para Em Andamento">
+                                    <i class="material-icons">fast_rewind</i>
+                                </button>
+                                <button
+                                    class="text-green-500 hover:text-green-700" 
+                                    onclick="alterarStatus({{ tarefa.id }}, 'concluida')" 
+                                    title="Mover para Concluída">
+                                        <i class="material-icons">check_circle</i>
+                                </button>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p class="text-gray-500">Nenhuma tarefa devolvida.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+<script src="{% static 'js/board_interactions.js' %}"></script>
+{% endblock board_tarefa %}

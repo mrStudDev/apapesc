@@ -1,0 +1,343 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Detalhes da Tarefa{% endblock title %}
+{% block single_tarefa %}
+<!-- Navbar -->
+{% include "components/navbar_associacao.html" %}
+
+<main class="flex-grow">
+    <div class="container mx-auto my-6 max-w-4xl">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <!-- Título -->
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Detalhes da Tarefa</h1>
+        <!-- Links de Ações -->
+        <div class="flex justify-center space-x-2 mb-4">
+            <a href="{% url 'app_tarefas:list_tarefas' %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300" title="Lista de Associados">
+                <i class="material-icons" style="font-size: 24px; color:blue">list</i>
+                <span class="sr-only">Lista</span> Lista
+            </a>
+            <a href="{% url 'app_tarefas:edit_tarefa' tarefa.pk %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400" title="Editar Associado">
+                <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
+                <span class="sr-only">Editar</span> Editar
+            </a>
+            <a href="{% url 'app_documentos:upload_documento' 'tarefa' tarefa.pk %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400" title="Upload de Documento">
+                <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
+                <span class="sr-only">Upload</span> Upload Doc
+            </a>
+        </div>
+        <!-- Card Principal -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <!-- Título -->
+            <div class="mb-6 border-b-2 border-gray-200 pb-4">
+                <h2 class="text-xl font-bold text-gray-800 tracking-wide uppercase">{{ tarefa.titulo }}</h2>
+            </div>
+            
+            <!-- Destaque: Data e Hora Limite -->
+            <div class="flex items-center justify-between mb-6 bg-yellow-100 p-4 rounded-md shadow-sm">
+                <div>
+                    <p class="text-yellow-700 text-sm"><i class="material-icons text-yellow-500 mr-2 align-middle">event</i> <strong>Data Limite:</strong> {{ tarefa.data_limite }}</p>
+                    <p class="text-yellow-700 text-sm"><i class="material-icons text-yellow-500 mr-2 align-middle">schedule</i> <strong>Hora Limite:</strong> {{ tarefa.hora_limite }}</p>
+                </div>
+            </div>
+
+            <!-- Informações da Tarefa -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                <p><i class="material-icons text-blue-500 mr-2 align-middle">category</i> <strong>Categoria:</strong> {{ tarefa.get_categoria_display }}</p>
+                <p><i class="material-icons text-red-500 mr-2 align-middle">priority_high</i> <strong>Prioridade:</strong> {{ tarefa.get_prioridade_display }}</p>
+                <p><i class="material-icons text-gray-500 mr-2 align-middle">hourglass_empty</i> <strong>Status:</strong>
+                <span class="px-2 py-1 rounded-full text-white
+                    {% if tarefa.status == 'pendente' %} bg-red-500
+                    {% elif tarefa.status == 'em_andamento' %} bg-blue-500
+                    {% elif tarefa.status == 'concluida' %} bg-green-500
+                    {% elif tarefa.status == 'devolvida' %} bg-yellow-500
+                    {% elif tarefa.status == 'arquivada' %} bg-pink-400
+                    {% endif %}">
+                    {{ tarefa.get_status_display }}
+                </span>
+                </p>
+                <p><i class="material-icons text-gray-500 mr-2 align-middle">calendar_today</i> <strong>Data de Criação:</strong> {{ tarefa.data_criacao|date:"d/m/Y H:i" }}</p>
+                <p><i class="material-icons text-green-500 mr-2 align-middle">person</i> <strong>Responsável:</strong> 
+                    {% for responsavel in tarefa.responsaveis.all %}
+                        {{ responsavel.user.get_full_name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %}
+                        Sem responsáveis
+                    {% endfor %}
+                </p>
+                {% if integrante %}
+                <p><i class="material-icons text-gray-400 mr-2 align-middle">person_add</i> <strong>Criado por:</strong> {{ tarefa.criado_por.integrante.nome_completo }}</p>
+                {% else %}
+                <p><i class="material-icons text-gray-400 mr-2 align-middle">person_add</i> <strong>Criado por:</strong> {{ tarefa.criado_por.username }}</p>
+                {% endif %}
+            </div>
+
+            <!-- Associado ou Integrante -->
+            {% if tarefa.associado or tarefa.integrante %}
+                <div class="mt-6 bg-gray-50 p-4 rounded-md border border-gray-200 shadow-sm">
+                    {% if tarefa.associado %}
+                    <p><i class="material-icons text-blue-500 mr-2 align-middle">group</i> <strong>Associado:</strong>
+                    <a href="#" class="text-blue-500 hover:underline">
+                        {{ tarefa.associado.user.get_full_name }} 
+                    </a>
+                    </p>
+                    {% endif %}
+                </div>
+            {% endif %}
+        </div><br>
+
+        <!-- Descrição -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold text-gray-700 border-b-2 border-gray-200 pb-2">Breve descrição</h2>
+                <p class="text-gray-600 mt-4">{{ tarefa.descricao|default:"Sem descrição" | safe }}</p>
+            </div>
+        </div>
+
+        <br>
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-bold text-gray-800 mb-2">Anotações</h2>
+            <hr>
+            <div class="prose max-w-none text-gray-700">
+                {{tarefa.content | safe }}
+            </div>
+        </div>
+
+        <!-- Formulário para Alterar Status -->
+        <!-- Alterar Responsável -->
+        <div class="mt-8 bg-gray-100 p-4 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Alterar Status da Tarefa</h2>
+            <form id="alterar-status-form" method="post" action="{% url 'app_tarefas:alterar_status' tarefa.pk %}">
+                {% csrf_token %}
+                <label for="status">Alterar Status:</label>
+                <select name="status" id="status">
+                    {% for status, display in status_choices %}
+                        <option value="{{ status }}" {% if tarefa.status == status %}selected{% endif %}>
+                            {{ display }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button 
+                    type="submit" 
+                    class="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                    Alterar Status
+                </button>
+            </form>
+        </div>
+        <br>
+        <!-- Alterar Responsáveis -->
+        <div class="mt-8 bg-gray-100 p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold text-gray-700 mb-4">Alterar Responsáveis da Tarefa</h2>
+            <form id="alterar-responsaveis-form" method="post" action="{% url 'app_tarefas:alterar_responsaveis' tarefa.pk %}">
+                {% csrf_token %}
+                <label for="responsaveis" class="block text-sm font-medium text-gray-700 mb-2">Responsáveis</label>
+                <select
+                    name="responsaveis"
+                    id="responsaveis"
+                    multiple
+                    size="10"
+                    class="appearance-none block w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                >
+                    {% for responsavel in responsaveis_disponiveis %}
+                        <option value="{{ responsavel.id }}" {% if responsavel in responsavel_atual %}selected{% endif %}>
+                            {{ responsavel.user.get_full_name }}
+                        </option>
+                    {% endfor %}
+                </select>
+                <button
+                    type="submit"
+                    class="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                    Alterar Responsáveis
+                </button>
+            </form>
+        </div>
+        <br>
+        <!-- Seção: Documentos -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-base font-semibold text-gray-700 mb-4">Documentos da Tarefa</h2>
+
+            {% if documentos %}
+                <ul class="space-y-4">
+                    {% for documento in documentos %}
+                    <li id="documento-{{ documento.id }}"  data-id="{{ documento.id }}"  class="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="material-icons text-gray-500 mr-2" style="font-size: 20px;">insert_drive_file</i>
+                            <div>
+                                <a href="{{ documento.arquivo.url }}" target="_blank" class="text-blue-500 font-semibold hover:underline">
+                                {{ documento.nome }}
+                                </a>
+                                <p class="text-gray-600 text-sm mt-1">Data de Upload: <strong> {{ documento.data_upload|date:"d/m/Y H:i" }}</strong></p>
+                                <p class="text-gray-600 text-sm mt-1">Extensão do Documento: <strong>{{ documento.arquivo.url|slice:"-3:" }}</strong></p> <!-- Novo -->
+                                <p class="text-gray-600 text-sm mt-1">* {{ documento.descricao|truncatechars:71 }}</p>
+
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <!-- Link para Download do Documento -->
+                            <a href="{{ documento.arquivo.url }}" download class="hover:text-green-500" title="Baixar Documento">
+                                <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
+                            </a>
+                            <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
+                                <i class="material-icons" style="font-size: 18px; color:green"> phone_android</i>
+                            </a>
+                            <a href="{% url 'app_documentos:criar_copia_pdf' documento.pk %}" title="Fazer Cópia em PDF" onclick="suaFuncaoAutomatizar()"> <!-- Adicione o link para a sua função -->
+                                <i class="material-icons" style="font-size: 20px; color:orange;">picture_as_pdf</i>
+                            </a>
+                            <a href="{% url 'app_documentos:delete_documento' documento.pk %}" 
+                            class="text-red-500 hover:text-red-700" title="Deletar">
+                                <i class="material-icons" style="font-size: 20px;">delete</i>
+                            </a>
+
+                        </div>
+                    </li>
+                    {% endfor %}
+                </ul>
+
+            {% else %}
+                <p class="text-gray-600">Nenhum documento disponível para este Integrante.</p>
+            {% endif %}
+        </div>        
+
+
+        <br>
+        <h2 class="text-xl font-semibold text-gray-700 mt-8 mb-4">Histórico de Alterações de Status</h2>
+        <table class="min-w-full border-collapse border border-gray-300">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Data/Hora</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Alterado por</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Status Anterior</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Status Atual</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for historico in tarefa.historico_status.all|dictsortreversed:"data_alteracao" %}
+                    <tr>
+                        <td class="border border-gray-300 px-4 py-2">{{ historico.data_alteracao|date:"d/m/Y H:i" }}</td>
+                        <td class="border border-gray-300 px-4 py-2">{{ historico.alterado_por.user.get_full_name }}</td>
+                        <td class="border border-gray-300 px-4 py-2">{{ historico.status_anterior }}</td>
+                        <td class="border border-gray-300 px-4 py-2">{{ historico.status_novo }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td class="border border-gray-300 px-4 py-2 text-center" colspan="4">Nenhuma alteração registrada.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <h2 class="text-xl font-semibold text-gray-700 mt-8 mb-4">Histórico de Alterações de Responsáveis</h2>
+        <table class="min-w-full border-collapse border border-gray-300">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Data/Hora</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Alterado por</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Responsáveis Anteriores</th>
+                    <th class="border border-gray-300 px-4 py-2 text-left">Responsáveis Novos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for historico in tarefa.historico_responsaveis.all|dictsortreversed:"data_alteracao" %}
+                    <tr>
+                        <td class="border border-gray-300 px-4 py-2">{{ historico.data_alteracao|date:"d/m/Y H:i" }}</td>
+                        <td class="border border-gray-300 px-4 py-2">{{ historico.alterado_por.user.get_full_name }}</td>
+                        <td class="border border-gray-300 px-4 py-2">
+                            {% for responsavel in historico.responsaveis_anteriores.all %}
+                                {{ responsavel.user.get_full_name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                        <td class="border border-gray-300 px-4 py-2">
+                            {% for responsavel in historico.responsaveis_novos.all %}
+                                {{ responsavel.user.get_full_name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td class="border border-gray-300 px-4 py-2 text-center" colspan="4">Nenhuma alteração registrada.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+
+
+        <!-- Botão de Voltar -->
+        <div class="mt-6 text-center">
+            <a href="{% url 'app_tarefas:list_tarefas' %}" class="text-blue-500 hover:underline">Voltar para lista de tarefas</a>
+            </div>
+        </div>
+        <br>   
+    </div>
+</main>
+
+
+<script>
+    document.getElementById('alterar-status-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = e.target;
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error('Erro:', error));
+    });
+</script>
+<script>
+    document.getElementById('alterar-responsaveis-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        console.log('Enviando dados:', Array.from(formData.entries())); // Log dos dados enviados
+    
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Resposta recebida:', data); // Log da resposta
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => console.error('Erro:', error));
+    });
+    
+</script>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+
+
+{% endblock single_tarefa %}

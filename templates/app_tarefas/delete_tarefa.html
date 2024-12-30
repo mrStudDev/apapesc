@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block title %}Delete Tarefa{% endblock title %}
+
+{% block delete_tarefa %}
+<!-- Navbar -->
+{% include "components/navbar_associacao.html" %}
+<main class="flex-grow">
+    <div class="container mx-auto py-6 px-4 max-w-3xl">
+        <!-- Título -->
+        <h1 class="text-4xl font-bold text-red-600 mb-6 text-center">Excluir Tarefa</h1>
+    
+        <!-- Card Principal -->
+        <div class="bg-white p-8 rounded-xl shadow-lg">
+            <div class="text-center">
+                <!-- Ícone de Alerta -->
+                <div class="bg-red-100 p-4 rounded-full inline-block mb-6">
+                    <i class="material-icons text-red-600" style="font-size: 48px;">warning</i>
+                </div>
+    
+                <!-- Mensagem de Confirmação -->
+                <p class="text-gray-700 text-lg mb-4">
+                    Tem certeza de que deseja excluir a tarefa
+                    <strong class="text-red-600">{{ object.titulo }}</strong>?
+                </p>
+                <p class="text-gray-500 mb-6">
+                    <strong>Descrição:</strong> {{ object.descricao|default:"Sem descrição" }}
+                </p>
+            </div>
+    
+            <!-- Ações -->
+            <div class="flex justify-center space-x-4">
+                <!-- Botão de Exclusão -->
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-400">
+                        Confirmar Exclusão
+                    </button>
+                </form>
+    
+                <!-- Botão de Cancelar -->
+                <div>
+                    <a href="{% url 'app_tarefas:list_tarefas' %}"
+                    class="inline-flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-6 rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-gray-300 transition duration-200">
+                     <i class="material-icons mr-2 text-gray-600">arrow_back</i>
+                        Cancelar
+                    </a>
+                </div>
+            </div>
+    
+        </div>
+    </div>
+</main>
+
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock delete_tarefa %}

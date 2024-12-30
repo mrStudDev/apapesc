@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.conf import settings
+from django.db import models
+from django.utils.timezone import now
+from django.utils.text import slugify
 
 
 PRIORIDADES_TAREFA = [
@@ -8,14 +12,6 @@ PRIORIDADES_TAREFA = [
     ('baixa', 'Baixa'),
 ]
 
-STATUS_TAREFA = [
-    ('pendente', 'Pendente'),
-    ('em_andamento', 'Em Andamento'),
-    ('concluida', 'Concluída'),
-    ('devolvida', 'Devolvida'),
-    ('arquivada', 'Arquivada'),
-    ('desarquivada', 'Desarquivada'),
-]
 
 CATEGORIAS_TAREFA = [
     ('administrativa', 'Administrativa'),
@@ -26,7 +22,20 @@ CATEGORIAS_TAREFA = [
 
 # Create your models here.
 class TarefaModel(models.Model):
-
+    STATUS_TAREFA = [
+        ('pendente', 'Pendente'),
+        ('em_andamento', 'Em Andamento'),
+        ('concluida', 'Concluída'),
+        ('devolvida', 'Devolvida'),
+        ('arquivada', 'Arquivada'),
+        ('desarquivada', 'Desarquivada'),
+    ]
+    criado_por = models.ForeignKey(
+        User, 
+        on_delete=models.CASCADE, 
+        related_name='tarefas_criadas',
+        verbose_name="Criado por"
+    )
     titulo = models.CharField(max_length=255)
     descricao = models.CharField(
         max_length=255,
@@ -43,11 +52,17 @@ class TarefaModel(models.Model):
         blank=True,
         verbose_name="Data Conlusão"
     )
+    data_limite = models.DateField(
+        blank=True, null=True
+    )
+    hora_limite = models.TimeField(
+        blank=True, null=True
+    )
     status = models.CharField(
         max_length=20, 
         choices=STATUS_TAREFA, 
-        default='aberta',
-        verbose_name="status da Tarefa"
+        verbose_name="status da Tarefa", 
+        default='pendente'
     )
     categoria = models.CharField(
         max_length=20, 
@@ -61,12 +76,11 @@ class TarefaModel(models.Model):
         default='media',
         verbose_name="Prioridade"
     )
-    criado_por = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
-        related_name='tarefas_criadas',
-        verbose_name="Criado por"
-        )
+    responsaveis = models.ManyToManyField(
+        'app_associacao.IntegrantesModel',
+        related_name='tarefas_atribuidas',
+        verbose_name="Responsáveis"
+    )    
     associado = models.ForeignKey(
         'app_associados.AssociadoModel', 
         on_delete=models.SET_NULL, 
@@ -74,15 +88,80 @@ class TarefaModel(models.Model):
         blank=True,
         verbose_name="Associado"
     )
-    responsaveis = models.ManyToManyField(
-        'app_associacao.IntegrantesModel',
-        related_name='tarefas_atribuidas',
-        verbose_name="Responsáveis"
-        )
+
     content = models.TextField(
         null=True, blank=True,
         verbose_name="Anotações"
     )
+    arquivada = models.BooleanField(default=False, verbose_name="Arquivada")
+
+    slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.titulo)
+            slug = base_slug
+            counter = 1
+
+            while TarefaModel.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+
+            self.slug = slug
+
+        super().save(*args, **kwargs)
+# ===================== End Tarefa
+
+
+# Histórico Status
+class HistoricoStatusModel(models.Model):
+    tarefa = models.ForeignKey(
+        'app_tarefas.TarefaModel',
+        on_delete=models.CASCADE,
+        related_name='historico_status',
+        verbose_name="Tarefa"
+    )
+    status_anterior = models.CharField(max_length=50, verbose_name="Status Anterior")
+    status_novo = models.CharField(max_length=50, verbose_name="Status Novo")
+    alterado_por = models.ForeignKey(
+        'app_associacao.IntegrantesModel',
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name="Alterado por"
+    )
+    data_alteracao = models.DateTimeField(default=now, verbose_name="Data de Alteração")
 
     def __str__(self):
-        return self.titulo
+        return f"{self.tarefa} - {self.status_anterior} → {self.status_novo}"
+# ===================== End Satatus
+
+# Histórico Responsáveis 
+class HistoricoResponsaveisModel(models.Model):
+    tarefa = models.ForeignKey(
+        'app_tarefas.TarefaModel',
+        on_delete=models.CASCADE,
+        related_name='historico_responsaveis',
+        verbose_name="Tarefa"
+    )
+    responsaveis_anteriores = models.ManyToManyField(
+        'app_associacao.IntegrantesModel',
+        related_name='responsaveis_anteriores',
+        verbose_name="Responsáveis Anteriores"
+    )
+    responsaveis_novos = models.ManyToManyField(
+        'app_associacao.IntegrantesModel',
+        related_name='responsaveis_novos',
+        verbose_name="Responsáveis Novos"
+    )
+    alterado_por = models.ForeignKey(
+        'app_associacao.IntegrantesModel',
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name="Alterado por"
+    )
+    data_alteracao = models.DateTimeField(default=now, verbose_name="Data de Alteração")
+
+    def __str__(self):
+        return f"{self.tarefa} - Responsáveis alterados"
+# ===================== End Responsáveis
+

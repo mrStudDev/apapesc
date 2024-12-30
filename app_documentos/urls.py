@@ -1,4 +1,5 @@
 from django.urls import path
+from .views import criar_copia_pdf
 
 from .views import (
     DocumentoUploadView,
@@ -8,7 +9,7 @@ from .views import (
     DocumentoDeleteView
     )
 
-from .views import criar_copia_pdf
+
 
 app_name = 'app_documentos'
 

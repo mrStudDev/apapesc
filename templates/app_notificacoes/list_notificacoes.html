@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block list_notificaoes %}
+<h1>Notificações</h1>
+<ul>
+    {% for notificacao in notificacoes %}
+        <li>
+            {{ notificacao.verb }} - {{ notificacao.description }}
+            {% if notificacao.unread %}
+                <a href="{% url 'app_notificacoes:marcar_como_lida' notificacao.id %}">Marcar como lida</a>
+            {% endif %}
+            <a href="{% url 'app_notificacoes:excluir_notificacao' notificacao.id %}">Excluir</a>
+        </li>
+    {% empty %}
+        <li>Sem notificações</li>
+    {% endfor %}
+</ul>
+{% endblock  list_notificaoes %}
