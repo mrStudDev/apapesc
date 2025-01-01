@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} {{ object.meta_title }} {% endblock title %} 
+{% block single_article %}
+{% include 'components/navbar_associacao.html' %}
+<!-- CSS do Editor -->
+<link rel="stylesheet" href="{% static 'css/editor.css' %}">
+<main class="flex-grow">
+    <div class="container mx-auto my-8 max-w-3xl bg-white p-6 rounded-lg shadow-lg text-justify">
+        
+        <!-- Título -->
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ article.title }}</h1>
+
+        <!-- Informações do Artigo -->
+        <div class="text-sm text-gray-600 mb-6">
+            <p><i class="material-icons text-blue-500 mr-1 align-middle">person</i> Autor: <strong>{{ article.author.get_full_name }}</strong></p>
+            <p><i class="material-icons text-gray-500 mr-1 align-middle">event</i> Publicado em: {{ article.date_created|date:"d/m/Y H:i" }}</p>
+        </div>
+
+        <!-- Imagem de Capa -->
+        {% if article.image %}
+        <div class="mb-6">
+            <img src="{{ article.image.url }}" alt="{{ article.title }}" class="w-full rounded-md">
+        </div>
+        {% endif %}
+  
+        <!-- Informações Adicionais -->
+        <div class="bg-gray-50 p-4 rounded-lg shadow-inner">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <p>
+                    <i class="material-icons text-purple-500 mr-1 align-middle">label</i>
+                    Categoria: <strong>{{ article.category }}</strong>
+                </p>
+                <p>
+                    <i class="material-icons text-green-500 mr-1 align-middle">loyalty</i>
+                    Tags: 
+                    {% for tag in article.tags.all %}
+                        <span class="inline-block bg-green-100 text-green-700 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">{{ tag }}</span>
+                    {% empty %}
+                        <span class="text-gray-400">Sem tags</span>
+                    {% endfor %}
+                </p>
+            </div>
+
+            <!-- Fonte da Imagem -->
+            <div class="mt-4">
+                <p>
+                    <i class="material-icons text-blue-500 mr-1 align-middle">photo_camera</i>
+                    Fonte: 
+                    <a href="{{ article.image_source }}" class="text-blue-600 underline" target="_blank">
+                        {{ article.image_source|safe }}
+                    </a>
+                </p>
+            </div>
+        </div>
+
+        {% if request.user == article.author or request.user.is_superuser %}
+            <div class="flex space-x-4 mt-6">
+                <!-- Botão Editar -->
+                <a href="{% url 'app_articles:edit_article' article.slug %}" 
+                class="flex items-center text-blue-600 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <i class="material-icons text-lg mr-1">edit</i> <!-- Ícone de edição -->
+                    <span class="text-sm font-medium">Editar</span>
+                </a>
+            
+                <!-- Botão Apagar -->
+                <a href="{% url 'app_articles:delete_article' article.slug %}" 
+                class="flex items-center text-red-600 hover:text-red-800 focus:outline-none focus:ring-2 focus:ring-red-400">
+                    <i class="material-icons text-lg mr-1">delete</i> <!-- Ícone de exclusão -->
+                    <span class="text-sm font-medium">Apagar</span>
+                </a>
+            </div>
+            
+        {% endif %}
+    
+        <br>
+        <!-- Conteúdo -->
+         <div style="margin-left:10px; margin-right: 10px;">
+            <div class="prose max-w-none text-gray-700">
+            <p>{{ article.content|safe }}</p>
+            </div> 
+            <br><br>          
+            <i>Obrigado(a) pela leitura!</i>          
+         </div>
+         <br><br><br>
+         
+
+        <!-- Informações do Artigo -->
+        <div class="text-sm text-gray-600 mb-6">
+            <p><i class="material-icons text-blue-500 mr-1 align-middle">person</i> Autor: <strong>{{ article.author.get_full_name }}</strong></p>
+            <p><i class="material-icons text-gray-500 mr-1 align-middle">task</i> Artigo: {{ article.title }}</p>
+            <p><i class="material-icons text-gray-500 mr-1 align-middle">event</i> Publicado em: {{ article.date_created|date:"d/m/Y H:i" }}</p>
+
+            <p><i class="material-icons text-purple-500 mr-1 align-middle">label</i> Categoria: <strong>{{ article.category }}</strong></p>
+            <p><i class="material-icons text-green-500 mr-1 align-middle">loyalty</i> Tags: 
+                {% for tag in article.tags.all %}
+                    <span class="inline-block bg-green-100 text-green-700 text-xs font-medium mr-2 px-2.5 py-0.5 rounded">{{ tag }}</span>
+                {% empty %}
+                    <span class="text-gray-400">Sem tags</span>
+                {% endfor %}
+            </p>
+
+        </div>
+        <!-- Fontes de Pesquisa -->
+        <div class="bg-gray-50 border-l-4 border-blue-500 p-4 rounded-md shadow-sm mt-8 mx-4">
+            <h2 class="text-lg font-semibold text-blue-600 mb-2">Fontes de Pesquisa</h2>
+            <p class="text-gray-700 text-sm leading-relaxed">{{ article.research_sources|safe }}</p>
+        </div>
+        
+    </div>
+</main>
+
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock single_article %}

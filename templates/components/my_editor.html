@@ -2,17 +2,18 @@
 {% load static %}
 <!-- Toolbar do Editor -->
 <div class="toolbar mb-4">
-    <button type="button" onclick="formatText('formatBlock', 'H1');" class="btn">Título</button>
-    <button type="button" onclick="formatText('formatBlock', '<h2>')" class="btn">Subtítulo</button>
-    <button type="button" onclick="returnToParagraph()" class="btn">Texto Normal</button>
+    <button type="button" onclick="formatText('formatBlock', 'H1');" class="btn">T1</button>
+    <button type="button" onclick="formatText('formatBlock', '<h2>')" class="btn">T2</button>
+    <button type="button" onclick="returnToParagraph()" class="btn">Normal</button>
     <button type="button" onclick="formatText('bold')" class="btn">B</button>
     <button type="button" onclick="formatText('italic')" class="btn">I</button>
     <button type="button" onclick="formatText('underline')" class="btn">U</button>
     <button type="button" onclick="createLink()" class="btn">Link</button>
-
-    <button type="button" onclick="addBlockquote()" class="btn">Comentário</button>
+</div>
+<div class="toolbar mb-4">
+    <button type="button" onclick="addBlockquote()" class="btn">" "</button>
     <select onchange="changeTextColor(this.value)" class="btn">
-        <option value="">Cor do texto</option>
+        <option value="">Cor</option>
         <option value="black">Preto</option>
         <option value="red">Vermelho</option>
         <option value="blue">Azul</option>
@@ -32,8 +33,8 @@
     {{ form.content.value|safe }}
 </div>
 <input type="hidden" id="hidden-editor" name="{{ form.content.name }}" value="{{ form.content.value|default:'' }}">
+<script src="{% static 'js/editor.js' %}"></script>
 
 <!-- CSS do Editor -->
 <link rel="stylesheet" href="{% static 'css/editor.css' %}">
-<!-- JS do Editor -->
-<script src="{% static 'js/editor.js' %}"></script>
+

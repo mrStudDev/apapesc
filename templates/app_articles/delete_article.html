@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block 'title' %}Delete Article{% endblock 'title' %}
+
+{% block delete_article %}
+{% include 'components/navbar_associacao.html' %}
+
+<main class="flex-grow bg-gray-100 py-10">
+    <div class="container max-w-xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <!-- Header -->
+        <div class="mb-6 text-center">
+            <h1 class="text-2xl font-bold text-red-600 mb-2">Deletar Artigo</h1>
+            <p class="text-gray-600">Tem certeza de que deseja deletar este artigo? Esta ação não poderá ser desfeita.</p>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- Informações do Artigo -->
+        <div class="bg-gray-50 p-4 rounded-lg shadow-inner mb-6">
+            <h2 class="text-lg font-semibold text-red-500">{{ object.title }}</h2>
+        </div>
+
+        <!-- Formulário -->
+        <form method="post" class="text-center">
+            {% csrf_token %}
+            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
+                Deletar
+            </button>
+            <a href="{% url 'app_articles:list_articles' %}" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded-lg shadow-md ml-4 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                Cancelar
+            </a>
+        </form>
+    </div>
+</main>
+
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock delete_article %}

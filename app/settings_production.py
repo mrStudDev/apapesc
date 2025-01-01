@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'app_documentos',
     'app_automacoes',
     'app_tarefas',
+    'app_articles',
     
     # Editor
     'app_editor',

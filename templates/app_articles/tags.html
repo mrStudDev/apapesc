@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Tag | {{ tags.name }} {% endblock title %} 
+{% block tags %}
+
+{% include 'components/navbar_associacao.html' %}
+<main class="flex-grow">
+    <div class="container mx-auto my-6 max-w-5xl">
+        <!-- Título -->
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Tag: {{tags.name}}</h1>
+
+        <!-- Contagem de Publicações -->
+        <p class="text-sm text-gray-600 mb-4 text-center">
+            Total de Artigos: <span class="font-semibold">{{ tags_count }}</span>
+        </p>
+
+        <!-- Grid de Artigos -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for article in articles %}
+            <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <!-- Imagem de Capa -->
+                {% if article.image %}
+                <div class="relative">
+                    <img src="{{ article.image.url }}" alt="{{ article.title }}" class="w-full h-40 object-cover">
+                </div>
+                {% else %}
+                <div class="w-full h-40 bg-gray-200 flex items-center justify-center text-gray-500">
+                    Sem Imagem
+                </div>
+                {% endif %}
+
+                <!-- Conteúdo do Artigo -->
+                <div class="p-4">
+                    <h2 class="text-lg font-bold text-gray-800">
+                        <a href="{% url 'app_articles:single_article' article.slug %}" class="hover:text-blue-500">
+                            {{ article.title|truncatewords:5  }}
+                        </a>
+                    </h2>
+                    <a href="{{ article.category.get_absolute_url }}" class="left-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded">
+                        {{ article.category.name }}
+                    </a>
+                </div>
+                <!-- Tags -->
+                <div class="p-4 border-t border-gray-200">
+                    <p class="text-sm text-gray-600">
+                        <i class="material-icons text-green-500 mr-1 align-middle">loyalty</i>
+                        Tags: 
+                        {% for tag in article.tags.all %}
+                            <a href="{{ tag.get_absolute_url }}" class="inline-block bg-green-100 text-green-700 text-xs font-medium mr-2 px-2.5 py-0.5 rounded hover:bg-green-200 transition">
+                                {{ tag.name }}
+                            </a>
+                        {% empty %}
+                            <span class="text-gray-400">Sem tags</span>
+                        {% endfor %}
+                    </p>
+                </div>
+
+                <!-- Rodapé com Data -->
+                <div class="px-4 py-2 bg-gray-50 text-sm text-gray-500 flex justify-between items-center">
+                    <span>Publicado em: {{ article.date_created|date:"d/m/Y" }}</span>
+                    <a href="{% url 'app_articles:single_article' article.slug %}" class="text-blue-500 hover:underline">
+                        Ler mais
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+
+        <!-- Paginação -->
+        <div class="mt-8 flex justify-center">
+            <nav aria-label="Paginação">
+                <ul class="inline-flex space-x-2">
+                    {% if articles.has_previous %}
+                    <li>
+                        <a href="?page={{ articles.previous_page_number }}" class="px-4 py-2 border rounded-md hover:bg-gray-100">
+                            Anterior
+                        </a>
+                    </li>
+                    {% endif %}
+                    {% for page_num in articles.paginator.page_range %}
+                        {% if page_num == articles.number %}
+                        <li>
+                            <span class="px-4 py-2 border rounded-md bg-blue-500 text-white">
+                                {{ page_num }}
+                            </span>
+                        </li>
+                        {% else %}
+                        <li>
+                            <a href="?page={{ page_num }}" class="px-4 py-2 border rounded-md hover:bg-gray-100">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endfor %}
+                    {% if articles.has_next %}
+                    <li>
+                        <a href="?page={{ articles.next_page_number }}" class="px-4 py-2 border rounded-md hover:bg-gray-100">
+                            Próximo
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock tags %}

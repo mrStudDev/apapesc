@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% block title %}Deletar Tag{% endblock title %}
+
+{% block delete_tag %}
+{% include 'components/navbar_associacao.html' %}
+<main class="flex-grow bg-gray-100 py-10">
+    <div class="container mx-auto max-w-lg bg-white p-6 rounded-lg shadow-lg">
+        <!-- Título -->
+        <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Deletar Tag</h1>
+
+        <!-- Mensagem de Confirmação -->
+        <p class="text-gray-600 mb-6 text-center">
+            Tem certeza de que deseja deletar a tag
+            <span class="font-semibold text-red-500">{{ category.name }}</span>?
+        </p>
+
+        <!-- Botões de Ação -->
+        <div class="flex justify-between">
+            <form method="post" class="w-full">
+                {% csrf_token %}
+                <button type="submit"
+                        class="w-full bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-red-400">
+                    Confirmar Exclusão
+                </button>
+            </form>
+            <a href="{% url 'app_articles:list_categories' %}"
+               class="w-full text-center bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-4 rounded ml-4 focus:outline-none focus:ring-2 focus:ring-gray-500">
+                Cancelar
+            </a>
+        </div>
+    </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock delete_tag %}

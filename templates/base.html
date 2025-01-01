@@ -1,16 +1,15 @@
+<!--Base HTML -->
 <!DOCTYPE html>
 {% load static %}
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Título Padrão{% endblock title %}</title>
+  <title>{% block title %}Associação Apapesc{% endblock title %}</title>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="stylesheet" href="{% static 'css/output.css' %}">
-
 </head>
 
 <body class="font-sans min-h-screen flex flex-col">
@@ -26,17 +25,22 @@
   
   <!--Blocos Groups -->
   {% block dashboard_Presidente %}{% endblock dashboard_Presidente %}
-  {% block dashboard_Diretores %}{% endblock dashboard_Diretores %}  
+
+  {% block dashboard_Diretores %}{% endblock dashboard_Diretores %}
+
   {% block dashboard_administradores %}{% endblock dashboard_administradores %}
+
   {% block dashboard_delegados %}{% endblock dashboard_delegados %}
+
   {% block dashboard_AuxAssociacao %}{% endblock dashboard_AuxAssociacao %}
+
   {% block dashboard_AuxReparticao %}{% endblock dashboard_AuxReparticao %}
+
   {% block dashboard_Associados %}{% endblock dashboard_Associados%}
   <!--########################################################################-->
 
-
- <!--BLOCOS DO APP Associação -->
- {% block list_users %}{% endblock list_users %}
+  <!--BLOCOS DO APP Associação -->
+  {% block list_users %}{% endblock list_users %}
   {% block create_associacao %}{% endblock create_associacao %}
   {% block delete_associacao %}{% endblock delete_associacao %}
   {% block edit_associacao %}{% endblock edit_associacao %}
@@ -81,14 +85,12 @@
   {% block list_PorReparticao %}{% endblock list_PorReparticao %}
   <!--########################################################################-->
 
-
   <!--BLOCOS DO APP DOCUMENTOS -->  
   {% block upload_documentos %}{% endblock upload_documentos %}
   {% block create_tipo_documento %}{% endblock create_tipo_documento %}
   {% block list_TipoDocumento %}{% endblock list_TipoDocumento %}
   {% block delete_documento %}{% endblock delete_documento %}
   <!--########################################################################-->
-
 
   <!--BLOCOS DO APP EDITOR -->
   {% block create_nota %}{% endblock create_nota %}
@@ -109,11 +111,28 @@
   {% block arquivadas_tarefa %}{% endblock arquivadas_tarefa %}
   {% block board_tarefa %}{% endblock board_tarefa %}
   {% block delete_tarefa %}{% endblock delete_tarefa %}
-
-
-  
-  {% block list_notificaoes %}{% endblock list_notificaoes %}
   <!--########################################################################-->
+
+  <!--BLOCOS DO APP ARTICLES -->
+  {% block create_article %}{% endblock create_article %}
+  {% block list_articles %}{% endblock list_articles %}
+  {% block single_article %}{% endblock single_article %}
+  {% block edit_article %}{% endblock edit_article %}
+  {% block delete_article %}{% endblock delete_article %}
+
+  {% block list_category %}{% endblock list_category %}
+  {% block list_tag %}{% endblock list_tag %}
+  {% block create_category %}{% endblock create_category %}
+  {% block create_tag %}{% endblock create_tag %}
+  {% block edit_category %}{% endblock edit_category %}
+  {% block edit_tag %}{% endblock edit_tag %}
+  {% block delete_category %}{% endblock delete_category %}
+  {% block delete_tag %}{% endblock delete_tag %}
+  {% block categories %}{% endblock categories %}
+  {% block tags %}{% endblock tags %}
+
+  <!--########################################################################-->
+
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/inputmask/5.0.7/inputmask.min.js"></script>

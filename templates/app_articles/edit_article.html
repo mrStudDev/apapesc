@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block edit_article %}
+{% include 'components/navbar_associacao.html' %}
+
+<main class="flex-grow">
+    <div class="container mx-auto mt-8 p-4 bg-white rounded max-w-4xl">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}bg-green-500
+                    {% elif message.tags == 'error' %}bg-red-500
+                    {% elif message.tags == 'info' %}bg-blue-500
+                    {% else %}bg-gray-500
+                    {% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}        
+        <h1 class="text-2xl font-bold mb-6">Editar Artigo</h1>
+        <p class="text-sm text-gray-600 mb-4">
+            <strong>Usuário:</strong> {{ request.user.username }}
+        </p>
+        <form method="post" enctype="multipart/form-data" class="bg-white p-8 rounded-lg shadow-lg">
+            {% csrf_token %}
+            <!-- Seção: Dados Principais -->
+            <div class="border-b border-gray-300 pb-6 mb-6">
+                <h2 class="text-lg font-semibold text-gray-800 mb-4">Dados do Artigo</h2>
+                
+                <!-- Campo: Title -->
+                <div class="w-full">
+                    <label for="{{ form.title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.title.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.title }}
+                    </div>
+                    {% for error in form.title.errors %}
+                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <!-- Campo: Meta title -->
+                <div class="w-full py-4">
+                    <label for="{{ form.meta_title.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.meta_title.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.meta_title }}
+                    </div>
+                    {% for error in form.meta_title.errors %}
+                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <!-- Campo: Title -->
+                <div class="w-full py-4">
+                    <label for="{{ form.image.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.image.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.image }}
+                    </div>
+                    {% for error in form.image.errors %}
+                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                    {% endfor %}
+                </div>           
+                <!-- Campo: Fonte Image -->
+                <div class="w-full py-4">
+                    <label for="{{ form.image_source.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.image_source.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.image_source }}
+                    </div>
+                    {% for error in form.image_source.errors %}
+                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                    {% endfor %}
+                </div>                  
+                <!-- Categorias -->
+                <div class="mb-4 py-4">
+                    <label for="{{ form.category.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.category.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.category }}
+                    </div>
+                    {% for error in form.category.errors %}
+                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <!-- Tags -->
+                <div class="w-full py-4">
+                    <label for="{{ form.tags.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.tags.label }}
+                    </label>
+                    <div class="mt-1">
+                        <select
+                            name="{{ form.tags.name }}"
+                            id="{{ form.tags.id_for_label }}"
+                            class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            multiple
+                            size="20" 
+                        >
+                            {% for choice in form.tags.field.queryset %}
+                                <option value="{{ choice.id }}" 
+                                    {% if choice.id|stringformat:"s" in form.tags.value|stringformat:"s" %}selected{% endif %}>
+                                    {{ choice }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% for error in form.tags.errors %}
+                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                    {% endfor %}
+                </div>            
+                <!-- Campo: Palavras Chave -->
+                <div class="w-full py-4">
+                    <label for="{{ form.keywords.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.keywords.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.keywords }}
+                    </div>
+                    {% for error in form.keywords.errors %}
+                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                    {% endfor %}
+                </div>          
+                <!-- Campo: Meta Descrição -->
+                <div class="w-full py-4">
+                    <label for="{{ form.meta_description.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.meta_description.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.meta_description }}
+                    </div>
+                    {% for error in form.meta_description.errors %}
+                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                    {% endfor %}
+                </div>         
+                <!-- Anotações -->        
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Tarefa/Anotações</h2>
+                <div class="mt-1 w-full" style="max-width: 100%; padding: 0; margin: 0;">
+                    {% include 'components/my_editor.html' %}
+                </div>
+                <br>
+                <!-- Campo: Publicado? -->
+                <div class="w-full py-4">
+                    <label for="{{ form.is_published.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.is_published.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.is_published }}
+                    </div>
+                    {% for error in form.is_published.errors %}
+                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                    {% endfor %}
+                </div>   
+                <!-- Campo: Publicado? -->
+                <div class="w-full py-4">
+                    <label for="{{ form.research_sources.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                        {{ form.research_sources.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.research_sources }}
+                    </div>
+                    {% for error in form.research_sources.errors %}
+                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                    {% endfor %}
+                </div>                                        
+                <br>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Salvar alterações
+            </button>
+        </form>
+    </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+
+{% endblock edit_article %}
