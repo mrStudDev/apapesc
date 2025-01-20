@@ -1,9 +1,24 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% block title %}Ex Integrantes{% endblock title %}
 {% block ex_integrantes %}
-<!-- Navbar -->
-{% include "components/navbar_associacao.html" %}
+
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretor.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% else %}
+        {% include "components/navbar_delegados.html" %}
+    {% endif %}
 
 
 <div class="container mx-auto mt-8">

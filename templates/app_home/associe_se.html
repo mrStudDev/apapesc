@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Associe-se{% endblock title %}
+
+{% block associe_se %}
+<!-- Navbar -->
+{% include "components/navbar_home.html" %}
+<link rel="stylesheet" href="{% static 'css/styles_home.css' %}">
+<section style="background-color:#111827">
+  <div class="container mx-auto px-6 py-16">
+    <!-- Mensagens de sucesso/erro -->
+    {% if messages %}
+    <div class="container mx-auto mt-8 bg-green-100" style="max-width: 980px;">
+        {% for message in messages %}
+            <div class="p-4 rounded-lg 
+                {% if message.tags == 'success' %}
+                    bg-green-100 text-green-800
+                {% elif message.tags == 'error' %}
+                    bg-red-100 text-red-800
+                {% elif message.tags == 'warning' %}
+                    bg-yellow-100 text-yellow-800
+                {% elif message.tags == 'info' %}
+                    bg-blue-100 text-blue-800
+                {% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    <br>
+    {% endif %}
+
+    <!-- Card Transparente -->
+    <div class="bg-white bg-opacity-10 backdrop-blur-lg p-8 rounded-lg shadow-lg text-center mx-auto max-w-6xl">    
+      <!-- Título Principal -->
+      <h1 class="associacao-title text-gray-100">
+          Associação Apapesc
+      </h1>
+
+      <!-- Título Secundário -->
+      <h2 class="text-4xl md:text-5xl text-gray-200 font-bold tracking-tight mt-4">
+        Semear, colher, pescar e viver!
+      </h2>
+
+      <!-- Subtítulo -->
+      <p class="mt-6 text-lg text-gray-200 leading-relaxed max-w-3xl mx-auto">
+        <strong>Venha fazer parte dessa família!</strong> 
+      </p>
+    </div>
+  </div>
+</section>
+
+<section id="membership" class="relative text-white py-16" style="background-color:#111827">
+    <div class="container mx-auto text-center px-6">
+        <!-- Título Principal -->
+        <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 leading-tight">
+          Para solicitar a filiação basta preencher o formulário. Informe seu número que logo entraremos em contato com você!
+        </h2>
+        <p class="text-lg mb-6">
+          Junte-se a nós e faça parte de uma comunidade dedicada ao desenvolvimento sustentável da agricultura e da pesca.
+        </p>
+  
+        <!-- Container para o Formulário -->
+        <div class="max-w-2xl mx-auto my-8">
+          <h2 class="text-xl md:text-2xl font-bold mb-4 text-center">Entre em Contato</h2>
+        
+      
+          <!-- Formulário -->
+          <form method="post" class="bg-white p-6 rounded-lg shadow-lg">
+              {% csrf_token %}
+              <div class="mb-4">
+                  <label for="{{ form.nome.id_for_label }}" class="block text-sm font-medium text-gray-700">Nome</label>
+                  {{ form.nome }}
+                  {% for error in form.nome.errors %}
+                      <p class="text-red-500 text-sm">{{ error }}</p>
+                  {% endfor %}
+              </div>
+              <div class="mb-4">
+                  <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700">Celular</label>
+                  {{ form.celular }}
+                  {% for error in form.celular.errors %}
+                      <p class="text-red-500 text-sm">{{ error }}</p>
+                  {% endfor %}
+              </div>
+              <div class="mb-4">
+                  <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">E-mail</label>
+                  {{ form.email }}
+                  {% for error in form.email.errors %}
+                      <p class="text-red-500 text-sm">{{ error }}</p>
+                  {% endfor %}
+              </div>
+              <div class="mb-4">
+                  <label for="{{ form.mensagem.id_for_label }}" class="block text-sm font-medium text-gray-700">Mensagem</label>
+                  {{ form.mensagem }}
+                  {% for error in form.mensagem.errors %}
+                      <p class="text-red-500 text-sm">{{ error }}</p>
+                  {% endfor %}
+              </div>
+              <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700 w-full">
+                  Enviar Mensagem
+              </button>
+          </form>
+        </div>
+    </div>    
+  </section>
+
+  <!-- Footer -->
+  {% include "components/footer_associacao.html" %}
+<script src="{% static 'js/mascaraTelefone.js' %}"></script>
+<script src="{% static 'js/formularioEventos.js' %}"></script>
+{% endblock associe_se %}

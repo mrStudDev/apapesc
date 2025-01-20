@@ -1,25 +1,47 @@
 {% extends "account/base_manage.html" %}
 {% load allauth i18n %}
+{% load static %}
 {% block head_title %}
     {% trans "Sign Out" %}
 {% endblock head_title %}
+
 {% block content %}
-    {% element h1 %}
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="{% static 'css/output.css' %}">
+<div class="bg-white p-6 rounded-lg shadow-lg max-w-lg mx-auto">
+    <!-- Título -->
+    <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">
         {% trans "Sign Out" %}
-    {% endelement %}
-    {% element p %}
+    </h1>
+
+    <!-- Mensagem de Confirmação -->
+    <p class="text-gray-600 mb-6 text-center">
         {% trans 'Are you sure you want to sign out?' %}
-    {% endelement %}
+    </p>
+
+    <!-- Formulário de Saída -->
     {% url 'account_logout' as action_url %}
-    {% element form method="post" action=action_url no_visible_fields=True %}
-        {% slot body %}
-            {% csrf_token %}
-            {{ redirect_field }}
-        {% endslot %}
-        {% slot actions %}
-            {% element button type="submit" %}
-                {% trans 'Sign Out' %}
-            {% endelement %}
-        {% endslot %}
-    {% endelement %}
+    <form method="post" action="{{ action_url }}" class="space-y-4">
+        {% csrf_token %}
+        {{ redirect_field }}
+
+        <!-- Botões -->
+        <div class="flex justify-between space-x-4">
+            <!-- Botão de Voltar -->
+            <a href="{% url 'app_home:home' %}" 
+               class="w-full bg-gray-300 text-gray-800 py-2 rounded-lg text-center hover:bg-gray-400 transition">
+                {% trans "Cancel" %}
+            </a>
+            
+            <!-- Botão de Sair -->
+            <button type="submit" 
+                    class="w-full bg-red-500 text-white py-2 rounded-lg hover:bg-red-600 transition">
+                {% trans "Sign Out" %}
+            </button>
+        </div>
+    </form>
+</div>
 {% endblock content %}
+

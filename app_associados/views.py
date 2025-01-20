@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from app_associados.models import STATUS_CHOICES
 from app_associados.models import AssociadoModel
 from accounts.mixins import GroupPermissionRequiredMixin 
+from django.contrib.auth.mixins import LoginRequiredMixin
 import logging
 from django.contrib.auth.models import Group
 from app_documentos.models import Documento
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 # Cadastrar Associado
-class CreateAssociadoView(GroupPermissionRequiredMixin, CreateView):
+class CreateAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = AssociadoModel
     form_class = AssociadoForm
     template_name = 'app_associados/create_associado.html'
@@ -31,7 +32,7 @@ class CreateAssociadoView(GroupPermissionRequiredMixin, CreateView):
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
         ]
@@ -103,8 +104,8 @@ class CreateAssociadoView(GroupPermissionRequiredMixin, CreateView):
         return reverse_lazy('app_associados:list_geral_associado')
 
 
-# List Geral Associados View
-class ListAssociadosView(GroupPermissionRequiredMixin, ListView):
+# List Geral Associados View - Apenas Superuser
+class ListAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = AssociadoModel
     template_name = 'app_associados/list_geral_associado.html'
     context_object_name = 'associados'
@@ -138,7 +139,7 @@ class ListAssociadosView(GroupPermissionRequiredMixin, ListView):
                 Q(cpf__icontains=query)
             )
 
-        return queryset
+        return queryset.order_by('user__first_name', 'user__last_name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -170,8 +171,8 @@ class ListAssociadosView(GroupPermissionRequiredMixin, ListView):
         return context
 
     
-# Single View
-class SingleAssociadoView(GroupPermissionRequiredMixin, DetailView):
+# Single Associado View
+class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
     model = AssociadoModel
     template_name = 'app_associados/single_associado.html'
     context_object_name = 'associado'
@@ -180,7 +181,7 @@ class SingleAssociadoView(GroupPermissionRequiredMixin, DetailView):
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
         ]
@@ -202,7 +203,7 @@ class EditAssociadoView(GroupPermissionRequiredMixin, UpdateView):
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
         ]
@@ -245,54 +246,50 @@ class EditAssociadoView(GroupPermissionRequiredMixin, UpdateView):
 
 
 # ================================ #
-# # List Por Associação View
-class ListAssociadosAssociacaoView(GroupPermissionRequiredMixin, ListView):
+# # Lista Por Associação View
+class ListAssociadosAssociacaoView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = AssociadoModel
     template_name = 'app_associados/list_por_associacao.html'
     context_object_name = 'associados'
-    group_required = 'Admin da Associação'  # ou 'Delegado da Repartição'
-
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]
+    
     def get_queryset(self):
-        queryset = super().get_queryset()
         user = self.request.user
+        queryset = super().get_queryset()
 
-        # Filtra os associados com base na associação do administrador logado
+        # Filtra associados com base no tipo de usuário logado
         if user.groups.filter(name='Admin da Associação').exists():
             try:
                 administrador = IntegrantesModel.objects.get(user=user)
-                associacao = AssociacaoModel.objects.get(administrador=administrador)
-                queryset = queryset.filter(associacao=associacao)
-            except (IntegrantesModel.DoesNotExist, AssociacaoModel.DoesNotExist):
-                queryset = queryset.none()
+                queryset = queryset.filter(associacao=administrador.associacao)
+            except IntegrantesModel.DoesNotExist:
+                return queryset.none()
         elif user.groups.filter(name='Delegado da Repartição').exists():
             try:
                 delegado = IntegrantesModel.objects.get(user=user)
-                reparticao = ReparticoesModel.objects.get(delegado=delegado)
-                queryset = queryset.filter(reparticao=reparticao)
-            except (IntegrantesModel.DoesNotExist, ReparticoesModel.DoesNotExist):
-                queryset = queryset.none()
+                queryset = queryset.filter(reparticao=delegado.reparticao)
+            except IntegrantesModel.DoesNotExist:
+                return queryset.none()
 
-        # Filtros adicionais da request
-        associacao_id = self.request.GET.get('associacao', '')
-        reparticao_id = self.request.GET.get('reparticao', '')
-        status = self.request.GET.get('status', '')
+        # Aplica filtros da request (associação, repartição, status)
+        associacao_id = self.request.GET.get('associacao')
+        reparticao_id = self.request.GET.get('reparticao')
+        status = self.request.GET.get('status')
 
         if associacao_id:
-            try:
-                associacao = AssociacaoModel.objects.get(id=associacao_id)
-                queryset = queryset.filter(associacao=associacao)
-            except AssociacaoModel.DoesNotExist:
-                queryset = queryset.none()
+            queryset = queryset.filter(associacao_id=associacao_id)
         if reparticao_id:
-            try:
-                reparticao = ReparticoesModel.objects.get(id=reparticao_id)
-                queryset = queryset.filter(reparticao=reparticao)
-            except ReparticoesModel.DoesNotExist:
-                queryset = queryset.none()
+            queryset = queryset.filter(reparticao_id=reparticao_id)
         if status:
             queryset = queryset.filter(status=status)
 
-        # Filtro adicional para busca (opcional)
+        # Filtro de busca (q)
         query = self.request.GET.get('q', '').strip()
         if query:
             queryset = queryset.filter(
@@ -302,72 +299,69 @@ class ListAssociadosAssociacaoView(GroupPermissionRequiredMixin, ListView):
                 Q(cpf__icontains=query)
             )
 
-        return queryset
+        return queryset.order_by('user__first_name', 'user__last_name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        # Adiciona informações dos filtros ao contexto
+        # Adiciona associações e repartições ao contexto
         if user.groups.filter(name='Admin da Associação').exists():
             try:
                 administrador = IntegrantesModel.objects.get(user=user)
-                context['associacoes'] = AssociacaoModel.objects.filter(administrador=administrador)
+                context['associacoes'] = AssociacaoModel.objects.filter(id=administrador.associacao_id)
+                context['reparticoes'] = ReparticoesModel.objects.filter(associacao_id=administrador.associacao_id)
             except IntegrantesModel.DoesNotExist:
                 context['associacoes'] = AssociacaoModel.objects.none()
+                context['reparticoes'] = ReparticoesModel.objects.none()
+        elif user.groups.filter(name='Delegado da Repartição').exists():
+            try:
+                delegado = IntegrantesModel.objects.get(user=user)
+                context['associacoes'] = AssociacaoModel.objects.filter(reparticoes__id=delegado.reparticao_id)
+                context['reparticoes'] = ReparticoesModel.objects.filter(id=delegado.reparticao_id)
+            except IntegrantesModel.DoesNotExist:
+                context['associacoes'] = AssociacaoModel.objects.none()
+                context['reparticoes'] = ReparticoesModel.objects.none()
         else:
             context['associacoes'] = AssociacaoModel.objects.all()
-        
-        # Filtra repartições com base na ASSOCIAÇÂO selecionada
-        selected_associacao_id = self.request.GET.get('associacao', '')
-        if selected_associacao_id:
-            context['reparticoes'] = ReparticoesModel.objects.filter(associacao_id=selected_associacao_id)
-        else:
-            if user.groups.filter(name='Admin da Associação').exists():
-                try:
-                    administrador = IntegrantesModel.objects.get(user=user)
-                    associacao = AssociacaoModel.objects.get(administrador=administrador)
-                    context['reparticoes'] = ReparticoesModel.objects.filter(associacao=associacao)
-                except (IntegrantesModel.DoesNotExist, AssociacaoModel.DoesNotExist):
-                    context['reparticoes'] = ReparticoesModel.objects.none()
-            else:
-                context['reparticoes'] = ReparticoesModel.objects.all()
+            context['reparticoes'] = ReparticoesModel.objects.all()
 
         context['status_choices'] = STATUS_CHOICES
 
         # Passa os valores selecionados para o template
-        context['selected_associacao'] = selected_associacao_id
+        context['selected_associacao'] = self.request.GET.get('associacao', '')
         context['selected_reparticao'] = self.request.GET.get('reparticao', '')
         context['selected_status'] = self.request.GET.get('status', '')
 
         return context
 
-# Lista de Associados por repartição
-class ListAssociadosReparticaoView(GroupPermissionRequiredMixin, ListView):
+
+# Lista de Associados por Repartição View
+class ListAssociadosReparticaoView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = AssociadoModel
     template_name = 'app_associados/list_por_reparticao.html'
     context_object_name = 'associados'
-    group_required = 'Delegado(a) da Repartição'
+    group_required = ['Delegado(a) da Repartição']
 
     def get_queryset(self):
-        queryset = super().get_queryset()
         user = self.request.user
 
-        # Filtra os associados com base na repartição do delegado logado
+        # Inicia o queryset vazio
+        queryset = AssociadoModel.objects.none()
+
+        # Filtra os associados pela repartição do delegado logado
         if user.groups.filter(name='Delegado(a) da Repartição').exists():
             try:
                 delegado = IntegrantesModel.objects.get(user=user)
-                reparticao = ReparticoesModel.objects.get(delegado=delegado)
-                queryset = queryset.filter(reparticao=reparticao)
-            except (IntegrantesModel.DoesNotExist, ReparticoesModel.DoesNotExist):
-                queryset = queryset.none()
+                queryset = AssociadoModel.objects.filter(reparticao=delegado.reparticao)
+            except IntegrantesModel.DoesNotExist:
+                pass
 
-        # Filtro por status
+        # Filtros opcionais
         status = self.request.GET.get('status', '')
         if status:
             queryset = queryset.filter(status=status)
 
-        # Filtro de busca
         query = self.request.GET.get('q', '').strip()
         if query:
             queryset = queryset.filter(
@@ -377,50 +371,28 @@ class ListAssociadosReparticaoView(GroupPermissionRequiredMixin, ListView):
                 Q(cpf__icontains=query)
             )
 
-        return queryset
+        return queryset.order_by('user__first_name', 'user__last_name')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         user = self.request.user
 
-        # Adiciona a associação e repartição vinculadas ao delegado no contexto
+        # Adiciona informações da associação e repartição ao contexto
         if user.groups.filter(name='Delegado(a) da Repartição').exists():
             try:
                 delegado = IntegrantesModel.objects.get(user=user)
-                reparticao = ReparticoesModel.objects.get(delegado=delegado)
-                associacao = reparticao.associacao
-                context['associacoes'] = [associacao]  # Apenas a associação vinculada
-                context['reparticoes'] = [reparticao]  # Apenas a repartição vinculada
-            except (IntegrantesModel.DoesNotExist, ReparticoesModel.DoesNotExist):
-                context['associacoes'] = []
-                context['reparticoes'] = []
+                reparticao = delegado.reparticao
+                context['associacao'] = reparticao.associacao
+                context['reparticao'] = reparticao
+            except IntegrantesModel.DoesNotExist:
+                context['associacao'] = None
+                context['reparticao'] = None
         else:
-            context['associacoes'] = AssociacaoModel.objects.none()
-            context['reparticoes'] = ReparticoesModel.objects.none()
+            context['associacao'] = None
+            context['reparticao'] = None
 
+        # Adiciona filtros ao contexto
         context['status_choices'] = STATUS_CHOICES
         context['selected_status'] = self.request.GET.get('status', '')
 
-        return context
-
-
-
-#  Lists Associados Clientes Especiais
-class ClientesEspeciaisListView(GroupPermissionRequiredMixin, ListView):
-    model = AssociadoModel
-    template_name = 'app_associados/list_clientes_especiais.html'
-    context_object_name = 'associados'
-    group_required = [
-        'Superuser',
-        ]    
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        queryset = queryset.filter(status='especial').order_by('user__first_name', 'user__last_name')
-
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['status_choices'] = STATUS_CHOICES
         return context

@@ -26,26 +26,19 @@
                     Super
                     <span class="material-icons align-middle">arrow_drop_down</span>
                 </button>
-                <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
-                    <a href="{% url 'app_manager:super_dashboard' %}" class="block px-4 py-2 hover:bg-gray-200">Dashboard</a>
-                    <a href="{% url 'app_manager:finances' %}" class="block px-4 py-2 hover:bg-gray-200">Finances</a>
-                </div>
-            </div>
-            <div class="relative group">
-                <button class="hover:text-gray-200 focus:outline-none">
-                    Ups
-                    <span class="material-icons align-middle">arrow_drop_down</span>
-                </button>
                 <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
-                    
+                    <a href="{% url 'app_manager:super_dashboard' %}" class="block px-4 py-2 hover:bg-gray-200">Dashboard</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_automacoes:upload_pdf_residencia' %}" class="block px-4 py-2 hover:bg-gray-200">Base Residencia</a>
                     <a href="{% url 'app_automacoes:upload_pdf_filiacao' %}" class="block px-4 py-2 hover:bg-gray-200">Base Filiacao</a>
                     <a href="{% url 'app_automacoes:upload_pdf_atividade_pesqueira' %}" class="block px-4 py-2 hover:bg-gray-200">Base Atv. Pesqueira</a>
                     <a href="{% url 'app_automacoes:upload_pdf_hipossuficiencia' %}" class="block px-4 py-2 hover:bg-gray-200">Base Hipossuficiência</a>
                     <a href="{% url 'app_automacoes:upload_pdf_procuracao_juridica' %}" class="block px-4 py-2 hover:bg-gray-200">Base Proc. Jurídica</a>
                     <a href="{% url 'app_automacoes:lista_automacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Base</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_manager:finances_super' %}" class="block px-4 py-2 hover:bg-gray-200">Finances</a>
                 </div>
-            </div>            
+            </div>           
             <!-- Dropdown Listas -->
             <div class="relative group">
                 <button class="hover:text-gray-200 focus:outline-none">
@@ -65,6 +58,11 @@
                     <a href="{% url 'app_associacao:list_integrante' %}" class="block px-4 py-2 hover:bg-gray-200">Integrantes Associação</a>
                     <a href="{% url 'app_associacao:list_cargo' %}" class="block px-4 py-2 hover:bg-gray-200">Cargos</a>
                     <a href="{% url 'app_associacao:ex_integrantes' %}" class="block px-4 py-2 hover:bg-gray-200">Ex-Integrantes</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_documentos:list_tipo_documento' %}" class="block px-4 py-2 hover:bg-gray-200">Tipos Documentos</a> 
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_articles:list_articles' %}" class="block px-4 py-2 hover:bg-gray-200">Artigos</a> 
+                    
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Users/Accounts</a>
 
@@ -86,10 +84,16 @@
                     <a href="#licencas" class="block px-4 py-2 hover:bg-gray-200">Nova Licença</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_associacao:create_cargo' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Cargo</a>
-                    <!-- CADASTRA NOVO INTEGRANTE A PARTIR DE UM USUÁRIO -->
+                    <!-- CADASTRA NOVO INTEGRANTE E ASSOCIADO A PARTIR DE UM USUÁRIO -->
                     <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Integrante</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Associado</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_documentos:create_tipo_documento' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Tipo de Documento</a> 
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_articles:create_article' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Artigo</a>
+                    <a href="{% url 'app_articles:create_category' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Categoria</a>
+                    <a href="{% url 'app_articles:create_tag' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Tag</a>                    
 
                 </div>
             </div>
@@ -101,31 +105,13 @@
                     <span class="material-icons align-middle">arrow_drop_down</span>
                 </button>
                 <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
-                    <a href="{% url 'app_tarefas:create_tarefa' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Tarefa</a>                   
                     <a href="{% url 'app_tarefas:list_tarefas' %}" class="block px-4 py-2 hover:bg-gray-200">Lista de Tarefas</a>
+                    <a href="{% url 'app_tarefas:create_tarefa' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Tarefa</a>
                     <a href="{% url 'app_tarefas:board_tarefas' %}" class="block px-4 py-2 hover:bg-gray-200">Fluxo Tarefas</a>
                     <a href="{% url 'app_tarefas:tarefas_arquivadas' %}" class="block px-4 py-2 hover:bg-gray-200">Tarefas Arquivadas</a>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Notificações</a>
-
                 </div>
             </div>
-
-            <!-- Articles  -->
-            <div class="relative group">
-                <button class="hover:text-gray-200 focus:outline-none">
-                    Artigos
-                    <span class="material-icons align-middle">arrow_drop_down</span>
-                </button>
-                <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
-                    <a href="{% url 'app_articles:list_articles' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Artigos</a>                   
-                    <a href="{% url 'app_articles:create_article' %}" class="block px-4 py-2 hover:bg-gray-200">Escrever Artigo</a>
-                    <a href="{% url 'app_articles:list_categories' %}" class="block px-4 py-2 hover:bg-gray-200">Categorias</a>
-                    <a href="{% url 'app_articles:list_tags' %}" class="block px-4 py-2 hover:bg-gray-200">Tags</a>
-                    <a href="{% url 'app_articles:create_category' %}" class="block px-4 py-2 hover:bg-gray-200">Add Categoria</a>
-                    <a href="{% url 'app_articles:create_tag' %}" class="block px-4 py-2 hover:bg-gray-200">Add Tag</a>
-
-                </div>
-            </div>            
+       
 
             <!-- Link para o login (somente quando o usuário não estiver autenticado) -->
             {% if not user.is_authenticated %}
@@ -133,7 +119,7 @@
             {% else %}
                 <a href="#" class="text-yellow-300"><strong style="font-size:12px;">{{ user.username }}</strong></a>
                 <!-- Logout  -->
-                <a href="{% url 'account_logout' %}" class="hover:text-gray-200">Logout</a>
+                <a href="{% url 'account_logout' %}" class="hover:text-gray-200">Sair</a>
             {% endif %}
 
             {% if user.is_authenticated %}
@@ -169,7 +155,7 @@
             <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Manager</summary>
             <div class="bg-blue-600">
                 <a href="{% url 'app_manager:super_dashboard' %}" class="block px-6 py-2 hover:bg-blue-700">Dashboard</a>
-                <a href="{% url 'app_manager:finances' %}" class="block px-6 py-2 hover:bg-blue-700">Finances</a>
+                <a href="{% url 'app_manager:finances_super' %}" class="block px-6 py-2 hover:bg-blue-700">Finances</a>
                 <a href="#" class="block px-6 py-2 hover:bg-blue-700">Link</a>
             </div>
         </details>

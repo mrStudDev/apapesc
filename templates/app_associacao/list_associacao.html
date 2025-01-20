@@ -26,8 +26,8 @@
                     <td class="border px-4 py-2">{{ associacao.email }}</td>
                     <td class="border px-4 py-2 text-center">
                         <a href="{% url 'app_associacao:single_associacao' associacao.id %}" class="text-blue-500 hover:underline">Detalhes</a> |
-                        <a href="{% url 'app_associacao:edit_associacao' associacao.id %}" class="text-yellow-500 hover:underline">Editar</a> |
-                        <a href="#" class="text-red-500 hover:underline">Excluir</a>
+                        <a href="{% url 'app_associacao:edit_associacao' associacao.id %}" class="text-yellow-500 hover:underline">Editar</a>
+                        <a href="#" class="text-red-500 hover:underline"></a>
                     </td>
                 </tr>
                 {% empty %}
@@ -46,6 +46,7 @@
         </div>
     </div>
 </div>
-
+ <!-- Footer -->
+ {% include "components/footer_associacao.html" %}
 
 {% endblock list_associacao %}

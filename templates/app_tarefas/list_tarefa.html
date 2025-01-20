@@ -5,8 +5,29 @@
 
 {% block list_tarefa %}
 
-<!-- Navbar -->
-{% include "components/navbar_associacao.html" %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretor.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %}     
+    {% endif %}
+
 <div class="container mx-auto py-6 px-4 max-w-6xl">
     <!-- Título -->
     <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Lista de Tarefas</h1>
@@ -71,15 +92,24 @@
         </div>
     </form>
 
-    <!-- Lista de Tarefas -->
-    {% if tarefas %}
-    <div class="flex justify-end mb-6">
+    <!-- Botões de Fluxo de Tarefas e Nova Tarefa -->
+    <div class="flex justify-end space-x-4 mb-6">
+        <!-- Fluxo de Tarefas -->
         <a href="{% url 'app_tarefas:board_tarefas' %}"
-           class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600">
-            Fluxo de Tarefas - Board
+        class="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 flex items-center">
+            <i class="material-icons mr-2">dashboard</i> Fluxo de Tarefas - Board
+        </a>
+
+        <!-- Nova Tarefa -->
+        <a href="{% url 'app_tarefas:create_tarefa' %}"
+        class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 flex items-center">
+            <i class="material-icons mr-2">add</i> Nova Tarefa
         </a>
     </div>
     
+
+    <!-- Lista de Tarefas -->
+    {% if tarefas %}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for tarefa in tarefas %}
         <div class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow duration-200">

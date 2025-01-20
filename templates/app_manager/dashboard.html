@@ -13,6 +13,25 @@
 
   <!-- Container geral para o conteúdo -->
   <div class="flex flex-col min-h-screen max-w-7xl mx-auto px-6 py-8">
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="p-4 rounded-md text-white 
+                {% if message.tags == 'success' %}
+                    bg-green-500
+                {% elif message.tags == 'error' %}
+                    bg-red-500
+                {% elif message.tags == 'info' %}
+                    bg-blue-500
+                {% else %}
+                    bg-gray-500
+                {% endif %}
+            ">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
     <!-- Área de conteúdo principal -->
     <div class="flex-1 p-6">
         <div class="text-gray-400">Super-Dashboard</div>      
@@ -137,36 +156,36 @@
             </ul>
           </div>
         </div>
-
-        <!-- Painel de Agendamentos -->
+        <!-- Painel de Artigo -->
         <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-auto">
-          <h3 class="text-xl font-semibold text-black-600">Agendamentos</h3>
-          <div class="mt-4 text-5xl font-bold text-green-600">0</div>
+          <h3 class="text-xl font-semibold text-black-600">Artigos</h3>
+          {% if total_articles %}
+            <div class="mt-4 text-5xl font-bold text-blue-500">{{total_articles}}</div>
+          {% else %}
+            <p>Nenhum artigo encontrado.</p>
+          {% endif %}
           <div class="mt-4 text-sm text-gray-600">
             <hr class="my-3 border-gray-300">
             <ul class="space-y-2">
+              {% for article in articles %}
               <li>
-                <a href="#" class="flex items-center text-gray-700 hover:text-green-600 transition-colors">
-                  <i class="material-icons mr-2">event</i>
-                  Agendamento 1
+                <a href="#" class="flex items-center text-gray-700 hover:text-orange-600 transition-colors">
+                  <i class="material-icons mr-2">check_circle</i>
+                  {{article.title}}
                 </a>
               </li>
-              <li>
-                <a href="#" class="flex items-center text-gray-700 hover:text-green-600 transition-colors">
-                  <i class="material-icons mr-2">event</i>
-                  Agendamento 2
-                </a>
-              </li>
-              <!-- Additional Agendamentos links -->
+              {% endfor %}
+              <!-- Additional Tarefas links -->
             </ul>
           </div>
         </div>
+
 
         <!-- Painel de Tarefas -->
         <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-auto">
           <h3 class="text-xl font-semibold text-black-600">Tarefas</h3>
           {% if total_tarefas %}
-            <div class="mt-4 text-5xl font-bold text-orange-600">{{total_tarefas}}</div>
+            <div class="mt-4 text-5xl font-bold text-blue-500">{{total_tarefas}}</div>
           {% else %}
             <p>Nenhuma tarefa encontrada.</p>
           {% endif %}
@@ -191,11 +210,49 @@
         <!-- Container Principal do Painel -->
         <div class="bg-white shadow-md rounded-lg overflow-hidden">
             <!-- Cabeçalho do Painel -->
-            <div class="bg-blue-500 text-white py-4 px-6">
-                <h2 class="text-lg font-semibold">Pequeno Painel</h2>
-                <p class="text-sm">Informações detalhadas e organizadas</p>
+            <!-- Sessão 1 -->
+            <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+              <h3 class="text-gray-700 font-semibold text-sm mb-4">Lista de Mensagens</h3>
+              <a href="{% url 'app_home:list_mensagens' %}" class="flex items-center text-blue-700 hover:text-orange-600 transition-colors">
+                <i class="material-icons mr-2">check_circle</i>
+                Ver Lista de Mensagens
+              </a>
+              <br>
+              <div class="overflow-x-auto">
+                  <table class="min-w-full bg-white rounded-lg shadow-md">
+                      <thead>
+                          <tr class="bg-gray-200 text-gray-600 text-sm leading-normal">
+                              <th class="py-3 px-6 text-left">Nome</th>
+                              <th class="py-3 px-6 text-left">Celular</th>
+                              <th class="py-3 px-6 text-left">Email</th>
+                              <th class="py-3 px-6 text-left">Mensagem</th>
+                          </tr>
+                      </thead>
+                      <tbody class="text-gray-600 text-sm font-light">
+                          {% for lead in leads %}
+                          <tr class="border-b border-gray-200 hover:bg-gray-100">
+                              <td class="py-3 px-6 text-left whitespace-nowrap">{{ lead.nome }}</td>
+                              <td class="py-3 px-6 text-left whitespace-nowrap">{{ lead.celular }}</td>
+                              <td class="py-3 px-6 text-left whitespace-nowrap">{{ lead.email }}</td>
+                              <td class="py-3 px-6 text-left">{{ lead.mensagem }}</td>
+                          </tr>
+                          {% empty %}
+                          <tr>
+                              <td colspan="4" class="py-3 px-6 text-center text-gray-500">Nenhuma mensagem encontrada.</td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+              </div>
             </div>
 
+          </div>
+          <br>
+            <!-- Cabeçalho do Painel -->
+            <div class="bg-gray-200 py-4 px-6">
+              <h2 class="text-lg font-semibold">Painel</h2>
+              <p class="text-sm">Informações detalhadas e organizadas</p>
+          </div>          
             <!-- Corpo do Painel -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
                 <!-- Sessão 1 -->
@@ -240,9 +297,9 @@
                 Informações atualizadas recentemente.
             </div>
         </div>
-    </div>
+
     <!-- Painel de Detalhes com tabelas adicionais -->
-    <div class="bg-white p-8 mt-12 rounded-lg shadow-lg">
+    <div class="bg-gray-100 p-8 mt-12 rounded-lg shadow-lg">
       <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">Associações</h2>
 
       <p class="mt-2 text-gray-600">Contagem de associados por associação.</p>
@@ -270,7 +327,7 @@
       </div>
     </div>
     <!-- Painel de Detalhes com tabelas adicionais -->
-    <div class="bg-white p-8 mt-12 rounded-lg shadow-lg">
+    <div class="bg-gray-100 p-8 mt-12 rounded-lg shadow-lg">
       <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">Repartições e Municípios</h2>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -335,7 +392,7 @@
       </div>
     </div>
   </div>
-
+</div>
 </div>
 
 <div class="flex flex-col min-h-screen max-w-7xl mx-auto px-6 py-8">

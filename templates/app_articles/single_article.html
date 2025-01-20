@@ -2,13 +2,45 @@
 {% load static %}
 
 {% block title %} {{ object.meta_title }} {% endblock title %} 
+
 {% block single_article %}
-{% include 'components/navbar_associacao.html' %}
+
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_direitor %}
+        {% include "components/navbar_diretor.html" %} 
+
+    {% elif is_presidente %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_aux_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% elif is_aux_reparticao %}
+        {% include "components/navbar_aux_reparticao.html" %}   
+
+    {% elif is_associado %}
+        {% include "components/navbar_associado.html" %}      
+
+    {% elif is_vip %}
+        {% include "components/navbar_vip.html" %}
+
+    {% else %}
+        {% include "components/navbar_home.html" %}           
+    {% endif %}
+
 <!-- CSS do Editor -->
 <link rel="stylesheet" href="{% static 'css/editor.css' %}">
 <main class="flex-grow">
     <div class="container mx-auto my-8 max-w-3xl bg-white p-6 rounded-lg shadow-lg text-justify">
-        
         <!-- Título -->
         <h1 class="text-3xl font-bold text-gray-800 mb-4">{{ article.title }}</h1>
 
@@ -109,6 +141,14 @@
         </div>
         
     </div>
+    <!-- Botão de Voltar -->
+    <div class="mt-6 text-center">
+        <a href="{% url 'app_articles:list_articles' %}" class="text-blue-500 hover:text-blue-700">
+            &larr; Voltar para a lista de Artigos
+        </a>
+        <br><br>
+    </div>
+
 </main>
 
 

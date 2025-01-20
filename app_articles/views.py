@@ -3,9 +3,16 @@ from .models import ArticlesModel, CategoryArticlesModel, TagArticlesModel
 from django.urls import reverse
 from django.http import HttpRequest, HttpResponse
 from django.utils import timezone
-from .forms import ArticleCreateForm, CategoryArticlesForm, TagArticlesForm
 from django.urls import reverse_lazy
 from django.utils.text import slugify
+from django.contrib.auth.mixins import LoginRequiredMixin
+from accounts.mixins import GroupPermissionRequiredMixin
+
+from .forms import (
+    ArticleCreateForm,
+    CategoryArticlesForm,
+    TagArticlesForm
+    )
 
 from django.views.generic import (
     ListView,
@@ -21,8 +28,7 @@ from .models import (
 )
 
 
-
-# Create your views here.
+# Artigos Lista - Acesso Livre
 class ArticlesListView(ListView):
     model = ArticlesModel
     template_name = 'app_articles/list_articles.html'
@@ -33,9 +39,10 @@ class ArticlesListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["publicacoes_count"] = ArticlesModel.objects.all().count()
-
+        context["categories"] = CategoryArticlesModel.objects.all()  # Inclua categorias
         return context
 
+# Artigos Singular - Acesso Livre
 class ArticleSingleView(DetailView):
     model = ArticlesModel
     template_name = 'app_articles/single_article.html'
@@ -46,150 +53,47 @@ class ArticleSingleView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['categories'] = CategoryArticlesModel.objects.all()
+        context['categories'] = CategoryArticlesModel.objects.exclude(slug__isnull=True).exclude(slug='')
         context['tags'] = TagArticlesModel.objects.all()
 
         return context
 
-
-class ArticleCreateView(CreateView):
-    model = ArticlesModel
-    form_class = ArticleCreateForm
-    template_name = 'app_articles/create_article.html'
-    success_url = reverse_lazy('app_articles:list_articles')  # Substitua pelo nome correto do URL da lista de artigos
-
-    def form_valid(self, form):
-        # Defina o autor como o usuário logado
-        form.instance.author = self.request.user
-        return super().form_valid(form)
-
-
-class EditArticleView(UpdateView):
-    model = ArticlesModel
-    form_class = ArticleCreateForm
-    template_name = 'app_articles/edit_article.html'
-
-    def get_success_url(self):
-        # Redireciona para a página do artigo após edição
-        return reverse('app_articles:single_article', kwargs={'slug': self.object.slug})
-
-class DeleteArticleView(DeleteView):
-    model = ArticlesModel
-    template_name = 'app_articles/delete_article.html'
-    success_url = reverse_lazy('app_articles:list_articles')
-    
-# Categorias
-class CategoryCreateView(CreateView):
-    model = CategoryArticlesModel
-    form_class = CategoryArticlesForm
-    template_name = 'app_articles/create_category.html'
-    success_url = reverse_lazy('app_articles:list_categories')
-
-    def form_valid(self, form):
-        # Gera o slug com base no campo "name"
-        form.instance.slug = slugify(form.cleaned_data['name'])
-        return super().form_valid(form)
-
-class CategoryEditView(UpdateView):
-    model = CategoryArticlesModel
-    form_class = CategoryArticlesForm
-    template_name = 'app_articles/edit_category.html'
-    success_url = reverse_lazy('app_articles:list_categories')
-
-class CategoryDeleteView(DeleteView):
-    model = CategoryArticlesModel
-    template_name = 'app_articles/delete_category.html'
-    success_url = reverse_lazy('app_articles:list_categories')  # Ajuste para a rota da lista de categorias
-    success_message = "Categoria deletada com sucesso!"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['category'] = self.object
-        return context
-    
-class CategoriesListView(ListView):
-    template_name = 'app_articles/list_categories.html'
-    ordering = ['-date_created']
-    ordering = ['-id']  # Ordena por ID decrescente
-    context_object_name = 'categories'
-    paginate_by = 12 
-
-    def get_queryset(self):
-            # Retorna o conjunto de categorias ordenado
-            return CategoryArticlesModel.objects.all().order_by('-id')
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['category_count'] = CategoryArticlesModel.objects.count()  # Conta total de categorias
-        return context
-         
+# Categorias Artigos  - Acesso livre Filtros
 class CategoriesView(ListView):
     model = ArticlesModel
     template_name = 'app_articles/categories.html'
     context_object_name = 'articles'
-    paginate_by = 12  # Paginação, opcional
+    paginate_by = 12
 
     def get_queryset(self):
-        # Filtra os artigos pela categoria selecionada
         slug = self.kwargs.get('slug')
-        return ArticlesModel.objects.filter(category__slug=slug, is_published=True).order_by('-date_created')
+        if not slug:
+            return ArticlesModel.objects.none()
+
+        return ArticlesModel.objects.filter(
+            category__slug=slug, is_published=True
+        ).order_by('-date_created')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         slug = self.kwargs.get('slug')
-        # Obtem a categoria atual
-        category = CategoryArticlesModel.objects.get(slug=slug)
-        context['category'] = category
-        # Contagem de artigos nesta categoria
-        context['categories_count'] = ArticlesModel.objects.filter(category=category, is_published=True).count()
-        return context
-
-
-# Tags
-class TagCreateView(CreateView):
-    model = TagArticlesModel
-    form_class = TagArticlesForm
-    template_name = 'app_articles/create_tag.html'
-    success_url = reverse_lazy('app_articles:list_tags')
-    
-    def form_valid(self, form):
-        # Gera o slug com base no campo "name"
-        form.instance.slug = slugify(form.cleaned_data['name'])
-        return super().form_valid(form)
-
-class TagEditView(UpdateView)    :
-    model = TagArticlesModel
-    form_class = TagArticlesForm
-    template_name = 'app_articles/edit_tag.html'
-    success_url = reverse_lazy('app_articles:list_tags')
-    
-class TagDeleteView(DeleteView):
-    model = TagArticlesModel
-    template_name = 'app_articles/delete_tag.html'
-    success_url = reverse_lazy('app_articles:list_tags')
-    success_message = "Categoria deletada com sucesso!"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['tags'] = self.object
-        return context
         
-class TagsListView(ListView)    :
-    template_name = 'app_articles/list_tags.html'
-    ordering = ['-date_created']
-    context_object_name = 'tags'
-    ordering = ['-id']  # Ordena por ID decrescente
-    context_object_name = 'tags'
+        # Adiciona categoria ao contexto
+        try:
+            category = CategoryArticlesModel.objects.get(slug=slug)
+            context['category'] = category
+            context['categories_count'] = category.articles.filter(is_published=True).count()
+        except CategoryArticlesModel.DoesNotExist:
+            context['category'] = None
+            context['categories_count'] = 0
 
-    def get_queryset(self):
-            # Retorna o conjunto de tagd ordenado
-            return TagArticlesModel.objects.all().order_by('-id')
+        return context
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["tags_count"] = TagArticlesModel.objects.count()
-        return context    
-    
+
+
+
+
+# Tags Artigos - Acesso livre Filtros
 class TagsView(ListView):
     model = ArticlesModel
     template_name = 'app_articles/tags.html'
@@ -209,3 +113,160 @@ class TagsView(ListView):
         # Filtra e conta os artigos associados à tag
         context["tags_count"] = ArticlesModel.objects.filter(tags=tag, is_published=True).count()
         return context
+
+    
+#============ Acesso Restrito ============================== #
+# Artigos Criar 
+class ArticleCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
+    model = ArticlesModel
+    form_class = ArticleCreateForm
+    template_name = 'app_articles/create_article.html'
+    success_url = reverse_lazy('app_articles:list_articles')
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]  
+    
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        if not form.instance.slug:
+            form.instance.slug = slugify(form.instance.title)
+        
+        response = super().form_valid(form)
+        
+        # Salva as tags depois que o artigo foi salvo
+        form.instance.tags.set(form.cleaned_data['tags'])
+        
+        return response
+
+
+class EditArticleView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
+    model = ArticlesModel
+    form_class = ArticleCreateForm
+    template_name = 'app_articles/edit_article.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]  
+    
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Salva as tags após o artigo ser salvo
+        form.instance.tags.set(form.cleaned_data['tags'])
+        return response
+        
+    def get_success_url(self):
+        # Redireciona para a página do artigo após edição
+        return reverse('app_articles:single_article', kwargs={'slug': self.object.slug})
+
+
+class DeleteArticleView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteView):
+    model = ArticlesModel
+    template_name = 'app_articles/delete_article.html'
+    success_url = reverse_lazy('app_articles:list_articles')
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]  
+        
+# Categorias
+class CategoryCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
+    model = CategoryArticlesModel
+    form_class = CategoryArticlesForm
+    template_name = 'app_articles/create_category.html'
+    success_url = reverse_lazy('app_articles:list_categories')
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]  
+    
+    def form_valid(self, form):
+        # Gera o slug com base no campo "name"
+        form.instance.slug = slugify(form.cleaned_data['name'])
+        return super().form_valid(form)
+
+class CategoryEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
+    model = CategoryArticlesModel
+    form_class = CategoryArticlesForm
+    template_name = 'app_articles/edit_category.html'
+    success_url = reverse_lazy('app_articles:list_categories')
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]  
+    
+class CategoryDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteView):
+    model = CategoryArticlesModel
+    template_name = 'app_articles/delete_category.html'
+    success_url = reverse_lazy('app_articles:list_categories')  # Ajuste para a rota da lista de categorias
+    success_message = "Categoria deletada com sucesso!"
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]  
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.object
+        return context
+    
+
+# Tags
+class TagCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
+    model = TagArticlesModel
+    form_class = TagArticlesForm
+    template_name = 'app_articles/create_tag.html'
+    success_url = reverse_lazy('app_articles:list_tags')
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]  
+        
+    def form_valid(self, form):
+        # Gera o slug com base no campo "name"
+        form.instance.slug = slugify(form.cleaned_data['name'])
+        return super().form_valid(form)
+
+class TagEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
+    model = TagArticlesModel
+    form_class = TagArticlesForm
+    template_name = 'app_articles/edit_tag.html'
+    success_url = reverse_lazy('app_articles:list_tags')
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]  
+        
+class TagDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteView):
+    model = TagArticlesModel
+    template_name = 'app_articles/delete_tag.html'
+    success_url = reverse_lazy('app_articles:list_tags')
+    success_message = "Categoria deletada com sucesso!"
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]  
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tags'] = self.object
+        return context
+        

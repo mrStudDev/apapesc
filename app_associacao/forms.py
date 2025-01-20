@@ -423,14 +423,20 @@ class IntegranteForm(forms.ModelForm):
         self.fields['group'].queryset = Group.objects.exclude(name__in=excluded_groups).order_by('name')
 
         # Configura os querysets dos outros campos relacionados
-        self.fields['associacao'].queryset = AssociacaoModel.objects.all()
+        #self.fields['associacao'].queryset = AssociacaoModel.objects.all()
         self.fields['cargo'].queryset = CargosModel.objects.all()
-        self.fields['reparticao'].queryset = ReparticoesModel.objects.all()
+       # self.fields['reparticao'].queryset = ReparticoesModel.objects.all()
         self.fields['profissao'].queryset = ProfissoesModel.objects.all()
 
-        # Se um usuário for passado, use suas informações (caso necessário no formulário)
-        #if user:
-            #self.fields['email'].initial = user.email
+        # Configurações de Associação
+        self.fields['associacao'].queryset = AssociacaoModel.objects.all()
+        self.fields['associacao'].label_from_instance = lambda obj: obj.nome_fantasia
+
+        # Configurações de Repartições
+        self.fields['reparticao'].queryset = ReparticoesModel.objects.all()
+        self.fields['reparticao'].label_from_instance = lambda obj: obj.nome_reparticao
+
+
                         
     # Validação dos dígitos verificadores do CPF
     def calcular_digito(cpf_parcial):

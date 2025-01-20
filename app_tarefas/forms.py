@@ -68,3 +68,7 @@ class TarefaForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if 'criado_por' in self.fields:
             self.fields['criado_por'].required = False
+
+        # Ajusta o queryset para exibir o nome completo no campo de seleção
+        self.fields['associado'].queryset = User.objects.filter(is_active=True).order_by('first_name', 'last_name')
+        self.fields['associado'].label_from_instance = lambda obj: obj.get_full_name() or obj.username            

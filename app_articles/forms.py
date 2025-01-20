@@ -67,7 +67,20 @@ class ArticleCreateForm(forms.ModelForm):
             }),                                  
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['tags'].initial = self.instance.tags.all()
 
+    def clean_tags(self):
+        tags = self.cleaned_data.get('tags')
+        # Se quiser obrigar a ter pelo menos 1, tudo bem.
+        if not tags:
+            raise forms.ValidationError("Selecione ao menos uma tag.")
+        return tags
+    
+    
+    
 class CategoryArticlesForm(forms.ModelForm):
     class Meta:
         model = CategoryArticlesModel

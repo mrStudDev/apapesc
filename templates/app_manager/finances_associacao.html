@@ -4,17 +4,18 @@
 {% block title %}Finances-Dashboard{% endblock title %}
 
 {% block finances_associacao %}
-
+  <!-- Navbar -->
+  {% include 'components/navbar_administradores.html' %}
+  
 <body class="font-sans bg-gray-100 text-gray-900">
 
-  <!-- Navbar -->
-  {% include 'components/navbar_associacao.html' %}
+
 
   <!-- Container principal -->
   <div class="flex flex-col min-h-screen max-w-7xl mx-auto px-6 py-8">
     <!-- Título do painel -->
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-800 text-center">Painel Financeiro</h1>
+      <h1 class="text-3xl font-bold text-gray-800 text-center">Painel Financeiro Admin</h1>
     </div>
 
     <!-- Painéis financeiros -->

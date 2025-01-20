@@ -127,10 +127,10 @@ RECOLHE_INSS_CHOICES = [
 ]
 SEGURO_DEFESO_CHOICES = [
     ('Não Recebe', 'Não Recebe'),
-    ('A paetir de Dez', 'A paetir de Dez'),
-    ('A paetir de Jan', 'A paetir de Jan'),
-    ('A paetir de Fev', 'A paetir de Fev'),
-    ('A paetir de Março', 'A paetir de Março'),
+    ('A partir de Dez', 'A partir de Dez'),
+    ('A partir de Jan', 'A partir de Jan'),
+    ('A partir de Fev', 'A partir de Fev'),
+    ('A partir de Março', 'A partir de Março'),
     ('Não declarado', 'Não declarado'),     
 ]
 class ProfissoesModel(models.Model):
@@ -436,14 +436,16 @@ class AssociadoModel(models.Model):
     # Vínculo
     associacao = models.ForeignKey(
         AssociacaoModel, 
-        on_delete=models.SET_NULL, 
+        on_delete=models.SET_NULL,
+        blank=True,
         null=True, 
         related_name='associados_associacao',
         verbose_name="Associação"
     )
     reparticao = models.ForeignKey(
         ReparticoesModel, 
-        on_delete=models.SET_NULL, 
+        on_delete=models.SET_NULL,
+        blank=True,
         null=True, 
         related_name='reparticoes_associados',
         verbose_name="Repartição"
@@ -453,7 +455,7 @@ class AssociadoModel(models.Model):
         on_delete=models.SET_NULL, 
         null=True, 
         related_name='municipios_associados',
-        verbose_name="Município de Circunscrição"
+        verbose_name="Município de Circunscrição/Atuação"
     )
     data_filiacao = models.DateField(
         null=True,

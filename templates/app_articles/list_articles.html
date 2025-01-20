@@ -1,11 +1,46 @@
 {% extends 'base.html' %}
 
+{% block title %}Lista Artigos{% endblock title %}
+
 {% block list_articles %}
-{% include 'components/navbar_associacao.html' %}
+
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretor.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% elif is_auxiliar_reparticao %}
+        {% include "components/navbar_aux_reparticao.html" %}   
+
+    {% elif is_associado_associacao %}
+        {% include "components/navbar_associado.html" %}      
+
+    {% elif is_user_vip %}
+        {% include "components/navbar_vip.html" %}
+
+    {% else %}
+        {% include "components/navbar_home.html" %}        
+    {% endif %}
+
+
 <main class="flex-grow">
     <div class="container mx-auto my-6 max-w-5xl">
         <!-- Título -->
-        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Lista de Artigos</h1>
+        <h1 class="text-3xl font-bold text-gray-500 mb-6 text-center">Lista de Artigos</h1>
 
         <!-- Contagem de Publicações -->
         <p class="text-sm text-gray-600 mb-4 text-center">
@@ -29,14 +64,22 @@
 
                 <!-- Conteúdo do Artigo -->
                 <div class="p-4">
-                    <h2 class="text-lg font-bold text-gray-800">
+                    <h2 class="text-lg font-bold text-green-800">
                         <a href="{% url 'app_articles:single_article' article.slug %}" class="hover:text-blue-500">
                             {{ article.title|truncatewords:5  }}
                         </a>
                     </h2>
-                    <a href="{{ article.category.get_absolute_url }}" class="left-2 bg-blue-500 text-white text-xs font-semibold px-2 py-1 rounded">
-                        {{ article.category.name }}
-                    </a>
+                    {% if article.category %}
+                        <a href="{{ article.category.get_absolute_url }}" class="left-2 bg-green-700 text-white text-xs font-semibold px-2 py-1 rounded">
+                            {{ article.category.name }}
+                        </a>
+                    {% else %}
+                        <span class="badge bg-secondary">Sem categoria</span>
+                    {% endif %}
+
+
+
+                    
                 </div>
                 <!-- Tags -->
                 <div class="p-4 border-t border-gray-200">
@@ -54,9 +97,9 @@
                 </div>
 
                 <!-- Rodapé com Data -->
-                <div class="px-4 py-2 bg-gray-50 text-sm text-gray-500 flex justify-between items-center">
+                <div class="px-4 py-2 bg-gray-50 text-sm text-green-800 flex justify-between items-center">
                     <span>Publicado em: {{ article.date_created|date:"d/m/Y" }}</span>
-                    <a href="{% url 'app_articles:single_article' article.slug %}" class="text-blue-500 hover:underline">
+                    <a href="{% url 'app_articles:single_article' article.slug %}" class="text-green-600 hover:underline">
                         Ler mais
                     </a>
                 </div>

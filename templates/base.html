@@ -15,12 +15,17 @@
 <body class="font-sans min-h-screen flex flex-col">
   <!--BLOCOS DO APP HOME -->
   {% block home %}{% endblock home %}
+  {% block list_mensagens %}{% endblock list_mensagens %}
+  {% block sobre %}{% endblock sobre %}
+  {% block contact_us %}{% endblock contact_us %}
+  {% block associe_se %}{% endblock associe_se %}
   <!--########################################################################-->
 
   
   <!--BLOCOS DO APP MANAGER -->
   <!--Blocos Superusers -->
   {% block dashboard %}{% endblock dashboard %}
+  {% block finances_super %}{% endblock finances_super %}
   {% block finances_associacao %}{% endblock finances_associacao %}
   
   <!--Blocos Groups -->
@@ -36,7 +41,9 @@
 
   {% block dashboard_AuxReparticao %}{% endblock dashboard_AuxReparticao %}
 
-  {% block dashboard_Associados %}{% endblock dashboard_Associados%}
+  {% block dashboard_Associados %}{% endblock dashboard_Associados %}
+
+  {% block dashboard_vip %}{% endblock dashboard_vip %}
   <!--########################################################################-->
 
   <!--BLOCOS DO APP Associação -->

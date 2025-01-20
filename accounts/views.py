@@ -23,6 +23,8 @@ def custom_login_redirect(request):
         return redirect(reverse('app_manager:presidente_associacao_dashboard'))
     elif user.groups.filter(name='Associados da Associação').exists():
         return redirect(reverse('app_manager:associado_dashboard'))
+    elif user.groups.filter(name='User Vip').exists():
+        return redirect(reverse('app_manager:user_vip_dasboard'))
     else:
         # Fallback para home
         return redirect(reverse('app_home:home'))

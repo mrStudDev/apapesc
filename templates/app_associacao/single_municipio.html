@@ -2,11 +2,38 @@
 {% load static %}
 
 {% block single_municipio %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
 
-    <!-- Botão de Voltar -->
-    <div class="mt-6">
-        <a href="{% url 'app_associacao:list_municipio' %}" class="text-blue-500 hover:text-blue-700">
-            &larr; Voltar para a lista de Municípios
-        </a>
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretor.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+<main class="flex-grow">
+    <div class="container mx-auto py-6">
+        <h1 class="text-2xl font-bold mb-4 text-gray-800">Município (nada por enquanto)</h1>
+        <!-- Botão de Voltar -->
+        <div class="mt-6">
+            <a href="{% url 'app_associacao:list_municipio' %}" class="text-blue-500 hover:text-blue-700">
+                &larr; Voltar para a lista de Municípios
+            </a>
+        </div>
     </div>
+</main>
+{% include "components/footer_associacao.html" %}
 {% endblock single_municipio %}

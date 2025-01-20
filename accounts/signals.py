@@ -14,7 +14,7 @@ def validate_user_fields(sender, instance, **kwargs):
         raise ValidationError("Nome e sobrenome são obrigatórios.")
 
 
-@receiver(user_logged_in)
+"""@receiver(user_logged_in)
 def redirect_user_based_on_group(sender, request, user, **kwargs):
     # Redireciona baseado no grupo do usuário
     if user.is_superuser:
@@ -33,6 +33,8 @@ def redirect_user_based_on_group(sender, request, user, **kwargs):
         return HttpResponseRedirect(reverse('presidente_associacao_dashboard'))
     elif user.groups.filter(name='Associados da Associação').exists():
         return HttpResponseRedirect(reverse('associado_dashboard'))
+    elif user.groups.filter(name='User Vip').exists():
+        return HttpResponseRedirect(reverse('user_vip_dasboard'))
     else:
         # Redireciona para home caso nenhum grupo seja encontrado
-        return HttpResponseRedirect(reverse('home'))
+        return HttpResponseRedirect(reverse('home'))"""

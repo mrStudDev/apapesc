@@ -179,7 +179,6 @@ class IntegrantesModel(models.Model):
         max_length=255, 
         verbose_name="Logradouro", 
         help_text="Ex: Rua, Servidão, Travessa",
-        default="", 
         blank=True, 
         null=True
     )
@@ -204,7 +203,6 @@ class IntegrantesModel(models.Model):
     cep = models.CharField(
         max_length=9,  # Apenas números (sem o hífen)
         validators=[RegexValidator(r'^\d{5}-\d{3}$', 'CEP deve estar no formato 00000-000')],
-        default="", 
         blank=True, 
         null=True,
         verbose_name="CEP"
@@ -332,7 +330,9 @@ class AssociacaoModel(models.Model):
     )
     # Lista de fundadores como texto livre
     fundadores = models.TextField(
-        verbose_name="Fundadores", 
+        verbose_name="Fundadores",
+        blank=True,
+        null=True,
         help_text="Lista de fundadores da associação"
     )
     
@@ -415,7 +415,8 @@ class ReparticoesModel(models.Model):
         on_delete=models.CASCADE,
         related_name='reparticoes',
         verbose_name="Associação",
-        default=1
+        blank=True,
+        null=True
     )
     nome_reparticao = models.CharField(
         max_length=120,
@@ -498,8 +499,7 @@ class ReparticoesModel(models.Model):
     # Municípios de Circunscrição
     municipios_circunscricao = models.ManyToManyField(
         MunicipiosModel,
-        max_length=100, 
-        default="", 
+        max_length=100,
         blank=True,
         related_name="municipios_circunscricao",
         verbose_name="Municipios Circinscrição"

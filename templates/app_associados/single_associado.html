@@ -4,15 +4,28 @@
 
 {% block single_associado %}
 
-<link rel="stylesheet" href="{% static 'css/editor.css' %}">
-<!-- Navbar -->
-{% if is_superuser %}
-    {% include "components/navbar_associacao.html" %}
-{% elif is_admin_associacao %}
-    {% include "components/navbar_administradores.html" %}
-{% elif is_delegado_reparticao %}
-    {% include "components/navbar_delegados.html" %}
-{% endif %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretor.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
 
 <!-- Hero Section -->
 <div class="bg-gray-800 text-white pt-12 pb-8 px-4 text-center">
@@ -1027,41 +1040,32 @@
         </div>
     </div>
 
-    <!-- Links de Ações -->
-    <div class="flex justify-center space-x-2 mb-4">
-        <!-- Botão Lista -->
-        <a href="{% url 'app_associados:list_geral_associado' %}"
-           class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300"
-           title="Lista de Associados">
-            <i class="material-icons" style="font-size: 24px; color:blue">list</i>
-            <span class="sr-only">Lista Geral</span> Lista
-        </a>
-
-        <!-- Botão Editar -->
-        <a href="{% url 'app_associados:edit_associado' associado.pk %}"
-           class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400"
-           title="Editar Associado">
-            <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
-            <span class="sr-only">Editar</span> Editar
-        </a>
-
-
-        <!-- Botão Upload -->
-        <a href="#"
-        class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400"
-        title="Upload de Documento">
-            <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
-            <span class="sr-only">Upload</span> Upload Doc
-        </a>
-
-            <a href="#"
-            class="flex items-center justify-center bg-red-500 text-white py-2 px-3 rounded-md hover:bg-red-600"
+        <!-- Links de Ações -->
+        <div class="flex justify-center space-x-2 mb-4">
+            <!-- Botão Lista -->
+            <a href="{% url 'app_associados:list_geral_associado' %}"
+            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300"
+            title="Lista de Associados">
+                <i class="material-icons" style="font-size: 24px; color:blue">list</i>
+                <span class="sr-only">Lista</span> Lista
+            </a>
+    
+            <!-- Botão Editar -->
+            <a href="{% url 'app_associados:edit_associado' associado.pk %}"
+            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400"
+            title="Editar Associado">
+                <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
+                <span class="sr-only">Editar</span> Editar
+            </a>
+    
+            <!-- Botão Upload -->
+            <a href="{% url 'app_documentos:upload_documento' 'associado' associado.pk %}"
+            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400"
             title="Upload de Documento">
-                <i class="material-icons" style="font-size: 24px; color:white">delete</i>
-                <span class="sr-only">Dletar Associado</span> Deletar Associado
+                <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
+                <span class="sr-only">Upload</span> Upload Doc
             </a>
         </div>
-        <a href="{% url 'app_associados:list_geral_associado' %}" class="text-blue-500 hover:underline">Voltar à lista</a>
     </div>
 </div>
 

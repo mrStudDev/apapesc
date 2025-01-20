@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block dashboard_vip %}
+{% include "components/navbar_user_vip.html" %}
+
+<main class="flex-grow bg-gray-100 py-10">
+  <div class="container mx-auto max-w-4xl bg-white p-6 rounded-lg shadow-lg">
+    <!-- Título do Dashboard -->
+    <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Dashboard VIP</h1>
+
+    <!-- Informações do Usuário -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+      <!-- Card: Informações Pessoais -->
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <h2 class="text-lg font-bold text-gray-700 mb-4 flex items-center">
+          <i class="material-icons text-blue-500 mr-2">person</i> Informações Pessoais
+        </h2>
+        <p><strong>Nome:</strong> {{ user.get_full_name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Data de Registro:</strong> {{ user.date_joined|date:"d/m/Y" }}</p>
+      </div>
+
+      <!-- Card: Estatísticas Rápidas -->
+      <div class="bg-white p-4 rounded-lg shadow-md">
+        <h2 class="text-lg font-bold text-gray-700 mb-4 flex items-center">
+          <i class="material-icons text-green-500 mr-2">bar_chart</i> Estatísticas
+        </h2>
+        <p><strong>Artigos lidos:</strong> 15</p>
+        <p><strong>Artigos Pendentes:</strong> 5</p>
+        <p><strong>Eventos Online:</strong> {{ user.last_login|date:"d/m/Y H:i" }}</p>
+      </div>
+    </div>
+
+    <!-- Ações Rápidas -->
+    <div class="bg-white p-4 rounded-lg shadow-md mb-8">
+      <h2 class="text-lg font-bold text-gray-700 mb-4 flex items-center">
+        <i class="material-icons text-yellow-500 mr-2">settings</i> Ações Rápidas
+      </h2>
+      <div class="flex space-x-4">
+        <a href="" class="bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 flex items-center">
+          <i class="material-icons mr-2">edit</i> Editar Perfil
+        </a>
+        <a href="" class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 flex items-center">
+          <i class="material-icons mr-2">assignment</i> Ver Seus Artigos 
+        </a>
+      </div>
+    </div>
+
+    <!-- Gráfico de Progresso -->
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-lg font-bold text-gray-700 mb-4 flex items-center">
+        <i class="material-icons text-purple-500 mr-2">show_chart</i> Progresso Geral
+      </h2>
+      <canvas id="progressChart" class="w-full h-64"></canvas>
+    </div>
+  </div>
+</main>
+
+<!-- Script para Gráfico de Progresso -->
+<script>
+  const ctx = document.getElementById('progressChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['Concluído', 'Pendente'],
+      datasets: [{
+        data: [15, 5],
+        backgroundColor: ['#10B981', '#F59E0B']
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+</script>
+{% endblock dashboard_vip %}
+

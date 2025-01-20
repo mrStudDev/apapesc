@@ -5,27 +5,267 @@
 <!-- Navbar -->
 {% include "components/navbar_home.html" %}
 <link rel="stylesheet" href="{% static 'css/styles_home.css' %}">
-<section class="bg-gradient-to-r from-blue-700 via-blue-500 to-blue-700 text-white py-12">
-  <div class="container mx-auto px-6 text-center">
-    <!-- Título Principal -->
-    <h1 class="associacao-title">
-        Associação Apapesc
-    </h1>
+<section style="background-color:#111827">
+  <div class="container mx-auto px-6 py-16">
+    <!-- Mensagens de sucesso/erro -->
+    {% if messages %}
+    <div class="container mx-auto mt-8 bg-green-100" style="max-width: 980px;">
+        {% for message in messages %}
+            <div class="p-4 rounded-lg 
+                {% if message.tags == 'success' %}
+                    bg-green-100 text-green-800
+                {% elif message.tags == 'error' %}
+                    bg-red-100 text-red-800
+                {% elif message.tags == 'warning' %}
+                    bg-yellow-100 text-yellow-800
+                {% elif message.tags == 'info' %}
+                    bg-blue-100 text-blue-800
+                {% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    <br>
+    {% endif %}
 
+    <!-- Card Transparente -->
+    <div class="bg-white bg-opacity-10 backdrop-blur-lg p-8 rounded-lg shadow-lg text-center mx-auto max-w-6xl">    
+      <!-- Título Principal -->
+      <h1 class="associacao-title text-gray-100">
+          Associação Apapesc
+      </h1>
 
-    <!-- Título Secundário -->
-    <h2 class="text-4xl md:text-5xl font-bold tracking-tight mt-4">
-      Tradição e Cultura da Pesca em Santa Catarina
-    </h2>
+      <!-- Título Secundário -->
+      <h2 class="text-4xl md:text-5xl text-gray-200 font-bold tracking-tight mt-4">
+        Semear, colher, pescar e viver!
+      </h2>
 
-    <!-- Subtítulo -->
-    <p class="mt-6 text-lg leading-relaxed max-w-3xl mx-auto">
-      A pesca em Santa Catarina é mais que uma atividade econômica; é uma tradição enraizada, passada de geração em geração. 
-      Com respeito ao mar e à natureza, os pescadores catarinenses mantêm viva uma herança cultural que sustenta famílias, molda 
-      comunidades e fortalece a identidade regional.
-    </p>
+      <!-- Subtítulo -->
+      <p class="mt-6 text-lg text-gray-200 leading-relaxed max-w-3xl mx-auto">
+        <strong>Cultivar e pescar é alimentar o futuro!</strong> No Brasil, a agricultura e pesca 
+          são mais do que simples ofícios — são a alma das comunidades que vivem entre o campo e o mar. 
+          Cada semente plantada e cada rede lançada carrega o esforço de gerações que, com respeito à 
+          terra e às águas, garantem o sustento das famílias e preservam um legado cultural único. Aqui, 
+          a vida é semeada no solo e fisgada nas águas com paixão e gratidão.
+      </p>
+    </div>
   </div>
 </section>
 
+<section class="bg-green-50 py-12">
+  <div class="container mx-auto flex flex-wrap lg:flex-nowrap items-center">
+    <!-- Imagem à Esquerda -->
+    <div class="w-full lg:w-1/3 mb-8 lg:mb-0 rounded-lg shadow-md p-6 bg-green-50">
+      <img src="{% static 'images/arvore.png' %}" alt="Imagem Representativa" class="rounded-lg shadow-lg mx-auto lg:mx-0">
+      <small>Imagem de <a href="https://pixabay.com/pt/users/susannp4-1777190/?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=1511608" target="_blank" >Susann Mielke</a> por <a href="https://pixabay.com/pt//?utm_source=link-attribution&utm_medium=referral&utm_campaign=image&utm_content=1511608">Pixabay</a></small>
+    </div>
+
+    <!-- Conteúdo à Direita -->
+    <div class="w-full lg:w-2/3 lg:pl-12">
+      <!-- Título Principal -->
+
+      <h1 class="text-3xl lg:text-4xl font-bold text-blue-950 mb-6">
+        Desenvolvimento, Sustentabilidade e Legalidade
+      </h1>
+      <p class="text-lg text-gray-600 leading-relaxed mb-8">
+        Somos uma organização comprometida com o progresso social. Entendemos que a sustentabilidade e a 
+        legalidade são os pilares do desenvolvimento contínuo e pŕospero para todas gerações.
+        <span class="text-blue-950 font-bold">Nossa missão é promover a regularização e profissionalização das atividades agrícolas e pesqueiras</span>, 
+        garantindo que esses setores fundamentais se desenvolvam em harmonia com o meio ambiente e dentro 
+        das normas legais.
+      </p>
+
+    <br>
+      <!-- Grid de Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Card 1 -->
+        <div class="bg-green-50 rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-blue-950 mb-2">Regularização e Profissionalização</h2>
+          <p class="text-gray-600">
+            Oferecemos assistência completa aos pescadores e agricultores, ajudando na regulamentação de suas atividades e no
+            desenvolvimento profissional.
+          </p>
+        </div>
+        <!-- Card 2 -->
+        <div class="bg-green-50 rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-blue-950 mb-2">Sustentabilidade e Preservação Ambiental</h2>
+          <p class="text-gray-600">
+            Desenvolvemos projetos que promovem boas práticas agrícolas e pesqueiras, contribuindo para a
+            preservação dos recursos naturais e a proteção do meio ambiente.
+          </p>
+        </div>
+        <!-- Card 3 -->
+        <div class="bg-green-50 rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-blue-950 mb-2">Consultoria Jurídica e Ambiental</h2>
+          <p class="text-gray-600">
+            Prestamos apoio em questões ambientais relacionadas a licenças, estudos de viabilidade 
+            e adequação de mão de obra especializada e de instalações do setor produtivo.
+          </p>
+        </div>
+        <!-- Card 4 -->
+        <div class="bg-green-50  rounded-lg shadow-md p-6">
+          <h2 class="text-xl font-semibold text-blue-950 mb-2">Combate à Ilegalidade</h2>
+          <p class="text-gray-600">
+            Atuamos ativamente no combate a práticas ilegais, incentivando a regularização de todos os setores produtivos em que
+            estamos presentes.
+          </p>
+        </div>
+      </div>
+
+      <!-- Mensagem de Conclusão -->
+      <p class="text-gray-600 mt-8 leading-relaxed">
+        Com uma visão voltada para o futuro, trabalhamos para construir um Mundo mais justo, sustentável e
+        próspero para todos. Seja parte desse movimento conosco!
+      </p>
+    </div>
+  </div>
+</section>
+<section class="relative w-full h-[300px] md:h-[500px]">
+  <!-- Imagem -->
+  <img src="{% static 'images/rede_pesca.jpg' %}" alt="Pescador" class="w-full h-full object-cover">
+
+  <!-- Link de Referência -->
+  <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white text-sm px-3 py-1 rounded-md shadow-md">
+    Imagem - <a href="https://pixabay.com/" target="_blank" class="underline hover:text-gray-300">Pixabay</a>
+  </div>
+</section>
+
+<!-- Call-to-Action Section -->
+<section id="membership" class="relative text-white py-16" style="background-color:#111827">
+  <div class="container mx-auto text-center px-6">
+      <h2 class="text-3xl font-bold mb-4">Associe-se à APAPESC</h2>
+      <p class="text-lg mb-6">Junte-se a nós e faça parte de uma comunidade dedicada ao desenvolvimento sustentável da pesca.</p>
+      <a href="{% url 'app_home:associe_se' %}" class="bg-white text-blue-700 font-semibold py-3 px-6 rounded-md hover:bg-gray-200 transition">
+          Seja um Associado
+      </a>
+  </div>
+  <br>
+  <!-- Imagem Responsiva Ajustada -->
+  <div class="flex justify-center items-center">
+      <img src="{% static 'images/pessoas.png' %}" 
+           alt="Pescador" 
+           class="h-48 object-cover rounded-lg shadow-md">
+  </div>
+</section>
+
+    <!-- Seção de Cards -->
+    <section class="py-16 bg-green-50">
+      <div class="container mx-auto px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Card 1 -->
+          <div class="bg-green-50 rounded-lg shadow-lg overflow-hidden">
+              <div class="p-6">
+                  <h2 class="text-2xl font-bold text-blue-950 mb-2">Representação e Defesa</h2>
+                  <p class="text-gray-700 mb-4">A APAPESC defende os direitos dos pescadores em instâncias públicas e privadas, promovendo regulamentações justas e sustentáveis.</p>
+                  <a href="#" class="text-blue-950 hover:text-blue-700 font-semibold">Saiba mais</a>
+              </div>
+          </div>
+          <!-- Card 2 -->
+          <div class="bg-green-50 rounded-lg shadow-lg overflow-hidden">
+              <div class="p-6">
+                  <h2 class="text-2xl font-bold text-blue-950 mb-2">Capacitação Profissional</h2>
+                  <p class="text-gray-700 mb-4">Oferecemos cursos e treinamentos para melhorar as técnicas de cultivo e pesca e garantir a sustentabilidade dos recursos.</p>
+                  <a href="#" class="text-blue-950 hover:text-blue-700 font-semibold">Saiba mais</a>
+              </div>
+          </div>
+          <!-- Card 3 -->
+          <div class="bg-green-50 rounded-lg shadow-lg overflow-hidden">
+              <div class="p-6">
+                  <h2 class="text-2xl font-bold text-blue-950 mb-2">Benefícios e Convênios</h2>
+                  <p class="text-gray-700 mb-4">Trabalhamos em busca de benefícios e convênios.</p>
+                  <a href="#" class="text-blue-950 hover:text-blue-700 font-semibold">Saiba mais</a>
+              </div>
+          </div>
+          <!-- Card 4 -->
+          <div class="bg-green-50 rounded-lg shadow-lg overflow-hidden">
+              <div class="p-6">
+                  <h2 class="text-2xl font-bold text-blue-950 mb-2">Suporte Jurídico</h2>
+                  <p class="text-gray-700 mb-4">Nossa equipe oferece suporte jurídico para associados, ajudando com questões legais e burocráticas.</p>
+                  <a href="#" class="text-blue-950 hover:text-blue-700 font-semibold">Saiba mais</a>
+              </div>
+          </div>
+          <!-- Card 5 -->
+          <div class="bg-green-50 rounded-lg shadow-lg overflow-hidden">
+              <div class="p-6">
+                  <h2 class="text-2xl font-bold text-blue-950 mb-2">Projetos Sustentáveis</h2>
+                  <p class="text-gray-700 mb-4">Participamos de projetos que visam a sustentabilidade e a preservação dos recursos naturais.</p>
+                  <a href="#" class="text-blue-950 hover:text-blue-700 font-semibold">Saiba mais</a>
+              </div>
+          </div>
+          <!-- Card 6 -->
+          <div class="bg-green-50 rounded-lg shadow-lg overflow-hidden">
+              <div class="p-6">
+                  <h2 class="text-2xl font-bold text-blue-950 mb-2">Feiras e Eventos</h2>
+                  <p class="text-gray-700 mb-4">Organizamos feiras e eventos que promovem o trabalho dos pescadores e aproximam a comunidade.</p>
+                  <a href="#" class="text-blue-950 hover:text-blue-700 font-semibold">Saiba mais</a>
+              </div>
+          </div>
+      </div>
+  </section>
+<!-- Call-to-Action Section -->
+<section id="membership" class="relative text-white py-16" style="background-color:#111827">
+  <div class="container mx-auto text-center px-6">
+      <!-- Título Principal -->
+      <h2 class="text-2xl md:text-3xl lg:text-4xl font-bold mb-4 leading-tight">
+        Para solicitar a filiação ou para obter informações, envie uma mensagem e informe seu número no formulário abaixo que logo entraremos em contato com você!
+      </h2>
+      <p class="text-lg mb-6">
+        Junte-se a nós e faça parte de uma comunidade dedicada ao desenvolvimento sustentável da agricultura e da pesca.
+      </p>
+
+      <!-- Container para o Formulário -->
+      <div class="max-w-2xl mx-auto my-8">
+        <h2 class="text-xl md:text-2xl font-bold mb-4 text-center">Entre em Contato</h2>
+      
+    
+        <!-- Formulário -->
+        <form method="post" class="bg-white p-6 rounded-lg shadow-lg">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="{{ form.nome.id_for_label }}" class="block text-sm font-medium text-gray-700">Nome</label>
+                {{ form.nome }}
+                {% for error in form.nome.errors %}
+                    <p class="text-red-500 text-sm">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700">Celular</label>
+                {{ form.celular }}
+                {% for error in form.celular.errors %}
+                    <p class="text-red-500 text-sm">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700">E-mail</label>
+                {{ form.email }}
+                {% for error in form.email.errors %}
+                    <p class="text-red-500 text-sm">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <div class="mb-4">
+                <label for="{{ form.mensagem.id_for_label }}" class="block text-sm font-medium text-gray-700">Mensagem</label>
+                {{ form.mensagem }}
+                {% for error in form.mensagem.errors %}
+                    <p class="text-red-500 text-sm">{{ error }}</p>
+                {% endfor %}
+            </div>
+            <button type="submit" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-700 w-full">
+                Enviar Mensagem
+            </button>
+        </form>
+      </div>
+  </div>    
+</section>
+<section class="relative w-full h-[300px] md:h-[500px]">
+  <img src="{% static 'images/barcos_pesca.jpg' %}" alt="Pescador" class="w-full h-full object-cover">
+  <!-- Link de Referência -->
+  <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white text-sm px-3 py-1 rounded-md shadow-md">
+    Imagem - <a href="https://pixabay.com/" target="_blank" class="underline hover:text-gray-300">Pixabay</a>
+  </div>
+</section>
+
+  <!-- Footer -->
+  {% include "components/footer_associacao.html" %}
+<script src="{% static 'js/mascaraTelefone.js' %}"></script>
+<script src="{% static 'js/formularioEventos.js' %}"></script>
 {% endblock home %}
 

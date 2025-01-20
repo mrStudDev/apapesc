@@ -16,7 +16,26 @@
         <!-- Área de conteúdo principal -->
         <div class="flex-1 p-6">
             <div class="text-gray-400">Admin-Dashboard</div> 
-          <!-- Painéis de dados -->
+            <!-- Mensagens de sucesso/erro -->
+              {% if messages %}
+              <div class="container mx-auto mt-8 bg-green-100" style="max-width: 980px;">
+                  {% for message in messages %}
+                      <div class="p-4 rounded-lg 
+                          {% if message.tags == 'success' %}
+                              bg-green-100 text-green-800
+                          {% elif message.tags == 'error' %}
+                              bg-red-100 text-red-800
+                          {% elif message.tags == 'warning' %}
+                              bg-yellow-100 text-yellow-800
+                          {% elif message.tags == 'info' %}
+                              bg-blue-100 text-blue-800
+                          {% endif %}">
+                          {{ message }}
+                      </div>
+                  {% endfor %}
+              </div>
+              <br>
+              {% endif %}
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
     
             <!-- Painel de Associados -->

@@ -1,15 +1,15 @@
 .associacao-title {
     font-family: 'Roboto', sans-serif;
     font-weight: 700; /* Peso da fonte */
-    font-size: 4rem; /* Tamanho base */
+    font-size: 75px; /* Tamanho base */
     letter-spacing: 0.1em; /* Espaçamento entre letras */
     text-transform: uppercase;
     text-align: center;
     background: linear-gradient(
-        60deg,
-        #145d3b, /* Verde */
-        #ffffff, /* Laranja */
-        #4299e1  /* Azul */
+        30deg,
+        #8efce4,
+        #eff1f1, /* Verde */
+        #8efce4 /* Azul */
     );
     background-clip: text;
     -webkit-background-clip: text;

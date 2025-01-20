@@ -2,7 +2,23 @@
 {% block title %}Deletar Tag{% endblock title %}
 
 {% block delete_tag %}
-{% include 'components/navbar_associacao.html' %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_direitor_associacao %}
+        {% include "components/navbar_diretor.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}       
+    {% endif %}
+
 <main class="flex-grow bg-gray-100 py-10">
     <div class="container mx-auto max-w-lg bg-white p-6 rounded-lg shadow-lg">
         <!-- Título -->

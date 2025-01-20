@@ -3,27 +3,48 @@
 {% load static %}
 {% block title %}Editar Tarefa{% endblock title %}
 {% block edit_tarefa %}
-<!-- Navbar -->
-{% include "components/navbar_associacao.html" %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
 
-{% if messages %}
-<div class="mb-4">
-    {% for message in messages %}
-        <div class="p-4 rounded-md text-white 
-            {% if message.tags == 'success' %}bg-green-500
-            {% elif message.tags == 'error' %}bg-red-500
-            {% elif message.tags == 'info' %}bg-blue-500
-            {% else %}bg-gray-500
-            {% endif %}">
-            {{ message }}
-        </div>
-    {% endfor %}
-</div>
-{% endif %}
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretor.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %}     
+    {% endif %}
+
+
 
 <div class="bg-gray-100">
     <div class="container mx-auto my-8">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Ediotar Tarefa</h1>
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Editar Tarefa</h1>
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}bg-green-500
+                    {% elif message.tags == 'error' %}bg-red-500
+                    {% elif message.tags == 'info' %}bg-blue-500
+                    {% else %}bg-gray-500
+                    {% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
             {% csrf_token %}
           <!-- Campo Criado Por -->

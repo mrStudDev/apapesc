@@ -21,6 +21,8 @@ from django.shortcuts import redirect
 from django.http import Http404
 from app_documentos.models import Documento
 
+
+
 class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = TarefaModel
     template_name = 'app_tarefas/list_tarefa.html'
@@ -30,7 +32,7 @@ class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView)
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
     ]
@@ -95,10 +97,10 @@ class TarefaCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateV
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
-        ]
+    ]
     
     def form_valid(self, form):
         # Salva a tarefa e atribui o criador
@@ -116,7 +118,7 @@ class TarefaEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateVie
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
     ]
@@ -182,7 +184,7 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
     ]
@@ -303,10 +305,10 @@ class TarefaBoardView(LoginRequiredMixin, GroupPermissionRequiredMixin, Template
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
-        ]
+    ]
     
     def get_queryset(self):
         user = self.request.user
@@ -375,7 +377,7 @@ def alterar_status_tarefa_board(request, pk):
     return JsonResponse({'success': False, 'message': 'Método não permitido.'}, status=405)
 
 
-class TarefaArquivadaListView(GroupPermissionRequiredMixin, ListView):
+class TarefaArquivadaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = TarefaModel
     template_name = 'app_tarefas/tarefas_arquivadas.html'
     context_object_name = 'tarefas'
@@ -384,10 +386,10 @@ class TarefaArquivadaListView(GroupPermissionRequiredMixin, ListView):
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
-        ]
+    ]
 
     def get_queryset(self):
             user = self.request.user
@@ -437,12 +439,19 @@ def desarquivar_tarefa(request, pk):
     return redirect('app_tarefas:tarefas_arquivadas')
 
 
-class TarefaDeleteView(GroupPermissionRequiredMixin, DeleteView):
+class TarefaDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteView):
     model = TarefaModel
     template_name = 'app_tarefas/delete_tarefa.html'
     success_url = reverse_lazy('app_tarefas:list_tarefas')
-
-
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
 
 

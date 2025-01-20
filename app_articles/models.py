@@ -17,6 +17,11 @@ class CategoryArticlesModel(models.Model):
     def get_absolute_url(self):
         return reverse('app_articles:category_articles', kwargs={'slug': self.slug})
     
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
 
 class TagArticlesModel(models.Model):
     name = models.CharField(max_length=155)
@@ -41,7 +46,7 @@ class ArticlesModel(models.Model):
     )   
     meta_title = models.CharField(max_length=60)
     author = models.ForeignKey(User, default=1, on_delete=models.CASCADE)
-    category = models.ForeignKey(CategoryArticlesModel, null=True, blank=True, on_delete=models.SET_NULL)
+    category = models.ForeignKey(CategoryArticlesModel, null=True, blank=True, on_delete=models.SET_NULL, related_name='articles')
     content = models.TextField(blank=True, null=True)
     keywords = models.CharField(max_length=255)   
     meta_description = models.TextField(max_length=160)

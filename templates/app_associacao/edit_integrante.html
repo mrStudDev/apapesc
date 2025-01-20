@@ -5,27 +5,28 @@
 {% block edit_integrante %}
 <!-- Navbar -->
 {% include "components/navbar_associacao.html" %}
-{% if messages %}
-<div class="mb-4">
-    {% for message in messages %}
-        <div class="p-4 rounded-md text-white 
-            {% if message.tags == 'success' %}
-                bg-green-500
-            {% elif message.tags == 'error' %}
-                bg-red-500
-            {% elif message.tags == 'info' %}
-                bg-blue-500
-            {% else %}
-                bg-gray-500
-            {% endif %}
-        ">
-            {{ message }}
-        </div>
-    {% endfor %}
-</div>
-{% endif %}
+
 <div class="bg-gray-100">
     <div class="container mx-auto my-8">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Editar Integrante</h1>
         <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
             {% csrf_token %}

@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.views.generic import TemplateView
-
+from accounts.mixins import GroupPermissionRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
 from pdfrw import PdfReader, PdfWriter, PageMerge
 from reportlab.lib.pagesizes import A4
@@ -15,7 +16,7 @@ from django.conf import settings
 from django.urls import reverse
 from urllib.parse import urlencode
 from django.contrib.staticfiles import finders
-from reportlab.lib.colors import lightgrey
+from reportlab.lib.colors import lightgrey, grey
 from reportlab.platypus import Table, TableStyle
 
 from app_associados.models import AssociadoModel
@@ -30,6 +31,8 @@ from .models import (
     )
 
 
+
+# UPLOAD DE MODELOS PDF BASE
 def upload_pdf_base(request, automacao):
     modelo_map = {
         'residencia': DeclaracaoResidenciaModel,
@@ -63,9 +66,13 @@ def upload_pdf_base(request, automacao):
 
 
 
-class ListaTodosArquivosView(TemplateView):
+class ListaTodosArquivosView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
     template_name = 'app_automacoes/list_automacoes.html'
-
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        ]
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Adiciona os registros de cada automação ao contexto
@@ -167,6 +174,17 @@ def gerar_declaracao_filiado(request, associado_id):
         leading=18,  # Espaçamento entre as linhas
         alignment=4
     )
+    style_presidente = ParagraphStyle(
+        'Title',
+            parent=styles['Title'],
+            fontName='Times-Bold',
+            fontSize=12,
+            alignment=2,
+            leading=32,  # Define a altura da linha
+            spaceBefore=100,  # Espaçamento antes do parágrafo
+            textColor=grey,
+    )
+    nome_presidente = ( f"{associacao.presidente.user.get_full_name()}")
 
     # Data atual
     data_atual = datetime.now().strftime('%d/%m/%Y')
@@ -202,9 +220,9 @@ def gerar_declaracao_filiado(request, associado_id):
 
     # Adiciona o título, texto, local e assinatura ao Frame
     elements = [
-        Paragraph("Apapesc - Promevento a pesca legal e equilíbrio ambiental em SC", style_title),
+        Paragraph(nome_presidente, style_presidente),
         Spacer(1, 90),
-
+                
         Paragraph(texto, style_normal),
         Spacer(1, 14),
 
@@ -283,7 +301,17 @@ def gerar_declaracao_atividade_pesqueira(request, associado_id):
         leading=15,  # Espaçamento entre as linhas do texto
         alignment=4,  # Justificado
     )
-
+    style_presidente = ParagraphStyle(
+        'Title',
+            parent=styles['Title'],
+            fontName='Times-Bold',
+            fontSize=12,
+            alignment=2,
+            leading=32,  # Define a altura da linha
+            spaceBefore=100,  # Espaçamento antes do parágrafo
+            textColor=grey,
+    )
+    nome_presidente = ( f"{associacao.presidente.user.get_full_name()}")
     # Data atual
     data_atual = datetime.now().strftime('%d/%m/%Y')
 
@@ -340,7 +368,7 @@ def gerar_declaracao_atividade_pesqueira(request, associado_id):
 
     # Elementos para o PDF
     elements = [
-        Paragraph("Apapesc - Promoção da pesca legal e equilíbrio ambiental em SC", style_title),
+        Paragraph(nome_presidente, style_presidente),
         Spacer(1, 100),
         Paragraph(texto, style_normal),
         Spacer(1, 17),

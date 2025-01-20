@@ -49,8 +49,6 @@ INSTALLED_APPS = [
     'app_tarefas',
     'app_articles',
     
-    # Editor
-    'app_editor',
     
 ]
 
@@ -152,15 +150,28 @@ MEDIA_URL = 'media/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_USER_MODEL_USERNAME_FIELD = None
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_SIGNUP_FIELDS = ['first_name', 'last_name', 'email']
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',  # Autenticação padrão do Django
+    'allauth.account.auth_backends.AuthenticationBackend',  # Backend do django-allauth
+]
 
+# Envia e-mails para o console (apenas para desenvolvimento)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+# Configuração do Allauth
+ACCOUNT_FORMS = {
+    'signup': 'accounts.forms.CustomSignupForm',
+    'login': 'accounts.forms.CustomLoginForm',
+    }
+
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"  # Login por email ou username
+ACCOUNT_USERNAME_REQUIRED = True  # Nome de usuário obrigatório
+ACCOUNT_EMAIL_REQUIRED = True  # Email obrigatório
+ACCOUNT_UNIQUE_EMAIL = True  # Email deve ser único
+ACCOUNT_SIGNUP_FIELDS = ['username', 'first_name', 'last_name', 'email']  # Campos obrigatórios no formulário de cadastro
+
+                     
 # Sessão Logins
 #ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/custom-login-redirect/'  # Redireciona após logout
 LOGIN_REDIRECT_URL = '/accounts/custom-login-redirect/'  # Redireciona após login

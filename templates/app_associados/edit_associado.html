@@ -4,8 +4,29 @@
 
 
 {% block edit_associado %}
-<!-- Navbar (já configurada, incluímos no topo) -->
-{% include 'components/navbar_associacao.html' %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretor.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+    
 <div class="container mx-auto mt-8 bg-gray-100" style="max-width: 980px;">
     <h1 class="text-2xl font-bold mb-4 text-center py-2">Editar Associado</h1>
     <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded shadow-md">
@@ -732,7 +753,7 @@
             </div>             
             <!-- Botões de Ação -->
             <div class="mt-8 flex justify-end space-x-4">
-                <a href="#" class="text-blue-500 hover:underline">
+                <a href="{% url 'app_associados:single_associado' associado.pk %}" class="text-blue-500 hover:underline">
                     Cancelar
                 </a>
                 <!-- Botão para salvar e ir para a página de detalhe -->

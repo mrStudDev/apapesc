@@ -1,61 +1,106 @@
 {% extends "account/base_entrance.html" %}
 {% load i18n %}
 {% load allauth account %}
+{% load static %}
 {% block head_title %}
-    {% trans "Sign In" %}
+
+{% trans "Sign In" %}
+
 {% endblock head_title %}
+
 {% block content %}
-    {% element h1 %}
-        {% trans "Sign In" %}
-    {% endelement %}
-    {% if not SOCIALACCOUNT_ONLY %}
-        {% setvar link %}
-            <a href="{{ signup_url }}">
-            {% endsetvar %}
-            {% setvar end_link %}
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="{% static 'css/output.css' %}">
+
+<main class="flex items-center justify-center min-h-screen bg-gray-100 py-12 px-6">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-md overflow-hidden p-6">
+        <!-- Título -->
+        <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">
+            {% trans "Sign In" %}
+        </h1>
+
+        {% if not SOCIALACCOUNT_ONLY %}
+        <div class="text-sm text-gray-600 text-center mb-4">
+            {% trans "Don't have an account?" %}
+            <a href="{{ signup_url }}" class="text-blue-500 hover:underline font-medium">
+                {% trans "Sign up here" %}
             </a>
-        {% endsetvar %}
-        {% element p %}
-            {% blocktranslate %}If you have not created an account yet, then please {{ link }}sign up{{ end_link }} first.{% endblocktranslate %}
-        {% endelement %}
-        {% url 'account_login' as login_url %}
-        {% element form form=form method="post" action=login_url tags="entrance,login" %}
-            {% slot body %}
-                {% csrf_token %}
-                {% element fields form=form unlabeled=True %}
-                {% endelement %}
-                {{ redirect_field }}
-            {% endslot %}
-            {% slot actions %}
-                {% element button type="submit" tags="prominent,login" %}
-                    {% trans "Sign In" %}
-                {% endelement %}
-            {% endslot %}
-        {% endelement %}
-    {% endif %}
-    {% if LOGIN_BY_CODE_ENABLED or PASSKEY_LOGIN_ENABLED %}
-        {% element hr %}
-        {% endelement %}
-        {% element button_group vertical=True %}
-            {% if PASSKEY_LOGIN_ENABLED %}
-                {% element button type="submit" form="mfa_login" id="passkey_login" tags="prominent,login,outline,primary" %}
+        </div>
+
+        <form method="post" action="{% url 'account_login' %}" class="space-y-6">
+            {% csrf_token %}
+            <small class="block text-center text-gray-600 mb-4">
+                Informe seu <strong>e-mail</strong> ou <strong>nome de usuário</strong> e sua senha.
+            </small>
+        
+            <div>
+                <label for="id_login" class="block text-sm font-medium text-gray-700">E-mail ou Nome de Usuário</label>
+                <input
+                    type="text"
+                    name="login"
+                    id="id_login"
+                    placeholder="Digite seu e-mail ou nome de usuário"
+                    class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+            </div>
+        
+            <div>
+                <label for="id_password" class="block text-sm font-medium text-gray-700">Senha</label>
+                <input
+                    type="password"
+                    name="password"
+                    id="id_password"
+                    class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+            </div>
+        
+            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition">
+                Entrar
+            </button>
+        </form>
+        
+        
+        
+        
+        {% endif %}
+
+        <!-- Login com Passkey ou Código (se habilitado) -->
+        {% if LOGIN_BY_CODE_ENABLED or PASSKEY_LOGIN_ENABLED %}
+        <div class="mt-6 border-t pt-6">
+            <p class="text-center text-gray-500 text-sm mb-4">
+                {% trans "Or sign in using" %}
+            </p>
+            <div class="flex flex-col space-y-4">
+                {% if PASSKEY_LOGIN_ENABLED %}
+                <button id="passkey_login" class="w-full bg-gray-100 border py-2 rounded-md hover:bg-gray-200 transition">
                     {% trans "Sign in with a passkey" %}
-                {% endelement %}
-            {% endif %}
-            {% if LOGIN_BY_CODE_ENABLED %}
-                {% element button href=request_login_code_url tags="prominent,login,outline,primary" %}
+                </button>
+                {% endif %}
+                {% if LOGIN_BY_CODE_ENABLED %}
+                <a href="{{ request_login_code_url }}" class="w-full bg-gray-100 border py-2 rounded-md hover:bg-gray-200 transition text-center">
                     {% trans "Mail me a sign-in code" %}
-                {% endelement %}
-            {% endif %}
-        {% endelement %}
-    {% endif %}
-    {% if SOCIALACCOUNT_ENABLED %}
-        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
-    {% endif %}
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Login Social (se habilitado) -->
+        {% if SOCIALACCOUNT_ENABLED %}
+        <div class="mt-6">
+            {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+        </div>
+        {% endif %}
+    </div>
+</main>
 {% endblock content %}
+<div class="mt-6 border-t pt-6">
 {% block extra_body %}
     {{ block.super }}
     {% if PASSKEY_LOGIN_ENABLED %}
         {% include "mfa/webauthn/snippets/login_script.html" with button_id="passkey_login" %}
     {% endif %}
 {% endblock %}
+ </div>

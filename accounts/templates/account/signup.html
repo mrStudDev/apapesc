@@ -1,45 +1,105 @@
 {% extends "account/base_entrance.html" %}
 {% load allauth i18n %}
+{% load static %}
 {% block head_title %}
-    {% trans "Signup" %}
+    {% trans "Sign Up" %}
 {% endblock head_title %}
+
 {% block content %}
-    {% element h1 %}
-        {% trans "Sign Up" %}
-    {% endelement %}
-    {% setvar link %}
-        <a href="{{ login_url }}">
-        {% endsetvar %}
-        {% setvar end_link %}
-        </a>
-    {% endsetvar %}
-    {% element p %}
-        {% blocktranslate %}Already have an account? Then please {{ link }}sign in{{ end_link }}.{% endblocktranslate %}
-    {% endelement %}
-    {% if not SOCIALACCOUNT_ONLY %}
-        {% url 'account_signup' as action_url %}
-        {% element form form=form method="post" action=action_url tags="entrance,signup" %}
-            {% slot body %}
-                {% csrf_token %}
-                {% element fields form=form unlabeled=True %}
-                {% endelement %}
-                {{ redirect_field }}
-            {% endslot %}
-            {% slot actions %}
-                {% element button tags="prominent,signup" type="submit" %}
-                    {% trans "Sign Up" %}
-                {% endelement %}
-            {% endslot %}
-        {% endelement %}
-    {% endif %}
-    {% if PASSKEY_SIGNUP_ENABLED %}
-        {% element hr %}
-        {% endelement %}
-        {% element button href=signup_by_passkey_url tags="prominent,signup,outline,primary" %}
-            {% trans "Sign up using a passkey" %}
-        {% endelement %}
-    {% endif %}
-    {% if SOCIALACCOUNT_ENABLED %}
-        {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
-    {% endif %}
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="{% static 'css/output.css' %}">
+<main class="flex items-center justify-center min-h-screen bg-gray-100 py-12 px-6">
+    <div class="w-full max-w-md bg-white rounded-lg shadow-md overflow-hidden p-6">
+        <!-- Título -->
+        <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">
+            {% trans "Sign Up" %}
+        </h1>
+
+        <!-- Mensagem para usuários existentes -->
+        <div class="text-sm text-gray-600 text-center mb-4">
+            {% trans "Already have an account?" %}
+            <a href="{{ login_url }}" class="text-blue-500 hover:underline font-medium">
+                {% trans "Sign in here" %}
+            </a>
+        </div>
+
+        {% if not SOCIALACCOUNT_ONLY %}
+        <form method="post" action="{% url 'account_signup' %}" class="space-y-6">
+            {% csrf_token %}
+        
+            <!-- Título -->
+            <small class="block text-center text-gray-600 mb-4">
+                Preencha os campos abaixo para criar sua conta
+            </small>
+        
+            <!-- Campos do Formulário -->
+            {% for field in form %}
+            {% if field.name == "terms" or field.field.widget.input_type == "checkbox" %}
+            <!-- Campo "Concordo com os Termos" ou similar -->
+            <div class="flex items-center">
+                <input 
+                    type="checkbox" 
+                    name="{{ field.html_name }}" 
+                    id="{{ field.id_for_label }}" 
+                    class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                >
+                <label for="{{ field.id_for_label }}" class="ml-2 block text-sm text-gray-700">
+                    {{ field.label }}
+                </label>
+            </div>
+            {% else %}
+            <!-- Outros Campos -->
+            <div class="flex flex-col w-full">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    {{ field.label }}
+                </label>
+                <input 
+                    type="{{ field.field.widget.input_type }}" 
+                    name="{{ field.html_name }}" 
+                    id="{{ field.id_for_label }}" 
+                    value="{{ field.value|default:'' }}" 
+                    class="w-full border border-gray-300 rounded-md py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}"
+                >
+                {% for error in field.errors %}
+                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endfor %}
+        
+            <!-- Campo oculto para redirecionamento -->
+            {{ redirect_field }}
+        
+            <!-- Botão de Cadastro -->
+            <button type="submit" class="w-full bg-green-500 text-white py-2 rounded-md hover:bg-green-600 transition">
+                {% trans "Sign Up" %}
+            </button>
+        </form>
+        
+        
+        {% endif %}
+
+        <!-- Cadastro com Passkey (se habilitado) -->
+        {% if PASSKEY_SIGNUP_ENABLED %}
+        <div class="mt-6 border-t pt-6">
+            <p class="text-center text-gray-500 text-sm mb-4">
+                {% trans "Or sign up using" %}
+            </p>
+            <a href="{{ signup_by_passkey_url }}" class="w-full bg-gray-100 border py-2 rounded-md hover:bg-gray-200 transition text-center block">
+                {% trans "Sign up using a passkey" %}
+            </a>
+        </div>
+        {% endif %}
+
+        <!-- Cadastro Social (se habilitado) -->
+        {% if SOCIALACCOUNT_ENABLED %}
+        <div class="mt-6">
+            {% include "socialaccount/snippets/login.html" with page_layout="entrance" %}
+        </div>
+        {% endif %}
+    </div>
+</main>
 {% endblock content %}

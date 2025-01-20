@@ -2,24 +2,26 @@
 {% load static %}
 <!-- Toolbar do Editor -->
 <div class="toolbar mb-4">
-    <button type="button" onclick="formatText('formatBlock', 'H1');" class="btn">T1</button>
-    <button type="button" onclick="formatText('formatBlock', '<h2>')" class="btn">T2</button>
-    <button type="button" onclick="returnToParagraph()" class="btn">Normal</button>
-    <button type="button" onclick="formatText('bold')" class="btn">B</button>
-    <button type="button" onclick="formatText('italic')" class="btn">I</button>
-    <button type="button" onclick="formatText('underline')" class="btn">U</button>
-    <button type="button" onclick="createLink()" class="btn">Link</button>
+    <button type="button" onclick="MainEditor.formatText('formatBlock', 'H1')" class="btn">T1</button>
+    <button type="button" onclick="MainEditor.formatText('formatBlock', 'H2')" class="btn">T2</button>
+    <button type="button" onclick="MainEditor.returnToParagraph()" class="btn">Normal</button>
+    <button type="button" onclick="MainEditor.formatText('bold')" class="btn">B</button>
+    <button type="button" onclick="MainEditor.formatText('italic')" class="btn">I</button>
+    <button type="button" onclick="MainEditor.formatText('underline')" class="btn">U</button>
+    <button type="button" onclick="MainEditor.createLink()" class="btn" target="_blank">Link</button>
+    
+    
 </div>
 <div class="toolbar mb-4">
-    <button type="button" onclick="addBlockquote()" class="btn">" "</button>
-    <select onchange="changeTextColor(this.value)" class="btn">
+    <button type="button" onclick="MainEditor.addBlockquote()" class="btn">" "</button>
+    <select onchange="MainEditor.changeTextColor(this.value)" class="btn">
         <option value="">Cor</option>
         <option value="black">Preto</option>
         <option value="red">Vermelho</option>
         <option value="blue">Azul</option>
         <option value="green">Verde</option>
     </select>
-    <select onchange="changeBackgroundColor(this.value)" class="btn">
+    <select onchange="MainEditor.changeBackgroundColor(this.value)" class="btn">
         <option value="">Fundo</option>
         <option value="white">Branco</option>
         <option value="yellow">Amarelo</option>

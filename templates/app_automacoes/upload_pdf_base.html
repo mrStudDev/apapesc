@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Cadastrar Associação{% endblock title %}
+{% block title %}Upload Modelo PDF Base{% endblock title %}
 
 {% block upload_docAutomacao %}
 {% include 'components/navbar_associacao.html' %}
@@ -9,13 +9,18 @@
         <h1 class="text-2xl font-bold text-gray-800 text-center mb-6">
             Upload de PDF Base - {{ automacao|capfirst }}
         </h1>
-
+        <p>Nessa página voce fará o upload do modelo base: 
+            <strong>{{ automacao|capfirst }}</strong>, para geração automática do documento. 
+        </p>
+        <p class="py-2"><strong>OBS:</strong>: 
+            Não esqueça de verificar o posicionamento e as dimenções do conteúdo no modelo seu novo modelo base! 
+        </p>            
         <form method="post" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
             <!-- Campo de Seleção de PDF -->
             <div>
                 <label for="pdf_base" class="block text-sm font-medium text-gray-700 mb-2">
-                    Selecionar PDF:
+                    Selecionar PDF: <small class="text-red-500">Apenas PDF</small>
                 </label>
                 <input 
                     type="file" 

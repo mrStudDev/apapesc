@@ -6,8 +6,6 @@ from . views import (
   ArticleCreateView,
   EditArticleView,
   DeleteArticleView,
-  CategoriesListView,
-  TagsListView,
   CategoryCreateView,
   TagCreateView,
   CategoriesView,
@@ -15,7 +13,8 @@ from . views import (
   TagEditView,
   CategoryEditView,
   CategoryDeleteView,
-  TagDeleteView
+  TagDeleteView,
+
   )
 
 app_name = 'app_articles'
@@ -30,9 +29,9 @@ urlpatterns = [
   path('create-category/', CategoryCreateView.as_view(), name='create_category'),  
   path('edit-categoria/<int:pk>/', CategoryEditView.as_view(), name='edit_category'),
   path('delete-categoria/<int:pk>/', CategoryDeleteView.as_view(), name='delete_category'),
-  path('categorias/', CategoriesListView.as_view(), name='list_categories'),
+
+
   
-  path('tags/', TagsListView.as_view(), name='list_tags'),
   path('create-tag/', TagCreateView.as_view(), name='create_tag'),
   path('edit-tag/<int:pk>/', TagEditView.as_view(), name='edit_tag'),
   path('delete-tag/<int:pk>/', TagDeleteView.as_view(), name='delete_tag'),

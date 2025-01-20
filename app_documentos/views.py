@@ -4,6 +4,7 @@ from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, View
 from accounts.mixins import GroupPermissionRequiredMixin 
+from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Documento, TipoDocumentoModel
 from app_associados.models import AssociadoModel
 from app_associacao.models import IntegrantesModel, AssociacaoModel, ReparticoesModel
@@ -28,7 +29,7 @@ import datetime
 
 # Create your views here.
 
-class DocumentoUploadView(GroupPermissionRequiredMixin, CreateView):
+class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = Documento
     form_class = DocumentoForm
     template_name = 'app_documentos/upload_documento.html'
@@ -37,7 +38,7 @@ class DocumentoUploadView(GroupPermissionRequiredMixin, CreateView):
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
         ]
@@ -102,7 +103,7 @@ class DocumentoUploadView(GroupPermissionRequiredMixin, CreateView):
             return reverse('app_tarefas:single_tarefa', kwargs={'pk': self.owner.pk})
 
 
-class TipoDocumentoCreateView(CreateView):
+class TipoDocumentoCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = TipoDocumentoModel
     template_name = 'app_documentos/create_tipo_documento.html'
     form_class = TipoDocumentoForm
@@ -112,10 +113,10 @@ class TipoDocumentoCreateView(CreateView):
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
-        ]    
+        ]
 
 class TipoDocListView(ListView):
     model = TipoDocumentoModel
@@ -126,7 +127,7 @@ class TipoDocListView(ListView):
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
         ]
@@ -136,7 +137,7 @@ class TipoDocListView(ListView):
 
 
 # View para detalhes do documento
-class DocumentoDetailView(GroupPermissionRequiredMixin, DetailView):
+class DocumentoDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
     model = Documento
     template_name = 'app_documentos/documento_detail.html'
     context_object_name = 'documento'
@@ -145,7 +146,7 @@ class DocumentoDetailView(GroupPermissionRequiredMixin, DetailView):
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
         ]
@@ -160,16 +161,16 @@ class DocumentoDetailView(GroupPermissionRequiredMixin, DetailView):
 
 
 
-class DocumentoDeleteView(GroupPermissionRequiredMixin, View):
+class DocumentoDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
     group_required = [
         'Superuser',
         'Admin da Associação',
         'Delegado(a) da Repartição',
         'Diretor(a) da Associação',
-        'Presidente',
+        'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
-    ]
+        ]
 
     def get(self, request, pk):
         """Renderiza a página de confirmação de exclusão."""

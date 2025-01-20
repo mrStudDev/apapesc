@@ -13,4 +13,5 @@ def group_context(request):
         'is_diretor_associacao': request.user.groups.filter(name='Diretor(a) da Associação').exists(),
         'is_presidente_associacao': request.user.groups.filter(name='Presidente da Associação').exists(),
         'is_associado_associacao': request.user.groups.filter(name='Associados da Associação').exists(),
+        'is_user_vip': request.user.groups.filter(name='User Vip').exists(),
     }
