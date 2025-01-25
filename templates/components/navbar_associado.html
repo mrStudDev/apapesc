@@ -24,12 +24,12 @@
             <!-- Dropdown Manager -->
             <div class="relative group">
                 <button class="hover:text-gray-200 focus:outline-none">
-                    Associado-Dash
+                    Associado(a)
                     <span class="material-icons align-middle">arrow_drop_down</span>
                 </button>
                 <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
                     <a href="{% url 'app_manager:associado_dashboard' %}" class="block px-4 py-2 hover:bg-gray-200">Dashboard</a>
-                    <a href="{% url 'app_manager:finances' %}" class="block px-4 py-2 hover:bg-gray-200">Finances</a>
+                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Link</a>
                 </div>
             </div>
             <!-- Dropdown Listas -->
@@ -92,9 +92,9 @@
     <div id="mobile-menu" class="hidden bg-blue-500 md:hidden">
         <!-- Usaremos detalhes para criar dropdowns no mobile -->
         <details class="border-t border-blue-600">
-            <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Associado-Dash</summary>
+            <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Associado(a)</summary>
             <div class="bg-blue-600">
-                <a href="{% url 'app_manager:dash_asssociado' %}" class="block px-6 py-2 hover:bg-blue-700">Dashboard</a>
+                <a href="{% url 'app_manager:associado_dashboard' %}" class="block px-6 py-2 hover:bg-blue-700">Dashboard</a>
 
                 <a href="#" class="block px-6 py-2 hover:bg-blue-700">Link</a>
             </div>

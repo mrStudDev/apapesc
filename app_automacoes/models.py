@@ -3,7 +3,16 @@ from django.db import models
 from django.conf import settings
 
 def upload_to_declaracao_residencia(instance, filename):
-    return f'pdf/declaracao_residencia.pdf'
+    # Retorna o caminho fixo para o arquivo PDF
+    file_path = os.path.join('pdf', 'declaracao_residencia.pdf')
+    
+    # Remove o arquivo existente, se existir
+    full_path = os.path.join(settings.MEDIA_ROOT, file_path)
+    if os.path.exists(full_path):
+        os.remove(full_path)
+
+    return file_path
+
 
 def upload_to_declaracao_filiacao(instance, filename):
     return f'pdf/declaracao_filiacao.pdf'
