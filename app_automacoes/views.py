@@ -101,24 +101,20 @@ def upload_pdf_base(request, automacao):
 
 class ListaTodosArquivosView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
     template_name = 'app_automacoes/list_automacoes.html'
-    group_required = [
-        'Superuser',
-        'Admin da Associação',
-    ]
+    group_required = ['Superuser','Admin da Associação']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        # Adiciona dinamicamente os registros de cada tipo de automação ao contexto
-        context['declaracoes'] = {
-            'residencia': DeclaracaoResidenciaModel.objects.all(),
-            'filiacao': DeclaracaoFiliacaoModel.objects.all(),
-            'atividade_pesqueira': DeclaracaoAtividadePesqueiraModel.objects.all(),
-            'hipossuficiencia': DeclaracaoHipossuficienciaModel.objects.all(),
-            'procuracao_juridica': ProcuracaoJuridicaModel.objects.all(),
-        }
-
+        
+        # Adicione cada queryset com nome separado
+        context['declaracoes_residencia'] = DeclaracaoResidenciaModel.objects.all()
+        context['declaracoes_filiacao'] = DeclaracaoFiliacaoModel.objects.all()
+        context['declaracoes_atividade_pesqueira'] = DeclaracaoAtividadePesqueiraModel.objects.all()
+        context['declaracoes_hipossuficiencia'] = DeclaracaoHipossuficienciaModel.objects.all()
+        context['procuracoes_procuracao_juridica'] = ProcuracaoJuridicaModel.objects.all()
+        
         return context
+
 
 
 # Automações
