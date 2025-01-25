@@ -64,7 +64,6 @@ def delete_pdf(request, automacao, declaracao_id):
 
 
 
-
 # UPLOAD DE MODELOS PDF BASE
 def upload_pdf_base(request, automacao):
     modelo_map = {
@@ -116,7 +115,6 @@ class ListaTodosArquivosView(LoginRequiredMixin, GroupPermissionRequiredMixin, T
         return context
 
 
-
 # Automações
 
 # PÁGINA DE AÇÕES -  AS AÇÕES GERAR ESTÃO VÍNCULADAS NESSA PÁGINA
@@ -138,8 +136,8 @@ def pagina_acoes(request, associado_id=None):
         'associado': associado,
         'associacao': associacao,
     })
+    
 #=======================================================================================================
-
 
 # GERAR DECLARAÇÃO DE FILIADO
 def gerar_declaracao_filiado(request, associado_id):
@@ -503,7 +501,7 @@ def gerar_declaracao_residencia(request, associado_id):
         f"para comprovação de residência, em conformidade com o disposto na Lei 7.115, de 29 de "
         f"agosto de 1983, DECLARO para os devidos fins, sob penas da Lei, que RESIDO no endereço: "
         f"<strong>{associado.logradouro}, nº {associado.numero}, {associado.complemento},"
-        f" {associado.bairro}, {associado.municipio} - {associado.uf} {associado.cep}.</strong>"
+        f" {associado.bairro}, {associado.municipio} - {associado.uf}, CEP: {associado.cep}.</strong>"
     )
 
     # Declaração de veracidade

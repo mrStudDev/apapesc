@@ -29,6 +29,25 @@
 
 <main class="flex-grow">
     <div class="max-w-6xl mx-auto px-6">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center py-4">Lista de Arquivos - Automação</h1>
         <div class="bg-white shadow-md rounded-lg p-6">
             <p class="text-gray-600 text-center mb-6">Faça o upload de um modelo base, ou <strong>delete para subistituir</strong> o modelo existente.</p>
@@ -101,16 +120,16 @@
                     </thead>
                     <tbody>
                         {% if declaracoes_filiacao.exists %}
-                        {% for declaracao in declaracoes_filiacao %}
+                        {% for filiacao in declaracoes_filiacao %}
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ filiacao.id }}</td>
                             <td class="py-3 px-4 text-blue-500 text-sm">
-                                <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                                <a href="{{ filiacao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
                             </td>
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ filiacao.atualizado_em }}</td>
                             <td class="py-3 px-4 text-red-500 text-sm text-center">
                                 <!-- Botão de Deletar -->
-                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'filiacao' declaracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
+                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'filiacao' filiacao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
                                     {% csrf_token %}
                                     <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
                                         <i class="material-icons text-base mr-1">delete</i>
@@ -152,16 +171,16 @@
                     </thead>
                     <tbody>
                         {% if declaracoes_atividade_pesqueira.exists %}
-                        {% for declaracao in declaracoes_atividade_pesqueira %}
+                        {% for atividade in declaracoes_atividade_pesqueira %}
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ atividade.id }}</td>
                             <td class="py-3 px-4 text-blue-500 text-sm">
-                                <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                                <a href="{{ atividade.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
                             </td>
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ atividade.atualizado_em }}</td>
                             <td class="py-3 px-4 text-red-500 text-sm text-center">
                                 <!-- Botão de Deletar -->
-                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'atividade_pesqueira' declaracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
+                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'atividade_pesqueira' atividade.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
                                     {% csrf_token %}
                                     <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
                                         <i class="material-icons text-base mr-1">delete</i>
@@ -202,16 +221,16 @@
                     </thead>
                     <tbody>
                         {% if declaracoes_hipossuficiencia.exists %}
-                        {% for declaracao in declaracoes_hipossuficiencia %}
+                        {% for hipossuficiencia in declaracoes_hipossuficiencia %}
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ hipossuficiencia.id }}</td>
                             <td class="py-3 px-4 text-blue-500 text-sm">
-                                <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                                <a href="{{ hipossuficiencia.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
                             </td>
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ hipossuficiencia.atualizado_em }}</td>
                             <td class="py-3 px-4 text-red-500 text-sm text-center">
                                 <!-- Botão de Deletar -->
-                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'hipossuficiencia' declaracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
+                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'hipossuficiencia' hipossuficiencia.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
                                     {% csrf_token %}
                                     <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
                                         <i class="material-icons text-base mr-1">delete</i>
