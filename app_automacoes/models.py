@@ -1,15 +1,14 @@
 import os
 from django.db import models
 from django.conf import settings
+from pathlib import Path
 
 def upload_to_declaracao_residencia(instance, filename):
-    # Caminho onde o arquivo será salvo
     file_path = os.path.join('pdf', 'declaracao_residencia.pdf')
-    
-    # Verifica se o arquivo já existe e o remove
-    full_path = os.path.join(settings.MEDIA_ROOT, file_path)
-    if os.path.exists(full_path):
-        os.remove(full_path)  # Remove o arquivo existente
+    full_path = Path(settings.MEDIA_ROOT) / file_path
+
+    # Remove o arquivo antigo manualmente
+    full_path.unlink(missing_ok=True)
 
     return file_path
 
