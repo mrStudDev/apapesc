@@ -3,14 +3,23 @@ from django.db import models
 from django.conf import settings
 from pathlib import Path
 
+from pathlib import Path
+
 def upload_to_declaracao_residencia(instance, filename):
     file_path = os.path.join('pdf', 'declaracao_residencia.pdf')
     full_path = Path(settings.MEDIA_ROOT) / file_path
 
-    # Remove o arquivo antigo manualmente
-    full_path.unlink(missing_ok=True)
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
 
     return file_path
+
 
 
 def upload_to_declaracao_filiacao(instance, filename):
