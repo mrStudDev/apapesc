@@ -3,13 +3,13 @@ from django.db import models
 from django.conf import settings
 
 def upload_to_declaracao_residencia(instance, filename):
-    # Retorna o caminho fixo para o arquivo PDF
+    # Caminho onde o arquivo será salvo
     file_path = os.path.join('pdf', 'declaracao_residencia.pdf')
     
-    # Remove o arquivo existente, se existir
+    # Verifica se o arquivo já existe e o remove
     full_path = os.path.join(settings.MEDIA_ROOT, file_path)
     if os.path.exists(full_path):
-        os.remove(full_path)
+        os.remove(full_path)  # Remove o arquivo existente
 
     return file_path
 
@@ -42,18 +42,12 @@ class DeclaracaoResidenciaModel(models.Model):
     atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Última Atualização")
 
     def save(self, *args, **kwargs):
-        # Substituir o arquivo existente se for necessário
-        if self.pk:
-            old_instance = DeclaracaoResidenciaModel.objects.get(pk=self.pk)
-            if old_instance.pdf_base and old_instance.pdf_base != self.pdf_base:
-                # Remove o arquivo anterior
-                if os.path.isfile(old_instance.pdf_base.path):
-                    os.remove(old_instance.pdf_base.path)
-
+        # Garantir que o arquivo existente seja substituído
         super().save(*args, **kwargs)
 
     def __str__(self):
         return "Declaração de Residência"
+
 
 
 class DeclaracaoFiliacaoModel(models.Model):
