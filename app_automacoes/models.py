@@ -41,7 +41,14 @@ class DeclaracaoResidenciaModel(models.Model):
     atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Última Atualização")
 
     def save(self, *args, **kwargs):
-        # Garantir que o arquivo existente seja substituído
+        # Substituir o arquivo existente se for necessário
+        if self.pk:
+            old_instance = DeclaracaoResidenciaModel.objects.get(pk=self.pk)
+            if old_instance.pdf_base and old_instance.pdf_base != self.pdf_base:
+                # Remove o arquivo anterior
+                if os.path.isfile(old_instance.pdf_base.path):
+                    os.remove(old_instance.pdf_base.path)
+
         super().save(*args, **kwargs)
 
     def __str__(self):
