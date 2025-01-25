@@ -23,22 +23,94 @@ def upload_to_declaracao_residencia(instance, filename):
 
 
 def upload_to_declaracao_filiacao(instance, filename):
-    return f'pdf/declaracao_filiacao.pdf'
+    file_path = os.path.join('pdf', 'declaracao_filiacao.pdf')
+    full_path = Path(settings.MEDIA_ROOT) / file_path
+
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
+
+    return file_path
 
 def upload_to_declaracao_atividade_pesqueira(instance, filename):
-    return f'pdf/declaracao_atividade_pesqueira.pdf'
+    file_path = os.path.join('pdf', 'declaracao_atividade_pesqueira.pdf')
+    full_path = Path(settings.MEDIA_ROOT) / file_path    
+    
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
+
+    return file_path
 
 def upload_to_declaracao_hipossuficiencia(instance, filename):
-    return f'pdf/declaracao_hipossuficiencia.pdf'
+    file_path = os.path.join('pdf', 'declaracao_hipossuficiencia.pdf')
+    full_path = Path(settings.MEDIA_ROOT) / file_path    
+    
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
+
+    return file_path
 
 def upload_to_procuracao_juridica(instance, filename):
-    return f'pdf/procuracao_juridica.pdf'
+    file_path = os.path.join('pdf', 'procuracao_juridica.pdf')
+    full_path = Path(settings.MEDIA_ROOT) / file_path    
+    
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
+
+    return file_path
 
 def upload_to_termo_compromisso(instance, filename):
-    return f'pdf/termo_compromisso.pdf'
+    file_path = os.path.join('pdf', 'termo_compromisso.pdf')
+    full_path = Path(settings.MEDIA_ROOT) / file_path    
+    
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
+
+    return file_path
 
 def upload_to_certificado_associado_legal(instance, filename):
-    return f'pdf/certificado_associado_legal.pdf'
+    file_path = os.path.join('pdf', 'certificado_associado_legal.pdf')    
+    full_path = Path(settings.MEDIA_ROOT) / file_path    
+    
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
+
+    return file_path
 
 
 class DeclaracaoResidenciaModel(models.Model):

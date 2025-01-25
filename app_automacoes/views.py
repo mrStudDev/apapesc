@@ -21,6 +21,7 @@ from reportlab.platypus import Table, TableStyle
 
 from app_associados.models import AssociadoModel
 from app_associacao.models import AssociacaoModel
+from django.contrib import messages
 
 from .models import (
     DeclaracaoResidenciaModel,
@@ -29,6 +30,38 @@ from .models import (
     DeclaracaoHipossuficienciaModel,
     ProcuracaoJuridicaModel,
     )
+
+# Deletes
+# Mapeamento de automações para modelos
+MODELO_MAP = {
+    'residencia': DeclaracaoResidenciaModel,
+    'filiacao': DeclaracaoFiliacaoModel,
+    'atividade_pesqueira': DeclaracaoAtividadePesqueiraModel,
+    'hipossuficiencia': DeclaracaoHipossuficienciaModel,
+    'procuracao_juridica': ProcuracaoJuridicaModel,
+}
+
+def delete_pdf(request, automacao, declaracao_id):
+    if request.method == "POST":
+        # Obter o modelo correspondente pelo tipo de automação
+        modelo = MODELO_MAP.get(automacao)
+        if not modelo:
+            messages.error(request, "Tipo de automação inválido.")
+            return redirect('app_automacoes:lista_automacoes')
+
+        # Obter a declaração pelo ID
+        declaracao = get_object_or_404(modelo, id=declaracao_id)
+
+        # Excluir o arquivo do sistema de arquivos
+        if declaracao.pdf_base:
+            declaracao.pdf_base.delete()  # Remove o arquivo do sistema
+
+        # Excluir o registro do banco de dados
+        declaracao.delete()
+        messages.success(request, f"{automacao.replace('_', ' ').capitalize()} excluído(a) com sucesso!")
+
+    return redirect('app_automacoes:lista_automacoes')
+
 
 
 

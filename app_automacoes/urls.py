@@ -17,6 +17,9 @@ urlpatterns = [
     # Ações
     path('pagina-acoes/', views.pagina_acoes, name='pagina_acoes'),
     path('pagina-acoes/<int:associado_id>/', views.pagina_acoes, name='pagina_acoes'),
+    
+    # Deletes
+    path('delete-pdf/<str:automacao>/<int:declaracao_id>/', views.delete_pdf, name='delete_pdf'),
 
     # Automações - Gerar
     path('declaracao/filiado/<int:associado_id>/', views.gerar_declaracao_filiado,
