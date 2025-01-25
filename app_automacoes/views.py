@@ -104,16 +104,20 @@ class ListaTodosArquivosView(LoginRequiredMixin, GroupPermissionRequiredMixin, T
     group_required = [
         'Superuser',
         'Admin da Associação',
-        ]
-    
+    ]
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Adiciona os registros de cada automação ao contexto
-        context['declaracoes_residencia'] = DeclaracaoResidenciaModel.objects.all()
-        context['declaracoes_filiacao'] = DeclaracaoFiliacaoModel.objects.all()
-        context['declaracoes_atividade_pesqueira'] = DeclaracaoAtividadePesqueiraModel.objects.all()
-        context['declaracoes_hipossuficiencia'] = DeclaracaoHipossuficienciaModel.objects.all()
-        context['procuracoes_procuracao_juridica'] = ProcuracaoJuridicaModel.objects.all()  # Nome corrigido
+
+        # Adiciona dinamicamente os registros de cada tipo de automação ao contexto
+        context['declaracoes'] = {
+            'residencia': DeclaracaoResidenciaModel.objects.all(),
+            'filiacao': DeclaracaoFiliacaoModel.objects.all(),
+            'atividade_pesqueira': DeclaracaoAtividadePesqueiraModel.objects.all(),
+            'hipossuficiencia': DeclaracaoHipossuficienciaModel.objects.all(),
+            'procuracao_juridica': ProcuracaoJuridicaModel.objects.all(),
+        }
+
         return context
 
 

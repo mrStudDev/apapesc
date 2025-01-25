@@ -49,29 +49,29 @@
                     </thead>
                     <tbody>
                         {% if declaracoes_residencia.exists %}
-                        {% for declaracao in declaracoes_residencia %}
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
-                            <td class="py-3 px-4 text-blue-500 text-sm">
-                                <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
-                            </td>
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
-                            <td class="py-3 px-4 text-red-500 text-sm text-center">
-                                <!-- Botão de Deletar -->
-                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'residencia' declaracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
-                                        <i class="material-icons text-base mr-1">delete</i>
-                                        <span>Substituir Modelo</span>
-                                    </button>
-                                </form>
-                            </td>  
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="4" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma declaração de residência encontrada.</td>
-                        </tr>
-                        {% endfor %}
+                            {% for declaracao in declaracoes_residencia %}
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
+                                <td class="py-3 px-4 text-blue-500 text-sm">
+                                    <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                                </td>
+                                <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
+                                <td class="py-3 px-4 text-red-500 text-sm text-center">
+                                    <!-- Botão de Deletar -->
+                                    <form method="post" action="{% url 'app_automacoes:delete_pdf' 'residencia' declaracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
+                                            <i class="material-icons text-base mr-1">delete</i>
+                                            <span>Substituir Modelo</span>
+                                        </button>
+                                    </form>
+                                </td>  
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma declaração de residência encontrada.</td>
+                            </tr>
+                            {% endfor %}
                         {% else %}
                         <div class="py-4 flex justify-center">
                             <!-- Botão de Upload -->
@@ -102,29 +102,29 @@
                     </thead>
                     <tbody>
                         {% if declaracoes_filiacao.exists %}
-                        {% for declaracao in declaracoes_filiacao %}
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
-                            <td class="py-3 px-4 text-blue-500 text-sm">
-                                <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
-                            </td>
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
-                            <td class="py-3 px-4 text-red-500 text-sm text-center">
-                                <!-- Botão de Deletar -->
-                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'filiacao' declaracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
-                                        <i class="material-icons text-base mr-1">delete</i>
-                                        <span>Substituir Modelo</span>
-                                    </button>
-                                </form>
-                            </td>                            
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="3" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma declaração de filiação encontrada.</td>
-                        </tr>
-                        {% endfor %}
+                            {% for declaracao in declaracoes_filiacao %}
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
+                                <td class="py-3 px-4 text-blue-500 text-sm">
+                                    <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                                </td>
+                                <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
+                                <td class="py-3 px-4 text-red-500 text-sm text-center">
+                                    <!-- Botão de Deletar -->
+                                    <form method="post" action="{% url 'app_automacoes:delete_pdf' 'filiacao' declaracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
+                                            <i class="material-icons text-base mr-1">delete</i>
+                                            <span>Substituir Modelo</span>
+                                        </button>
+                                    </form>
+                                </td>                            
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma declaração de filiação encontrada.</td>
+                            </tr>
+                            {% endfor %}
                         {% else %}
                         <div class="py-4 flex justify-center">
                             <!-- Botão de Upload -->
