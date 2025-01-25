@@ -29,12 +29,14 @@
                 <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
                     <a href="{% url 'app_manager:super_dashboard' %}" class="block px-4 py-2 hover:bg-gray-200">Dashboard</a>
                     <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_automacoes:lista_automacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Modelos Base</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_automacoes:upload_pdf_residencia' %}" class="block px-4 py-2 hover:bg-gray-200">Base Residencia</a>
                     <a href="{% url 'app_automacoes:upload_pdf_filiacao' %}" class="block px-4 py-2 hover:bg-gray-200">Base Filiacao</a>
                     <a href="{% url 'app_automacoes:upload_pdf_atividade_pesqueira' %}" class="block px-4 py-2 hover:bg-gray-200">Base Atv. Pesqueira</a>
                     <a href="{% url 'app_automacoes:upload_pdf_hipossuficiencia' %}" class="block px-4 py-2 hover:bg-gray-200">Base Hipossuficiência</a>
                     <a href="{% url 'app_automacoes:upload_pdf_procuracao_juridica' %}" class="block px-4 py-2 hover:bg-gray-200">Base Proc. Jurídica</a>
-                    <a href="{% url 'app_automacoes:lista_automacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Base</a>
+                    
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_manager:finances_super' %}" class="block px-4 py-2 hover:bg-gray-200">Finances</a>
                 </div>
@@ -84,6 +86,7 @@
                     <a href="#licencas" class="block px-4 py-2 hover:bg-gray-200">Nova Licença</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_associacao:create_cargo' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Cargo</a>
+                    
                     <!-- CADASTRA NOVO INTEGRANTE E ASSOCIADO A PARTIR DE UM USUÁRIO -->
                     <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Integrante</a>
                     <hr class="border-t-2 border-gray-500 my-2">
