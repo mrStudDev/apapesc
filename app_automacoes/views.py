@@ -73,7 +73,7 @@ def upload_pdf_base(request, automacao):
         'hipossuficiencia': DeclaracaoHipossuficienciaModel,
         'procuracao_juridica': ProcuracaoJuridicaModel,
     }
-
+    
     modelo = modelo_map.get(automacao)
     if not modelo:
         return HttpResponse("Automação inválida.", status=400)
@@ -83,16 +83,18 @@ def upload_pdf_base(request, automacao):
         if not pdf_base:
             return HttpResponse("Arquivo PDF não enviado.", status=400)
 
-        # Atualiza ou cria o registro do modelo
-        try:
-            instancia = modelo.objects.get(id=1)
-        except modelo.DoesNotExist:
-            instancia = modelo()  # Cria uma nova instância
+        # Tenta pegar a primeira instância existente; se não houver, cria nova
+        instancia = modelo.objects.first()
+        if not instancia:
+            instancia = modelo()
+
+        # Atribui o novo arquivo e salva
         instancia.pdf_base = pdf_base
         instancia.save()
 
-        return redirect('app_automacoes:lista_automacoes')  # Redireciona para a lista de automações
+        return redirect('app_automacoes:lista_automacoes')  # Ajuste conforme sua url de destino
 
+    # Para requisições GET, exibe o template com formulário de upload
     return render(request, 'app_automacoes/upload_pdf_base.html', {'automacao': automacao})
 
 
