@@ -37,7 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    
     # Aplicativos Externos
+    'django_cleanup.apps.CleanupConfig',
     
     # Apps 
     'app_home',
@@ -48,7 +50,6 @@ INSTALLED_APPS = [
     'app_automacoes',
     'app_tarefas',
     'app_articles',
-    
     
 ]
 
