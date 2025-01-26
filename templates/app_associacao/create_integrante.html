@@ -119,165 +119,246 @@
                 </div>                  
             </div>
                                       
-            <!-- Campos em duas colunas -->
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Dados Principais</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div class="mb-4">
-                    <label for="{{ form.cpf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ form.cpf.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.cpf }}
-                    </div>
-                    {% for error in form.cpf.errors %}
-                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
-                    {% endfor %}
-                </div> 
-                <!-- OAB -->
-                <div class="mb-4">
-                    <label for="{{ form.oab.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.oab.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.oab }}
-                    </div>
-                    {% for error in form.oab.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-4">
-                    <label for="{{ form.nacionalidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.nacionalidade.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.nacionalidade }}
-                    </div>
-                    {% for error in form.nacionalidade.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>                
-            </div>
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Contatos</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div class="mb-4">
-                    <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.email.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.email }}
-                    </div>
-                    {% for error in form.email.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>                             
-                <!-- Celular -->
-                <div class="mb-4">
-                    <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                        {{ form.celular.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.celular }}
-                    </div>
-                    {% for error in form.celular.errors %}
-                        <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
-                    {% endfor %}
-                </div>   
-            </div>
-            <!--Daocumento RG  -->
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Documento RG</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                
-                <div class="mb-4">
-                    <label for="{{ form.rg_numero.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.rg_numero.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.rg_numero }}
-                    </div>
-                    {% for error in form.rg_numero.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-4">
-                    <label for="{{ form.rg_orgao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.rg_orgao.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.rg_orgao }}
-                    </div>
-                    {% for error in form.rg_orgao.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-4">
-                    <label for="{{ form.rg_data_emissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.rg_data_emissao.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.rg_data_emissao }}
-                    </div>
-                    {% for error in form.rg_data_emissao.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div> 
-                <div class="mb-4">
-                    <label for="{{ form.naturalidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.naturalidade.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.naturalidade }}
-                    </div>
-                    {% for error in form.naturalidade.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-4">
-                    <label for="{{ form.data_nascimento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.data_nascimento.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.data_nascimento }}
-                    </div>
-                    {% for error in form.data_nascimento.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div> 
-            </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">               
-                <div class="mb-4">
-                    <label for="{{ form.foto.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.foto.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.foto }}
-                    </div>
-                    {% for error in form.foto.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-4">
-                    <label for="{{ form.estado_civil.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.estado_civil.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.estado_civil }}
-                    </div>
-                    {% for error in form.estado_civil.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-4">
-                    <label for="{{ form.profissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.profissao.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.profissao }}
-                    </div>
-                    {% for error in form.profissao.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>                                                              
-            </div> 
+           <!-- Campos em duas colunas -->
+           <h2 class="text-xl font-semibold text-gray-700 mb-4">Dados Principais</h2>
+           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+               <div class="mb-4">
+                   <label for="{{ form.cpf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                       {{ form.cpf.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.cpf }}
+                   </div>
+                   {% for error in form.cpf.errors %}
+                       <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                   {% endfor %}
+               </div> 
+               <!-- OAB -->
+               <div class="mb-4">
+                   <label for="{{ form.oab.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.oab.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.oab }}
+                   </div>
+                   {% for error in form.oab.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>
+               <div class="mb-4">
+                   <label for="{{ form.nacionalidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.nacionalidade.label }} <small>(País)</small>
+                   </label>
+                   <div class="mt-1">
+                       {{ form.nacionalidade }}
+                   </div>
+                   {% for error in form.nacionalidade.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>                                                            
+
+               <div class="mb-4">
+                   <label for="{{ form.foto.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.foto.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.foto }}
+                   </div>
+                   {% for error in form.foto.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>
+               <div class="mb-4">
+                   <label for="{{ form.estado_civil.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.estado_civil.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.estado_civil }}
+                   </div>
+                   {% for error in form.estado_civil.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>
+               <div class="mb-4">
+                   <label for="{{ form.profissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.profissao.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.profissao }}
+                   </div>
+                   {% for error in form.profissao.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>  
+           </div>
+           <h2 class="text-xl font-semibold text-gray-700 mb-4">Contatos</h2>
+           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+               <div class="mb-4">
+                   <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.email.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.email }}
+                   </div>
+                   {% for error in form.email.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>                             
+               <!-- Celular -->
+               <div class="mb-4">
+                   <label for="{{ form.celular.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
+                       {{ form.celular.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.celular }}
+                   </div>
+                   {% for error in form.celular.errors %}
+                       <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+                   {% endfor %}
+               </div>   
+           </div>
+           <!--Daocumento RG  -->
+           <h2 class="text-xl font-semibold text-gray-700 mb-4">Documento RG</h2>
+           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               
+               <div class="mb-4">
+                   <label for="{{ form.rg_numero.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.rg_numero.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.rg_numero }}
+                   </div>
+                   {% for error in form.rg_numero.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>
+               <div class="mb-4">
+                   <label for="{{ form.rg_orgao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.rg_orgao.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.rg_orgao }}
+                   </div>
+                   {% for error in form.rg_orgao.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>
+               <div class="mb-4">
+                   <label for="{{ form.rg_data_emissao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.rg_data_emissao.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.rg_data_emissao }}
+                   </div>
+                   {% for error in form.rg_data_emissao.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div> 
+               <div class="mb-4">
+                   <label for="{{ form.naturalidade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.naturalidade.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.naturalidade }}
+                   </div>
+                   {% for error in form.naturalidade.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>
+               <div class="mb-4">
+                   <label for="{{ form.data_nascimento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.data_nascimento.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.data_nascimento }}
+                   </div>
+                   {% for error in form.data_nascimento.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div> 
+           </div>
+
+           <!-- Seção Endereço do Integrante -->
+           <h2 class="text-xl font-semibold text-gray-700 mb-4">Endereço</h2>
+           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+               <div class="mb-4">
+                   <label for="{{ form.logradouro.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.logradouro.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.logradouro }}
+                   </div>
+                   {% for error in form.logradouro.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div> 
+               <div class="mb-4">
+                   <label for="{{ form.bairro.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.bairro.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.bairro }}
+                   </div>
+                   {% for error in form.bairro.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>
+               <div class="mb-4">
+                   <label for="{{ form.numero.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.numero.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.numero }}
+                   </div>
+                   {% for error in form.numero.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>
+               <div class="mb-4">
+                   <label for="{{ form.complemento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.complemento.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.complemento }}
+                   </div>
+                   {% for error in form.complemento.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>
+               <div class="mb-4">
+                   <label for="{{ form.cep.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.cep.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.cep }}
+                   </div>
+                   {% for error in form.cep.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>
+               <div class="mb-4">
+                   <label for="{{ form.municipio.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.municipio.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.municipio }}
+                   </div>
+                   {% for error in form.municipio.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>
+               <div class="mb-4">
+                   <label for="{{ form.uf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                       {{ form.uf.label }}
+                   </label>
+                   <div class="mt-1">
+                       {{ form.uf }}
+                   </div>
+                   {% for error in form.uf.errors %}
+                       <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                   {% endfor %}
+               </div>                
+           </div> 
             <!-- Seção Datas -->
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Datas</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

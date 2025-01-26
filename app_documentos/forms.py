@@ -10,6 +10,7 @@ class DocumentoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields['tipo_doc'].queryset = TipoDocumentoModel.objects.all().order_by('tipo')
         self.fields['tipo_doc'].label = "Tipo do Documento"
         self.fields['arquivo'].widget.attrs.update({'class': 'file-input'})
         self.fields['descricao'].widget.attrs.update({'placeholder': 'Adicione uma descrição para o documento...'})

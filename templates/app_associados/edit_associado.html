@@ -630,8 +630,56 @@
                     {% endfor %}
                 </div>                
             </div>
-            <!-- Produção Anual  -->
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Endereço</h2>
+            <hr>
+            <!--Tabela informativa -->
+            <div class="overflow-x-auto">
+                <!-- Produção Anual  -->
+                <h2 class="text-xl font-semibold text-gray-700 mb-4 py-4">Produção Anual</h2>
+                <h3 class="text-lg font-bold text-gray-700 mb-4">Informações Auxiliares</h3>
+                <p>Guia - Para o preenchimento do formulário de produção anual, use valores de peso entre os indicados, <strong>EXCETO em casos específicos</strong></p>
+                <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="py-2 px-4 text-left text-sm font-medium text-gray-600">Espécie</th>
+                            <th class="py-2 px-4 text-left text-sm font-medium text-gray-600">Quantidade Média a partir</th>
+                            <th class="py-2 px-4 text-left text-sm font-medium text-gray-600">Quantidade Média máxima</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Pampo -->
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-2 px-4 text-sm text-gray-700">Pampo</td>
+                            <td class="py-2 px-4 text-sm text-gray-700">de 170,00 kg</td>
+                            <td class="py-2 px-4 text-sm text-gray-700">até 230,00 kg</td>
+                        </tr>
+                        <!-- Abrótea -->
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-2 px-4 text-sm text-gray-700">Abrótea</td>
+                            <td class="py-2 px-4 text-sm text-gray-700">de 3.500,00  kg</td>
+                            <td class="py-2 px-4 text-sm text-gray-700">até 3.700,00 kg</td>
+                        </tr>
+                        <!-- Tainha -->
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-2 px-4 text-sm text-gray-700">Tainha</td>
+                            <td class="py-2 px-4 text-sm text-gray-700">de 3.900,00 kg</td>
+                            <td class="py-2 px-4 text-sm text-gray-700">até 4.100,00 kg</td>
+                        </tr>
+                        <!-- Anchova -->
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-2 px-4 text-sm text-gray-700">Anchova</td>
+                            <td class="py-2 px-4 text-sm text-gray-700">de 3.100,00 kg</td>
+                            <td class="py-2 px-4 text-sm text-gray-700">até 3.300,00 kg</td>
+                        </tr>
+                        <!-- Robalo -->
+                        <tr class="hover:bg-gray-50">
+                            <td class="py-2 px-4 text-sm text-gray-700">Robalo</td>
+                            <td class="py-2 px-4 text-sm text-gray-700">de 270,00 kg</td>
+                            <td class="py-2 px-4 text-sm text-gray-700">até 330,00 kg</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <h3 class="text-lg font-bold text-gray-700 mb-4 py-8">Produção Anual - Atividade Pesqueira</h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">        
                 <div class="mb-4">
                     <label for="{{ form.especie1.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">

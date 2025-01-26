@@ -426,7 +426,7 @@ class IntegranteForm(forms.ModelForm):
         #self.fields['associacao'].queryset = AssociacaoModel.objects.all()
         self.fields['cargo'].queryset = CargosModel.objects.all()
        # self.fields['reparticao'].queryset = ReparticoesModel.objects.all()
-        self.fields['profissao'].queryset = ProfissoesModel.objects.all()
+        self.fields['profissao'].queryset = ProfissoesModel.objects.all().order_by('nome')
 
         # Configurações de Associação
         self.fields['associacao'].queryset = AssociacaoModel.objects.all()

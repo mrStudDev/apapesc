@@ -64,28 +64,28 @@ EMISSOR_RG_CHOICES = [
 STATUS_CHOICES = [
     ('Associado Lista Ativo(a)', 'Associado Lista Ativo(a)'),
     ('Associado Lista Aposentado(a)', 'Associado  Lista Aposentado(a)'),
-    ('Desassociado(a)', 'Desassociado(a)'),
     ('Candidato(a)', 'Candidato(a)'),
     ('Cliente Especial', 'Cliente Especial'),
+    ('Desassociado(a)', 'Desassociado(a)'),
 ]
 ESPECIES_MARITIMAS = [
-    ('Pampo', 'Pampo'),
     ('Abrótea', 'Abrótea'),
-    ('Tainha', 'Tainha'),
     ('Anchova', 'Anchova'),
-    ('Robalo', 'Robalo'),
-    ('Sardinha', 'Sardinha'),
     ('Atum', 'Atum'),
-    ('Corvina', 'Corvina'),
-    ('Pescada-olhuda', 'Pescada-olhuda'),
-    ('Linguado', 'Linguado'),
-    ('Garoupa', 'Garoupa'),
     ('Bagre', 'Bagre'),
     ('Baiacu', 'Baiacu'),
-    ('Cavala', 'Cavala'),
-    ('Xerelete', 'Xerelete'),
     ('Cação', 'Cação'),
+    ('Cavala', 'Cavala'),
+    ('Corvina', 'Corvina'),
+    ('Garoupa', 'Garoupa'),
+    ('Linguado', 'Linguado'),
     ('Marisco', 'Marisco'),
+    ('Pampo', 'Pampo'),
+    ('Pescada-olhuda', 'Pescada-olhuda'),
+    ('Robalo', 'Robalo'),
+    ('Sardinha', 'Sardinha'),
+    ('Tainha', 'Tainha'),
+    ('Xerelete', 'Xerelete'),
     ('Não declarado', 'Não declarado'),
 ]
 ESTADO_CIVIL_CHOICES = [
@@ -133,6 +133,7 @@ SEGURO_DEFESO_CHOICES = [
     ('A partir de Março', 'A partir de Março'),
     ('Não declarado', 'Não declarado'),     
 ]
+
 class ProfissoesModel(models.Model):
     nome = models.CharField(
         max_length=255, 
