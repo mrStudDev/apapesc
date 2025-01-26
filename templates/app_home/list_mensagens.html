@@ -4,7 +4,29 @@
 {% block title %}Lista Mensagens{% endblock title %}
 
 {% block list_mensagens %}
-{% include 'components/navbar_associacao.html' %}
+
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+
 <main class="flex-grow">
     <div class="container mx-auto mt-8 bg-gray-100" style="max-width: 980px;">
         <h2 class="text-gray-700 font-semibold text-lg mb-4">Mensagens Recebidas</h2>

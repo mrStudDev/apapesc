@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Lista de Arquivos Base- Automação{% endblock title %}
+{% block title %}Lista Automação{% endblock title %}
 
 {% block list_automacoes %}
     <!-- Navbar -->
@@ -12,7 +12,7 @@
         {% include "components/navbar_administradores.html" %}
 
     {% elif is_diretor_associacao %}
-        {% include "components/navbar_diretor.html" %} 
+        {% include "components/navbar_diretores.html" %} 
 
     {% elif is_presidente_associacao %}
         {% include "components/navbar_presidente.html" %} 

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Upload de Modelo PDF Base{% endblock title %}
+{% block title %}Upload Base Declarações{% endblock title %}
 
 {% block upload_docAutomacao %}
 
@@ -12,7 +12,7 @@
         {% include "components/navbar_administradores.html" %}
 
     {% elif is_diretor_associacao %}
-        {% include "components/navbar_diretor.html" %} 
+        {% include "components/navbar_diretores.html" %} 
 
     {% elif is_presidente_associacao %}
         {% include "components/navbar_presidente.html" %} 
