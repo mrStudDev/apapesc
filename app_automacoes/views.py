@@ -51,7 +51,7 @@ def delete_pdf(request, automacao, declaracao_id):
 
         # Obter a declaração pelo ID
         declaracao = get_object_or_404(modelo, id=declaracao_id)
-
+        
         # Excluir o arquivo do sistema de arquivos
         if declaracao.pdf_base:
             declaracao.pdf_base.delete()  # Remove o arquivo do sistema

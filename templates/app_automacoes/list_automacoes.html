@@ -122,16 +122,16 @@
                     </thead>
                     <tbody>
                         {% if declaracoes_filiacao.exists %}
-                            {% for filiacao in declaracoes_filiacao %}
+                            {% for declaracao in declaracoes_filiacao %}
                                 <tr class="border-b hover:bg-gray-50">
-                                    <td class="py-3 px-4 text-gray-800 text-sm">{{ filiacao.id }}</td>
+                                    <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
                                     <td class="py-3 px-4 text-blue-500 text-sm">
-                                        <a href="{{ filiacao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                                        <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
                                     </td>
-                                    <td class="py-3 px-4 text-gray-800 text-sm">{{ filiacao.atualizado_em }}</td>
+                                    <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
                                     <td class="py-3 px-4 text-red-500 text-sm text-center">
                                         <!-- Botão de Deletar -->
-                                        <form method="post" action="{% url 'app_automacoes:delete_pdf' 'filiacao' filiacao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
+                                        <form method="post" action="{% url 'app_automacoes:delete_pdf' 'filiacao' declaracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
                                             {% csrf_token %}
                                             <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
                                                 <i class="material-icons text-base mr-1">delete</i>
@@ -175,16 +175,16 @@
                     </thead>
                     <tbody>
                         {% if declaracoes_atividade_pesqueira.exists %}
-                        {% for atividade in declaracoes_atividade_pesqueira %}
+                        {% for declaracao in declaracoes_atividade_pesqueira %}
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ atividade.id }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
                             <td class="py-3 px-4 text-blue-500 text-sm">
-                                <a href="{{ atividade.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                                <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
                             </td>
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ atividade.atualizado_em }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
                             <td class="py-3 px-4 text-red-500 text-sm text-center">
                                 <!-- Botão de Deletar -->
-                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'atividade_pesqueira' atividade.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
+                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'atividade_pesqueira' declaracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
                                     {% csrf_token %}
                                     <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
                                         <i class="material-icons text-base mr-1">delete</i>
@@ -227,16 +227,16 @@
                     </thead>
                     <tbody>
                         {% if declaracoes_hipossuficiencia.exists %}
-                        {% for hipossuficiencia in declaracoes_hipossuficiencia %}
+                        {% for declaracao in declaracoes_hipossuficiencia %}
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ hipossuficiencia.id }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
                             <td class="py-3 px-4 text-blue-500 text-sm">
-                                <a href="{{ hipossuficiencia.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                                <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
                             </td>
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ hipossuficiencia.atualizado_em }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
                             <td class="py-3 px-4 text-red-500 text-sm text-center">
                                 <!-- Botão de Deletar -->
-                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'hipossuficiencia' hipossuficiencia.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
+                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'hipossuficiencia' declaracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
                                     {% csrf_token %}
                                     <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
                                         <i class="material-icons text-base mr-1">delete</i>
@@ -279,16 +279,16 @@
                     </thead>
                     <tbody>
                         {% if procuracoes_procuracao_juridica.exists %}
-                            {% for procuracao in procuracoes_procuracao_juridica %}
+                            {% for declaracao in procuracoes_procuracao_juridica %}
                             <tr class="border-b hover:bg-gray-50">
-                                <td class="py-3 px-4 text-gray-800 text-sm">{{ procuracao.id }}</td>
+                                <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.id }}</td>
                                 <td class="py-3 px-4 text-blue-500 text-sm">
-                                    <a href="{{ procuracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                                    <a href="{{ declaracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
                                 </td>
-                                <td class="py-3 px-4 text-gray-800 text-sm">{{ procuracao.atualizado_em }}</td>
+                                <td class="py-3 px-4 text-gray-800 text-sm">{{ declaracao.atualizado_em }}</td>
                                 <td class="py-3 px-4 text-red-500 text-sm text-center">
                                     <!-- Botão de Deletar -->
-                                    <form method="post" action="{% url 'app_automacoes:delete_pdf' 'procuracao_juridica' procuracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
+                                    <form method="post" action="{% url 'app_automacoes:delete_pdf' 'procuracao_juridica' declaracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
                                         {% csrf_token %}
                                         <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
                                             <i class="material-icons text-base mr-1">delete</i>
