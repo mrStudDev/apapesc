@@ -92,13 +92,15 @@
                             </tr>
                             {% endfor %}
                         {% else %}
-                        <div class="py-4 flex justify-center">
-                            <!-- Botão de Upload -->
-                            <a href="{% url 'app_automacoes:upload_pdf_residencia' %}" 
-                               class="inline-block bg-blue-500 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-green-600 transition">
-                                Upload Modelo Base Residência
-                            </a>
-                        </div>
+                        <tr>
+                            <td colspan="4" class="py-4 text-center">
+                                <!-- Botão de Upload -->
+                                <a href="{% url 'app_automacoes:upload_pdf_residencia' %}"
+                                   class="inline-block bg-blue-500 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-green-600 transition">
+                                    Upload Modelo Base Residência
+                                </a>
+                            </td>
+                        </tr>
                         {% endif %}
                     </tbody>
                     
@@ -120,37 +122,39 @@
                     </thead>
                     <tbody>
                         {% if declaracoes_filiacao.exists %}
-                        {% for filiacao in declaracoes_filiacao %}
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ filiacao.id }}</td>
-                            <td class="py-3 px-4 text-blue-500 text-sm">
-                                <a href="{{ filiacao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
-                            </td>
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ filiacao.atualizado_em }}</td>
-                            <td class="py-3 px-4 text-red-500 text-sm text-center">
-                                <!-- Botão de Deletar -->
-                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'filiacao' filiacao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
-                                        <i class="material-icons text-base mr-1">delete</i>
-                                        <span>Substituir Modelo</span>
-                                    </button>
-                                </form>
-                            </td>                            
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="3" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma declaração de filiação encontrada.</td>
-                        </tr>
-                        {% endfor %}
+                            {% for filiacao in declaracoes_filiacao %}
+                                <tr class="border-b hover:bg-gray-50">
+                                    <td class="py-3 px-4 text-gray-800 text-sm">{{ filiacao.id }}</td>
+                                    <td class="py-3 px-4 text-blue-500 text-sm">
+                                        <a href="{{ filiacao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                                    </td>
+                                    <td class="py-3 px-4 text-gray-800 text-sm">{{ filiacao.atualizado_em }}</td>
+                                    <td class="py-3 px-4 text-red-500 text-sm text-center">
+                                        <!-- Botão de Deletar -->
+                                        <form method="post" action="{% url 'app_automacoes:delete_pdf' 'filiacao' filiacao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
+                                            {% csrf_token %}
+                                            <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
+                                                <i class="material-icons text-base mr-1">delete</i>
+                                                <span>Substituir Modelo</span>
+                                            </button>
+                                        </form>
+                                    </td>                            
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma declaração de filiação encontrada.</td>
+                                </tr>
+                            {% endfor %}
                         {% else %}
-                        <div class="py-4 flex justify-center">
-                            <!-- Botão de Upload -->
-                            <a href="{% url 'app_automacoes:upload_pdf_filiacao' %}" 
-                               class="inline-block bg-blue-500 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-green-600 transition">
-                               Upload Modelo Base Filiação
-                            </a>
-                        </div>                        
+                        <tr>
+                            <td colspan="4" class="py-4 text-center">
+                                <!-- Botão de Upload -->
+                                <a href="{% url 'app_automacoes:upload_pdf_filiacao' %}" 
+                                   class="inline-block bg-blue-500 text-white text-sm font-medium py-2 px-4 rounded-lg hover:bg-green-600 transition">
+                                   Upload Modelo Base Filiação
+                                </a>
+                            </td>
+                        </tr>                 
                         {% endif %}                        
                     </tbody>
                 </table>
@@ -271,29 +275,29 @@
                     </thead>
                     <tbody>
                         {% if procuracoes_procuracao_juridica.exists %}
-                        {% for procuracao in procuracoes_procuracao_juridica %}
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ procuracao.id }}</td>
-                            <td class="py-3 px-4 text-blue-500 text-sm">
-                                <a href="{{ procuracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
-                            </td>
-                            <td class="py-3 px-4 text-gray-800 text-sm">{{ procuracao.atualizado_em }}</td>
-                            <td class="py-3 px-4 text-red-500 text-sm text-center">
-                                <!-- Botão de Deletar -->
-                                <form method="post" action="{% url 'app_automacoes:delete_pdf' 'procuracao_juridica' procuracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
-                                    {% csrf_token %}
-                                    <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
-                                        <i class="material-icons text-base mr-1">delete</i>
-                                        <span>Substituir Modelo</span>
-                                    </button>
-                                </form>
-                            </td>                              
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="3" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma Procuração Jurídica encontrada.</td>
-                        </tr>
-                        {% endfor %}
+                            {% for procuracao in procuracoes_procuracao_juridica %}
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-3 px-4 text-gray-800 text-sm">{{ procuracao.id }}</td>
+                                <td class="py-3 px-4 text-blue-500 text-sm">
+                                    <a href="{{ procuracao.pdf_base.url }}" target="_blank" class="hover:underline">Visualizar PDF</a>
+                                </td>
+                                <td class="py-3 px-4 text-gray-800 text-sm">{{ procuracao.atualizado_em }}</td>
+                                <td class="py-3 px-4 text-red-500 text-sm text-center">
+                                    <!-- Botão de Deletar -->
+                                    <form method="post" action="{% url 'app_automacoes:delete_pdf' 'procuracao_juridica' procuracao.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este arquivo?');">
+                                        {% csrf_token %}
+                                        <button type="submit" class="flex items-center text-sm text-red-500 hover:text-red-700 transition-colors">
+                                            <i class="material-icons text-base mr-1">delete</i>
+                                            <span>Substituir Modelo</span>
+                                        </button>
+                                    </form>
+                                </td>                              
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="py-3 px-4 text-center text-gray-500 italic">Nenhuma Procuração Jurídica encontrada.</td>
+                            </tr>
+                            {% endfor %}
                         {% else %}
                         <div class="py-4 flex justify-center">
                             <!-- Botão de Upload -->
