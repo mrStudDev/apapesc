@@ -196,6 +196,12 @@ class AssociadoModel(models.Model):
         null=True,
         help_text="Senha criptografada para segurança.",
     )
+    senha_site = models.CharField(
+        max_length=128, 
+        blank=True, 
+        null=True,
+        help_text="Senha criptografada para segurança.",
+    )    
     foto = models.ImageField(
         upload_to='fotos_associados/', 
         blank=True, 

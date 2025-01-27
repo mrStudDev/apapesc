@@ -60,7 +60,9 @@ class AssociadoForm(forms.ModelForm):
             'senha_google': forms.TextInput(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
-                   
+            'senha_site': forms.TextInput(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),                   
             # Documento RG
             'rg_numero': forms.TextInput(attrs={
                 'placeholder': 'Digite somente números 0123456789',
