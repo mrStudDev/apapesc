@@ -139,6 +139,7 @@
             <div class="prose max-w-none text-gray-700">
                 {{tarefa.content | safe }}
             </div>
+            <br>
             <a href="{% url 'app_tarefas:edit_tarefa' tarefa.pk %}" class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400" title="Editar Associado">
                 <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
                 <span class="sr-only">Editar</span> Editar Tarefa

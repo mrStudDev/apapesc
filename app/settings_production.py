@@ -177,3 +177,8 @@ ACCOUNT_SIGNUP_FIELDS = ['username', 'first_name', 'last_name', 'email']  # Camp
 #ACCOUNT_LOGOUT_REDIRECT_URL = '/accounts/custom-login-redirect/'  # Redireciona após logout
 LOGIN_REDIRECT_URL = '/accounts/custom-login-redirect/'  # Redireciona após login
 #ACCOUNT_SIGNUP_REDIRECT_URL = '/accounts/custom-login-redirect/'  # Redireciona após cadastro
+
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = 104857600  # 100MB
+
