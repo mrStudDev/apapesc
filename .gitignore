@@ -1,6 +1,7 @@
 # Minhas excessões
 settings_local.py
 
+app_associados/credentials/service_account.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
