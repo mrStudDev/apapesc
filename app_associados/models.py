@@ -6,7 +6,7 @@ from django.core.validators import MinValueValidator
 from bleach.sanitizer import Cleaner
 from bleach.css_sanitizer import CSSSanitizer
 from django.contrib.auth.models import Group
-
+from .utils import create_associado_folder
 from app_associacao.models import(
     AssociacaoModel,
     ReparticoesModel,
@@ -154,6 +154,7 @@ class AssociadoModel(models.Model):
         related_name='associado',
         verbose_name="Usuário Associado"
     )    
+    drive_folder_id = models.CharField(max_length=100, blank=True, null=True)
     # Informações Pessoais
     cpf = models.CharField(
         max_length=14,
@@ -564,7 +565,8 @@ class AssociadoModel(models.Model):
     
     
     def save(self, *args, **kwargs):
-        if self.content:
+        # Sanitização do conteúdo (se aplicável)
+        if hasattr(self, 'content') and self.content:  # Verifica se o campo 'content' existe
             allowed_tags = ['p', 'a', 'strong', 'em', 'ul', 'ol', 'li', 'blockquote', 'h1', 'h2', 'h3', 'br', 'span']
             allowed_attributes = {
                 'a': ['href', 'title', 'style'],
@@ -587,6 +589,14 @@ class AssociadoModel(models.Model):
 
             # Limpeza do conteúdo
             self.content = cleaner.clean(self.content)
+
+        # Criação da pasta no Google Drive (se não existir)
+        if not self.drive_folder_id:
+            folder_name = self.user.get_full_name() or self.user.username
+            parent_folder_id = '15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w'  # ID da pasta "Associados"
+            self.drive_folder_id = create_associado_folder(folder_name, parent_folder_id)
+
+        # Salva o objeto
         super().save(*args, **kwargs)
 
             
