@@ -147,7 +147,15 @@
             </div>
         </div>
     </div>
-
+    {% if associado.drive_folder_link %}
+        <p><strong>Documentos:</strong> 
+            <a href="{{ associado.drive_folder_link }}" target="_blank" class="text-blue-500 hover:underline">
+                Acessar documentos no Google Drive
+            </a>
+        </p>
+    {% else %}
+        <p><em>Nenhuma pasta associada.</em></p>
+    {% endif %}
     <!-- Seção: Informações Pessoais -->
     <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Informações Pessoais</h2>

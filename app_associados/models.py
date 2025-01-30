@@ -599,6 +599,11 @@ class AssociadoModel(models.Model):
         # Salva o objeto
         super().save(*args, **kwargs)
 
-            
+    @property
+    def drive_folder_link(self):
+        if self.drive_folder_id:
+            return f"https://drive.google.com/drive/folders/{self.drive_folder_id}"
+        return None
+    
     def __str__(self):
         return f"{self.user} - CPF: {self.cpf} - CELULAR: {self.celular} - {self.data_nascimento}"
