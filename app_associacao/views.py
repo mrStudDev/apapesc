@@ -321,6 +321,14 @@ class IntegrantesDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, De
         context['associacao'] = integrante.reparticao.associacao if integrante.reparticao else None
         context['delegado'] = integrante.reparticao.delegado if integrante.reparticao else None
         context['documentos'] = Documento.objects.filter(integrante=integrante)
+        
+        
+        # Obter grupo do usuário relacionado ao integrante
+        if hasattr(integrante, 'user'):  # Certifique-se que o modelo tem o campo relacionado 'user'
+            context['grupos'] = integrante.user.groups.all()  # Lista de grupos
+        else:
+            context['grupos'] = []
+
         return context
 
 

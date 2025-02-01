@@ -77,9 +77,18 @@
                 <li><strong>Associação:</strong> {{ associacao.nome_fantasia|default:"Não vinculado" }}</li>
                 <li><strong>Repartição:</strong> {{ reparticao.nome_reparticao|default:"Não vinculado" }}</li>
                 <li><strong>Delegado da Repertição:</strong> {{ delegado.user.first_name|default:"Sem delegado" }} {{ delegado.user.last_name }}</li>
+                <li class="text-orange-600"><strong>Grupo / Licença de Acesso:</strong> 
+                    {% if grupos %}
+                        {% for grupo in grupos %}
+                            {{ grupo.name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        Nenhum grupo associado
+                    {% endif %}
+                </li>                
                 <hr class="my-2">
                 <li><strong>Cargo:</strong> {{ integrante.cargo.nome }}</li>
-                <li><strong>Grupo:</strong> {{ integrante.group }}</li>
+
                 <li><strong>Data Admissão:</strong> {{ integrante.data_entrada|default:"Não cadastrado" }}</li>
                 <li><strong>Data Saída:</strong> {{ integrante.data_saida|default:"Integrante em atividade" }}</li>
             </ul>
