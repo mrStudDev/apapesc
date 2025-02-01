@@ -169,7 +169,7 @@
             <ul class="space-y-2">
               {% for article in articles %}
               <li>
-                <a href="#" class="flex items-center text-gray-700 hover:text-orange-600 transition-colors">
+                <a href="{% url 'app_articles:single_article' article.slug %}" class="flex items-center text-gray-700 hover:text-orange-600 transition-colors">
                   <i class="material-icons mr-2">check_circle</i>
                   {{article.title}}
                 </a>
@@ -194,7 +194,7 @@
             <ul class="space-y-2">
               {% for tarefa in tarefas %}
               <li>
-                <a href="#" class="flex items-center text-gray-700 hover:text-orange-600 transition-colors">
+                <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" class="flex items-center text-gray-700 hover:text-orange-600 transition-colors">
                   <i class="material-icons mr-2">check_circle</i>
                   {{tarefa.titulo}}
                 </a>

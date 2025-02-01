@@ -9,7 +9,7 @@
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
         <!-- Logo -->
         <a href="/" class="flex items-center">
-            <img src="{% static 'images/new_logo_apapesc_2024.png' %}" alt="Logo APAPESC" class="w-16 h-16 md:w-24 md:h-24 object-contain rounded-md">
+            <img src="{% static 'images/Logo_Apapesc_2025.png' %}" alt="Logo APAPESC" class="w-16 h-16 md:w-24 md:h-24 object-contain rounded-md">
         </a>
 
         <!-- Botão do menu para dispositivos móveis -->
@@ -34,6 +34,8 @@
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_automacoes:lista_automacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Declarações Uploads</a>
                     <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="#" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Link</a>
+                    <a href="#" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Link</a>
 
                 </div>
             </div>           
@@ -85,8 +87,7 @@
                     <a href="#" class="block px-4 py-2 hover:bg-gray-200">Nova Profissão</a>
                     <!-- CADASTRA NOVO INTEGRANTE E ASSOCIADO A PARTIR DE UM USUÁRIO -->
                     <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Integrante</a>
-                    <hr class="border-t-2 border-gray-500 my-2">
-                    <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Associado</a>
+                    <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 text-white bg-blue-950 hover:bg-green-700">Novo Associado</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_documentos:create_tipo_documento' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Tipo de Documento</a> 
                     <hr class="border-t-2 border-gray-500 my-2">

@@ -590,14 +590,15 @@ class AssociadoModel(models.Model):
             # Limpeza do conteúdo
             self.content = cleaner.clean(self.content)
 
-        # Criação da pasta no Google Drive (se não existir)
-        if not self.drive_folder_id:
+        # Criação da pasta no Google Drive (apenas durante a criação do objeto)
+        if not self.id and not self.drive_folder_id:  # Verifica se o objeto ainda não foi salvo no banco de dados
             folder_name = self.user.get_full_name() or self.user.username
             parent_folder_id = '15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w'  # ID da pasta "Associados"
             self.drive_folder_id = create_associado_folder(folder_name, parent_folder_id)
 
         # Salva o objeto
         super().save(*args, **kwargs)
+
 
     @property
     def drive_folder_link(self):
