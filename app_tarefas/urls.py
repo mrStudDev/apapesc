@@ -18,6 +18,7 @@ app_name = 'app_tarefas'
 urlpatterns = [
     path('lista-tarefas/', TarefaListView.as_view(), name='list_tarefas'),
     path('criar-tarefa/', TarefaCreateView.as_view(), name='create_tarefa'),
+     path('create-tarefa/<int:associado_id>/', views.TarefaCreateView.as_view(), name='create_tarefa_associado'),
     path('editar-tarefa/<int:pk>/', TarefaEditView.as_view(), name='edit_tarefa'),
     path('single/<int:pk>/', TarefaDetailView.as_view(), name='single_tarefa'),
     

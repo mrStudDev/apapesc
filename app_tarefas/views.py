@@ -10,7 +10,6 @@ from .models import TarefaModel, HistoricoStatusModel, HistoricoResponsaveisMode
 from .forms import TarefaForm
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponseForbidden
-from app_associacao.models import IntegrantesModel, AssociacaoModel, ReparticoesModel
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
@@ -19,6 +18,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.http import Http404
+from app_associados.models import AssociadoModel
+from app_associacao.models import IntegrantesModel, AssociacaoModel, ReparticoesModel
 from app_documentos.models import Documento
 
 
@@ -102,12 +103,26 @@ class TarefaCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateV
         'Auxiliar da Repartição',
     ]
     
+    def get_initial(self):
+        # Preenche o campo associado se o parâmetro estiver na URL
+        associado_id = self.kwargs.get('associado_id')
+        initial_data = super().get_initial()
+        if associado_id:
+            initial_data['associado'] = AssociadoModel.objects.filter(id=associado_id).first()
+        return initial_data
+
     def form_valid(self, form):
         # Salva a tarefa e atribui o criador
         form.instance.criado_por = self.request.user
-        response = super().form_valid(form)
+        return super().form_valid(form)
 
-        return response
+    def get_success_url(self):
+        # Redireciona para a página do associado caso tenha sido criado a partir dele
+        associado_id = self.kwargs.get('associado_id')
+        if associado_id:
+            return reverse('app_associados:single_associado', kwargs={'pk': associado_id})
+        return super().get_success_url()
+
 
 class TarefaEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
     model = TarefaModel

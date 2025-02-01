@@ -8,14 +8,16 @@ from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q
 from app_associacao.models import AssociacaoModel, ReparticoesModel, MunicipiosModel, IntegrantesModel
-from django.contrib.auth.models import User
 from app_associados.models import STATUS_CHOICES
 from app_associados.models import AssociadoModel
+from app_tarefas.models import TarefaModel
+from django.contrib.auth.models import User
 from accounts.mixins import GroupPermissionRequiredMixin 
 from django.contrib.auth.mixins import LoginRequiredMixin
 import logging
 from django.contrib.auth.models import Group
 from app_documentos.models import Documento
+
 
 logger = logging.getLogger(__name__)
 
@@ -189,7 +191,13 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         associado = self.object  # Associado atual
+
+        # Documentos relacionados ao associado
         context['documentos'] = Documento.objects.filter(associado=associado)
+
+        # Tarefas relacionadas ao associado
+        context['tarefas'] = TarefaModel.objects.filter(associado=associado).order_by('-data_criacao')
+
         return context
     
 # Editar Associado
