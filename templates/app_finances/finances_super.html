@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Resumo Financeiro{% endblock title %}
+
+{% block finances_super %}
+<body class="font-sans bg-gray-100 text-gray-900">
+
+  <!-- Navbar -->
+  {% include 'components/navbar_associacao.html' %}
+
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="p-4 rounded-md text-white 
+                {% if message.tags == 'success' %}
+                    bg-green-500
+                {% elif message.tags == 'error' %}
+                    bg-red-500
+                {% elif message.tags == 'info' %}
+                    bg-blue-500
+                {% else %}
+                    bg-gray-500
+                {% endif %}
+            ">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+  <!-- Container Principal -->
+  <div class="container mx-auto px-8 py-10 max-w-7xl">
+
+    <!-- Título -->
+    <div class="mb-8 text-center">
+      <h1 class="text-4xl font-extrabold text-gray-800">Painel Financeiro</h1>
+      <p class="mt-2 text-gray-600">Resumo geral das informações financeiras das Associações</p>
+    </div>
+
+    <!-- Painéis financeiros -->
+    <h2 class="text-2xl font-bold text-gray-800">Anuidades</h2>
+    <h3 class="text-xl font-semibold text-gray-400">Total Global</h3>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- Total de Associados -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold text-gray-800">Total de Associados</h3>
+        <div class="mt-4 text-5xl font-bold text-green-500">{{ total_associados }}</div>
+        <div class="mt-4">
+          <div class="flex justify-between text-sm text-gray-700">
+            <span>Ass. em dia:</span>
+            <span>{{ associados_em_dia }}</span>
+          </div>
+          <div class="flex justify-between text-sm text-gray-700 mt-2">
+            <span>Ass. em atraso:</span>
+            <span>{{ associados_em_atraso }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Receitas -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold text-gray-800">Apuradas</h3>
+        <div class="mt-4 text-4xl font-bold text-blue-500">R$ {{ receita_total|floatformat:2 }}</div>
+        <p class="mt-2 text-sm text-gray-600">Total global de anuidades apuradas</p>
+        <p class="mt-2 text-sm text-gray-600">
+          Data Atual: {{ data_atual|date:"d/m/Y" }}
+        </p>
+      </div>
+
+      <!-- Saldo Pendente -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold text-gray-800">Pendente</h3>
+        <div class="mt-4 text-4xl font-bold text-red-500">R$ {{ saldo_pendente|floatformat:2 }}</div>
+        <p class="mt-2 text-sm text-gray-600">Anuidades em aberto</p>
+      </div>
+    </div>
+
+    <div class="mt-10">
+    <h3 class="text-xl font-semibold text-gray-800">Anuidades</h3>
+    <ul class="mt-4 space-y-3">
+      <li>
+        <a href="#" class="flex items-center text-gray-700 hover:text-green-500 transition">
+          <span class="material-icons mr-2">check_circle</span>
+          Associados em Dia: {{ associados_em_dia }}
+        </a>
+      </li>
+      <li>
+        <a href="#" class="flex items-center text-gray-700 hover:text-red-500 transition">
+          <span class="material-icons mr-2">cancel</span>
+          Associados em Atraso: {{ associados_em_atraso }}
+        </a>
+      </li>
+    </ul>
+    </div>
+    <div class="mt-10">
+      <h3 class="text-xl font-semibold text-gray-400">Total por Associação</h3>
+      <table class="w-full mt-4 border border-gray-300 rounded-md overflow-hidden shadow-md">
+          <thead class="bg-gray-200">
+              <tr>
+                  <th class="px-4 py-2 text-left font-semibold text-gray-700">Associação</th>
+                  <th class="px-4 py-2 text-center font-semibold text-gray-700">Associados</th>
+                  <th class="px-4 py-2 text-center font-semibold text-gray-700">Anuidades Apuradas</th>
+                  <th class="px-4 py-2 text-center font-semibold text-gray-700">Saldo Pendente</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for associacao in associacoes_data %}
+              <tr class="border-b hover:bg-gray-50">
+                  <td class="px-4 py-2 text-gray-800">{{ associacao.nome }}</td>
+                  <td class="px-4 py-2 text-center">{{ associacao.total_associados }}</td>
+                  <td class="px-4 py-2 text-center">R$ {{ associacao.receita_total|floatformat:2 }}</td>
+                  <td class="px-4 py-2 text-center">R$ {{ associacao.saldo_pendente|floatformat:2 }}</td>
+              </tr>
+              {% empty %}
+              <tr>
+                  <td colspan="4" class="px-4 py-3 text-center italic text-gray-500">Nenhuma associação encontrada.</td>
+              </tr>
+              {% endfor %}
+          </tbody>
+      </table>
+  </div>
+  
+    <!-- Anuidades -->
+    <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+      <!-- Painéis Despesass -->
+      <h2 class="text-2xl font-bold text-gray-800">Despesas</h2>
+      <!-- Adicionando um novo card para o resumo geral de despesas -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-8">
+        <!-- Resumo Geral de Despesas -->
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h3 class="text-xl font-semibold text-gray-800">Resumo Geral de Despesas</h3>
+            <div class="mt-4 text-4xl font-bold text-red-500">R$ {{ total_despesas|floatformat:2 }}</div>
+            <p class="mt-2 text-sm text-gray-600">Despesas acumuladas de todas as associações.</p>
+        </div>
+      </div>
+
+      <!-- Tabela de Despesas por Associação -->
+      <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+        <h3 class="text-xl font-semibold text-gray-800">Resumo de Despesas por Associação</h3>
+        <table class="min-w-full border border-gray-300 rounded-md overflow-hidden mt-4">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="px-4 py-2 text-left font-semibold text-gray-700">Associação</th>
+                    <th class="px-4 py-2 text-center font-semibold text-gray-700">Total Despesas</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for despesa in despesas_por_associacao %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="px-4 py-2 text-gray-800">{{ despesa.associacao__nome_fantasia }}</td>
+                    <td class="px-4 py-2 text-center">R$ {{ despesa.total_despesas|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+      </div>
+      
+    <!-- Painel de Relatórios -->
+    <div class="mt-8 bg-white p-6 rounded-lg shadow-md">
+      <h3 class="text-xl font-semibold text-gray-800">Relatórios</h3>
+      <ul class="mt-4 space-y-3">
+        <li>
+          <a href="#" class="flex items-center text-gray-700 hover:text-blue-500 transition">
+            <span class="material-icons mr-2">assessment</span>
+            Relatório de Pagamentos
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center text-gray-700 hover:text-blue-500 transition">
+            <span class="material-icons mr-2">pending_actions</span>
+            Relatório de Pendências
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center text-gray-700 hover:text-blue-500 transition">
+            <span class="material-icons mr-2">request_quote</span>
+            Gerar Boletos
+          </a>
+        </li>
+        <li>
+          <a href="#" class="flex items-center text-gray-700 hover:text-blue-500 transition">
+            <span class="material-icons mr-2">send</span>
+            Enviar Cobranças
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Gráficos -->
+    <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+      <!-- Gráfico de Receitas -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold text-gray-800">Receitas por Mês</h3>
+        <canvas id="chart-receitas" class="h-40 w-full mt-4"></canvas>
+      </div>
+
+      <!-- Gráfico de Débitos -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-lg font-semibold text-gray-800">Débitos por Mês</h3>
+        <canvas id="chart-debitos" class="h-40 w-full mt-4"></canvas>
+      </div>
+    </div>
+
+  </div>
+</div>
+  <!-- Footer -->
+  {% include "components/footer_associacao.html" %}
+
+</body>
+{% endblock %}

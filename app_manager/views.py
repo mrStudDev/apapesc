@@ -191,16 +191,3 @@ class UserVipDashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, Tem
     group_required = 'User Vip'
     
     
-
-# Views Finances======
-# Finances Super
-class FinancesSuperView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
-    template_name = 'app_manager/finances_super.html'
-    group_required = ['Superuser']
-
-# Finances Admins Associação    
-class FinancesAssociacaoView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
-    template_name = 'app_manager/finances_associacao.html'
-    group_required = ['Superuser', 'Admin da Associação']
-
-# --- END -----#

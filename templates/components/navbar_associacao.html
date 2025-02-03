@@ -30,10 +30,14 @@
                 <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
                     <a href="{% url 'app_manager:super_dashboard' %}" class="block px-4 py-2 hover:bg-gray-200">Dashboard</a>
                     <hr class="border-t-2 border-gray-500 my-2">
-                    <a href="{% url 'app_manager:finances_super' %}" class="block px-4 py-2 hover:bg-gray-200">Finances</a>
+                    <a href="{% url 'app_finances:resumo_financeiro' %}" class="block px-4 py-2 hover:bg-gray-200">Finances</a>
+                    <a href="{% url 'app_finances:list_despesas' %}" class="block px-4 py-2 hover:bg-gray-200">Despesas</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_finances:list_anuidades' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Anuidades</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_automacoes:lista_automacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Declarações Uploads</a>
                     <hr class="border-t-2 border-gray-500 my-2">
+                   
                     <a href="#" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Link</a>
                     <a href="#" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Link</a>
                     <a href="#" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Link</a>
@@ -155,7 +159,7 @@
             <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Manager</summary>
             <div class="bg-blue-600">
                 <a href="{% url 'app_manager:super_dashboard' %}" class="block px-6 py-2 hover:bg-blue-700">Dashboard</a>
-                <a href="{% url 'app_manager:finances_super' %}" class="block px-6 py-2 hover:bg-blue-700">Finances</a>
+                
                 <a href="#" class="block px-6 py-2 hover:bg-blue-700">Link</a>
             </div>
         </details>

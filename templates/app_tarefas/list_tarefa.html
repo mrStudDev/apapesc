@@ -110,84 +110,85 @@
 
     <!-- Lista de Tarefas -->
     {% if tarefas %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for tarefa in tarefas %}
-        <div class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow duration-200">
-            <div class="flex justify-between items-center mb-2">
-                <h2 class="text-md font-bold text-gray-800">{{ tarefa.titulo }}</h2>
-                <span class="px-2 py-1 rounded-full text-sm font-semibold
-                    {% if tarefa.prioridade == 'alta' %} bg-red-100 text-red-600
-                    {% elif tarefa.prioridade == 'media' %} bg-yellow-100 text-yellow-600
-                    {% else %} bg-green-100 text-green-600
-                    {% endif %}">
-                    {{ tarefa.get_prioridade_display }}
-                </span>
-            </div>
-            <p class="text-sm text-gray-600 mb-2">{{ tarefa.descricao|truncatechars:25 | safe }}</p>
-            <div class="text-sm text-gray-500 space-y-1">
-                <p><i class="material-icons text-blue-400 align-middle text-base mr-1">hourglass_empty</i>Status: {{ tarefa.get_status_display }}</p>
-                <p><i class="material-icons text-green-400 align-middle text-base mr-1">category</i>Categoria: {{ tarefa.get_categoria_display }}</p>
-                <p><i class="material-icons text-yellow-400 align-middle text-base mr-1">person</i>Responsável:
-                    {% for responsavel in tarefa.responsaveis.all %}
-                    {{ responsavel.user.get_full_name }}{% if not forloop.last %}, {% endif %}
-                    {% empty %}
-                        Sem responsáveis
-                    {% endfor %}
-                    </p>
-                <p><i class="material-icons text-gray-400 align-middle text-base mr-1">calendar_today</i>Criada em: {{ tarefa.data_criacao|date:"d/m/Y H:i" }}</p>
-            </div>
-            <div class="flex space-x-4 mt-4">
-                <!-- Botão Ver -->
-                <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}"
-                   class="flex items-center text-blue-500 hover:text-blue-700" style="font-size: 14px;">
-                    <i class="material-icons align-middle text-sm mr-1">visibility</i> Ver
-                </a>
-                <!-- Botão Editar -->
-                <a href="{% url 'app_tarefas:edit_tarefa' tarefa.pk %}"
-                   class="flex items-center text-green-500 hover:text-green-700" style="font-size: 14px;">
-                    <i class="material-icons align-middle text-sm mr-1">edit</i> Editar
-                </a>
-                <!-- Botão Excluir -->
-                <a href="{% url 'app_tarefas:deletar_tarefa' tarefa.pk %}"
-                   class="flex items-center text-red-500 hover:text-red-700" style="font-size: 14px;">
-                    <i class="material-icons align-middle text-sm mr-1">delete</i> Excluir
-                </a>
-            </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for tarefa in tarefas %}
+                <div class="bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow duration-200">
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-md font-bold text-gray-800">{{ tarefa.titulo }}</h2>
+                        <span class="px-2 py-1 rounded-full text-sm font-semibold
+                            {% if tarefa.prioridade == 'alta' %} bg-red-100 text-red-600
+                            {% elif tarefa.prioridade == 'media' %} bg-yellow-100 text-yellow-600
+                            {% else %} bg-green-100 text-green-600
+                            {% endif %}">
+                            {{ tarefa.get_prioridade_display }}
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">{{ tarefa.descricao|truncatechars:25 | safe }}</p>
+                    <div class="text-sm text-gray-500 space-y-1">
+                        <p><i class="material-icons text-blue-400 align-middle text-base mr-1">hourglass_empty</i>Status: {{ tarefa.get_status_display }}</p>
+                        <p><i class="material-icons text-green-400 align-middle text-base mr-1">category</i>Categoria: {{ tarefa.get_categoria_display }}</p>
+                        <p><i class="material-icons text-yellow-400 align-middle text-base mr-1">person</i>Responsável:
+                            {% for responsavel in tarefa.responsaveis.all %}
+                            {{ responsavel.user.get_full_name }}{% if not forloop.last %}, {% endif %}
+                            {% empty %}
+                                Sem responsáveis
+                            {% endfor %}
+                            </p>
+                        <p><i class="material-icons text-gray-400 align-middle text-base mr-1">calendar_today</i>Criada em: {{ tarefa.data_criacao|date:"d/m/Y H:i" }}</p>
+                    </div>
+                    <div class="flex space-x-4 mt-4">
+                        <!-- Botão Ver -->
+                        <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}"
+                        class="flex items-center text-blue-500 hover:text-blue-700" style="font-size: 14px;">
+                            <i class="material-icons align-middle text-sm mr-1">visibility</i> Ver
+                        </a>
+                        <!-- Botão Editar -->
+                        <a href="{% url 'app_tarefas:edit_tarefa' tarefa.pk %}"
+                        class="flex items-center text-green-500 hover:text-green-700" style="font-size: 14px;">
+                            <i class="material-icons align-middle text-sm mr-1">edit</i> Editar
+                        </a>
+                        <!-- Botão Excluir -->
+                        <a href="{% url 'app_tarefas:deletar_tarefa' tarefa.pk %}"
+                        class="flex items-center text-red-500 hover:text-red-700" style="font-size: 14px;">
+                            <i class="material-icons align-middle text-sm mr-1">delete</i> Excluir
+                        </a>
+                    </div>
 
-            <br>
-            <hr>
-            <!-- Botão Arquivar -->
-            {% if tarefa.status != 'arquivada' %}
-            <form method="post" action="{% url 'app_tarefas:arquivar_tarefa' tarefa.pk %}" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" title="Arquivar" class="text-gray-500 hover:text-red-700">
-                    <i class="material-icons align-middle">archive</i> Arquivar
-                </button>
-            </form>
-            
+                    <br>
+                    <hr>
+                    <!-- Botão Arquivar -->
+                    {% if tarefa.status != 'arquivada' %}
+                    <form method="post" action="{% url 'app_tarefas:arquivar_tarefa' tarefa.pk %}" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" title="Arquivar" class="text-gray-500 hover:text-red-700">
+                            <i class="material-icons align-middle">archive</i> Arquivar
+                        </button>
+                    </form>
+                    
+                    {% endif %}
+                </div>
+            {% endfor %}
+            <!-- Modal de Alerta -->
+            <div id="alertModal" class="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
+                <div class="bg-white p-6 rounded shadow-lg">
+                    <p class="text-lg font-semibold text-gray-800" id="modalMessage"></p>
+                    <button id="closeModal" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        Fechar
+                    </button>
+                </div>
+            </div>
+        
+            {% if messages %}
+                {% for message in messages %}
+                    <p class="hidden django-message">{{ message }}</p> <!-- Oculta a mensagem original -->
+                {% endfor %}
             {% endif %}
         </div>
-        {% endfor %}
-          <!-- Modal de Alerta -->
-          <div id="alertModal" class="fixed z-50 inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden">
-            <div class="bg-white p-6 rounded shadow-lg">
-                <p class="text-lg font-semibold text-gray-800" id="modalMessage"></p>
-                <button id="closeModal" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-                    Fechar
-                </button>
-            </div>
-        </div>
-    
-        {% if messages %}
-            {% for message in messages %}
-                <p class="hidden django-message">{{ message }}</p> <!-- Oculta a mensagem original -->
-            {% endfor %}
-        {% endif %}
-    </div>
     {% else %}
         <p class="text-gray-600 text-center">Nenhuma tarefa encontrada.</p>
     {% endif %}
 </div>
+
 <script src="{% static 'js/alertModal.js' %}"></script>
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}

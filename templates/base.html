@@ -25,9 +25,7 @@
   <!--BLOCOS DO APP MANAGER -->
   <!--Blocos Superusers -->
   {% block dashboard %}{% endblock dashboard %}
-  {% block finances_super %}{% endblock finances_super %}
-  {% block finances_associacao %}{% endblock finances_associacao %}
-  
+
   <!--Blocos Groups -->
   {% block dashboard_Presidente %}{% endblock dashboard_Presidente %}
 
@@ -46,7 +44,17 @@
   {% block dashboard_vip %}{% endblock dashboard_vip %}
   <!--########################################################################-->
 
-  <!--BLOCOS DO APP Associação -->
+  <!--BLOCOS DO APP FINANCES -->
+  {% block finances_super %}{% endblock finances_super %}
+  {% block finances_associacao %}{% endblock finances_associacao %}
+  {% block gerar_anuidades %}{% endblock gerar_anuidades %}
+  {% block list_anuidades %}{% endblock list_anuidades %}
+  {% block financeiro_SingleAssociado %}{% endblock financeiro_SingleAssociado %}
+  {% block list_despesas %}{% endblock list_despesas %}
+  <!--########################################################################-->
+
+
+  <!--BLOCOS DO APP ASSOCIAÇÃO -->
   {% block list_users %}{% endblock list_users %}
   {% block create_associacao %}{% endblock create_associacao %}
   {% block delete_associacao %}{% endblock delete_associacao %}

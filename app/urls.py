@@ -32,6 +32,7 @@ urlpatterns = [
     path('automacoes/', include('app_automacoes.urls', namespace='app_automacoes')),
     path('tarefas/', include('app_tarefas.urls', namespace='app_tarefas')),
     path('artigos/', include('app_articles.urls', namespace='app_articles')),
+    path('financas/', include('app_finances.urls', namespace='app_finances')),
     
     
 ]

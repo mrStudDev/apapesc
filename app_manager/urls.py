@@ -2,8 +2,6 @@
 from django.urls import path
 from .views import (
     DashboardView,
-    FinancesAssociacaoView,
-    FinancesSuperView,
     AdminDashboardView,
     DelegadoDashboardView,
     AuxiliarAssociacaoDashboardView,
@@ -18,8 +16,6 @@ app_name = 'app_manager'
 
 urlpatterns = [
     path('dashboard/', DashboardView.as_view(), name='super_dashboard'),
-    path('finances-super/', FinancesSuperView.as_view(), name='finances_super'),
-    path('finances-associacao/', FinancesAssociacaoView.as_view(), name='finances_associacao'),
     path('admin_dashboard/', AdminDashboardView.as_view(), name='admin_dashboard'),
     path('delegado_dashboard/', DelegadoDashboardView.as_view(), name='delegado_dashboard'),
     path('auxiliar_associacao_dashboard/', AuxiliarAssociacaoDashboardView.as_view(), name='auxiliar_associacao_dashboard'),

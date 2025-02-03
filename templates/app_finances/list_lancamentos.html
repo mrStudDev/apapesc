@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block list_lancamentos %}
+<h2>Lançamentos Financeiros</h2>
+<form method="get">
+    <label for="tipo">Tipo:</label>
+    <select name="tipo" id="tipo">
+        <option value="">Todos</option>
+        <option value="entrada">Entrada</option>
+        <option value="despesa">Despesa</option>
+    </select>
+
+    <label for="inicio">Início:</label>
+    <input type="date" name="inicio" id="inicio">
+
+    <label for="fim">Fim:</label>
+    <input type="date" name="fim" id="fim">
+
+    <button type="submit">Filtrar</button>
+</form>
+
+<table>
+    <tr>
+        <th>Data</th>
+        <th>Descrição</th>
+        <th>Tipo</th>
+        <th>Valor</th>
+        <th>Categoria</th>
+    </tr>
+    {% for lancamento in lancamentos %}
+    <tr>
+        <td>{{ lancamento.data_lancamento }}</td>
+        <td>{{ lancamento.descricao }}</td>
+        <td>{{ lancamento.tipo }}</td>
+        <td>R$ {{ lancamento.valor }}</td>
+        <td>{{ lancamento.categoria }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+
+{% endblock list_lancamentos %}

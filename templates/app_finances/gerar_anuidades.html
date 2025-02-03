@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+
+{% block gerar_anuidades %}
+<h1>Gerar Anuidades</h1>
+<p>Selecione o ano para o qual deseja gerar as anuidades:</p>
+<h1>Gerar Anuidades</h1>
+<p>Confirme para gerar as anuidades para o ano vigente.</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary">Gerar Anuidades</button>
+</form>
+{% endblock gerar_anuidades %}

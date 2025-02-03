@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% block title %}Anuidades e Débitos{% endblock title %}
+
+{% block list_anuidades %}
+
+    <!-- Navbar -->
+    {% include "components/navbar_associacao.html" %}
+
+
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+    <main class="flex-grow">
+        <div class="container mx-auto mt-8">
+            <h1 class="text-3xl font-extrabold text-gray-900 mb-8">Relatório de Anuidades por Associado</h1>
+
+            <!-- Filtro de anos -->
+            <form method="get" class="mb-6 flex items-center space-x-4">
+
+                <label for="ano" class="text-lg font-semibold text-gray-700">Selecione o Ano:</label>
+                <div class="relative inline-block w-full sm:w-auto">
+                <select name="ano" id="ano" class="border border-gray-300 rounded-md py-2 pl-3 pr-10 h-12 text-lg appearance-none focus:ring-2 focus:ring-blue-500 focus:outline-none w-full">
+                    <option value="">--- Selecione ---</option>
+                    {% for ano in anos_disponiveis %}
+                    <option value="{{ ano }}" {% if ano == ano_selecionado %}selected{% endif %}>{{ ano }}</option>
+                    {% endfor %}
+                </select>
+                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
+
+                <button type="submit" class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    Filtrar
+                </button>
+
+                <!-- Indicação do ano selecionado -->
+                {% if ano_selecionado %}
+                <span class="text-gray-700 text-lg font-medium ml-6">
+                    Ano Selecionado: <span class="font-bold">{{ ano_selecionado }}</span>
+                </span>
+                {% endif %}
+            </form>
+
+            <!-- Tabela de resultados -->
+            {% if anuidades_associados %}
+            <div class="overflow-x-auto shadow-md rounded-lg">
+                <table class="min-w-full border border-gray-300 rounded-md overflow-hidden">
+                    <thead class="bg-blue-100 border-b-2 border-gray-300">
+                        <tr>
+                            <th class="px-6 py-3 text-left font-semibold text-gray-700">Associado</th>
+                            <th class="px-6 py-3 text-center font-semibold text-gray-700">Valor</th>
+                            <th class="px-6 py-3 text-center font-semibold text-gray-700">Status</th>
+                            <th class="px-6 py-3 text-center font-semibold text-gray-700">Valor Pago</th>
+                            <th class="px-6 py-3 text-center font-semibold text-gray-700">Saldo Total</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        {% for anuidade_assoc in anuidades_associados %}
+                        <tr class="hover:bg-gray-100">
+                            <!-- Nome do associado clicável -->
+                            <td class="px-6 py-4 text-gray-800 whitespace-nowrap">
+                                <a href="{% url 'app_finances:financeiro_associado' anuidade_assoc.associado.id %}" 
+                                class="text-blue-600 hover:text-blue-800 font-medium">
+                                    {{ anuidade_assoc.associado.user.get_full_name }}
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 text-center">R$ {{ anuidade_assoc.valor_pro_rata|floatformat:2 }}</td>
+                            <td class="px-6 py-4 text-center">
+                                {% if anuidade_assoc.pago %}
+                                    <span class="inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">Pago</span>
+                                {% else %}
+                                    <span class="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-semibold">Em aberto</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-6 py-4 text-center">R$ {{ anuidade_assoc.total_pago_ano|floatformat:2 }}</td>
+                            <td class="px-6 py-4 text-center font-medium text-gray-900">R$ {{ anuidade_assoc.saldo_devedor_total|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mt-6 rounded-md">
+                    <p class="text-yellow-700 font-semibold text-center">Nenhuma anuidade encontrada para o ano selecionado.</p>
+                </div>
+            {% endif %}
+        </div>
+        <br>
+    </main>
+    <!-- Footer -->
+    {% include "components/footer_associacao.html" %}
+{% endblock %}
