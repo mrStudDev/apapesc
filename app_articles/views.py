@@ -175,29 +175,35 @@ class DeleteArticleView(LoginRequiredMixin, GroupPermissionRequiredMixin, Delete
         'Presidente da Associação',
         ]  
         
-# Categorias
 class CategoryCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = CategoryArticlesModel
     form_class = CategoryArticlesForm
     template_name = 'app_articles/create_category.html'
-    success_url = reverse_lazy('app_articles:list_categories')
+    success_url = reverse_lazy('app_articles:create_category')
     group_required = [
         'Superuser',
         'Admin da Associação',
         'Diretor(a) da Associação',
         'Presidente da Associação',
-        ]  
-    
+    ]
+
     def form_valid(self, form):
         # Gera o slug com base no campo "name"
         form.instance.slug = slugify(form.cleaned_data['name'])
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adiciona todas as categorias ao contexto
+        context['categories'] = CategoryArticlesModel.objects.all()
+        return context
+
+
 class CategoryEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
     model = CategoryArticlesModel
     form_class = CategoryArticlesForm
     template_name = 'app_articles/edit_category.html'
-    success_url = reverse_lazy('app_articles:list_categories')
+    success_url = reverse_lazy('app_articles:create_category')
     group_required = [
         'Superuser',
         'Admin da Associação',
@@ -228,24 +234,31 @@ class TagCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView
     model = TagArticlesModel
     form_class = TagArticlesForm
     template_name = 'app_articles/create_tag.html'
-    success_url = reverse_lazy('app_articles:list_tags')
+    success_url = reverse_lazy('app_articles:create_tag')
     group_required = [
         'Superuser',
         'Admin da Associação',
         'Diretor(a) da Associação',
         'Presidente da Associação',
-        ]  
-        
+    ]
+
     def form_valid(self, form):
         # Gera o slug com base no campo "name"
         form.instance.slug = slugify(form.cleaned_data['name'])
         return super().form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adiciona todas as tags ao contexto
+        context['tags'] = TagArticlesModel.objects.all()
+        return context
+
+
 class TagEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
     model = TagArticlesModel
     form_class = TagArticlesForm
     template_name = 'app_articles/edit_tag.html'
-    success_url = reverse_lazy('app_articles:list_tags')
+    success_url = reverse_lazy('app_articles:create_tag')
     group_required = [
         'Superuser',
         'Admin da Associação',

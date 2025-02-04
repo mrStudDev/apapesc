@@ -54,7 +54,37 @@
                 </li>
             </ul>
         </div>
-        
+
+        <div class="bg-purple-50 border-l-4 border-purple-400 p-4 rounded-lg shadow-md max-w-3xl mx-auto my-6">
+            <div class="flex items-start">
+              <!-- Ícone de informação -->
+              <svg class="w-6 h-6 text-purple-400 flex-shrink-0" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9 9h1V5H9v4zm0 6h2v-2H9v2zm10-5a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+          
+              <!-- Conteúdo do Aviso -->
+              <div class="ml-3 w-full">
+                <h3 class="text-lg font-medium text-purple-800">Atualização de status da tarefa</h3>
+                <p class="mt-2 text-sm text-purple-700">
+                  Você pode mudar o status da tarefa clicando nos ícones localizados na parte inferior dos cartões (cards) de tarefas. As cores dos ícones correspondem à cor da coluna que representa o novo status da tarefa.
+                </p>
+                <p class="mt-2 text-sm text-purple-700">
+                  Para visualizar mais detalhes sobre a tarefa, clique no ícone <span class="text-purple-600 font-semibold">roxo</span> disponível no card.
+                </p>
+          
+                <!-- Exemplos de ícones com legendas -->
+                <div class="mt-4 flex space-x-4">
+                  <!-- Ícone de detalhes -->
+                  <div class="flex items-center space-x-2">
+                    <i class="material-icons text-purple-700 hover:text-blue-700">visibility</i>
+                    <span class="text-sm text-purple-700">Ver detalhes</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+
         
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- Coluna Pendentes -->
@@ -71,7 +101,7 @@
                                     <p class="text-sm text-gray-600">{{ tarefa.responsavel.integrante }}</p>
                                 </div>
                                 <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" title="Ver Detalhes">
-                                    <i class="material-icons text-blue-500 hover:text-blue-700">visibility</i>
+                                    <i class="material-icons text-purple-700 hover:text-blue-700">visibility</i>
                                 </a>
                             </div>
                             <div class="mt-3 flex space-x-2">
@@ -88,7 +118,7 @@
                                     <i class="material-icons">check_circle</i>
                                 </button>
                                 <button 
-                                    class="text-gray-500 hover:text-gray-700" 
+                                    class="text-yellow-400 hover:text-yellow-500" 
                                     onclick="alterarStatus({{ tarefa.id }}, 'devolvida')" 
                                     title="Mover para Devolvida">
                                     <i class="material-icons">arrow_circle_right</i>
@@ -116,7 +146,7 @@
                                     <p class="text-sm text-gray-600">{{ tarefa.responsavel.integrante }}</p>
                                 </div>
                                 <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" title="Ver Detalhes">
-                                    <i class="material-icons text-blue-500 hover:text-blue-700">visibility</i>
+                                    <i class="material-icons text-purple-700 hover:text-blue-700">visibility</i>
                                 </a>
                             </div>
                             <div class="mt-3 flex space-x-2">
@@ -133,7 +163,7 @@
                                     <i class="material-icons">check_circle</i>
                                 </button>
                                 <button 
-                                    class="text-gray-500 hover:text-gray-700" 
+                                    class="text-yellow-400 hover:text-yellow-500" 
                                     onclick="alterarStatus({{ tarefa.id }}, 'devolvida')" 
                                     title="Mover para Devolvida">
                                     <i class="material-icons">arrow_circle_right</i>
@@ -160,7 +190,7 @@
                                     <p class="text-sm text-gray-600">{{ tarefa.responsavel.integrante }}</p>
                                 </div>
                                 <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" title="Ver Detalhes">
-                                    <i class="material-icons text-blue-500 hover:text-blue-700">visibility</i>
+                                    <i class="material-icons text-purple-700 hover:text-blue-700">visibility</i>
                                 </a>
                             </div>
                             <div class="mt-3 flex space-x-2">
@@ -177,7 +207,7 @@
                                     <i class="material-icons">fast_rewind</i>
                                 </button>
                                 <button 
-                                    class="text-gray-500 hover:text-gray-700" 
+                                    class="text-yellow-400 hover:text-yellow-500" 
                                     onclick="alterarStatus({{ tarefa.id }}, 'devolvida')" 
                                     title="Mover para Devolvida">
                                     <i class="material-icons">arrow_circle_right</i>
@@ -205,7 +235,7 @@
                                     <p class="text-sm text-gray-600">{{ tarefa.responsavel.integrante }}</p>
                                 </div>
                                 <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" title="Ver Detalhes">
-                                    <i class="material-icons text-blue-500 hover:text-blue-700">visibility</i>
+                                    <i class="material-icons text-purple-700 hover:text-blue-700">visibility</i>
                                 </a>
                             </div>
                             <div class="mt-3 flex space-x-2">

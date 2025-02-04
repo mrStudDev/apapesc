@@ -1,17 +1,24 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from app_finances.models import AnuidadeModel, AnuidadeAssociado, Pagamento
-from app_associados.models import AssociadoModel
-from django.db import models
-from django.views.generic import DetailView, TemplateView, ListView
-from django.contrib import messages
-from django.views import View
-from decimal import Decimal
+from django.urls import reverse_lazy
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-from django.db.models import Sum, Count
-from django.utils import timezone
+from django.db.models import Sum, Count, Q
+from django.contrib import messages
+from django.db import models
+from decimal import Decimal
+from django.utils.timezone import now
+
+from django.views.generic import DetailView, TemplateView, ListView, CreateView, UpdateView
+from django.views import View
+
+from app_finances.models import AnuidadeModel, AnuidadeAssociado, Pagamento
+from app_associados.models import AssociadoModel
 from app_associacao.models import AssociacaoModel
+
 from .models import DespesaAssociacaoModel
+from .forms import AnuidadeForm
+
 
 
 def lista_anuidades(request):
@@ -128,6 +135,74 @@ class DarBaixaAnuidadeView(View):
         return redirect('app_finances:financeiro_associado', anuidade_assoc.associado.id)
 
 
+# Lista Triangular de Condições
+def associados_triangulo_view(request):
+    ano_atual = now().year
+
+    # Obter o valor da anuidade do ano atual
+    anuidade_atual = AnuidadeModel.objects.filter(ano=ano_atual).first()
+    valor_anuidade_atual = anuidade_atual.valor_anuidade if anuidade_atual else Decimal('0.00')
+
+    # Associados em dia (todas as anuidades quitadas até o ano vigente)
+    associados_em_dia = (
+        AssociadoModel.objects.filter(
+            anuidades_associados__pago=True, 
+            anuidades_associados__anuidade__ano=ano_atual
+        )
+        .distinct()
+    )
+
+    # Associados com anuidades do ano vigente em aberto
+    associados_a_pagar = (
+        AssociadoModel.objects.filter(
+            anuidades_associados__anuidade__ano=ano_atual,
+            anuidades_associados__pago=False
+        )
+        .annotate(valor_anuidade=Sum('anuidades_associados__valor_pro_rata'))
+    )
+
+    # Associados com anuidades de anos anteriores em atraso
+    associados_atrasados = (
+        AssociadoModel.objects.filter(
+            anuidades_associados__anuidade__ano__lt=ano_atual,
+            anuidades_associados__pago=False
+        )
+        .annotate(valor_debito=Sum('anuidades_associados__valor_pro_rata') - Sum('anuidades_associados__valor_pago'))
+    )
+
+    context = {
+        'associados_em_dia': associados_em_dia,
+        'associados_a_pagar': associados_a_pagar,
+        'associados_atrasados': associados_atrasados,
+        'ano_atual': ano_atual,
+        'valor_anuidade_atual': valor_anuidade_atual,  # Adicionando o valor da anuidade ao contexto
+    }
+
+    return render(request, 'app_finances/tri_condictions.html', context)
+
+
+# View para criar anuidade
+class CreateAnuidadeView(CreateView):
+    model = AnuidadeModel
+    form_class = AnuidadeForm
+    template_name = 'app_finances/create_anuidade.html'
+    success_url = reverse_lazy('app_finances:create_anuidade')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['anuidades'] = AnuidadeModel.objects.order_by('-ano')
+        return context
+
+# View para editar anuidade
+class EditAnuidadeView(UpdateView):
+    model = AnuidadeModel
+    form_class = AnuidadeForm
+    template_name = 'app_finances/edit_anuidade.html'
+    success_url = reverse_lazy('app_finances:create_anuidade')
+
+
+
+# Financeiro Outras entradas e Despesas
 class ResumoFinanceiroView(TemplateView):
     template_name = 'app_finances/finances_super.html'
 

@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista Triangular (Anuidades){% endblock title %}
+
+{% block tringular_condictions %}
+<!-- Navbar -->
+{% include "components/navbar_associacao.html" %}
+    <main class="flex-grow">
+        <div class="container mx-auto mt-8 p-4 bg-white rounded max-w-6xl">
+            <h1 class="text-3xl font-bold text-gray-800 mb-8">Relatório Triangular de Condições (Anuidades)</h1>
+
+            <!-- Associados em Dia -->
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-green-600 mb-4">Associados em Dia (incluindo ano vigente)</h2>
+
+                {% if associados_em_dia %}
+                <table class="w-full border-collapse border border-gray-300 rounded-md">
+                    <thead class="bg-green-100">
+                        <tr>
+                            <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Associado</th>
+                            <th class="border px-4 py-2 text-center text-gray-700 font-semibold">Ano Anuidade</th>
+                            <th class="border px-4 py-2 text-center text-gray-700 font-semibold">Valor Anuidade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for associado in associados_em_dia %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <!-- Nome do Associado -->
+                            <td class="border px-4 py-2">
+                                <a href="{% url 'app_finances:financeiro_associado' associado.id %}" 
+                                class="text-blue-500 hover:underline font-semibold">
+                                {{ associado.user.get_full_name }}
+                                </a>
+                            </td>
+
+                            <!-- Ano da Anuidade -->
+                            <td class="border px-4 py-2 text-center text-gray-700">
+                                {{ ano_atual }}
+                            </td>
+
+                            <!-- Valor da Anuidade -->
+                            <td class="border px-4 py-2 text-center text-gray-700">
+                                R$ {{ valor_anuidade_atual|floatformat:2 }}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                    <p class="text-gray-600 italic">Nenhum associado com pagamento em dia.</p>
+                {% endif %}
+            </section>
+
+            <!-- Associados com Anuidade a Pagar -->
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-yellow-600 mb-4">Associados em Aberto (ano vigente)</h2>
+                {% if associados_a_pagar %}
+                    <table class="w-full border-collapse border border-gray-300 rounded-md">
+                        <thead class="bg-yellow-100">
+                            <tr>
+                                <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Associado</th>
+                                <th class="border px-4 py-2 text-center text-gray-700 font-semibold">Ano / Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for associado in associados_a_pagar %}
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="border px-4 py-2 text-blue-500 hover:underline">
+                                    <a href="{% url 'app_finances:financeiro_associado' associado.id %}">{{ associado.user.get_full_name }}</a>
+                                </td>
+                                <td class="border px-4 py-2 text-center text-gray-700">{{ ano_atual }} -  R$ {{ associado.valor_anuidade|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-gray-600 italic">Nenhum associado com anuidade do ano vigente em aberto.</p>
+                {% endif %}
+            </section>
+
+            <!-- Associados com Débitos em Atraso -->
+            <section class="mb-8">
+                <h2 class="text-2xl font-semibold text-red-600 mb-4">Associados com Débitos de Anos Anteriores</h2>
+                {% if associados_atrasados %}
+                    <table class="w-full border-collapse border border-gray-300 rounded-md">
+                        <thead class="bg-red-100">
+                            <tr>
+                                <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Associado</th>
+                                <th class="border px-4 py-2 text-center text-gray-700 font-semibold">Valor Total do Débito</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for associado in associados_atrasados %}
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="border px-4 py-2 text-blue-500 hover:underline">
+                                    <a href="{% url 'app_finances:financeiro_associado' associado.id %}">{{ associado.user.get_full_name }}</a>
+                                </td>
+                                <td class="border px-4 py-2 text-center text-gray-700">R$ {{ associado.valor_debito|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-gray-600 italic">Nenhum associado com débitos em atraso.</p>
+                {% endif %}
+            </section>
+        </div>
+    </main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock tringular_condictions %}

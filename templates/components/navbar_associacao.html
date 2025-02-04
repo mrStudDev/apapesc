@@ -31,9 +31,12 @@
                     <a href="{% url 'app_manager:super_dashboard' %}" class="block px-4 py-2 hover:bg-gray-200">Dashboard</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_finances:resumo_financeiro' %}" class="block px-4 py-2 hover:bg-gray-200">Finances</a>
-                    <a href="{% url 'app_finances:list_despesas' %}" class="block px-4 py-2 hover:bg-gray-200">Despesas</a>
+                    <a href="#" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Lançar Despesa</a>
+                    <a href="{% url 'app_finances:list_despesas' %}" class="block px-4 py-2 hover:bg-gray-200">Listas de Despesas</a>
                     <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_finances:create_anuidade' %}" class="block px-4 py-2 hover:bg-gray-200">Cadastrar Anuidade</a>
                     <a href="{% url 'app_finances:list_anuidades' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Anuidades</a>
+                    <a href="{% url 'app_finances:tri_condictions' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Tri Anuidaeds</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_automacoes:lista_automacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Declarações Uploads</a>
                     <hr class="border-t-2 border-gray-500 my-2">

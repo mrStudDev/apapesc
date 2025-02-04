@@ -1,11 +1,13 @@
+from django.shortcuts import render
 from django.contrib.auth.models import User 
 from django.db import models, transaction
 from django.utils import timezone
 from decimal import Decimal
 from app_associados.models import AssociadoModel
 from django.utils.timezone import now
-from django.db.models import Sum
+from django.db.models import Sum, Q
 from app_associacao.models import AssociacaoModel
+
 
 
 class AnuidadeModel(models.Model):
@@ -94,7 +96,8 @@ class AnuidadeAssociado(models.Model):
         if self.valor_pago >= self.valor_pro_rata:
             self.pago = True
         self.save()
-        
+
+
 class Pagamento(models.Model):
     anuidade_associado = models.ForeignKey(AnuidadeAssociado, on_delete=models.CASCADE, related_name='pagamentos')
     data_pagamento = models.DateField(auto_now_add=True)
@@ -143,3 +146,4 @@ class DespesaAssociacaoModel(models.Model):
     def esta_vencida(self):
         """Verifica se a despesa está vencida."""
         return now().date() > self.data_vencimento
+

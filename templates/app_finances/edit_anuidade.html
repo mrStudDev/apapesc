@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Anuidade{% endblock title %}
+
+{% block edit_anuidade %}
+<main class="flex-grow">
+    <div class="container mx-auto mt-8 p-4 bg-white rounded max-w-4xl">
+        <h1 class="text-2xl font-bold mb-6">Editar Anuidade</h1>
+        
+        <!-- Formulário de edição -->
+        <form method="post" enctype="multipart/form-data" class="bg-white p-8 rounded-lg shadow-lg">
+            {% csrf_token %}
+            {{ form.as_p }}
+            
+            <button type="submit" class="mt-4 bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600">
+                Atualizar Anuidade
+            </button>
+        </form>
+    </div>
+</main>
+{% endblock edit_anuidade %}

@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Resumo Financeiro{% endblock title %}
+{% block title %}Super Financeiro{% endblock title %}
 
 {% block finances_super %}
 <body class="font-sans bg-gray-100 text-gray-900">
@@ -79,15 +79,9 @@
     <h3 class="text-xl font-semibold text-gray-800">Anuidades</h3>
     <ul class="mt-4 space-y-3">
       <li>
-        <a href="#" class="flex items-center text-gray-700 hover:text-green-500 transition">
-          <span class="material-icons mr-2">check_circle</span>
-          Associados em Dia: {{ associados_em_dia }}
-        </a>
-      </li>
-      <li>
-        <a href="#" class="flex items-center text-gray-700 hover:text-red-500 transition">
+        <a href="{% url 'app_finances:tri_condictions' %}" class="flex items-center text-gray-700 hover:text-red-500 transition">
           <span class="material-icons mr-2">cancel</span>
-          Associados em Atraso: {{ associados_em_atraso }}
+          Listra Triangular de Condições
         </a>
       </li>
     </ul>

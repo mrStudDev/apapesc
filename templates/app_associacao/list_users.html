@@ -47,7 +47,45 @@
                 Buscar
             </button>
         </form>
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-lg shadow-md max-w-3xl mx-auto my-6">
+            <div class="flex items-start">
+              <!-- Ícone de informação -->
+              <svg class="w-6 h-6 text-blue-400 flex-shrink-0" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                <path d="M9 9h1V5H9v4zm0 6h2v-2H9v2zm10-5a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+          
+              <!-- Conteúdo do Aviso -->
+              <div class="ml-3">
+                <h3 class="text-lg font-medium text-blue-800">Informação importante</h3>
+                <p class="mt-2 text-sm text-blue-700">
+                  Você pode <strong>Tornar</strong> um usuário em um <strong>integrante</strong> ou torná-lo um <strong>
+                    associado</strong> a partir dessa lista. Caso não encontre o usuário desejado nas buscas, 
+                    será necessário cadastrar uma conta de usuário global.
+                </p>
+                <p class="mt-2 text-sm text-blue-700">
+                  Depois de cadastrar a nova conta no site da <strong>APAPESC</strong>, retorne a essa lista e procure 
+                  pelo nome de usuário, e-mail ou nome completo para encontrar a nova conta cadastrada.
+                </p>
+                <p class="mt-4 text-sm font-semibold text-red-600">
+                  ⚠️ Abra uma guia anônima ou utilize outro navegador para registrar a nova conta. Voçê está logado(a) e o sistema não permite dois ou mais logins simultâneos no mesmo navegador.
+                  Clique no botão abaixo, copie o link e cole na nova janela.
+                </p>
 
+                      <!-- Link com opção de copiar -->
+                <div class="mt-4 flex items-center">
+                    <h1 id="signup-link" class="text-sm text-blue-600 font-semibold">http://localhost:8000/accounts/signup/</h1>
+                    <button onclick="copyToClipboard('signup-link')" class="ml-2 p-2 bg-blue-100 rounded-md hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-300">
+                    <!-- Ícone de copiar -->
+                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <path d="M8 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V6a2 2 0 00-2-2H9.414L8 2.586A2 2 0 008 2zM7 4a2 2 0 011-1.732V16a1 1 0 001 1h8a1 1 0 001-1V6.732A2 2 0 0116 6H9.414L7 4.586V4z" />
+                    </svg>
+                    </button> <small class="text-xs text-gray-500"> - Copie o link</small>
+                </div>
+
+              </div>
+            </div>
+          </div>
+          
         <!-- Tabela de usuários -->
         <table class="table-auto w-full border border-gray-200 text-sm">
             <thead>
@@ -80,7 +118,7 @@
                                 </a>
                             {% else %}
                                 <a href="{% url 'app_associacao:create_integrante' %}?user_id={{ user.id }}" 
-                                    class="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded text-xs">
+                                    class="bg-gray-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded text-xs">
                                     Tornar Integrante
                                 </a>
                             {% endif %}
@@ -91,7 +129,7 @@
                                 <span class="text-gray-500">Já é um associado</span>
                             {% else %}
                                 <a href="{% url 'app_associados:create_associado' %}?user_id={{ user.id }}" 
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded text-xs">
+                                    class="bg-blue-500 hover:bg-green-500 text-white font-semibold py-1 px-2 rounded text-xs">
                                     Tornar Associado
                                 </a>
                             {% endif %}
@@ -122,6 +160,7 @@
         </div>
     </div><br>
 </main>
+<script src="{% static 'js/copy_to_clipboard.js' %}"></script>
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}
 <script>

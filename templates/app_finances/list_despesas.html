@@ -1,95 +1,94 @@
 {% extends 'base.html' %}
 
-{% block title %}Lista de Despesas{% endblock title %}
+{% block title %}Listas de Despesas{% endblock title %}
 
 {% block list_despesas %}
     <!-- Navbar -->
     {% include "components/navbar_associacao.html" %}
 
-<main class="flex-grow">
+    <main class="flex-grow">
+        <div class="container mx-auto mt-8">
+            <h1 class="text-2xl font-bold mb-6">Listas de Despesas</h1>
 
-<div class="container mx-auto mt-8">
-    <h1 class="text-2xl font-bold mb-6">Relatório de Despesas</h1>
+            <!-- Filtros -->
+            <form method="get" class="flex items-center space-x-4 mb-6">
+                <!-- Associação -->
+                <label for="associacao" class="font-medium">Associação:</label>
+                <select name="associacao" id="associacao" class="border border-gray-300 rounded-md py-2 px-3">
+                    <option value="">Todas</option>
+                    {% for associacao in associacoes %}
+                    <option value="{{ associacao.id }}" {% if associacao.id|stringformat:"s" == associacao_selecionada %}selected{% endif %}>
+                        {{ associacao.nome_fantasia }}
+                    </option>
+                    {% endfor %}
+                </select>
 
-    <!-- Filtros -->
-    <form method="get" class="flex items-center space-x-4 mb-6">
-        <!-- Associação -->
-        <label for="associacao" class="font-medium">Associação:</label>
-        <select name="associacao" id="associacao" class="border border-gray-300 rounded-md py-2 px-3">
-            <option value="">Todas</option>
-            {% for associacao in associacoes %}
-            <option value="{{ associacao.id }}" {% if associacao.id|stringformat:"s" == associacao_selecionada %}selected{% endif %}>
-                {{ associacao.nome_fantasia }}
-            </option>
-            {% endfor %}
-        </select>
+                <!-- Ano -->
+                <label for="ano" class="font-medium">Ano:</label>
+                <div class="relative inline-block w-full sm:w-auto">
+                    <select name="ano" id="ano" class="border border-gray-300 rounded-md py-2 pl-3 pr-10 h-12 text-lg appearance-none focus:ring-2 focus:ring-blue-500 focus:outline-none w-full">
+                        <option value="">Todos</option>
+                        {% for ano in anos %}
+                        <option value="{{ ano.year }}" {% if ano.year|stringformat:"s" == ano_selecionado %}selected{% endif %}>
+                            {{ ano.year }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <!-- Seta personalizada -->
+                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </div>
+                </div>
 
-        <!-- Ano -->
-        <label for="ano" class="font-medium">Ano:</label>
-        <div class="relative inline-block w-full sm:w-auto">
-            <select name="ano" id="ano" class="border border-gray-300 rounded-md py-2 pl-3 pr-10 h-12 text-lg appearance-none focus:ring-2 focus:ring-blue-500 focus:outline-none w-full">
-                <option value="">Todos</option>
-                {% for ano in anos %}
-                <option value="{{ ano.year }}" {% if ano.year|stringformat:"s" == ano_selecionado %}selected{% endif %}>
-                    {{ ano.year }}
-                </option>
-                {% endfor %}
-            </select>
-            <!-- Seta personalizada -->
-            <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-            </div>
+                <!-- Mês -->
+                <label for="mes" class="font-medium">Mês:</label>
+                <select name="mes" id="mes" class="border border-gray-300 rounded-md py-2 px-3">
+                    <option value="">Todos</option>
+                    {% for mes_num, mes_nome in meses %}
+                    <option value="{{ mes_num }}" {% if mes_num|stringformat:"s" == mes_selecionado %}selected{% endif %}>
+                        {{ mes_nome }}
+                    </option>
+                    {% endfor %}
+                </select>
+
+                <button type="submit" class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600">
+                    Filtrar
+                </button>
+            </form>
+
+            <!-- Tabela de Despesas -->
+            {% if despesas %}
+            <table class="w-full border border-gray-300 rounded-md overflow-hidden shadow-md">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="px-4 py-2 text-left font-semibold text-gray-700">Associação</th>
+                        <th class="px-4 py-2 text-left font-semibold text-gray-700">Tipo</th>
+                        <th class="px-4 py-2 text-center font-semibold text-gray-700">Descrição</th>
+                        <th class="px-4 py-2 text-center font-semibold text-gray-700">Data</th>
+                        <th class="px-4 py-2 text-center font-semibold text-gray-700">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for despesa in despesas %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-4 py-2">{{ despesa.associacao.nome_fantasia }}</td>
+                        <td class="px-4 py-2">{{ despesa.tipo_despesa.nome }}</td>
+                        <td class="px-4 py-2 text-center">{{ despesa.descricao }}</td>
+                        <td class="px-4 py-2 text-center">{{ despesa.data_despesa|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-2 text-center">R$ {{ despesa.valor|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <p class="mt-4 font-semibold text-gray-700">Total de Despesas: R$ {{ total_despesas|floatformat:2 }}</p>
+            {% else %}
+            <p class="italic text-gray-500 text-center mt-6">Nenhuma despesa encontrada para o filtro selecionado.</p>
+            {% endif %}
         </div>
-
-        <!-- Mês -->
-        <label for="mes" class="font-medium">Mês:</label>
-        <select name="mes" id="mes" class="border border-gray-300 rounded-md py-2 px-3">
-            <option value="">Todos</option>
-            {% for mes_num, mes_nome in meses %}
-            <option value="{{ mes_num }}" {% if mes_num|stringformat:"s" == mes_selecionado %}selected{% endif %}>
-                {{ mes_nome }}
-            </option>
-            {% endfor %}
-        </select>
-
-        <button type="submit" class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600">
-            Filtrar
-        </button>
-    </form>
-
-    <!-- Tabela de Despesas -->
-    {% if despesas %}
-    <table class="w-full border border-gray-300 rounded-md overflow-hidden shadow-md">
-        <thead class="bg-gray-200">
-            <tr>
-                <th class="px-4 py-2 text-left font-semibold text-gray-700">Associação</th>
-                <th class="px-4 py-2 text-left font-semibold text-gray-700">Tipo</th>
-                <th class="px-4 py-2 text-center font-semibold text-gray-700">Descrição</th>
-                <th class="px-4 py-2 text-center font-semibold text-gray-700">Data</th>
-                <th class="px-4 py-2 text-center font-semibold text-gray-700">Valor</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for despesa in despesas %}
-            <tr class="border-b hover:bg-gray-50">
-                <td class="px-4 py-2">{{ despesa.associacao.nome_fantasia }}</td>
-                <td class="px-4 py-2">{{ despesa.tipo_despesa.nome }}</td>
-                <td class="px-4 py-2 text-center">{{ despesa.descricao }}</td>
-                <td class="px-4 py-2 text-center">{{ despesa.data_despesa|date:"d/m/Y" }}</td>
-                <td class="px-4 py-2 text-center">R$ {{ despesa.valor|floatformat:2 }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <p class="mt-4 font-semibold text-gray-700">Total de Despesas: R$ {{ total_despesas|floatformat:2 }}</p>
-    {% else %}
-    <p class="italic text-gray-500 text-center mt-6">Nenhuma despesa encontrada para o filtro selecionado.</p>
-    {% endif %}
-</div>
-<br>
-</main>
+        <br>
+    </main>
  <!-- Footer -->
  {% include "components/footer_associacao.html" %}
 {% endblock list_despesas %}

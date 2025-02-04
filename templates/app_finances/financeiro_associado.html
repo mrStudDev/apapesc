@@ -3,95 +3,99 @@
 {% block title %}Finceiro {{ associado.user.get_full_name }}{% endblock title %}
 
 {% block financeiro_SingleAssociado %}
-   <!-- Navbar -->
-   {% include "components/navbar_associacao.html" %}
+    <!-- Navbar -->
+    {% include "components/navbar_associacao.html" %}
 
-<div class="container mx-auto px-6 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Situação Financeira do Associado</h1>
+    <main class="flex-grow">
+        <div class="container mx-auto px-6 py-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-6">Situação Financeira do Associado</h1>
 
-    <!-- Informações Resumidas -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-2xl font-semibold text-gray-700">{{ associado.user.get_full_name }}</h2>
-        <p class="mt-2 text-lg text-gray-600"><strong>Data de Filiação:</strong> {{ associado.data_filiacao|date:"d/m/Y" }}</p>
-        <div class="grid grid-cols-3 gap-4 mt-4 text-lg text-gray-700">
-            <p><strong>Total de Anuidades:</strong> R$ {{ total_anuidades|floatformat:2 }}</p>
-            <p><strong>Total Pago:</strong> R$ {{ total_pago|floatformat:2 }}</p>
-            <p><strong>Saldo Devedor:</strong> <span class="{% if saldo_total > 0 %}text-red-500{% else %}text-green-600{% endif %} font-semibold">R$ {{ saldo_total|floatformat:2 }}</span></p>
+            <!-- Informações Resumidas -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                <h2 class="text-2xl font-semibold text-gray-700">{{ associado.user.get_full_name }}</h2>
+                <p class="mt-2 text-lg text-gray-600"><strong>Data de Filiação:</strong> {{ associado.data_filiacao|date:"d/m/Y" }}</p>
+                <div class="grid grid-cols-3 gap-4 mt-4 text-lg text-gray-700">
+                    <p><strong>Total de Anuidades:</strong> R$ {{ total_anuidades|floatformat:2 }}</p>
+                    <p><strong>Total Pago:</strong> R$ {{ total_pago|floatformat:2 }}</p>
+                    <p><strong>Saldo Devedor:</strong> <span class="{% if saldo_total > 0 %}text-red-500{% else %}text-green-600{% endif %} font-semibold">R$ {{ saldo_total|floatformat:2 }}</span></p>
+                </div>
+            </div>
+
+            <!-- Tabela de Anuidades -->
+            <h2 class="text-xl font-semibold mb-4">Detalhes das Anuidades</h2>
+            <p class="text-red-600 mb-4">Para dar baixa, use o ponto para separar os centavos <strong>( . )</strong> Ex: 25.00 </p>
+            <table class="min-w-full border border-gray-300 rounded-md overflow-hidden shadow-md">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="px-4 py-2 text-left font-semibold text-gray-700">Ano</th>
+                        <th class="px-4 py-2 text-center font-semibold text-gray-700">Valor Anuidade</th>
+                        <th class="px-4 py-2 text-center font-semibold text-gray-700">Valor Pago</th>
+                        <th class="px-4 py-2 text-center font-semibold text-gray-700">Saldo</th>
+                        <th class="px-4 py-2 text-center font-semibold text-gray-700">Ação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for anuidade in anuidades_associado %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="px-4 py-2 text-gray-800">{{ anuidade.ano }}</td>
+                        <td class="px-4 py-2 text-center">R$ {{ anuidade.valor_total|floatformat:2 }}</td>
+                        <td class="px-4 py-2 text-center">R$ {{ anuidade.valor_pago|floatformat:2 }}</td>
+                        <td class="px-4 py-2 text-center">R$ {{ anuidade.saldo|floatformat:2 }}</td>
+                        <td class="px-4 py-2 text-center">
+                            {% if anuidade.saldo > 0 %}
+                                <form method="post" action="{% url 'app_finances:dar_baixa_anuidade' anuidade.anuidade.id %}">
+                                    {% csrf_token %}
+                                    <input type="text" name="valor_baixa" class="mt-1 p-2 border border-gray-300 rounded-md" required>
+                                    <button type="submit" class="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
+                                        Dar Baixa
+                                    </button>
+                                </form>
+                            {% else %}
+                                <span class="text-green-600 font-semibold">Quitado</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Acordeon para Relatório de Pagamentos -->
+            <div class="mt-6">
+                <button type="button" onclick="toggleAccordion()" class="w-full bg-gray-200 text-left px-4 py-3 font-semibold text-gray-700 hover:bg-gray-300 rounded-t-md focus:outline-none">
+                    Relatório de Pagamentos
+                </button>
+                <div id="accordion-content" class="hidden bg-white p-6 border-t border-gray-300 rounded-b-md shadow-inner">
+                    <table class="w-full border-collapse border border-gray-300 rounded-md">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Data da baixa</th>
+                                <th class="border px-4 py-2 text-center text-gray-700 font-semibold">Valor Pago</th>
+                                <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Ref. Anuidade</th>
+                                <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Registrado por</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pagamento in pagamentos %}
+                            <tr class="border-b hover:bg-gray-50">
+                                <!-- Exibindo o ano da anuidade -->
+                                <td class="border px-4 py-2 text-gray-700">{{ pagamento.data_pagamento|date:"d/m/Y" }}</td>
+                                <td class="border px-4 py-2 text-center text-gray-700">R$ {{ pagamento.valor|floatformat:2 }}</td>
+                                <td class="border px-4 py-2 text-gray-700">{{ pagamento.anuidade_associado.anuidade.ano }}</td>
+                                <td class="border px-4 py-2 text-gray-700">{{ pagamento.registrado_por.get_full_name|default:pagamento.registrado_por }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="px-4 py-3 text-center text-gray-500 italic">Nenhum pagamento registrado.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
-    </div>
-
-    <!-- Tabela de Anuidades -->
-    <h2 class="text-xl font-semibold mb-4">Detalhes das Anuidades</h2>
-<table class="min-w-full border border-gray-300 rounded-md overflow-hidden shadow-md">
-    <thead class="bg-gray-200">
-        <tr>
-            <th class="px-4 py-2 text-left font-semibold text-gray-700">Ano</th>
-            <th class="px-4 py-2 text-center font-semibold text-gray-700">Valor Anuidade</th>
-            <th class="px-4 py-2 text-center font-semibold text-gray-700">Valor Pago</th>
-            <th class="px-4 py-2 text-center font-semibold text-gray-700">Saldo</th>
-            <th class="px-4 py-2 text-center font-semibold text-gray-700">Ação</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for anuidade in anuidades_associado %}
-        <tr class="border-b hover:bg-gray-50">
-            <td class="px-4 py-2 text-gray-800">{{ anuidade.ano }}</td>
-            <td class="px-4 py-2 text-center">R$ {{ anuidade.valor_total|floatformat:2 }}</td>
-            <td class="px-4 py-2 text-center">R$ {{ anuidade.valor_pago|floatformat:2 }}</td>
-            <td class="px-4 py-2 text-center">R$ {{ anuidade.saldo|floatformat:2 }}</td>
-            <td class="px-4 py-2 text-center">
-                {% if anuidade.saldo > 0 %}
-                    <form method="post" action="{% url 'app_finances:dar_baixa_anuidade' anuidade.anuidade.id %}">
-                        {% csrf_token %}
-                        <input type="text" name="valor_baixa" class="mt-1 p-2 border border-gray-300 rounded-md" required>
-                        <button type="submit" class="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
-                            Dar Baixa
-                        </button>
-                    </form>
-                {% else %}
-                    <span class="text-green-600 font-semibold">Quitado</span>
-                {% endif %}
-            </td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-
-<!-- Acordeon para Relatório de Pagamentos -->
-<div class="mt-6">
-    <button type="button" onclick="toggleAccordion()" class="w-full bg-gray-200 text-left px-4 py-3 font-semibold text-gray-700 hover:bg-gray-300 rounded-t-md focus:outline-none">
-        Relatório de Pagamentos
-    </button>
-    <div id="accordion-content" class="hidden bg-white p-6 border-t border-gray-300 rounded-b-md shadow-inner">
-        <table class="w-full border-collapse border border-gray-300 rounded-md">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Data da baixa</th>
-                    <th class="border px-4 py-2 text-center text-gray-700 font-semibold">Valor Pago</th>
-                    <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Ref. Anuidade</th>
-                    <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Registrado por</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for pagamento in pagamentos %}
-                <tr class="border-b hover:bg-gray-50">
-                    <!-- Exibindo o ano da anuidade -->
-                    <td class="border px-4 py-2 text-gray-700">{{ pagamento.data_pagamento|date:"d/m/Y" }}</td>
-                    <td class="border px-4 py-2 text-center text-gray-700">R$ {{ pagamento.valor|floatformat:2 }}</td>
-                    <td class="border px-4 py-2 text-gray-700">{{ pagamento.anuidade_associado.anuidade.ano }}</td>
-                    <td class="border px-4 py-2 text-gray-700">{{ pagamento.registrado_por.get_full_name|default:pagamento.registrado_por }}</td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="px-4 py-3 text-center text-gray-500 italic">Nenhum pagamento registrado.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-
+    </main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
 
 <!-- Script para controle do acordeon -->
 <script>
@@ -100,5 +104,6 @@ function toggleAccordion() {
     content.classList.toggle('hidden');
 }
 </script>
+
 
 {% endblock financeiro_SingleAssociado %}
