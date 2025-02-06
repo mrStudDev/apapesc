@@ -608,7 +608,7 @@ class AssociadoModel(models.Model):
         # 3. Salva o objeto no banco
         super().save(*args, **kwargs)
 
-        # 4. Depois de salvo (tem pk), atribui anuidades - Tentando ajustar o pipeline
+        # 4. Depois de salvo (tem pk), atribui anuidades 
         self.atribuir_anuidades_existentes()
 
     def atribuir_anuidades_existentes(self):

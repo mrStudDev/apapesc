@@ -4,7 +4,7 @@
 {% block title %}Lista de Usuários Global{% endblock title %}
 
 {% block list_users %}
-    <!-- Navbar -->
+    <!-- Navbar --><!-- Lógica -->
     {% if is_superuser %}
         {% include "components/navbar_associacao.html" %}
 
@@ -42,7 +42,7 @@
             >
             <button 
                 type="submit" 
-                class="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+                class="bg-blue-500 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
             >
                 Buscar
             </button>
