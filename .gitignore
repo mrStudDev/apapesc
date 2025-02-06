@@ -31,6 +31,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Deletando envnvs
+.env
 
 /media/pdf/
 /media/documentos/

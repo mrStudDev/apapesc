@@ -7,6 +7,10 @@ from bleach.sanitizer import Cleaner
 from bleach.css_sanitizer import CSSSanitizer
 from django.contrib.auth.models import Group
 from .utils import create_associado_folder
+from django.apps import apps
+from django.db import transaction
+from decimal import Decimal
+
 from app_associacao.models import(
     AssociacaoModel,
     ReparticoesModel,
@@ -563,22 +567,27 @@ class AssociadoModel(models.Model):
         verbose_name="Anotações"
     )
     
-    
     def save(self, *args, **kwargs):
-        # Sanitização do conteúdo (se aplicável)
-        if hasattr(self, 'content') and self.content:  # Verifica se o campo 'content' existe
-            allowed_tags = ['p', 'a', 'strong', 'em', 'ul', 'ol', 'li', 'blockquote', 'h1', 'h2', 'h3', 'br', 'span']
+        """
+        Combina a lógica de sanitização do 'content',
+        criação de pasta no Drive (se objeto for novo)
+        e atribuição de anuidades ao associado.
+        """
+        # 1. Se houver campo 'content', sanitiza antes de salvar
+        if hasattr(self, 'content') and self.content:
+            allowed_tags = ['p', 'a', 'strong', 'em', 'ul', 'ol', 'li',
+                            'blockquote', 'h1', 'h2', 'h3', 'br', 'span']
             allowed_attributes = {
                 'a': ['href', 'title', 'style'],
                 'span': ['style'],
                 '*': ['style'],
             }
-            allowed_styles = ['color', 'background-color', 'text-align', 'font-weight', 'font-style', 'text-decoration']
+            allowed_styles = [
+                'color', 'background-color', 'text-align',
+                'font-weight', 'font-style', 'text-decoration'
+            ]
 
-            # CSSSanitizer configurado para permitir 'color'
             css_sanitizer = CSSSanitizer(allowed_css_properties=allowed_styles)
-
-            # Configuração do Cleaner
             cleaner = Cleaner(
                 tags=allowed_tags,
                 attributes=allowed_attributes,
@@ -587,17 +596,50 @@ class AssociadoModel(models.Model):
                 css_sanitizer=css_sanitizer
             )
 
-            # Limpeza do conteúdo
             self.content = cleaner.clean(self.content)
 
-        # Criação da pasta no Google Drive (apenas durante a criação do objeto)
-        if not self.id and not self.drive_folder_id:  # Verifica se o objeto ainda não foi salvo no banco de dados
+        # 2. Se for a criação (não tem self.id ainda) e sem pasta Drive, cria pasta
+        creating = not self.pk  # Detecta se é objeto novo
+        if creating and not self.drive_folder_id:
             folder_name = self.user.get_full_name() or self.user.username
-            parent_folder_id = '15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w'  # ID da pasta "Associados"
+            parent_folder_id = '15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w'  # Exemplo
             self.drive_folder_id = create_associado_folder(folder_name, parent_folder_id)
 
-        # Salva o objeto
+        # 3. Salva o objeto no banco
         super().save(*args, **kwargs)
+
+        # 4. Depois de salvo (tem pk), atribui anuidades
+        self.atribuir_anuidades_existentes()
+
+    def atribuir_anuidades_existentes(self):
+        AnuidadeModel = apps.get_model('app_finances', 'AnuidadeModel')
+        AnuidadeAssociado = apps.get_model('app_finances', 'AnuidadeAssociado')
+        
+        anuidades = AnuidadeModel.objects.all()
+        with transaction.atomic():
+            for anuidade in anuidades:
+                if not AnuidadeAssociado.objects.filter(anuidade=anuidade, associado=self).exists():
+                    meses_restantes = self.calcular_meses_validos(anuidade.ano)
+                    if meses_restantes > 0:
+                        valor_pro_rata = round(
+                            (anuidade.valor_anuidade / Decimal(12)) * Decimal(meses_restantes), 2
+                        )
+                        AnuidadeAssociado.objects.create(
+                            anuidade=anuidade,
+                            associado=self,
+                            valor_pro_rata=valor_pro_rata
+                        )
+
+    def calcular_meses_validos(self, ano):
+        """
+        Calcula o número de meses para o cálculo pro-rata.
+        """
+        if not self.data_filiacao or self.data_filiacao.year > ano:
+            return 0
+        if self.data_filiacao.year == ano:
+            # 12 - mês de filiação + 1 => filiou em março => 12 -3 + 1 = 10 meses
+            return 12 - self.data_filiacao.month + 1
+        return 12
 
 
     @property
