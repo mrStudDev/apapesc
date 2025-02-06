@@ -31,6 +31,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+
+
 # Deletando envnvs
 .env
 
@@ -41,6 +43,7 @@ MANIFEST
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
+#rerirando meu env
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
