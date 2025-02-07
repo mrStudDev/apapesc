@@ -18,12 +18,18 @@ def get_drive_service():
     return build("drive", "v3", credentials=creds)
 
 # Criar uma pasta no Google Drive para um novo associado
-def create_associado_folder(nome_associado):
-    drive_service = get_drive_service()
-    folder_metadata = {
-        "name": nome_associado,
-        "mimeType": "application/vnd.google-apps.folder",
-        "parents": [PARENT_FOLDER_ID]  # Define a pasta raiz onde será criada
-    }
-    folder = drive_service.files().create(body=folder_metadata, fields="id").execute()
-    return folder.get("id")  # Retorna o ID da nova pasta criada
+def create_associado_folder(nome_associado, parent_folder_id):
+    try:
+        drive_service = get_drive_service()
+        folder_metadata = {
+            "name": nome_associado,
+            "mimeType": "application/vnd.google-apps.folder",
+            "parents": [parent_folder_id]  # Define a pasta raiz onde será criada
+        }
+        folder = drive_service.files().create(body=folder_metadata, fields="id").execute()
+        folder_id = folder.get("id")
+        print(f"Pasta criada com ID: {folder_id}")  # Adicione este print para depuração
+        return folder_id
+    except Exception as e:
+        print(f"Erro ao criar pasta no Drive: {e}")  # Adicione este print para depuração
+        return None

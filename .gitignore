@@ -3,6 +3,13 @@ settings_local.py
 
 app_associados/credentials/service_account.json
 
+.env
+
+/media/pdf/
+/media/documentos/
+/media/images/
+/media/fotos_associados/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -34,12 +41,7 @@ MANIFEST
 
 
 # Deletando envnvs
-.env
 
-/media/pdf/
-/media/documentos/
-/media/images/
-/media/fotos_associados/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template

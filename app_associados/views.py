@@ -198,8 +198,12 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
         # Tarefas relacionadas ao associado
         context['tarefas'] = TarefaModel.objects.filter(associado=associado).order_by('-data_criacao')
 
+        context['associado'] = associado
+        context['drive_folder_id'] = associado.drive_folder_id
+
         return context
-    
+
+
 # Editar Associado
 class EditAssociadoView(GroupPermissionRequiredMixin, UpdateView):
     model = AssociadoModel

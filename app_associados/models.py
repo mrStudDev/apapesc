@@ -599,21 +599,33 @@ class AssociadoModel(models.Model):
             self.content = cleaner.clean(self.content)
 
         # 2. Se for a criação (não tem self.id ainda) e sem pasta Drive, cria pasta
+
+        
         creating = not self.pk  # Detecta se é objeto novo
         if creating and not self.drive_folder_id:
             folder_name = self.user.get_full_name() or self.user.username
             parent_folder_id = '15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w'  # Exemplo
             self.drive_folder_id = create_associado_folder(folder_name, parent_folder_id)
+            print(f"Drive Folder ID atribuído: {self.drive_folder_id}")  # Adicione este print para depuração
 
-        # 3. Salva o objeto no banco
+        # Salva o objeto no banco
         super().save(*args, **kwargs)
+        print(f"Objeto salvo com Drive Folder ID: {self.drive_folder_id}")
 
-        # 4. Depois de salvo (tem pk), atribui anuidades 
-        self.atribuir_anuidades_existentes()
+        @property
+        def drive_folder_link(self):
+            if self.drive_folder_id:
+                return f"https://drive.google.com/drive/folders/{self.drive_folder_id}"
+            return None
+        
+        def __str__(self):
+            return f"{self.user} - CPF: {self.cpf} - CELULAR: {self.celular} - {self.data_nascimento}"
 
     def atribuir_anuidades_existentes(self):
         AnuidadeModel = apps.get_model('app_finances', 'AnuidadeModel')
         AnuidadeAssociado = apps.get_model('app_finances', 'AnuidadeAssociado')
+        # 4. Depois de salvo (tem pk), atribui anuidades 
+        self.atribuir_anuidades_existentes()
         
         anuidades = AnuidadeModel.objects.all()
         with transaction.atomic():
@@ -642,11 +654,3 @@ class AssociadoModel(models.Model):
         return 12
 
 
-    @property
-    def drive_folder_link(self):
-        if self.drive_folder_id:
-            return f"https://drive.google.com/drive/folders/{self.drive_folder_id}"
-        return None
-    
-    def __str__(self):
-        return f"{self.user} - CPF: {self.cpf} - CELULAR: {self.celular} - {self.data_nascimento}"
