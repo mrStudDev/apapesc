@@ -43,7 +43,12 @@ class AssociadoForm(forms.ModelForm):
                 'placeholder': '(99)99999-9999',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'oninput': 'mascaraTelefone(this)',  # Chama a função de máscara para celular
-            }),              
+            }),
+            'drive_folder_id': forms.TextInput(attrs={
+                'class': 'bg-gray-100 border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight shadow-sm',
+                'readonly': 'readonly',  # Torna o campo ineditável
+                'style': 'cursor: not-allowed;'  # Estilo para indicar que não pode ser editado
+            }),
             'cpf': forms.TextInput(attrs={
                 'id': 'id_cpf',
                 'placeholder': '000.000.000-00',
@@ -264,8 +269,22 @@ class AssociadoForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None) 
+        associacao = kwargs.pop('associacao', None)
+        reparticao = kwargs.pop('reparticao', None)
         super().__init__(*args, **kwargs)
-        
+    
+        # Filtra repartições com base na associação
+        if associacao:
+            self.fields['reparticao'].queryset = ReparticoesModel.objects.filter(associacao=associacao)
+        else:
+            self.fields['reparticao'].queryset = ReparticoesModel.objects.none()
+
+        # Filtra municípios com base na repartição
+        if reparticao:
+            self.fields['municipio_circunscricao'].queryset = MunicipiosModel.objects.filter(reparticao=reparticao)
+        else:
+            self.fields['municipio_circunscricao'].queryset = MunicipiosModel.objects.none()
+            
         # Se o formulário tiver uma instância associada a um usuário, define o e-mail inicial
         if self.instance and self.instance.user:
             self.fields['email'].initial = self.instance.user.email
@@ -421,4 +440,15 @@ class AssociadoForm(forms.ModelForm):
         
         # Retorna o CEP formatado com o hífen
         return f"{numeros[:5]}-{numeros[5:]}"
-    
+
+
+class ProfissaoForm(forms.ModelForm):
+    class Meta:
+        model = ProfissoesModel
+        fields = ['nome']
+        widgets = {
+            'nome': forms.TextInput(attrs={
+                'placeholder': 'Digite o nome da profissão',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm'
+            }),
+        }

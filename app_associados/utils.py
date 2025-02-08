@@ -1,3 +1,4 @@
+
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -11,22 +12,18 @@ credentials = service_account.Credentials.from_service_account_file(
 
 service = build('drive', 'v3', credentials=credentials)
 
-def create_associado_folder(folder_name, parent_folder_id):
+import re
+
+def format_celular_for_whatsapp(celular):
     """
-    Cria uma pasta no Google Drive dentro de uma pasta pai específica.
-    
-    :param folder_name: Nome da pasta a ser criada.
-    :param parent_folder_id: ID da pasta pai no Google Drive.
-    :return: ID da pasta criada ou None em caso de erro.
+    Remove caracteres especiais e retorna o número no formato correto para o WhatsApp.
+    Exemplo: (48) 99999-9999 -> 5548999999999
     """
-    try:
-        file_metadata = {
-            'name': folder_name,
-            'mimeType': 'application/vnd.google-apps.folder',
-            'parents': [parent_folder_id]  # ID da pasta "Associados"
-        }
-        file = service.files().create(body=file_metadata, fields='id').execute()
-        return file.get('id')
-    except HttpError as error:
-        print(f"Erro ao criar pasta no Google Drive: {error}")
-        return None
+    # Remove tudo que não for número
+    celular = re.sub(r'\D', '', celular)
+
+    # Adiciona o código do país, se não estiver presente
+    if not celular.startswith('55'):
+        celular = f'55{celular}'
+
+    return celular

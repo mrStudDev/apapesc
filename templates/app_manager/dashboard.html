@@ -180,7 +180,6 @@
           </div>
         </div>
 
-
         <!-- Painel de Tarefas -->
         <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-auto">
           <h3 class="text-xl font-semibold text-black-600">Tarefas</h3>
@@ -212,10 +211,10 @@
             <!-- Cabeçalho do Painel -->
             <!-- Sessão 1 -->
             <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
-              <h3 class="text-gray-700 font-semibold text-sm mb-4">Lista de Mensagens</h3>
-              <a href="{% url 'app_home:list_mensagens' %}" class="flex items-center text-blue-700 hover:text-orange-600 transition-colors">
+              <h3 class="text-gray-700 font-semibold text-sm mb-4">Lista de Mensagens (leads-associe-se)</h3>
+              <a href="{% url 'app_home:list_mensagens' %}" class="flex items-center text-blue-700 hover:text-green-600 transition-colors">
                 <i class="material-icons mr-2">check_circle</i>
-                Ver Lista de Mensagens
+                Mensagens do formulário de informações
               </a>
               <br>
               <div class="overflow-x-auto">
@@ -245,11 +244,45 @@
                   </table>
               </div>
             </div>
-
-          </div>
           <br>
+          <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+          <h3 class="text-gray-700 font-semibold text-sm mb-4">Mensagens de Contato</h3>
+          <a href="{% url 'app_home:list_contact_messages' %}" class="flex items-center text-orange-500 hover:text-purple-600 transition-colors">
+              <i class="material-icons mr-2">email</i>
+              Mensagens do formulário de Contato
+          </a>
+          <br>
+          <div class="overflow-x-auto">
+              <table class="min-w-full bg-white rounded-lg shadow-md">
+                  <thead>
+                      <tr class="bg-gray-200 text-gray-600 text-sm leading-normal">
+                          <th class="py-3 px-6 text-left">Nome</th>
+                          <th class="py-3 px-6 text-left">E-mail</th>
+                          <th class="py-3 px-6 text-left">Assunto</th>
+                          <th class="py-3 px-6 text-left">Mensagem</th>
+                          <th class="py-3 px-6 text-left">Data</th>
+                      </tr>
+                  </thead>
+                  <tbody class="text-gray-600 text-sm font-light">
+                      {% for contato_mensagen in contato_mensagens %}
+                      <tr class="border-b border-gray-200 hover:bg-gray-100">
+                          <td class="py-3 px-6 text-left whitespace-nowrap">{{ contato_mensagen.name }}</td>
+                          <td class="py-3 px-6 text-left whitespace-nowrap">{{ contato_mensagen.email }}</td>
+                          <td class="py-3 px-6 text-left">{{ contato_mensagen.subject }}</td>
+                          <td class="py-3 px-6 text-left">{{ contato_mensagen.message|truncatechars:50 }}</td>
+                          <td class="py-3 px-6 text-left">{{ contato_mensagen.created_at|date:"d/m/Y H:i" }}</td>
+                      </tr>
+                      {% empty %}
+                      <tr>
+                          <td colspan="5" class="py-3 px-6 text-center text-gray-500">Nenhuma mensagem encontrada.</td>
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+          </div>
+      </div>
             <!-- Cabeçalho do Painel -->
-            <div class="bg-gray-200 py-4 px-6">
+            <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
               <h2 class="text-lg font-semibold">Painel</h2>
               <p class="text-sm">Informações detalhadas e organizadas</p>
           </div>          
@@ -291,15 +324,10 @@
                     </p>
                 </div>
             </div>
-
-            <!-- Rodapé do Painel -->
-            <div class="bg-gray-100 py-3 px-6 text-center text-sm text-gray-600">
-                Informações atualizadas recentemente.
-            </div>
         </div>
-
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
     <!-- Painel de Detalhes com tabelas adicionais -->
-    <div class="bg-gray-100 p-8 mt-12 rounded-lg shadow-lg">
+    <div class="bg-gray-50 p-8 mt-12 rounded-lg shadow-lg">
       <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">Associações</h2>
 
       <p class="mt-2 text-gray-600">Contagem de associados por associação.</p>
@@ -327,7 +355,7 @@
       </div>
     </div>
     <!-- Painel de Detalhes com tabelas adicionais -->
-    <div class="bg-gray-100 p-8 mt-12 rounded-lg shadow-lg">
+    <div class="bg-gray-50 p-8 mt-12 rounded-lg shadow-lg">
       <h2 class="text-2xl font-bold text-gray-800 text-center mb-8">Repartições e Municípios</h2>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
@@ -392,11 +420,8 @@
       </div>
     </div>
   </div>
-</div>
-</div>
+  <br>
 
-<div class="flex flex-col min-h-screen max-w-7xl mx-auto px-6 py-8">
-  <div class="flex-1 p-6">
   <!-- Bloco separado -->
   <div class="bg-gray-50 py-8 px-6 rounded-lg shadow-inner">
     <!-- Título Geral -->
@@ -426,11 +451,13 @@
         <h3 class="text-xl font-semibold text-gray-800 mb-4">Associados Por Status</h3>
         <canvas id="chartStatus" class="w-full h-60"></canvas>
       </div>
-
     </div>
   </div>
 </div>
 </div>
+</div>
+
+
 
 
 

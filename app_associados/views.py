@@ -1,15 +1,15 @@
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from .models import AssociadoModel
-from .forms import AssociadoForm  
+from .forms import AssociadoForm, ProfissaoForm
 from django.contrib.auth import get_user_model
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q
 from app_associacao.models import AssociacaoModel, ReparticoesModel, MunicipiosModel, IntegrantesModel
 from app_associados.models import STATUS_CHOICES
-from app_associados.models import AssociadoModel
+from app_associados.models import AssociadoModel, ProfissoesModel
 from app_tarefas.models import TarefaModel
 from django.contrib.auth.models import User
 from accounts.mixins import GroupPermissionRequiredMixin 
@@ -17,6 +17,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 import logging
 from django.contrib.auth.models import Group
 from app_documentos.models import Documento
+from django.http import QueryDict
+from django.http import JsonResponse
 
 
 logger = logging.getLogger(__name__)
@@ -41,9 +43,22 @@ class CreateAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
     
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
+        
         user_id = self.request.GET.get('user_id')
         if user_id:
             kwargs['user'] = User.objects.get(id=user_id)
+        
+            # Obtem associação e repartição selecionadas nos filtros
+        associacao_id = self.request.GET.get('associacao')
+        reparticao_id = self.request.GET.get('reparticao')
+
+        # Busca os objetos de associação e repartição, se fornecidos
+        if associacao_id:
+            kwargs['associacao'] = get_object_or_404(AssociacaoModel, pk=associacao_id)
+        if reparticao_id:
+            kwargs['reparticao'] = get_object_or_404(ReparticoesModel, pk=reparticao_id)
+
+       
         return kwargs
 
     def get_context_data(self, **kwargs):
@@ -67,7 +82,15 @@ class CreateAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
         # Configura querysets para campos relacionados
         context['form'].fields['reparticao'].queryset = ReparticoesModel.objects.all()
         context['form'].fields['municipio_circunscricao'].queryset = MunicipiosModel.objects.all()
+        # Adiciona dados de contexto para filtros
+        context['associacoes'] = AssociacaoModel.objects.all().order_by('nome_fantasia')
+        context['reparticoes'] = ReparticoesModel.objects.order_by('nome_reparticao')
 
+        # Preserva os valores de filtro na página
+        context['associacao_selecionada'] = self.request.GET.get('associacao')
+        context['reparticao_selecionada'] = self.request.GET.get('reparticao')
+
+        context['municipios'] = MunicipiosModel.objects.all()
         return context
 
     def form_valid(self, form):
@@ -200,6 +223,13 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
 
         context['associado'] = associado
         context['drive_folder_id'] = associado.drive_folder_id
+
+        # Verificação adicional
+        if associado.drive_folder_id:
+            print(f"Drive Folder ID: {associado.drive_folder_id}")
+            print(f"Drive Folder Link: https://drive.google.com/drive/folders/{associado.drive_folder_id}")
+        else:
+            print("Nenhum Drive Folder ID associado.")
 
         return context
 
@@ -408,3 +438,38 @@ class ListAssociadosReparticaoView(LoginRequiredMixin, GroupPermissionRequiredMi
         context['selected_status'] = self.request.GET.get('status', '')
 
         return context
+
+
+class CreateProfissaoView(CreateView):
+    model = ProfissoesModel
+    form_class = ProfissaoForm
+    template_name = 'app_associados/create_profissao.html'
+    success_url = reverse_lazy('app_associados:create_profissao')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Listar profissões em ordem alfabética
+        context['profissoes'] = ProfissoesModel.objects.all().order_by('nome')
+        return context
+
+# View para editar profissão
+class EditProfissaoView(UpdateView):
+    model = ProfissoesModel
+    form_class = ProfissaoForm
+    template_name = 'app_associados/edit_profissao.html'
+    success_url = reverse_lazy('app_associados:create_profissao')
+    
+
+def filtro_reparticoes(request, associacao_id):
+    print(f"Associação ID recebido: {associacao_id}")  # Log para depuração
+    reparticoes = ReparticoesModel.objects.filter(associacao_id=associacao_id).values('id', 'nome_reparticao')
+    print(f"Repartições encontradas: {list(reparticoes)}")  # Log para depuração
+    return JsonResponse({'reparticoes': list(reparticoes)})
+
+def filtro_municipios(request, reparticao_id):
+    print(f"Repartição ID recebido: {reparticao_id}")  # Log para depuração
+    reparticao = get_object_or_404(ReparticoesModel, id=reparticao_id)
+    municipios = reparticao.municipios_circunscricao.all().values('id', 'municipio')
+
+    print(f"Municípios encontrados: {list(municipios)}")  # Log para depuração
+    return JsonResponse({'municipios': list(municipios)})

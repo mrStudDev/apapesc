@@ -28,6 +28,27 @@
     {% endif %}
     
 <div class="container mx-auto mt-8 bg-gray-100" style="max-width: 980px;">
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="p-4 rounded-md text-white 
+                {% if message.tags == 'success' %}
+                    bg-green-500
+                {% elif message.tags == 'error' %}
+                    bg-red-500
+                {% elif message.tags == 'info' %}
+                    bg-blue-500
+                {% else %}
+                    bg-gray-500
+                {% endif %}
+            ">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <br>
     <h1 class="text-2xl font-bold mb-4 text-center py-2">Editar Associado</h1>
     <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded shadow-md">
         {% csrf_token %}
@@ -56,6 +77,22 @@
                 </div>
             </div>
         </div>
+        <div class="border-b border-gray-300 pb-6 mb-6">
+            <div class="mb-4">
+                <label for="{{ form.drive_folder_id.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    {{ form.drive_folder_id.label }}
+                </label>
+                <div class="mt-1 relative">
+                    {{ form.drive_folder_id }}
+                    <span class="absolute top-2 right-2 text-gray-500 italic text-sm">Somente leitura</span>
+                </div>
+                {% for error in form.drive_folder_id.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        
         <div class="border-b border-gray-300 pb-6 mb-6">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Vínculos</h2>
             <!--Dados Principais -->
@@ -95,7 +132,9 @@
                     {% for error in form.municipio_circunscricao.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>                
+                </div> 
+                
+                
                 <div class="mb-4">
                     <label for="{{ form.data_filiacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                         {{ form.data_filiacao.label }}
@@ -827,6 +866,8 @@
         </div>
     </form>
 </div>
+
+
 {% include 'components/footer_associacao.html' %}
 <!-- CSS do Editor -->
 <link rel="stylesheet" href="{% static 'css/editor.css' %}">

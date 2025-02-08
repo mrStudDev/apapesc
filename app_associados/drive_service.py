@@ -3,12 +3,12 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 
 
-# jhkjdhksf
+SCOPES = ['https://www.googleapis.com/auth/drive']
 # Caminho do arquivo JSON da conta de serviço
-SERVICE_ACCOUNT_FILE = os.path.join(os.path.dirname(__file__), 'config/drive_credentials.json')
+SERVICE_ACCOUNT_FILE = os.path.join(os.path.dirname(__file__), 'credentials/service_account.json')
 
 # ID da pasta raiz onde serão criadas as pastas dos associados
-PARENT_FOLDER_ID = "15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w"  # Altere para o ID da sua pasta no Drive
+PARENT_FOLDER_ID = "15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w?lfhs=2"  # Removido o sufixo ?lfhs=2
 
 # Autenticação com o Google Drive API
 def get_drive_service():

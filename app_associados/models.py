@@ -6,10 +6,12 @@ from django.core.validators import MinValueValidator
 from bleach.sanitizer import Cleaner
 from bleach.css_sanitizer import CSSSanitizer
 from django.contrib.auth.models import Group
-from .utils import create_associado_folder
+from .drive_service import create_associado_folder
 from django.apps import apps
 from django.db import transaction
 from decimal import Decimal
+from .utils import format_celular_for_whatsapp
+import re
 
 from app_associacao.models import(
     AssociacaoModel,
@@ -601,17 +603,21 @@ class AssociadoModel(models.Model):
         creating = not self.pk
         if creating and not self.drive_folder_id:
             try:
-                # Certifique-se de que 'folder_name' seja sempre definido
+                # Definindo o nome da pasta
                 folder_name = self.user.get_full_name() if self.user else "Novo_Associado"
                 parent_folder_id = '15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w'
-                
+
                 # Criar a pasta no Google Drive
-                self.drive_folder_id = create_associado_folder(folder_name, parent_folder_id)
-                if not self.drive_folder_id:
+                folder_id = create_associado_folder(folder_name, parent_folder_id)
+                if folder_id:
+                    # Adicionando o sufixo e atribuindo ao campo
+                    self.drive_folder_id = f"{folder_id}?lfhs=2"
+                    print(f"ID salvo no campo: {self.drive_folder_id}")
+                else:
                     print("Erro ao criar a pasta. Nenhum ID foi retornado.")
             except Exception as e:
                 print(f"Erro ao criar pasta no Drive: {e}")
-                self.drive_folder_id = None
+
 
 
         # 3. Salva
@@ -660,7 +666,12 @@ class AssociadoModel(models.Model):
         if self.drive_folder_id:
             return f"https://drive.google.com/drive/folders/{self.drive_folder_id}"
         return None
+    
 
+    # Método auxiliar para o celular limpo
+    def get_celular_clean(self):
+        return self.celular.replace('-', '').replace(' ', '') if self.celular else ''
+    
     def __str__(self):
         return f"Associado {self.user} (filiado em {self.data_filiacao})"
 

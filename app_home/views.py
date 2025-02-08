@@ -2,11 +2,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import Group
 from django.contrib import messages  # Para exibir mensagens de sucesso
 from .forms import LeadInformacoesForm  # Importa o formulário
-from django.views.generic import ListView, TemplateView
-from .models import LeadInformacoes
+from django.views.generic import ListView, TemplateView, DetailView 
+from .models import LeadInformacoes, ContactMessagesModel
 from django.shortcuts import get_object_or_404, redirect
 from .forms import ContactForm
-
+from accounts.mixins import GroupPermissionRequiredMixin 
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 def HomeView(request):
     context = {}
@@ -90,4 +91,32 @@ class Associese_View(TemplateView):
         else:
             return render(request, self.template_name, {'form': form})
 
+
+
+class ListContactMessagesView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
+    model = ContactMessagesModel
+    template_name = 'app_home/list_contatos.html'
+    context_object_name = 'mensagens'
+    paginate_by = 10  # Paginação opcional, exibe 10 mensagens por página
     
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+    ]
+
+    def get_queryset(self):
+        return ContactMessagesModel.objects.order_by('-created_at')
+
+
+class ViewContactMessageView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
+    model = ContactMessagesModel
+    template_name = 'app_home/single_contato.html'
+    context_object_name = 'mensagem'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+    ]

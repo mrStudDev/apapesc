@@ -135,13 +135,17 @@ class CargoCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateVi
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
         ]
-    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Lista de cargos ordenada alfabeticamente
+        context['cargos'] = CargosModel.objects.order_by('nome')
+        return context
 
 class CargoUpdateView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
     model = CargosModel
     template_name = 'app_associacao/edit_cargo.html'
     fields = '__all__'
-    success_url = reverse_lazy('app_associacao:list_cargos')
+    success_url = reverse_lazy('app_associacao:list_cargo')
     group_required = [
         'Superuser',
         'Admin da Associação',

@@ -8,6 +8,9 @@
 <main class="flex-grow">
     <div class="container mx-auto mt-8">
         <h1 class="text-2xl font-bold mb-4">Criar Novo Cargo</h1>
+        <p>Os cargos são aplicáveis apenas aos integrantes da Associação/Repartição, não se confundem com profissões.</p>
+        
+        <!-- Formulário de criação de cargo -->
         <form method="post" class="bg-white p-6 rounded shadow-md max-w-lg">
             {% csrf_token %}
             <div class="mb-4">
@@ -29,8 +32,36 @@
                 Salvar
             </button>
         </form>
+
+        <!-- Tabela de cargos -->
+        <h2 class="text-xl font-semibold text-gray-700 mt-10">Cargos Cadastrados</h2>
+        <table class="w-full border-collapse border border-gray-300 rounded-md mt-4">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="border px-4 py-2 text-left font-semibold text-gray-700">Nome do Cargo</th>
+                    <th class="border px-4 py-2 text-center font-semibold text-gray-700">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cargo in cargos %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="border px-4 py-2 text-gray-800">{{ cargo.nome }}</td>
+                    <td class="border px-4 py-2 text-center">
+                        <!-- Link de edição -->
+                        <a href="{% url 'app_associacao:edit_cargo' cargo.id %}" 
+                           class="text-blue-500 hover:underline">Editar</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-center text-gray-500 italic py-4">Nenhum cargo cadastrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </main>
+
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}   
 {% endblock create_cargo %}

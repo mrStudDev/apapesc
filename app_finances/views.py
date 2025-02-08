@@ -231,15 +231,6 @@ class ResumoFinanceiroView(TemplateView):
         # Resumo geral de despesas
         total_despesas = DespesaAssociacaoModel.objects.aggregate(total=Sum('valor'))['total'] or 0
 
-        # Resumo de despesas por associação (sem vínculo com associados)
-        despesas_por_associacao = (
-            DespesaAssociacaoModel.objects
-            .values('associacao__nome_fantasia', 'associacao__id')
-            .annotate(
-                total_despesas=Sum('valor')
-            )
-            .order_by('associacao__nome_fantasia')
-        )
         
         # Totais financeiros gerais
         receita_total = AnuidadeAssociado.objects.aggregate(total_pago=Sum('valor_pago'))['total_pago'] or Decimal('0.00')
@@ -285,7 +276,7 @@ class ResumoFinanceiroView(TemplateView):
             'data_atual': data_atual,
             'associacoes_data': associacoes_data,
             'total_despesas': total_despesas,
-            'despesas_por_associacao': despesas_por_associacao,
+
         })
 
         return context

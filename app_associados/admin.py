@@ -7,6 +7,7 @@ class AssociadoAdmin(admin.ModelAdmin):
     list_filter = ['reparticao', 'associacao', 'status']
     search_fields = ['user__first_name', 'user__last_name', 'cpf', 'email', 'celular']
 
+    
     def get_user_full_name(self, obj):
         return obj.user.get_full_name() if obj.user else "Usuário não associado"
     get_user_full_name.short_description = 'Nome Completo'

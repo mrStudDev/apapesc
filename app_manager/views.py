@@ -5,7 +5,7 @@ from app_associados.models import AssociadoModel
 from app_associacao.models import ReparticoesModel, MunicipiosModel, IntegrantesModel
 from django.db.models import Count
 import json
-from app_home.models import LeadInformacoes
+from app_home.models import LeadInformacoes, ContactMessagesModel
 from app_tarefas.models import TarefaModel
 from app_articles.models import ArticlesModel
 from django.shortcuts import get_object_or_404
@@ -84,6 +84,8 @@ class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateVi
         
         # Leads Mensagens - Home
         context['leads'] = LeadInformacoes.objects.all().order_by('-created_at')
+        context['contato_mensagens'] = ContactMessagesModel.objects.all().order_by('-created_at')
+        
         
         # Tarefas
         context['tarefas'] = TarefaModel.objects.all().order_by('-data_criacao')[:5]

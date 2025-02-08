@@ -148,18 +148,20 @@
         </div>
         <br>
         {% if associado.drive_folder_id %}
-            <p><strong>Pasta Drive - Documentos:</strong> 
-                <a href="https://drive.google.com/drive/folders/{{ associado.drive_folder_id }}" target="_blank" class="text-blue-500 hover:underline flex items-center space-x-2 py-2">
-                    <img src="https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png" alt="Drive" class="w-6 h-6">
-                    <span>Acessar documentos no Google Drive</span>
-                </a>
-            </p>
-            <p>Drive Folder ID: {{ associado.drive_folder_id }}</p>
-            <p>Drive Folder Link: {{ associado.drive_folder_link }}</p>
-
-        {% else %}
-            <p><em>Nenhuma pasta associadaaa.</em></p>
-        {% endif %}
+        <p><strong>Pasta Drive - Documentos:</strong> 
+            <a href="https://drive.google.com/drive/folders/{{ associado.drive_folder_id }}" 
+               target="_blank" 
+               class="text-blue-500 hover:underline flex items-center space-x-2 py-2">
+                <img src="https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png" alt="Drive" class="w-6 h-6">
+                <span>Acessar documentos no Google Drive</span>
+            </a>
+        </p>
+    {% else %}
+        <p><em>Nenhuma pasta associada.</em></p>
+    {% endif %}
+    
+        
+        
       
 
     </div>

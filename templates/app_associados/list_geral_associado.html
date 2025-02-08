@@ -91,6 +91,7 @@
                             <td class="px-4 py-2 border">{{ associado.cpf }}</td>
                             <td class="px-4 py-2 border">{{ associado.celular }}</td>
                             <td class="px-4 py-2 border">{{ associado.email }}</td>
+
                             <td class="px-4 py-2 border text-center flex justify-center space-x-2">
                                 <a href="{% url 'app_associados:single_associado' associado.pk %}" 
                                 class="text-blue-500 hover:text-blue-700" 
@@ -102,11 +103,14 @@
                                 title="Editar">
                                     <i class="material-icons">edit</i>
                                 </a>
-                                <a href="https://wa.me/{{ associado.celular_clean }}" target="_blank" 
+
+                                <a href="https://wa.me/{{ associado.celular_clean }}" 
+                                    target="_blank" 
                                     class="text-green-600 hover:text-green-800" 
                                     title="WhatsApp">
                                     <i class="material-icons">phone</i>
                                 </a>
+
                                 <a href="mailto:{{ associado.email }}" 
                                 class="text-purple-500 hover:text-purple-700" 
                                 title="Enviar Email">
