@@ -3,11 +3,11 @@ from django.contrib.auth.models import User
 from django.db import models, transaction
 from django.utils import timezone
 from decimal import Decimal
-from app_associados.models import AssociadoModel
+from app_associados.models import AssociadoModel, AssociacaoModel
 from django.utils.timezone import now
 from django.db.models import Sum, Q
-from app_associacao.models import AssociacaoModel
-
+from django.apps import apps 
+from django.conf import settings
 
 
 class AnuidadeModel(models.Model):
@@ -25,38 +25,40 @@ class AnuidadeModel(models.Model):
 
     def save(self, *args, **kwargs):
         """
-        Sobrescreve o método save para gerar lançamentos para todos os associados.
+        Ao salvar a anuidade, atribuir a todos os associados existentes.
         """
         super().save(*args, **kwargs)
         self.atribuir_anuidades_associados()
 
     def atribuir_anuidades_associados(self):
         """
-        Atribui a anuidade a todos os associados com base na data de filiação.
+        Atribui esta anuidade a todos os associados, calculando pro-rata.
         """
+        # Evita import circular com app_associados
+        AssociadoModel = apps.get_model('app_associados', 'AssociadoModel')
+        AnuidadeAssociado = apps.get_model('app_finances', 'AnuidadeAssociado')
+
         associados = AssociadoModel.objects.all()
 
         with transaction.atomic():
             for associado in associados:
-                if not self.associado_possui_anuidades(associado):
+                # Se já existir AnuidadeAssociado para este anuidade + associado, pula
+                if not AnuidadeAssociado.objects.filter(anuidade=self, associado=associado).exists():
                     meses_restantes = self.calcular_meses_validos(associado)
                     if meses_restantes > 0:
-                        valor_pro_rata = round((self.valor_anuidade / 12) * Decimal(meses_restantes), 2)
+                        valor_pro_rata = round(
+                            (self.valor_anuidade / Decimal(12)) * Decimal(meses_restantes), 2
+                        )
                         AnuidadeAssociado.objects.create(
                             anuidade=self,
                             associado=associado,
                             valor_pro_rata=valor_pro_rata
                         )
 
-    def associado_possui_anuidades(self, associado):
-        """
-        Verifica se o associado já tem a anuidade deste ano.
-        """
-        return AnuidadeAssociado.objects.filter(anuidade=self, associado=associado).exists()
-
     def calcular_meses_validos(self, associado):
         """
-        Calcula o número de meses para o cálculo pro-rata.
+        Calcula o número de meses para o cálculo pro-rata
+        com base em associado.data_filiacao e self.ano.
         """
         if not associado.data_filiacao or associado.data_filiacao.year > self.ano:
             return 0
@@ -67,7 +69,11 @@ class AnuidadeModel(models.Model):
 
 class AnuidadeAssociado(models.Model):
     anuidade = models.ForeignKey(AnuidadeModel, on_delete=models.CASCADE, related_name='anuidades_associados')
-    associado = models.ForeignKey(AssociadoModel, on_delete=models.CASCADE, related_name='anuidades_associados')
+    associado = models.ForeignKey(
+        'app_associados.AssociadoModel',
+        on_delete=models.CASCADE,
+        related_name='anuidades_associados'
+    )
     valor_pro_rata = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor Pro-Rata")
     valor_pago = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'), verbose_name="Valor Pago")
     pago = models.BooleanField(default=False, verbose_name="Anuidade Paga")
@@ -82,17 +88,13 @@ class AnuidadeAssociado(models.Model):
     def __str__(self):
         return f"Anuidade {self.anuidade.ano} - {self.associado}"
 
-
     def calcular_saldo(self):
         """Calcula o saldo devedor da anuidade."""
         return max(self.valor_pro_rata - self.valor_pago, Decimal('0.00'))
 
-    
     def dar_baixa(self, valor_baixa):
         """Dá baixa parcial ou total no valor da anuidade, sem criar automaticamente o pagamento."""
         self.valor_pago += valor_baixa
-
-        # Verifica se o saldo foi totalmente quitado
         if self.valor_pago >= self.valor_pro_rata:
             self.pago = True
         self.save()
@@ -125,7 +127,7 @@ class TipoDespesaModel(models.Model):
 
 # Despesa de uma Associação
 class DespesaAssociacaoModel(models.Model):
-    associacao = models.ForeignKey(AssociacaoModel, on_delete=models.CASCADE, related_name='despesas')
+    associacao = models.ForeignKey(AssociadoModel, on_delete=models.CASCADE, related_name='despesas')
     tipo_despesa = models.ForeignKey(TipoDespesaModel, on_delete=models.PROTECT, related_name='despesas')
     valor = models.DecimalField(max_digits=12, decimal_places=2, verbose_name="Valor da Despesa")
     descricao = models.TextField(blank=True, null=True, verbose_name="Descrição")

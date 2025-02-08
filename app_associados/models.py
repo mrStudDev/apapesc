@@ -567,25 +567,25 @@ class AssociadoModel(models.Model):
         verbose_name="Anotações"
     )
     
+
     def save(self, *args, **kwargs):
         """
-        Combina a lógica de sanitização do 'content',
-        criação de pasta no Drive (se objeto for novo)
-        e atribuição de anuidades ao associado.
+        1) Sanitiza 'content' (se existir),
+        2) Cria pasta no Drive se objeto for novo,
+        3) Salva,
+        4) Atribui anuidades existentes (para que associe
+           esse novo associado às anuidades do ano atual).
         """
-        # 1. Se houver campo 'content', sanitiza antes de salvar
-        if hasattr(self, 'content') and self.content:
-            allowed_tags = ['p', 'a', 'strong', 'em', 'ul', 'ol', 'li',
-                            'blockquote', 'h1', 'h2', 'h3', 'br', 'span']
+        # 1. Sanitização
+        if self.content:
+            allowed_tags = ['p','a','strong','em','ul','ol','li',
+                            'blockquote','h1','h2','h3','br','span']
             allowed_attributes = {
-                'a': ['href', 'title', 'style'],
+                'a': ['href','title','style'],
                 'span': ['style'],
                 '*': ['style'],
             }
-            allowed_styles = [
-                'color', 'background-color', 'text-align',
-                'font-weight', 'font-style', 'text-decoration'
-            ]
+            allowed_styles = ['color','background-color','text-align','font-weight','font-style','text-decoration']
 
             css_sanitizer = CSSSanitizer(allowed_css_properties=allowed_styles)
             cleaner = Cleaner(
@@ -595,41 +595,33 @@ class AssociadoModel(models.Model):
                 strip_comments=True,
                 css_sanitizer=css_sanitizer
             )
-
             self.content = cleaner.clean(self.content)
 
-        # 2. Se for a criação (não tem self.id ainda) e sem pasta Drive, cria pasta
-
-        
-        creating = not self.pk  # Detecta se é objeto novo
+        # 2. Se for criação (objeto novo), cria pasta no drive
+        creating = not self.pk
         if creating and not self.drive_folder_id:
             folder_name = self.user.get_full_name() or self.user.username
-            parent_folder_id = '15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w'  # Exemplo
+            parent_folder_id = '15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w'
             self.drive_folder_id = create_associado_folder(folder_name, parent_folder_id)
-            print(f"Drive Folder ID atribuído: {self.drive_folder_id}")  # Adicione este print para depuração
 
-        # Salva o objeto no banco
+        # 3. Salva
         super().save(*args, **kwargs)
-        print(f"Objeto salvo com Drive Folder ID: {self.drive_folder_id}")
 
-        @property
-        def drive_folder_link(self):
-            if self.drive_folder_id:
-                return f"https://drive.google.com/drive/folders/{self.drive_folder_id}"
-            return None
-        
-        def __str__(self):
-            return f"{self.user} - CPF: {self.cpf} - CELULAR: {self.celular} - {self.data_nascimento}"
+        # 4. Atribui anuidades existentes (gera AnuidadeAssociado se necessário)
+        self.atribuir_anuidades_existentes()
 
     def atribuir_anuidades_existentes(self):
-        AnuidadeModel = apps.get_model('app_finances', 'AnuidadeModel')
-        AnuidadeAssociado = apps.get_model('app_finances', 'AnuidadeAssociado')
-        # 4. Depois de salvo (tem pk), atribui anuidades 
-        self.atribuir_anuidades_existentes()
-        
+        """
+        Atribui todas as AnuidadeModel existentes para este Associado,
+        usando cálculo pro-rata se couber.
+        """
+        AnuidadeModel = apps.get_model('app_finances','AnuidadeModel')
+        AnuidadeAssociado = apps.get_model('app_finances','AnuidadeAssociado')
+
         anuidades = AnuidadeModel.objects.all()
         with transaction.atomic():
             for anuidade in anuidades:
+                # Se ainda não existe AnuidadeAssociado para (anuidade, self)
                 if not AnuidadeAssociado.objects.filter(anuidade=anuidade, associado=self).exists():
                     meses_restantes = self.calcular_meses_validos(anuidade.ano)
                     if meses_restantes > 0:
@@ -644,13 +636,23 @@ class AssociadoModel(models.Model):
 
     def calcular_meses_validos(self, ano):
         """
-        Calcula o número de meses para o cálculo pro-rata.
+        Cálculo pro-rata do nº de meses restantes do ano de filiação.
+        Exemplo: filiou em março => conta = 12 - 3 + 1 = 10 meses.
         """
         if not self.data_filiacao or self.data_filiacao.year > ano:
             return 0
         if self.data_filiacao.year == ano:
-            # 12 - mês de filiação + 1 => filiou em março => 12 -3 + 1 = 10 meses
             return 12 - self.data_filiacao.month + 1
         return 12
+
+    @property
+    def drive_folder_link(self):
+        if self.drive_folder_id:
+            return f"https://drive.google.com/drive/folders/{self.drive_folder_id}"
+        return None
+
+    def __str__(self):
+        return f"Associado {self.user} (filiado em {self.data_filiacao})"
+
 
 

@@ -11,8 +11,10 @@ from django.utils.timezone import now
 
 from django.views.generic import DetailView, TemplateView, ListView, CreateView, UpdateView
 from django.views import View
+from django.db.models import Value, F
+from django.db.models.functions import Concat, Lower
 
-from app_finances.models import AnuidadeModel, AnuidadeAssociado, Pagamento
+from .models import AnuidadeModel, AnuidadeAssociado, Pagamento
 from app_associados.models import AssociadoModel
 from app_associacao.models import AssociacaoModel
 
@@ -31,7 +33,18 @@ def lista_anuidades(request):
     # Filtrar os dados das anuidades com base no ano selecionado
     if ano_selecionado:
         anuidade = get_object_or_404(AnuidadeModel, ano=ano_selecionado)
-        anuidades_associados = AnuidadeAssociado.objects.filter(anuidade=anuidade).select_related('associado')
+        anuidades_associados = (
+            AnuidadeAssociado.objects.filter(anuidade=anuidade)
+            .select_related('associado__user')
+            .annotate(
+                full_name=Concat(
+                    F('associado__user__first_name'),
+                    Value(' '),
+                    F('associado__user__last_name')
+                )
+            )
+            .order_by('full_name')
+        )
 
         # Adicionar informações extras para cada associado
         for anuidade_assoc in anuidades_associados:
