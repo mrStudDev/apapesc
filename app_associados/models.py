@@ -597,12 +597,22 @@ class AssociadoModel(models.Model):
             )
             self.content = cleaner.clean(self.content)
 
-        # 2. Se for criação (objeto novo), cria pasta no drive
+        # 2. Criação da pasta no Drive, se necessário
         creating = not self.pk
         if creating and not self.drive_folder_id:
-            folder_name = self.user.get_full_name() or self.user.username
-            parent_folder_id = '15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w'
-            self.drive_folder_id = create_associado_folder(folder_name, parent_folder_id)
+            try:
+                # Certifique-se de que 'folder_name' seja sempre definido
+                folder_name = self.user.get_full_name() if self.user else "Novo_Associado"
+                parent_folder_id = '15Nby8u0aLy1hcjvfV8Ja6w_nSG0yFQ2w'
+                
+                # Criar a pasta no Google Drive
+                self.drive_folder_id = create_associado_folder(folder_name, parent_folder_id)
+                if not self.drive_folder_id:
+                    print("Erro ao criar a pasta. Nenhum ID foi retornado.")
+            except Exception as e:
+                print(f"Erro ao criar pasta no Drive: {e}")
+                self.drive_folder_id = None
+
 
         # 3. Salva
         super().save(*args, **kwargs)
