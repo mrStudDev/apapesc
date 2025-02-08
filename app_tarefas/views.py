@@ -141,7 +141,8 @@ class TarefaEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateVie
     def form_valid(self, form):
         # Preenche o campo 'criado_por' com o usuário logado
         form.instance.criado_por = self.request.user
-
+        # Inicializa o objeto, mas não salva ainda
+        self.object = form.save(commit=False)
         # Obter o estado atual da tarefa antes de salvar as mudanças
         tarefa_antiga = TarefaModel.objects.get(pk=self.object.pk)
 
@@ -166,7 +167,8 @@ class TarefaEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateVie
             historico_responsaveis.responsaveis_anteriores.set(responsaveis_anteriores)
             historico_responsaveis.responsaveis_novos.set(novos_responsaveis)
             historico_responsaveis.save()
-
+        # Agora salva o objeto atualizado
+        self.object.save()
         return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
