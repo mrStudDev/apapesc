@@ -9,7 +9,7 @@ from django.contrib.auth.models import Group
 from .models import TarefaModel, HistoricoStatusModel, HistoricoResponsaveisModel
 from .forms import TarefaForm
 from django.urls import reverse_lazy
-from django.http import HttpResponseRedirect, HttpResponseForbidden
+#from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
@@ -187,10 +187,10 @@ class TarefaEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateVie
 
         return context
 
+
     def get_success_url(self):
-        # Redireciona para a página de detalhes da tarefa com o pk da instância
+        # Redireciona para a página de detalhes da tarefa com o pk da instância 
         return reverse_lazy('app_tarefas:single_tarefa', kwargs={'pk': self.object.pk})
- 
     
 
 class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
@@ -235,7 +235,7 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Lista de status disponíveis para alteração
+        # Lista de status disponíveis para alteraçãos
         context['status_choices'] = self.model._meta.get_field('status').choices
         # Lista de responsáveis disponíveis
         context['responsaveis_disponiveis'] = IntegrantesModel.objects.all()
@@ -247,7 +247,6 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
         context['documentos'] = Documento.objects.filter(tarefa=self.object)
         
         return context
-
 
 
 def alterar_status_tarefa(request, pk):
@@ -266,7 +265,7 @@ def alterar_status_tarefa(request, pk):
             alterado_por=request.user.integrante  # Assumindo que o usuário está vinculado a um IntegrantesModel
         )
 
-        # Atualiza o status da tarefa
+        # Atualiza o status da tarefas
         tarefa.status = novo_status
         tarefa.save()
 
