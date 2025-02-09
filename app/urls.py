@@ -20,6 +20,20 @@ from django.urls import path, include
 from django.conf.urls.static import static
 
 
+from django.contrib.sitemaps.views import sitemap
+from django.views.generic import RedirectView
+from django.contrib.staticfiles.storage import staticfiles_storage
+
+from app_articles.sitemaps import ArticleSitemap, CategorySitemap
+from app_home.sitemaps import StaticViewSitemap
+
+sitemaps = {
+    'articles': ArticleSitemap(),
+    'categories': CategorySitemap(),
+    'static': StaticViewSitemap(),
+}
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('allauth.urls')),
@@ -34,7 +48,13 @@ urlpatterns = [
     path('artigos/', include('app_articles.urls', namespace='app_articles')),
     path('financas/', include('app_finances.urls', namespace='app_finances')),
     
-    
+
+    # Rotas de SEO
+    path('robots.txt', RedirectView.as_view(url=staticfiles_storage.url('seo/robots.txt')), name='robots_file'),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
+    path('google2e294c64b6641554.html', RedirectView.as_view(url=staticfiles_storage.url('seo/google2e294c64b6641554.html')), name='google_verification'),
+    #path('BingSiteAuth.xml', RedirectView.as_view(url=staticfiles_storage.url('seo/BingSiteAuth.xml')), name='bing_auth_file'),
+    #path('fbe920112a7946ea91b904e0ebf284d3.txt', RedirectView.as_view(url=staticfiles_storage.url('seo/fbe920112a7946ea91b904e0ebf284d3.txt')), name='bing_indexnow_file'),
 ]
 
 if settings.DEBUG:

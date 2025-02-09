@@ -1,8 +1,8 @@
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.mixins import GroupPermissionRequiredMixin
 from app_associados.models import AssociadoModel
-from app_associacao.models import ReparticoesModel, MunicipiosModel, IntegrantesModel
+from app_associacao.models import ReparticoesModel, MunicipiosModel, IntegrantesModel, AssociacaoModel
 from django.db.models import Count
 import json
 from app_home.models import LeadInformacoes, ContactMessagesModel
@@ -84,8 +84,11 @@ class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateVi
         
         # Leads Mensagens - Home
         context['leads'] = LeadInformacoes.objects.all().order_by('-created_at')
-        context['contato_mensagens'] = ContactMessagesModel.objects.all().order_by('-created_at')
+        context['total_leads'] = LeadInformacoes.objects.count()
         
+        # Contato Mensagens - Home
+        context['contato_mensagens'] = ContactMessagesModel.objects.all().order_by('-created_at')
+        context['total_mensagens'] = ContactMessagesModel.objects.count()
         
         # Tarefas
         context['tarefas'] = TarefaModel.objects.all().order_by('-data_criacao')[:5]
@@ -94,10 +97,68 @@ class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateVi
         # Tarefas
         context['articles'] = ArticlesModel.objects.all().order_by('-date_created')[:5]
         context['total_articles'] = ArticlesModel.objects.count()
-                
+        
+        
         return context
 
 
+
+from django.db.models import Prefetch
+
+
+from django.db.models import Count, Prefetch, Q
+from django.views.generic import ListView
+from app_associacao.models import AssociacaoModel, ReparticoesModel
+from app_associados.models import AssociadoModel
+
+class QuadroAssociadosView(ListView):
+    template_name = 'app_manager/quadro_associados.html'
+    context_object_name = 'associacoes'
+    model = AssociacaoModel
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Prefetch com anotações para contar associados por status
+        reparticoes_com_contagem = Prefetch(
+            'reparticoes',
+            queryset=ReparticoesModel.objects.annotate(
+                qtd_associados=Count('reparticoes_associados'),
+                qtd_ativos=Count('reparticoes_associados', filter=Q(reparticoes_associados__status='Associado Lista Ativo(a)')),
+                qtd_aposentados=Count('reparticoes_associados', filter=Q(reparticoes_associados__status='Associado Lista Aposentado(a)')),
+                qtd_candidatos=Count('reparticoes_associados', filter=Q(reparticoes_associados__status='Candidato(a)')),
+                qtd_clientes_especiais=Count('reparticoes_associados', filter=Q(reparticoes_associados__status='Cliente Especial')),
+                qtd_desassociados=Count('reparticoes_associados', filter=Q(reparticoes_associados__status='Desassociado(a)')),
+            )
+        )
+
+        associacoes = AssociacaoModel.objects.prefetch_related(reparticoes_com_contagem)
+
+        associacoes_data = []
+        for associacao in associacoes:
+            associacao_info = {
+                'nome': associacao.nome_fantasia,
+                'reparticoes': [
+                    {
+                        'nome': reparticao.nome_reparticao,
+                        'qtd_associados': reparticao.qtd_associados,
+                        'status': {
+                            'ativos': reparticao.qtd_ativos,
+                            'aposentados': reparticao.qtd_aposentados,
+                            'candidatos': reparticao.qtd_candidatos,
+                            'clientes_especiais': reparticao.qtd_clientes_especiais,
+                            'desassociados': reparticao.qtd_desassociados,
+                        }
+                    }
+                    for reparticao in associacao.reparticoes.all()
+                ]
+            }
+            associacoes_data.append(associacao_info)
+
+        context['associacoes_data'] = associacoes_data
+        return context
+
+    
 # Administradores da Associação
 class AdminDashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
     template_name = 'app_manager/dash_administradores.html'

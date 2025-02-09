@@ -26,7 +26,7 @@ class LeadInformacoes(models.Model):
     class Meta:
         verbose_name_plural = "Lead Informações"
         
-
+# Contato
 class ContactMessagesModel(models.Model):
     name = models.CharField(max_length=100)
     email = models.EmailField()

@@ -1,0 +1,12 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /manager/
+Disallow: /associacao/
+Disallow: /associados/
+Disallow: /documentos/
+Disallow: /automacoes/
+Disallow: /tarefas/
+Disallow: /financas/
+
+Sitemap: https://www.apapesc.com/sitemap.xml

@@ -5,7 +5,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>{% block title %}Associação Apapesc{% endblock title %}</title>
+  <!-- Title dinâmico -->
+  <title>{% block title %}Apapesc Associação{% endblock title %}</title>
+
+  <!-- Meta description dinâmico -->
+  <meta name="description" content="{% block meta_description %}Apapesc, Associação dos Agricultores e Pescadores do Estado de Santa Catarina.{% endblock meta_description %}">
+
+  <!-- Meta keywords dinâmico -->
+  <meta name="keywords" content="{% block meta_keywords %}pescadores, agricultores, associação{% endblock meta_keywords %}">
+
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp,container-queries"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -44,6 +52,8 @@
   {% block dashboard_Associados %}{% endblock dashboard_Associados %}
 
   {% block dashboard_vip %}{% endblock dashboard_vip %}
+
+  {% block quadro_associados %}{% endblock quadro_associados %}
   <!--########################################################################-->
 
   <!--BLOCOS DO APP FINANCES -->

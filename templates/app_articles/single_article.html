@@ -1,7 +1,14 @@
 {% extends 'base.html' %}
+
+{% block title %}{{ article.title }}{% endblock title %}
+{% block meta_title %} {{ article.meta_title }} {% endblock meta_title %} 
+{% block meta_description %}{{ article.meta_description }}{% endblock meta_description %}
+{% block meta_keywords %}{{ article.keywords }}{% endblock meta_keywords %}
+
+
+
 {% load static %}
 
-{% block title %} {{ object.meta_title }} {% endblock title %} 
 
 {% block single_article %}
 

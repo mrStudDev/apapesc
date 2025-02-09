@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 
 {% load static %}
-{% block title %}Lista Mensagens{% endblock title %}
+
+{% block title %}Lista Mensagens (leads){% endblock title %}
 
 {% block list_mensagens %}
 
@@ -28,64 +29,80 @@
     {% endif %}
 
 <main class="flex-grow">
-    <div class="container mx-auto mt-8 bg-gray-100" style="max-width: 980px;">
-        <h2 class="text-gray-700 font-semibold text-lg mb-4">Mensagens Recebidas</h2>
-            <!-- Mensagens de sucesso/erro -->
-            {% if messages %}
-            <div class="mb-4">
-                {% for message in messages %}
-                    <div class="p-4 rounded-lg 
-                        {% if message.tags == 'success' %}
-                            bg-green-100 text-green-800
-                        {% elif message.tags == 'error' %}
-                            bg-red-100 text-red-800
-                        {% elif message.tags == 'warning' %}
-                            bg-yellow-100 text-yellow-800
-                        {% elif message.tags == 'info' %}
-                            bg-blue-100 text-blue-800
-                        {% endif %}">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-        {% if leads %}
-            <div class="space-y-4">
-                {% for lead in leads %}
-                <div class="bg-white p-4 rounded-lg shadow-md relative">
-                    <!-- Botão de exclusão -->
-                    <form method="post" action="{% url 'app_home:delete_lead_message' lead.pk %}" class="absolute top-2 right-2">
-                        {% csrf_token %}
-                        <button type="submit" title="Excluir mensagem">
-                            <i class="material-icons text-red-500 hover:text-red-700">delete</i>
-                        </button>
-                    </form>
 
-                    <!-- Informações da mensagem -->
-                    <p class="text-gray-700 font-semibold text-base">
-                        Nome: <span class="text-gray-900">{{ lead.nome }}</span>
-                    </p>
-                    <p class="text-gray-700 text-sm">
-                        Celular: <span class="text-gray-900">{{ lead.celular }}</span>
-                    </p>
-                    <p class="text-gray-700 text-sm">
-                        Email: <span class="text-gray-900">{{ lead.email|default:'Não informado' }}</span>
-                    </p>
-                    <p class="text-gray-700 text-sm mt-2">
-                        Mensagem: <span class="text-gray-900">{{ lead.mensagem }}</span>
-                    </p>
-                    <p class="text-gray-500 text-xs mt-3">
-                        Recebida em: {{ lead.created_at|date:"d/m/Y H:i" }}
-                    </p>
+    <div class="container mx-auto mt-8 bg-gray-100 p-6 rounded shadow-lg max-w-4xl">
+        <h1 class="text-2xl text-blue-500 font-bold mb-6">Mensagens de Leads - Total: {{ total_leads }}</h1>
+
+
+        <div class="container mx-auto mt-8 bg-gray-100" style="max-width: 980px;">
+            <h2 class="text-gray-700 font-semibold text-lg mb-4">Mensagens Recebidas</h2>
+                <!-- Mensagens de sucesso/erro -->
+                {% if messages %}
+                <div class="mb-4">
+                    {% for message in messages %}
+                        <div class="p-4 rounded-lg 
+                            {% if message.tags == 'success' %}
+                                bg-green-100 text-green-800
+                            {% elif message.tags == 'error' %}
+                                bg-red-100 text-red-800
+                            {% elif message.tags == 'warning' %}
+                                bg-yellow-100 text-yellow-800
+                            {% elif message.tags == 'info' %}
+                                bg-blue-100 text-blue-800
+                            {% endif %}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <p class="text-gray-500">Nenhuma mensagem encontrada.</p>
-        {% endif %}
+                {% endif %}
+            {% if leads %}
+                <div class="space-y-4">
+                    {% for lead in leads %}
+                    <div class="bg-white p-4 rounded-lg shadow-md relative">
+                        <!-- Botão de exclusão -->
+                        <form method="post" action="{% url 'app_home:delete_lead_message' lead.pk %}" class="absolute top-2 right-2">
+                            {% csrf_token %}
+                            <button type="submit" title="Excluir mensagem">
+                                <i class="material-icons text-red-500 hover:text-red-700">delete</i>
+                            </button>
+                        </form>
+
+                        <!-- Informações da mensagem -->
+                        <p class="text-gray-700 font-semibold text-base">
+                            Nome: <span class="text-gray-900">{{ lead.nome }}</span>
+                        </p>
+                        <p class="text-gray-700 text-sm flex items-center">
+                            Celular: 
+                            <span id="lead-celular-{{ lead.pk }}" class="text-gray-900">{{ lead.celular }}</span>
+                            <button onclick="copyToClipboard('lead-celular-{{ lead.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                                <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                            </button>
+                        </p>
+                        
+                        <p class="text-gray-700 text-sm flex items-center">
+                            Email: 
+                            <span id="lead-email-{{ lead.pk }}" class="text-gray-900">{{ lead.email|default:'Não informado' }}</span>
+                            <button onclick="copyToClipboard('lead-email-{{ lead.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                                <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                            </button>
+                        </p>
+                        
+                        <p class="text-gray-700 text-sm mt-2">
+                            Mensagem: <span class="text-gray-900">{{ lead.mensagem }}</span>
+                        </p>
+                        <p class="text-gray-500 text-xs mt-3">
+                            Recebida em: {{ lead.created_at|date:"d/m/Y H:i" }}
+                        </p>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-500">Nenhuma mensagem encontrada.</p>
+            {% endif %}
+        </div>
     </div>
 </main>
-
+<script src="{% static 'js/copy_to_clipboard.js' %}"></script>
   <!-- Footer -->
   {% include "components/footer_associacao.html" %}
 {% endblock list_mensagens %}

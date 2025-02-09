@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %} Categoria | {{ category.name }} {% endblock title %} 
+{% block meta_description %} Artigos relacionados à categoria {{ category.name }} {% endblock meta_description %} 
+{% block meta_keywords %} tags, artigos, filtros {% endblock meta_keywords %}
 
 {% block categories %}
 

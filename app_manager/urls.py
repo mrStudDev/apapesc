@@ -9,7 +9,8 @@ from .views import (
     DiretorAssociacaoDashboardView,
     PresidenteAssociacaoDashboardView,
     AssociadoDashboardView,
-    UserVipDashboardView
+    UserVipDashboardView,
+    QuadroAssociadosView,
     )
 
 app_name = 'app_manager'
@@ -23,7 +24,7 @@ urlpatterns = [
     path('diretor_associacao_dashboard/', DiretorAssociacaoDashboardView.as_view(), name='diretor_associacao_dashboard'),
     path('presidente_associacao_dashboard/', PresidenteAssociacaoDashboardView.as_view(), name='presidente_associacao_dashboard'),
     path('associado_dashboard/', AssociadoDashboardView.as_view(), name='associado_dashboard'),
-
+    path('quadro-associados/', QuadroAssociadosView.as_view(), name='quadro_associados'),
     # Outras URLs...
     path('user_vip/', UserVipDashboardView.as_view(), name='user_vip_dasboard'),
 ]

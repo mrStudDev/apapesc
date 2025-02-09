@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %} Tag | {{ tags.name }} {% endblock title %} 
+{% block meta_description %} Artigos relacionados à tag {{ tags.name }} {% endblock meta_description %} 
+{% block meta_keywords %} {{ tags.name }} {% endblock meta_keywords %}
+
 
 {% block tags %}
 

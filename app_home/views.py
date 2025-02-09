@@ -51,27 +51,17 @@ class LeadMessagesListView(ListView):
     context_object_name = 'leads'
     ordering = ['-created_at']
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adiciona a quantidade total de mensagens no contexto
+        context['total_leads'] = LeadInformacoes.objects.count()
+        return context
+
 def delete_lead_message(request, pk):
     lead = get_object_or_404(LeadInformacoes, pk=pk)
     lead.delete()
     messages.success(request, "Mensagem deletada com sucesso!")
     return redirect('app_home:list_mensagens')
-
-
-def contact_view(request):
-    if request.method == 'POST':
-        form = ContactForm(request.POST)
-        if form.is_valid():
-            form.save()  # Salva a mensagem no banco de dados
-            return render(request, 'app_home/contact_us.html', {
-                'form': ContactForm(), 
-                'success': True, 
-            })
-    else:
-        form = ContactForm()
-    return render(request, 'app_home/contact_us.html', {
-        'form': form, 
-    })
 
 
 class Associese_View(TemplateView):
@@ -109,6 +99,12 @@ class ListContactMessagesView(LoginRequiredMixin, GroupPermissionRequiredMixin, 
     def get_queryset(self):
         return ContactMessagesModel.objects.order_by('-created_at')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adiciona a quantidade total de mensagens no contexto
+        context['total_mensagens'] = ContactMessagesModel.objects.count()
+        return context
+    
 
 class ViewContactMessageView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
     model = ContactMessagesModel
@@ -120,3 +116,26 @@ class ViewContactMessageView(LoginRequiredMixin, GroupPermissionRequiredMixin, D
         'Diretor(a) da Associação',
         'Presidente da Associação',
     ]
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Adiciona a quantidade total de mensagens no contexto
+        context['total_mensagens'] = ContactMessagesModel.objects.count()
+        return context    
+    
+
+# Formulário de Contato
+def contact_view(request):
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            form.save()  # Salva a mensagem no banco de dados
+            return render(request, 'app_home/contact_us.html', {
+                'form': ContactForm(), 
+                'success': True, 
+            })
+    else:
+        form = ContactForm()
+    return render(request, 'app_home/contact_us.html', {
+        'form': form, 
+    })

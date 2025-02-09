@@ -211,7 +211,7 @@
             <!-- Cabeçalho do Painel -->
             <!-- Sessão 1 -->
             <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
-              <h3 class="text-gray-700 font-semibold text-sm mb-4">Lista de Mensagens (leads-associe-se)</h3>
+              <h3 class="text-gray-700 font-semibold text-sm mb-4">Lista de Mensagens (leads-associe-se) . Total: <strong class="text-blue-500">{{ total_leads }}</strong></h3>
               <a href="{% url 'app_home:list_mensagens' %}" class="flex items-center text-blue-700 hover:text-green-600 transition-colors">
                 <i class="material-icons mr-2">check_circle</i>
                 Mensagens do formulário de informações
@@ -246,7 +246,8 @@
             </div>
           <br>
           <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
-          <h3 class="text-gray-700 font-semibold text-sm mb-4">Mensagens de Contato</h3>
+          <h3 class="text-gray-700 font-semibold text-sm mb-4">Mensagens de Contato. Total: <strong class="text-orange-500">{{ total_mensagens }}</strong></h3>
+          
           <a href="{% url 'app_home:list_contact_messages' %}" class="flex items-center text-orange-500 hover:text-purple-600 transition-colors">
               <i class="material-icons mr-2">email</i>
               Mensagens do formulário de Contato
