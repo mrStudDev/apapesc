@@ -167,6 +167,7 @@ class TarefaEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateVie
             historico_responsaveis.responsaveis_anteriores.set(responsaveis_anteriores)
             historico_responsaveis.responsaveis_novos.set(novos_responsaveis)
             historico_responsaveis.save()
+            
         # Agora salva o objeto atualizado
         self.object.save()
         return super().form_valid(form)
@@ -436,6 +437,7 @@ def arquivar_tarefa(request, pk):
 
     messages.error(request, 'Método não permitido.')
     return redirect('app_tarefas:list_tarefas')
+
 
 @login_required
 def desarquivar_tarefa(request, pk):
