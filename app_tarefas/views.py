@@ -139,9 +139,9 @@ class TarefaEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateVie
     ]
 
     def form_valid(self, form):
-        # Preenche o campo 'criado_por' com o usuário logado
+        # Preenche o campo 'criado_por' com o usuário logado sempre
         form.instance.criado_por = self.request.user
-        # Inicializa o objeto, mas não salva ainda
+        # Inicializa o objeto, mas não salva ainda - ==========
         self.object = form.save(commit=False)
         # Obter o estado atual da tarefa antes de salvar as mudanças
         tarefa_antiga = TarefaModel.objects.get(pk=self.object.pk)
