@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     
     # Aplicativos Externos
     'django_cleanup.apps.CleanupConfig',
+    'django.contrib.sitemaps',
     
     # Apps 
     'app_home',
