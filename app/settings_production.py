@@ -20,7 +20,7 @@ SECRET_KEY = env("SECRET_KEY", default="chave-padrao-insegura")
 
 DEBUG = env.bool("DEBUG", default=False)
 # REAL 34.55.106.64
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS_PROD", default=["127.0.0.1", "localhost", "34.30.59.89"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS_PROD", default=["apapesc.com", "www.apapesc.com", "127.0.0.1", "localhost", "34.30.59.89"])
 
 
 # Application definition
@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     
     # Aplicativos Externos
     'django_cleanup.apps.CleanupConfig',
-    'django.contrib.sitemaps',
+    'django.contrib.sitemaps', # Sitemap do Django
     
     # Apps 
     'app_home',
