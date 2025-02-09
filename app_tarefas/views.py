@@ -9,7 +9,7 @@ from django.contrib.auth.models import Group
 from .models import TarefaModel, HistoricoStatusModel, HistoricoResponsaveisModel
 from .forms import TarefaForm
 from django.urls import reverse_lazy
-#from django.http import HttpResponseRedirect, HttpResponseForbidden
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse

@@ -66,6 +66,6 @@ function getCSRFToken() {
     colunaConteudo.insertAdjacentElement('afterbegin', card);
     
     // Opcional: atualizar botões, recarregar página, etc.
-    location.reload(); // se quiser forçar recarregar e atualizar tudo
+    //location.reload(); // se quiser forçar recarregar e atualizar tudo
   }
   
