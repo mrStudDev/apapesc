@@ -26,6 +26,8 @@ from django.contrib.staticfiles.storage import staticfiles_storage
 
 from app_articles.sitemaps import ArticleSitemap, CategorySitemap
 from app_home.sitemaps import StaticViewSitemap
+from django.conf.urls.static import static
+
 
 sitemaps = {
     'articles': ArticleSitemap(),
