@@ -340,7 +340,7 @@
         e.preventDefault();
         const form = e.target;
         const formData = new FormData(form);
-        console.log('Enviando dados:', Array.from(formData.entries())); // Log dos dados enviados
+        console.log('Enviando dados:', Array.from(formData.entries())); 
     
         fetch(form.action, {
             method: 'POST',
@@ -348,7 +348,7 @@
         })
         .then(response => response.json())
         .then(data => {
-            console.log('Resposta recebida:', data); // Log da resposta
+            console.log('Resposta recebida:', data); 
             if (data.success) {
                 alert(data.message);
                 location.reload();
