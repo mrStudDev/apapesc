@@ -22,8 +22,8 @@ class DocumentoForm(forms.ModelForm):
         arquivo = self.cleaned_data.get('arquivo')
 
         # Verifica se o arquivo é maior que 5MB
-        if arquivo.size > 5 * 1024 * 1024:
-            raise forms.ValidationError("O arquivo não pode ser maior que 5MB.")
+        if arquivo.size > 100 * 1024 * 1024:
+            raise forms.ValidationError("O arquivo não pode ser maior que 100MB.")
         
         return arquivo
 
