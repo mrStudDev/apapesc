@@ -9,7 +9,25 @@
     <main class="flex-grow">
         <div class="container mx-auto px-6 py-8">
             <h1 class="text-3xl font-bold text-gray-800 mb-6">Situação Financeira do Associado</h1>
-
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md text-white 
+                        {% if message.tags == 'success' %}
+                            bg-green-500
+                        {% elif message.tags == 'error' %}
+                            bg-red-500
+                        {% elif message.tags == 'info' %}
+                            bg-blue-500
+                        {% else %}
+                            bg-gray-500
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
             <!-- Informações Resumidas -->
             <div class="bg-white p-6 rounded-lg shadow-md mb-6">
                 <h2 class="text-2xl font-semibold text-gray-700">{{ associado.user.get_full_name }}</h2>

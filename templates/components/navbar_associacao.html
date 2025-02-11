@@ -43,10 +43,6 @@
                     <a href="{% url 'app_automacoes:lista_automacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Declarações Uploads</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                    
-                    <a href="#" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Link</a>
-                    <a href="#" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Link</a>
-                    <a href="#" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Link</a>
-
                 </div>
             </div>           
             <!-- Dropdown Listas -->
@@ -157,32 +153,38 @@
         </div>
     </div>
 
-    <!-- ///////// Menu para dispositivos móveis CELULAR (oculto por padrão) /////////////// -->
+    <!--  Menu para dispositivos móveis CELULAR oculto por padrão -->
     <div id="mobile-menu" class="hidden bg-blue-500 md:hidden">
         <!-- Usaremos detalhes para criar dropdowns no mobile -->
         <details class="border-t border-blue-600">
-            <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Manager</summary>
+            <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Super</summary>
             <div class="bg-blue-600">
                 <a href="{% url 'app_manager:super_dashboard' %}" class="block px-6 py-2 hover:bg-blue-700">Dashboard</a>
+                <a href="{% url 'app_finances:resumo_financeiro' %}" class="block px-6 py-2 hover:bg-blue-700">Finances</a>
+                <a href="#" class="block px-6 py-2 text-gray-400 hover:bg-blue-700">Lançar Despesa</a>
+                <a href="{% url 'app_finances:list_despesas' %}" class="block px-6 py-2 hover:bg-blue-700">Listas de Despesas</a>
+                <a href="{% url 'app_finances:create_anuidade' %}" class="block px-6 py-2 hover:bg-blue-700">Cadastrar Anuidade</a>
+                <a href="{% url 'app_finances:list_anuidades' %}" class="block px-6 py-2 hover:bg-blue-700">Lista Anuidades</a>
+                <a href="{% url 'app_finances:tri_condictions' %}" class="block px-6 py-2 hover:bg-blue-700">Lista Tri Anuidaeds</a>
+                <a href="{% url 'app_manager:quadro_associados' %}" class="block px-6 py-2 hover:bg-blue-700">Associados Status</a>
+                <a href="{% url 'app_automacoes:lista_automacoes' %}" class="block px-6 py-2 hover:bg-blue-700">Declarações Uploads</a>
                 
-                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Link</a>
             </div>
         </details>
         <details class="border-t border-blue-600">
-            <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Lista</summary>
+            <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Listas</summary>
             <div class="bg-blue-600">
-                <a href="{% url 'app_associados:list_geral_associado' %}" class="block px-6 py-2 hover:bg-blue-700">Associados</a>
-                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Ativos</a>
-                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Aposentados</a>
-                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Desassociados</a>
-                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Clientes Especiais</a>
-                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Candidatos</a>
-                <a href="#embarcacoes" class="block px-6 py-2 hover:bg-blue-700">Embarcações</a>
-                <a href="#licencas" class="block px-6 py-2 hover:bg-blue-700">Licenças</a>
-                <a href="{% url 'app_associacao:list_reparticao' %}" class="block px-6 py-2 hover:bg-blue-700">Repartições Associação</a>
-                <a href="{% url 'app_associacao:list_municipio' %}" class="block px-6 py-2 hover:bg-blue-700">Municipios Circunscrição</a>
-                <a href="{% url 'app_associacao:list_integrante' %}" class="block px-6 py-2 hover:bg-blue-700">Integrantes Associação</a>                
+                <a href="{% url 'app_associados:list_geral_associado' %}" class="block px-6 py-2 hover:bg-blue-700">LG - Associados</a>
+                <a href="{% url 'app_associacao:list_associacao' %}" class="block px-6 py-2 hover:bg-blue-700">Associações</a>
+                <a href="{% url 'app_associacao:list_reparticao' %}" class="block px-6 py-2 hover:bg-blue-700">Repartições</a>
+                <a href="{% url 'app_associacao:list_municipio' %}" class="block px-6 py-2 hover:bg-blue-700">Mun. de Circunscrição</a>
+                <a href="{% url 'app_associacao:list_integrante' %}" class="block px-6 py-2 hover:bg-blue-700">Integrantes Associação</a>
+                <a href="{% url 'app_associacao:list_cargo' %}" class="block px-6 py-2 hover:bg-blue-700">Cargos</a>
+                <a href="{% url 'app_associacao:ex_integrantes' %}" class="block px-6 py-2 hover:bg-blue-700">Ex-Integrantes</a>
+                <a href="{% url 'app_documentos:list_tipo_documento' %}" class="block px-6 py-2 hover:bg-blue-700">Tipos Documentos</a>
+                <a href="{% url 'app_articles:list_articles' %}" class="block px-6 py-2 hover:bg-blue-700">Artigos</a>
                 <a href="{% url 'app_associacao:list_users' %}" class="block px-6 py-2 hover:bg-blue-700">Users/Accounts</a>
+                
 
             </div>
         </details>
@@ -191,25 +193,26 @@
             <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Cadastrar</summary>
             <div class="bg-blue-600">
                 <a href="{% url 'app_associacao:create_associacao' %}" class="block px-6 py-2 hover:bg-blue-700">Nova Associação</a>
-                <a href="{% url 'app_associados:create_associado' %}" class="block px-6 py-2 hover:bg-blue-700">Novo Associado</a>
                 <a href="{% url 'app_associacao:create_reparticao' %}" class="block px-6 py-2 hover:bg-blue-700">Nova Repartição</a>
-                <a href="#embarcacoes" class="block px-6 py-2 hover:bg-blue-700">Nova Embarcação</a>
-                <a href="#licencas" class="block px-6 py-2 hover:bg-blue-700">Nova Licença</a>
                 <a href="{% url 'app_associacao:create_municipio' %}" class="block px-6 py-2 hover:bg-blue-700">Mun. Circunscrição</a>
-
-                <!-- CADASTRA NOVO INTEGRANTE A PARTIR DE UM USUÁRIO -->
+                <a href="{% url 'app_associacao:create_cargo' %}" class="block px-6 py-2 hover:bg-blue-700">Novo Cargo(Integrante)</a>
+                <a href="{% url 'app_associados:create_profissao' %}" class="block px-6 py-2 hover:bg-blue-700">Nova Profissão</a>
                 <a href="{% url 'app_associacao:list_users' %}" class="block px-6 py-2 hover:bg-blue-700">Novo Integrante</a>
+                <a href="{% url 'app_associacao:list_users' %}" class="block px-6 py-2 hover:bg-blue-700">Novo Associado</a>
+                <a href="{% url 'app_documentos:create_tipo_documento' %}" class="block px-6 py-2 hover:bg-blue-700">Novo Tipo de Documento</a>
+                <a href="{% url 'app_articles:create_article' %}" class="block px-6 py-2 hover:bg-blue-700">Novo Artigo</a>
+                <a href="{% url 'app_articles:create_category' %}" class="block px-6 py-2 hover:bg-blue-700">Nova Categoria</a>
+                <a href="{% url 'app_articles:create_tag' %}" class="block px-6 py-2 hover:bg-blue-700">Nova Tag</a>
             </div>
         </details>
         <!-- Tarefas  -->
         <details class="border-t border-blue-600">
             <summary class="px-4 py-2 text-white hover:bg-blue-700 cursor-pointer">Tarefas</summary>
             <div class="bg-blue-600">
-                <a href="#" class="block px-6 py-2 hover:bg-blue-700">lista Tarefas</a>
-                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Board</a>
-                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Nova Tarefa</a>
-                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Notificações</a>
-                <a href="#" class="block px-6 py-2 hover:bg-blue-700">Tarefas Arquivadas</a>
+                <a href="{% url 'app_tarefas:list_tarefas' %}" class="block px-6 py-2 hover:bg-blue-700">lista Tarefas</a>
+                <a href="{% url 'app_tarefas:create_tarefa' %}" class="block px-6 py-2 hover:bg-blue-700">Nova Tarefa</a>
+                <a href="{% url 'app_tarefas:board_tarefas' %}" class="block px-6 py-2 hover:bg-blue-700">Fluxo Tarefa</a>
+                <a href="{% url 'app_tarefas:tarefas_arquivadas' %}" class="block px-6 py-2 hover:bg-blue-700">Tarefas Arquivadas</a>
             </div>
         </details>
 

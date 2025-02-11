@@ -28,7 +28,25 @@
     <main class="flex-grow">
         <div class="container mx-auto mt-8">
             <h2 class="text-2xl font-bold mb-6 text-center">Lista de Tipos de Documento</h2>
-
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md text-white 
+                        {% if message.tags == 'success' %}
+                            bg-green-500
+                        {% elif message.tags == 'error' %}
+                            bg-red-500
+                        {% elif message.tags == 'info' %}
+                            bg-blue-500
+                        {% else %}
+                            bg-gray-500
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
             <div class="overflow-x-auto">
                 <table class="table-auto w-full bg-white border border-gray-300 rounded-lg">
                     <thead class="bg-gray-100">

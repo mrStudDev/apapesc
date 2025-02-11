@@ -9,12 +9,12 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Roboto', 'sans-serif'], // Fonte do Google
+        sans: ['Roboto', 'sans-serif'], 
       },
     },
     container: {
       center: true,
-      padding: '1rem', // Adiciona padding nos containers
+      padding: '1rem', 
       screens: {
         sm: '640px',
         md: '768px',
