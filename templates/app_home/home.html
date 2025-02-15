@@ -8,6 +8,15 @@
 {% block home %}
 <!-- Navbar -->
 {% include "components/navbar_home.html" %}
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LPC03RR5H2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LPC03RR5H2');
+</script>
 
 <link rel="stylesheet" href="{% static 'css/styles_home.css' %}">
 <section style="background-image: url('{% static 'images/barcos_pesca.jpg' %}'); background-size: cover; background-position: center; background-repeat: no-repeat;">

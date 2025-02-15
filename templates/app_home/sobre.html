@@ -7,7 +7,15 @@
 {% block meta_keywords %}associação, apapesc, sobre{% endblock meta_keywords %}
 
 {% block sobre %}
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LPC03RR5H2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
+  gtag('config', 'G-LPC03RR5H2');
+</script>
 <!-- Navbar -->
 {% include "components/navbar_home.html" %}
 
