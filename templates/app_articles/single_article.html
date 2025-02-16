@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 
 {% block title %}{{ article.title }}{% endblock title %}
-{% block meta_title %} {{ article.meta_title }} {% endblock meta_title %} 
-{% block meta_description %}{{ article.meta_description }}{% endblock meta_description %}
+{% block og_title %}{{ article.meta_title|default:article.title }}{% endblock %}
+{% block og_description %}{{ article.meta_description|default:"Leia este artigo completo no nosso site!" }}{% endblock %}
+{% block og_image %}{{ article.image.url }}{% endblock %}
 {% block meta_keywords %}{{ article.keywords }}{% endblock meta_keywords %}
 
 
@@ -52,8 +53,7 @@
         {% include "components/navbar_home.html" %}           
     {% endif %}
 
-<!-- CSS do Editor -->
-<link rel="stylesheet" href="{% static 'css/editor.css' %}">
+
 <main class="flex-grow">
     <div class="container mx-auto my-8 max-w-3xl bg-white p-6 rounded-lg shadow-lg text-justify">
         <!-- Título -->
@@ -166,7 +166,8 @@
 
 </main>
 
-
+<!-- CSS do Editor -->
+<link rel="stylesheet" href="{% static 'css/editor.css' %}">
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}
 {% endblock single_article %}
