@@ -250,6 +250,26 @@ class EditAssociadoView(GroupPermissionRequiredMixin, UpdateView):
         'Auxiliar da Repartição',
         ]
     
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        
+        user_id = self.request.GET.get('user_id')
+        if user_id:
+            kwargs['user'] = User.objects.get(id=user_id)
+        
+            # Obtem associação e repartição selecionadas nos filtros
+        associacao_id = self.request.GET.get('associacao')
+        reparticao_id = self.request.GET.get('reparticao')
+
+        # Busca os objetos de associação e repartição, se fornecidos
+        if associacao_id:
+            kwargs['associacao'] = get_object_or_404(AssociacaoModel, pk=associacao_id)
+        if reparticao_id:
+            kwargs['reparticao'] = get_object_or_404(ReparticoesModel, pk=reparticao_id)
+
+       
+        return kwargs
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -261,6 +281,14 @@ class EditAssociadoView(GroupPermissionRequiredMixin, UpdateView):
         context['form'].fields['reparticao'].queryset = ReparticoesModel.objects.all()
         context['form'].fields['municipio_circunscricao'].queryset = MunicipiosModel.objects.all()
 
+        # Adiciona dados de contexto para filtros
+        context['associacoes'] = AssociacaoModel.objects.all().order_by('nome_fantasia')
+        context['reparticoes'] = ReparticoesModel.objects.order_by('nome_reparticao')
+        # Preserva os valores de filtro na página
+        context['associacao_selecionada'] = self.request.GET.get('associacao')
+        context['reparticao_selecionada'] = self.request.GET.get('reparticao')
+
+        context['municipios'] = MunicipiosModel.objects.all()
         return context
 
     def form_valid(self, form):

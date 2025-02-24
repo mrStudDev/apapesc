@@ -20,8 +20,19 @@
   <meta property="og:type" content="article">
   <meta name="twitter:card" content="summary_large_image">
   
-  <link rel="canonical" href="{{ request.build_absolute_uri }}">
-  <link rel="icon" type="image/png" sizes="48x48" href="{% static 'images/favicon.ico' %}">
+  {% if request.path == "/" %}
+    <link rel="canonical" href="https://www.apapesc.com/">
+  {% elif request.path == "/sobre/" %}
+    <link rel="canonical" href="https://www.apapesc.com/sobre/">
+  {% elif request.path == "/contato/" %}
+    <link rel="canonical" href="https://www.apapesc.com/contato/">
+  {% elif request.path == "/associe-se/" %}
+    <link rel="canonical" href="https://www.apapesc.com/associe-se/">
+  {% else %}
+    <link rel="canonical" href="{{ request.build_absolute_uri }}">
+  {% endif %}
+
+  <link rel="icon" type="image/ico" sizes="48x48" href="{% static 'images/favicon.ico' %}">
   <link rel="icon" type="image/png" sizes="48x48" href="{% static 'images/favicon.png' %}">
 
 

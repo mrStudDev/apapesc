@@ -17,6 +17,7 @@ CATEGORIAS_TAREFA = [
     ('administrativa', 'Administrativa'),
     ('associado', 'Associado'),
     ('integrante', 'Integrante'),
+    ('sistema', 'Sistema'),
     ('outro', 'Outro'),
 ]
 
