@@ -48,8 +48,9 @@
                         <th class="px-4 py-2 text-left font-semibold text-gray-700">Ano</th>
                         <th class="px-4 py-2 text-center font-semibold text-gray-700">Valor Anuidade</th>
                         <th class="px-4 py-2 text-center font-semibold text-gray-700">Valor Pago</th>
+                        <th class="px-4 py-2 text-center font-semibold text-yellow-600">Desconto</th>  <!-- ✅ Nova coluna -->
                         <th class="px-4 py-2 text-center font-semibold text-gray-700">Saldo</th>
-                        <th class="px-4 py-2 text-center font-semibold text-gray-700">Ação</th>
+                        <th class="px-4 py-2 text-center font-semibold text-gray-700">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,17 +58,37 @@
                     <tr class="border-b hover:bg-gray-50">
                         <td class="px-4 py-2 text-gray-800">{{ anuidade.ano }}</td>
                         <td class="px-4 py-2 text-center">R$ {{ anuidade.valor_total|floatformat:2 }}</td>
-                        <td class="px-4 py-2 text-center">R$ {{ anuidade.valor_pago|floatformat:2 }}</td>
+                        <td class="px-4 py-2 text-center text-blue-600 font-semibold">R$ {{ anuidade.valor_pago|floatformat:2 }}</td>
+                        <td class="px-4 py-2 text-center text-yellow-600 font-semibold">
+                            R$ {{ anuidade.valor_desconto|floatformat:2 }}  <!-- ✅ Exibe o desconto -->
+                        </td>
                         <td class="px-4 py-2 text-center">R$ {{ anuidade.saldo|floatformat:2 }}</td>
                         <td class="px-4 py-2 text-center">
                             {% if anuidade.saldo > 0 %}
-                                <form method="post" action="{% url 'app_finances:dar_baixa_anuidade' anuidade.anuidade.id %}">
-                                    {% csrf_token %}
-                                    <input type="text" name="valor_baixa" class="mt-1 p-2 border border-gray-300 rounded-md" required>
-                                    <button type="submit" class="mt-2 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700">
-                                        Dar Baixa
-                                    </button>
-                                </form>
+                                <div class="flex flex-col gap-2">
+                                    <!-- Formulário de Dar Baixa -->
+                                    <form method="post" action="{% url 'app_finances:dar_baixa_anuidade' anuidade.anuidade.id %}" class="flex items-center gap-2">
+                                        {% csrf_token %}
+                                        <input type="number" step="0.01" min="0.01" name="valor_baixa" class="w-24 p-1 border border-gray-300 rounded-md text-center" required>
+                                        <button type="submit" class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700">
+                                            Dar Baixa
+                                        </button>
+                                    </form>
+            
+                                    <!-- Formulário de Desconto -->
+                                    <form method="post" action="{% url 'app_finances:conceder_desconto' anuidade.anuidade.id %}" class="flex items-center gap-2">
+                                        {% csrf_token %}
+                                        <input type="number" name="valor_desconto" step="0.01" min="0.01"
+                                               class="w-24 p-1 border text-yellow-500 border-gray-300 rounded-md text-center" required
+                                               placeholder="0.00">
+                                        <input type="text" name="motivo"
+                                               class="w-40 p-1 border text-yellow-600 border-gray-300 rounded-md"
+                                               placeholder="Descrição desconto" required>
+                                        <button type="submit" class="bg-yellow-500 text-white py-1 px-3 rounded hover:bg-yellow-600">
+                                            Aplicar Desconto
+                                        </button>
+                                    </form>
+                                </div>
                             {% else %}
                                 <span class="text-green-600 font-semibold">Quitado</span>
                             {% endif %}
@@ -76,6 +97,8 @@
                     {% endfor %}
                 </tbody>
             </table>
+            
+            
 
             <!-- Acordeon para Relatório de Pagamentos -->
             <div class="mt-6">
@@ -86,24 +109,43 @@
                     <table class="w-full border-collapse border border-gray-300 rounded-md">
                         <thead class="bg-gray-100">
                             <tr>
-                                <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Data da baixa</th>
-                                <th class="border px-4 py-2 text-center text-gray-700 font-semibold">Valor Pago</th>
+                                <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Data</th>
+                                <th class="border px-4 py-2 text-center text-gray-700 font-semibold">Valor</th>
                                 <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Ref. Anuidade</th>
                                 <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Registrado por</th>
+                                <th class="border px-4 py-2 text-left text-gray-700 font-semibold">Descrição Desconto</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for pagamento in pagamentos %}
+                            {% for evento in eventos_financeiros %}
                             <tr class="border-b hover:bg-gray-50">
-                                <!-- Exibindo o ano da anuidade -->
-                                <td class="border px-4 py-2 text-gray-700">{{ pagamento.data_pagamento|date:"d/m/Y" }}</td>
-                                <td class="border px-4 py-2 text-center text-gray-700">R$ {{ pagamento.valor|floatformat:2 }}</td>
-                                <td class="border px-4 py-2 text-gray-700">{{ pagamento.anuidade_associado.anuidade.ano }}</td>
-                                <td class="border px-4 py-2 text-gray-700">{{ pagamento.registrado_por.get_full_name|default:pagamento.registrado_por }}</td>
+                                <td class="border px-4 py-2 text-gray-700">{{ evento.data|date:"d/m/Y" }}</td>
+                    
+                                {% if evento.tipo == "pagamento" %}
+                                    <td class="border px-4 py-2 text-center text-blue-600 font-semibold">
+                                        + R$ {{ evento.valor|floatformat:2 }}
+                                    </td>
+                                {% elif evento.tipo == "desconto" %}
+                                    <td class="border px-4 py-2 text-center text-yellow-600 font-semibold">
+                                        - R$ {{ evento.valor|floatformat:2 }} (Desconto)
+                                    </td>
+                                {% endif %}
+                    
+                                <td class="border px-4 py-2 text-gray-700">{{ evento.ano }}</td>
+                                <td class="border px-4 py-2 text-gray-700">{{ evento.registrado_por.get_full_name|default:evento.registrado_por }}</td>
+                                
+                                <!-- Exibir motivo do desconto se existir -->
+                                <td class="border px-4 py-2 text-gray-700">
+                                    {% if evento.tipo == "desconto" %}
+                                        <span class="italic text-yellow-700">{{ evento.motivo }}</span>
+                                    {% else %}
+                                        <span class="text-gray-500">—</span>  <!-- Para pagamentos, sem motivo -->
+                                    {% endif %}
+                                </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="4" class="px-4 py-3 text-center text-gray-500 italic">Nenhum pagamento registrado.</td>
+                                <td colspan="5" class="px-4 py-3 text-center text-gray-500 italic">Nenhum pagamento ou desconto registrado.</td>
                             </tr>
                             {% endfor %}
                         </tbody>

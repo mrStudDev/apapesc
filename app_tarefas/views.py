@@ -1,5 +1,5 @@
 from django.shortcuts import render, reverse
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView, View
 from django.contrib import messages
 from django.utils.timezone import now
 from django.contrib.auth.models import User
@@ -15,13 +15,15 @@ from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 import json
 from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 from django.http import Http404
 from app_associados.models import AssociadoModel
 from app_associacao.models import IntegrantesModel, AssociacaoModel, ReparticoesModel
 from app_documentos.models import Documento
-
+from django.db.models import Count
+from .models import GuiaINSSModel
 
 
 class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
@@ -473,4 +475,80 @@ class TarefaDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteV
 
 
 
+
+# ========= INSS =========
+
+class EmissaoGuiasView(LoginRequiredMixin, TemplateView):
+    template_name = "app_tarefas/emissao_guias.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        ano_selecionado = self.request.GET.get("ano", now().year)
+        meses_validos = list(range(4, 12))  # Abril a Novembro
+
+        # 🔥 Filtra somente associados que recolhem INSS e inclui CPF e Senha_Gov
+        associados_inss = AssociadoModel.objects.filter(recolhe_inss="Sim").values(
+            "id", "user__first_name", "user__last_name", "cpf", "senha_gov", "celular_correspondencia"
+        )
+
+
+        guias_por_associado = {}
+        for associado in associados_inss:
+            associado_id = associado["id"]  # ✅ Garante que ID está presente
+            guias = {mes: None for mes in meses_validos}
+            guias_existentes = GuiaINSSModel.objects.filter(associado_id=associado_id, ano=ano_selecionado)
+
+            for guia in guias_existentes:
+                guias[guia.mes_referencia] = guia  # ✅ Associamos corretamente
+
+            guias_por_associado[associado_id] = {
+                "dados": associado,
+                "guias": guias
+            }
+
+
+        context.update({
+            "ano_selecionado": int(ano_selecionado),
+            "anos_disponiveis": range(2022, now().year + 1),  # Mostra anos de 2023 até o atual
+            "meses_validos": meses_validos,
+            "associados_inss": associados_inss,
+            "guias_por_associado": guias_por_associado,
+        })
+        return context
+
+
+
+@method_decorator(login_required, name='dispatch')
+class CriarGuiaView(View):
+    def post(self, request, associado_id, mes, ano):
+        associado = get_object_or_404(AssociadoModel, id=associado_id)
+
+        # Verifica se a guia já existe
+        guia, created = GuiaINSSModel.objects.get_or_create(
+            associado=associado,
+            mes_referencia=mes,
+            ano=ano,
+            defaults={"status": "pendente"},
+        )
+
+        if created:
+            messages.success(request, f"Guia de {mes}/{ano} criada para {associado.user.get_full_name()}.")
+
+        return JsonResponse({"success": True, "guia_id": guia.id})
+
+
+class AtualizarStatusGuiaView(LoginRequiredMixin, View):
+    def post(self, request, guia_id):
+        guia = get_object_or_404(GuiaINSSModel, id=guia_id)
+        
+        if guia.status == "pendente":
+            guia.status = "emitido"
+            messages.success(request, f"Guia {guia.get_mes_referencia_display()} marcada como EMITIDA.")
+        elif guia.status == "emitido":
+            guia.status = "enviado"
+            messages.success(request, f"Guia {guia.get_mes_referencia_display()} marcada como ENVIADA.")
+        
+        guia.save()
+        return redirect("app_tarefas:emissao_guias")
 

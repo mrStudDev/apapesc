@@ -38,33 +38,47 @@
       <!-- Painéis de dados -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
 
-        <!-- Painel de Associados -->
-        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-auto">
-          <h3 class="text-xl font-semibold text-gray-800">Associados Cadastrados</h3>
-          <div class="mt-4 text-5xl font-bold text-blue-500">{{ total_associados }}</div>
-          <div class="mt-2 text-sm text-gray-600">
-            <hr class="my-3 border-gray-300">
-            <div class="grid grid-cols-2 gap-y-2">
-              <div>
-                <p class="font-medium text-gray-700">Ativos:</p>
-                <p><strong class="text-blue-600 text-sm mt-2">{{ associados_ativos }}</strong></p>
+      <!-- Painel de Associados -->
+      <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-auto">
+        <h3 class="text-xl font-semibold text-gray-800">Cadastros</h3>
 
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Aposentados:</p>
-                <p><strong class="text-purple-600 text-sm mt-2">{{ associados_aposentados }}</strong></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Clientes Especiais:</p>
-                <p><strong class="text-yellow-600 text-sm mt-2">{{ associados_especiais }}</strong></p>
-              </div>
-              <div>
-                <p class="font-medium text-gray-700">Candidatos</p>
-                <p>{{ total_candidatos }}</p>
-              </div>
+        <!-- Grid com Total, Desassociados e Final -->
+        <div class="grid grid-cols-3 gap-4 mt-4">
+            <!-- Total de Associados -->
+            <div>
+                <div class="text-5xl font-bold text-blue-800">{{ total_associados }}</div>
+                <p class="text-sm text-gray-600">Total Geral</p>
             </div>
+            <!-- Total de Ativos -->
+            <div>
+              <div class="text-5xl font-bold text-blue-600">{{ associados_ativos }}</div>
+              <p class="text-sm text-gray-600">Ativos</p>
           </div>
+            <!-- Total de Aposentados -->
+            <div>
+              <div class="text-5xl font-bold text-blue-600">{{ associados_aposentados }}</div>
+              <p class="text-sm text-gray-600">Apodentados</p>
+          </div>
+            <!-- Total de Clientes Especiais -->
+            <div>
+              <div class="text-5xl font-bold text-blue-600">{{ associados_especiais }}</div>
+              <p class="text-sm text-gray-600">Clientes</p>
+          </div>              
+            <!-- Candidatos -->
+            <div>
+              <div class="text-5xl font-bold text-blue-600">{{ total_candidatos}}</div>
+              <p class="text-sm text-gray-600">Candidatos</p>
+          </div>          
+            <!-- Desassociados -->
+            <div>
+                <div class="text-5xl font-bold text-blue-600">{{ total_desassociados }}</div>
+                <p class="text-sm text-gray-600">Desassociados</p>
+            </div>
+        
         </div>
+
+      </div>
+
 
         <!-- Painel de Embarcações -->
         <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md mx-auto">

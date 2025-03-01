@@ -20,14 +20,14 @@ class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateVi
         context = super().get_context_data(**kwargs)
         user = self.request.user
         context['is_superuser'] = user.is_superuser
-        # Contagens de Associados
+        
+        # Filtrando categorias específicas
         context['total_associados'] = AssociadoModel.objects.count()
         context['associados_ativos'] = AssociadoModel.objects.filter(status="Associado Lista Ativo(a)").count()
         context['associados_aposentados'] = AssociadoModel.objects.filter(status="Associado Lista Aposentado(a)").count()
-
-        # Filtrando categorias específicas
         context['associados_especiais'] = AssociadoModel.objects.filter(status="Cliente Especial").count()
         context['total_candidatos'] = AssociadoModel.objects.filter(status="Candidato(a)").count()
+        context['total_desassociados'] = AssociadoModel.objects.filter(status="Desassociado(a)").count()
 
         # Sexo biológico
         context['associados_homens'] = AssociadoModel.objects.filter(sexo_biologico="Masculino").count()
@@ -98,7 +98,7 @@ class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateVi
         context['articles'] = ArticlesModel.objects.all().order_by('-date_created')[:5]
         context['total_articles'] = ArticlesModel.objects.count()
         
-        
+
         return context
 
 

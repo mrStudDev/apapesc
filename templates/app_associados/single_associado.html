@@ -145,6 +145,29 @@
                     </div>
                 </div>
             </div>
+            {% if associado.status == "Candidato(a)" %}
+                    <p class="text-yellow-500 font-semibold">Anuidade ainda não computada</p>
+
+                {% elif associado.status == "Cliente Especial" %}
+                    <p class="text-gray-500 font-semibold">Anuidade não aplicável</p>
+
+                {% elif associado.status == "Desassociado(a)" %}
+                    <p class="text-red-500 font-semibold">Anuidade não aplicável</p>
+
+                {% elif associado.status in "Associado Lista Ativo(a)" or associado.status == "Associado Lista Aposentado(a)" %}
+                    {% if not associado.anuidades_associados.exists %}
+                        <form action="{% url 'app_finances:aplicar_anuidade' associado.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-md shadow hover:bg-green-500 transition-colors">
+                                Aplicar Anuidade
+                            </button>
+                        </form>
+                    {% else %}
+                        <p class="text-green-600 font-semibold">Anuidade já aplicada!</p>
+                    {% endif %}
+                {% endif %}
+
+
         </div>
         <br>
         {% if associado.drive_folder_id %}

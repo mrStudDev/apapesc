@@ -5,6 +5,10 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.text import slugify
 
+from django.contrib.auth import get_user_model
+from app_associados.models import AssociadoModel
+
+User = get_user_model()
 
 PRIORIDADES_TAREFA = [
     ('alta', 'Alta'),
@@ -165,4 +169,40 @@ class HistoricoResponsaveisModel(models.Model):
     def __str__(self):
         return f"{self.tarefa} - Responsáveis alterados"
 # ===================== End Responsáveis
+
+
+# ======== INSS ==========
+
+MESES_GUIAS = [
+    (4, "Abril"), (5, "Maio"), (6, "Junho"), (7, "Julho"),
+    (8, "Agosto"), (9, "Setembro"), (10, "Outubro"), (11, "Novembro")
+]
+
+class GuiaINSSModel(models.Model):
+    associado = models.ForeignKey(
+        AssociadoModel, 
+        on_delete=models.CASCADE, 
+        related_name="guias_inss",
+        verbose_name="Associado"
+    )
+    mes_referencia = models.PositiveSmallIntegerField(choices=MESES_GUIAS, verbose_name="Mês de Referência")
+    ano = models.PositiveIntegerField(default=now().year, verbose_name="Ano")
+    data_emissao = models.DateTimeField(auto_now_add=True, verbose_name="Data de Emissão")
+    emitido_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Emitido por")
+
+    STATUS_CHOICES = [
+        ("pendente", "Pendente"),
+        ("emitido", "Emitido"),
+        ("enviado", "Enviado")
+    ]
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pendente", verbose_name="Status")
+
+    class Meta:
+        ordering = ["ano", "mes_referencia"]
+        verbose_name = "Guia INSS"
+        verbose_name_plural = "Guias INSS"
+
+    def __str__(self):
+        return f"{self.get_mes_referencia_display()} - {self.ano} | {self.associado}"
+
 

@@ -618,48 +618,26 @@ class AssociadoModel(models.Model):
             except Exception as e:
                 print(f"Erro ao criar pasta no Drive: {e}")
 
-
-
         # 3. Salva
         super().save(*args, **kwargs)
 
         # 4. Atribui anuidades existentes (gera AnuidadeAssociado se necessário)
-        self.atribuir_anuidades_existentes()
-
-    def atribuir_anuidades_existentes(self):
-        """
-        Atribui todas as AnuidadeModel existentes para este Associado,
-        usando cálculo pro-rata se couber.
-        """
-        AnuidadeModel = apps.get_model('app_finances','AnuidadeModel')
-        AnuidadeAssociado = apps.get_model('app_finances','AnuidadeAssociado')
-
-        anuidades = AnuidadeModel.objects.all()
-        with transaction.atomic():
-            for anuidade in anuidades:
-                # Se ainda não existe AnuidadeAssociado para (anuidade, self)
-                if not AnuidadeAssociado.objects.filter(anuidade=anuidade, associado=self).exists():
-                    meses_restantes = self.calcular_meses_validos(anuidade.ano)
-                    if meses_restantes > 0:
-                        valor_pro_rata = round(
-                            (anuidade.valor_anuidade / Decimal(12)) * Decimal(meses_restantes), 2
-                        )
-                        AnuidadeAssociado.objects.create(
-                            anuidade=anuidade,
-                            associado=self,
-                            valor_pro_rata=valor_pro_rata
-                        )
+        #self.atribuir_anuidades_existentes()
 
     def calcular_meses_validos(self, ano):
         """
-        Cálculo pro-rata do nº de meses restantes do ano de filiação.
-        Exemplo: filiou em março => conta = 12 - 3 + 1 = 10 meses.
+        Calcula o número de meses a serem cobrados no primeiro ano de anuidade.
+        Exemplo: filiou em março → 12 - 3 + 1 = 10 meses.
         """
         if not self.data_filiacao or self.data_filiacao.year > ano:
-            return 0
+            return 0  # Se a filiação ocorreu depois do ano da anuidade, não há cobrança
+
         if self.data_filiacao.year == ano:
-            return 12 - self.data_filiacao.month + 1
-        return 12
+            return 12 - self.data_filiacao.month + 1  # Exemplo: fevereiro → 12 - 2 + 1 = 11 meses
+
+        return 12  # Se a filiação foi antes do ano da anuidade, paga o valor total
+
+
 
     @property
     def drive_folder_link(self):

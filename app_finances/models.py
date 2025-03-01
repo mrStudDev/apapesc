@@ -8,6 +8,7 @@ from django.utils.timezone import now
 from django.db.models import Sum, Q
 from django.apps import apps 
 from django.conf import settings
+from django.db.models.functions import Lower
 
 
 class AnuidadeModel(models.Model):
@@ -30,19 +31,29 @@ class AnuidadeModel(models.Model):
         super().save(*args, **kwargs)
         self.atribuir_anuidades_associados()
 
+
+
+
     def atribuir_anuidades_associados(self):
         """
-        Atribui esta anuidade a todos os associados, calculando pro-rata.
+        Atribui esta anuidade apenas aos associados ATIVOS e APOSENTADOS,
+        garantindo que o filtro funcione corretamente.
         """
         # Evita import circular com app_associados
         AssociadoModel = apps.get_model('app_associados', 'AssociadoModel')
         AnuidadeAssociado = apps.get_model('app_finances', 'AnuidadeAssociado')
 
-        associados = AssociadoModel.objects.all()
+        # 🔥 🚀 Filtra APENAS os associados ATIVOS e APOSENTADOS 🚀 🔥
+        associados = AssociadoModel.objects.annotate(
+            status_lower=Lower('status')
+        ).filter(
+            status_lower__in=['associado lista ativo(a)', 'associado lista aposentado(a)']
+        )
+
+        print(f"✅ Associados válidos encontrados: {associados.count()}")  # DEBUG
 
         with transaction.atomic():
             for associado in associados:
-                # Se já existir AnuidadeAssociado para este anuidade + associado, pula
                 if not AnuidadeAssociado.objects.filter(anuidade=self, associado=associado).exists():
                     meses_restantes = self.calcular_meses_validos(associado)
                     if meses_restantes > 0:
@@ -54,17 +65,30 @@ class AnuidadeModel(models.Model):
                             associado=associado,
                             valor_pro_rata=valor_pro_rata
                         )
+                        print(f"✅ Anuidade aplicada para {associado}")  # DEBUG
+                    else:
+                        print(f"⚠️ {associado} não recebeu anuidade porque meses_restantes = 0")  # DEBUG
+
+
 
     def calcular_meses_validos(self, associado):
         """
-        Calcula o número de meses para o cálculo pro-rata
+        Calcula o número de meses para o cálculo pró-rata
         com base em associado.data_filiacao e self.ano.
         """
         if not associado.data_filiacao or associado.data_filiacao.year > self.ano:
+            print(f"⚠️ Nenhum mês válido para {associado} - Data de Filiação: {associado.data_filiacao}, Anuidade: {self.ano}")
             return 0
+
         if associado.data_filiacao.year == self.ano:
-            return 12 - associado.data_filiacao.month + 1
-        return 12
+            meses = 12 - associado.data_filiacao.month + 1
+            print(f"✅ Cálculo pró-rata para {associado}: {meses} meses")  # DEBUG
+            return meses
+        
+        print(f"✅ Anuidade completa para {associado}")
+        return 12  # Se a filiação foi antes do ano da anuidade, paga o valor total
+
+
 
 
 class AnuidadeAssociado(models.Model):
@@ -110,7 +134,28 @@ class Pagamento(models.Model):
         return f"Pagamento de R$ {self.valor} em {self.data_pagamento}"
     
     
+class DescontoAnuidade(models.Model):
+    anuidade_associado = models.ForeignKey(
+        AnuidadeAssociado,
+        on_delete=models.CASCADE,
+        related_name="descontos",
+        verbose_name="Anuidade Associado"
+    )
+    valor_desconto = models.DecimalField(
+        max_digits=10, decimal_places=2, verbose_name="Valor do Desconto"
+    )
+    motivo = models.TextField(verbose_name="Motivo do Desconto")
+    concedido_por = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Concedido por"
+    )
+    data_concessao = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        verbose_name = "Desconto na Anuidade"
+        verbose_name_plural = "Descontos nas Anuidades"
+
+    def __str__(self):
+        return f"Desconto de R$ {self.valor_desconto} para {self.anuidade_associado}"
 
 
 # Tipo de Despesa

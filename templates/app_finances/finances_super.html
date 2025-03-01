@@ -43,8 +43,8 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       <!-- Total de Associados -->
       <div class="bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-xl font-semibold text-gray-800">Total de Associados</h3>
-        <div class="mt-4 text-5xl font-bold text-green-500">{{ total_associados }}</div>
+        <h3 class="text-xl font-semibold text-gray-800">Cadastrados</h3>
+        <div class="mt-4 text-5xl font-bold text-blue-800">{{ total_associados }}</div>
         <div class="mt-4">
           <div class="flex justify-between text-sm text-gray-700">
             <span>Ass. em dia:</span>
@@ -66,7 +66,18 @@
           Data Atual: {{ data_atual|date:"d/m/Y" }}
         </p>
       </div>
-
+      <!-- Total de Descontos Concedidos -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold text-gray-800">Descontos Concedidos</h3>
+        <div class="mt-4 text-4xl font-bold text-yellow-500">R$ {{ total_descontos|floatformat:2 }}</div>
+        <p class="mt-2 text-sm text-gray-600">Desconto em anuidades</p>
+      </div>
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <h3 class="text-xl font-semibold text-gray-800">Total de Pagantes</h3>
+        <div class="mt-4 text-4xl font-bold text-green-500">{{ total_pagantes }}</div>
+        <p class="mt-2 text-sm text-gray-600">Pagantes: Ativos e Aposentados</p>
+    </div>
+    
       <!-- Saldo Pendente -->
       <div class="bg-white p-6 rounded-lg shadow-md">
         <h3 class="text-xl font-semibold text-gray-800">Pendente</h3>
