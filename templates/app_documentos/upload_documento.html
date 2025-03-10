@@ -47,6 +47,7 @@
                 Veja as instruções abaixo do formulário.
             </p>
         </div>
+
         <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
             {% csrf_token %}
 
@@ -98,6 +99,7 @@
                 {% for error in form.arquivo.errors %}
                     <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                 {% endfor %}
+                <small class="text-blue-500">Máximo 100 MB</small>
             </div>
 
             <!-- Descrição -->

@@ -10,7 +10,7 @@ from .models import TarefaModel, HistoricoStatusModel, HistoricoResponsaveisMode
 from .forms import TarefaForm
 from django.urls import reverse_lazy
 from django.http import HttpResponseRedirect, HttpResponseForbidden
-from django.db.models import Q
+from django.db.models import Q, F
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
 import json
@@ -24,7 +24,7 @@ from app_associacao.models import IntegrantesModel, AssociacaoModel, Reparticoes
 from app_documentos.models import Documento
 from django.db.models import Count
 from .models import GuiaINSSModel
-
+from django.utils import timezone
 
 class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = TarefaModel
@@ -44,12 +44,9 @@ class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView)
         user = self.request.user
         try:
             integrante = IntegrantesModel.objects.get(user=user)
-            queryset = TarefaModel.objects.filter(
-                Q(criado_por=user) | Q(responsaveis=integrante),
-                arquivada=False
-            ).distinct().order_by('-data_criacao')
+            queryset = TarefaModel.objects.filter(arquivada=False).distinct().order_by('-data_criacao')
         except IntegrantesModel.DoesNotExist:
-            queryset = TarefaModel.objects.filter(criado_por=user, arquivada=False)
+            queryset = TarefaModel.objects.filter(arquivada=False)
 
         # Aplica os filtros de status, categoria e prioridade
         status = self.request.GET.get('status')
@@ -70,6 +67,13 @@ class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView)
             queryset = queryset.filter(
                 Q(titulo__icontains=busca) | Q(descricao__icontains=busca)
             )
+            
+        # Ordena primeiro por data_limite (priorizando as mais próximas),
+        # e, se não tiver data_limite, ordena por data_criacao (mais recentes primeiro)
+        queryset = queryset.order_by(
+            F('data_limite').asc(nulls_last=True),  # Prioriza quem tem data_limite
+            '-data_criacao'  # Em caso de empate, ordena por data de criação (mais recente primeiro)
+        )            
 
         return queryset
 
@@ -82,7 +86,7 @@ class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView)
         context['total_em_andamento'] = tarefas.filter(status='em_andamento').count()
         context['total_concluidas'] = tarefas.filter(status='concluida').count()
         context['total_devolvidas'] = tarefas.filter(status='devolvida').count()
-
+        context['now'] = timezone.now().date() 
         context['total_tarefas'] = tarefas.count()
         context['busca'] = self.request.GET.get('busca', '')
 
@@ -189,7 +193,6 @@ class TarefaEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateVie
 
         return context
 
-
     def get_success_url(self):
         # Redireciona para a página de detalhes da tarefa com o pk da instância 
         return reverse_lazy('app_tarefas:single_tarefa', kwargs={'pk': self.object.pk})
@@ -211,27 +214,10 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
     
     def get_object(self, queryset=None):
         """
-        Sobrescreve o método get_object para verificar se o usuário tem acesso à tarefa
-        e validar o slug fornecido na URL.
+        Sobrescreve o método get_object para garantir que todos os integrantes possam acessar a tarefa.
         """
-        tarefa = get_object_or_404(
-            TarefaModel,
-            pk=self.kwargs['pk'],
-        )
-        user = self.request.user
-
-        # Verifica se o usuário é criador ou responsável pela tarefa
-        try:
-            integrante = IntegrantesModel.objects.get(user=user)
-            if tarefa.criado_por == user or integrante in tarefa.responsaveis.all():
-                return tarefa
-        except IntegrantesModel.DoesNotExist:
-            # Caso o usuário não seja um integrante
-            if tarefa.criado_por == user:
-                return tarefa
-
-        # Se o usuário não tem permissão, levanta um erro 404
-        raise Http404("Você não tem permissão para acessar esta tarefa.")
+        tarefa = get_object_or_404(TarefaModel, pk=self.kwargs['pk'])
+        return tarefa
 
 
     def get_context_data(self, **kwargs):
@@ -330,16 +316,9 @@ class TarefaBoardView(LoginRequiredMixin, GroupPermissionRequiredMixin, Template
     ]
     
     def get_queryset(self):
-        user = self.request.user
-        try:
-            integrante = IntegrantesModel.objects.get(user=user)
-            # Tarefas criadas pelo usuário ou atribuídas a ele como responsável
-            return TarefaModel.objects.filter(
-                Q(criado_por=user) | Q(responsaveis=integrante)
-            ).distinct().order_by('-data_criacao')
-        except IntegrantesModel.DoesNotExist:
-            # Se o usuário não for um integrante, mostra apenas as tarefas que ele criou
-            return TarefaModel.objects.filter(criado_por=user)
+        """ 🔥 Retorna TODAS as tarefas para TODOS os integrantes """
+        return TarefaModel.objects.all().distinct().order_by('-data_criacao')
+        
         
     def get_context_data(self, **kwargs):
         """
@@ -411,14 +390,14 @@ class TarefaArquivadaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, 
     ]
 
     def get_queryset(self):
-            user = self.request.user
-            try:
-                integrante = IntegrantesModel.objects.get(user=user)
-                return TarefaModel.objects.filter(
-                    Q(arquivada=True) & (Q(criado_por=user) | Q(responsaveis=integrante))
-                ).distinct()
-            except IntegrantesModel.DoesNotExist:
-                return TarefaModel.objects.filter(arquivada=True, criado_por=user)
+        user = self.request.user
+        try:
+            integrante = IntegrantesModel.objects.get(user=user)
+            return TarefaModel.objects.filter(
+                Q(arquivada=True)
+            ).distinct()
+        except IntegrantesModel.DoesNotExist:
+            return TarefaModel.objects.filter(arquivada=True)
 
 
 @login_required

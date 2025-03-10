@@ -63,6 +63,12 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
+        arquivo = form.cleaned_data.get("arquivo")
+
+        if arquivo and arquivo.size > 104857600:  # 100MB
+            form.add_error("arquivo", _("O arquivo excede o tamanho máximo permitido de 100MB."))
+            return self.form_invalid(form)
+
         # Associar o documento ao proprietário correto
         if isinstance(self.owner, AssociadoModel):
             form.instance.associado = self.owner
