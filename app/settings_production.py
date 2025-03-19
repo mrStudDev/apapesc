@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     # Aplicativos Externos
     'django_cleanup.apps.CleanupConfig',
     'django.contrib.sitemaps', # Sitemap do Django
+    'django.contrib.humanize',
     
     # Apps 
     'app_home',

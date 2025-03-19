@@ -258,9 +258,10 @@
                     {% endfor %}
                 </div>              
                 <!-- Status do Associado  -->
-                <div class="mb-4">
+                <div class="mb-4 bg-gray-100 p-4 rounded-lg">
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Status</h2>
                     <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.status.label }} - <small class="text-green-500">Determine o Status </small>
+                        {{ form.status.label }} - <small class="text-blue-500">Determine o Status </small>
                     </label>
                     
                     <div class="mt-1">
@@ -272,7 +273,7 @@
                 </div>                
             </div>
             <!--Daocumento RG  -->
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Documento RG</h2>
+            <h2 class="text-xl font-semibold text-gray-700 mb-4 py-4">Documento RG</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 
                 <div class="mb-4">
@@ -443,7 +444,7 @@
             </div>
             <!--Dados Dingulares de Atividade -->
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Dados Singulares de Atividade</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-100 p-4 rounded-lg">
                 <div class="mb-4">
                     <label for="{{ form.recolhe_inss.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                         {{ form.recolhe_inss.label }}

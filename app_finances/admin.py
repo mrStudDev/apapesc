@@ -28,7 +28,7 @@ class TipoDespesaAdmin(admin.ModelAdmin):
 
 @admin.register(DespesaAssociacaoModel)
 class DespesaAssociacaoAdmin(admin.ModelAdmin):
-    list_display = ('associacao', 'tipo_despesa', 'valor', 'data_despesa', 'data_vencimento', 'registrado_por')
+    list_display = ('associacao', 'tipo_despesa', 'valor', 'data_vencimento', 'registrado_por')
     readonly_fields = ('data_lancamento', 'registrado_por', 'associacao')
 
     def save_model(self, request, obj, form, change):

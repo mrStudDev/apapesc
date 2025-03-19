@@ -31,7 +31,7 @@ class UserListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = User
     template_name = 'app_associacao/list_users.html'
     context_object_name = 'users'
-    paginate_by = 20
+    paginate_by = 100
     group_required = [
         'Superuser',
         'Admin da Associação',

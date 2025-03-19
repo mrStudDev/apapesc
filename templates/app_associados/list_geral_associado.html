@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}Lista Geral Associados{% endblock title %}
 {% block list_GeralAssociados %}
     <!-- Navbar Exclusivo Superuser -->
@@ -79,8 +79,8 @@
                     <tr>
                         <th class="px-4 py-2 border">Nome</th>
                         <th class="px-4 py-2 border">CPF</th>
+                        <th class="px-4 py-2 border">Gov</th>
                         <th class="px-4 py-2 border">Celular</th>
-                        <th class="px-4 py-2 border">Email</th>
                         <th class="px-4 py-2 border text-center">Ações</th>
                     </tr>
                 </thead>
@@ -88,9 +88,18 @@
                     {% for associado in associados %}
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-4 py-2 border">{{ associado.user.get_full_name }}</td>
-                            <td class="px-4 py-2 border">{{ associado.cpf }}</td>
-                            <td class="px-4 py-2 border">{{ associado.celular }}</td>
-                            <td class="px-4 py-2 border">{{ associado.email }}</td>
+                            <td class="px-4 py-2 border"><span id="cpf-{{ associado.pk }}" class="text-gray-800">{{ associado.cpf }}</span>
+                                <button onclick="copyToClipboard('cpf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-orange-500">
+                                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                                </button></td>
+                            <td class="px-4 py-2 border"><span id="senha-gov-{{ associado.pk }}" class="text-gray-800">{{ associado.senha_gov }}</span>
+                                <button onclick="copyToClipboard('senha-gov-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                                </button></td>
+                            <td class="px-4 py-2 border"><span id="celular-{{ associado.pk }}" class="text-gray-800">{{ associado.celular }}</span>
+                                <button onclick="copyToClipboard('celular-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                                </button></td>
 
                             <td class="px-4 py-2 border text-center flex justify-center space-x-2">
                                 <a href="{% url 'app_associados:single_associado' associado.pk %}" 
@@ -129,6 +138,7 @@
         </div>
     </div>
 </main>
+<script src="{% static 'js/copy_to_clipboard.js' %}"></script>
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}
 

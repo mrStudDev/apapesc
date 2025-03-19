@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}Criar Anuidade{% endblock title %}
-
+{% load custom_filters_entradas %}
 {% block create_anuidade %}
     <!-- Navbar -->
     {% include "components/navbar_associacao.html" %}
@@ -30,11 +30,52 @@
             <!-- Formulário de criação -->
             <form method="post" enctype="multipart/form-data" class="bg-white p-8 rounded-lg shadow-lg">
                 {% csrf_token %}
-                {{ form.as_p }}
+                <div class="container mx-auto max-w-3xl bg-white shadow-lg rounded-lg p-6">
+                    <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
+                        <i class="material-icons text-blue-500 mr-2">event</i> Cadastro de Anuidade
+                    </h2>
+                    <p class="text-gray-600 mt-1 text-sm">Informe o ano e o valor correspondente.</p>
                 
-                <button type="submit" class="mt-4 bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600">
-                    Salvar Anuidade
-                </button>
+                    <form method="post" class="mt-6 space-y-4">
+                        {% csrf_token %}
+                
+                        <!-- 🔹 Campo: Ano da Anuidade -->
+                        <div>
+                            <label for="{{ form.ano.id_for_label }}" class="block text-sm font-medium text-gray-700">Ano da Anuidade</label>
+                            <input type="number" name="{{ form.ano.name }}" id="{{ form.ano.id_for_label }}"
+                                   class="mt-1 w-full border border-gray-300 rounded-md shadow-sm py-3 px-4 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                   placeholder="Digite o ano (ex: 2025)">
+                            {% for error in form.ano.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                
+                        <!-- 🔹 Campo: Valor da Anuidade -->
+                        <div>
+                            <label for="{{ form.valor_anuidade.id_for_label }}" class="block text-sm font-medium text-gray-700">Valor da Anuidade</label>
+                            <input type="text" name="{{ form.valor_anuidade.name }}" id="{{ form.valor_anuidade.id_for_label }}"
+                                   class="mt-1 w-full border border-gray-300 rounded-md shadow-sm py-3 px-4 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                                   placeholder="Não use vírgulas (ex: 1200.00)">
+                            {% for error in form.valor_anuidade.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                
+                        <!-- 🔹 Botões -->
+                        <div class="flex justify-between items-center mt-6">
+                            <a href="{% url 'app_finances:list_anuidades' %}"
+                               class="text-gray-600 hover:text-red-500 flex items-center">
+                                <i class="material-icons mr-1">arrow_back</i> Cancelar
+                            </a>
+                
+                            <button type="submit"
+                                    class="bg-green-500 text-white px-6 py-2 rounded-md hover:bg-green-600 transition shadow-lg">
+                                <i class="material-icons mr-1">save</i> Salvar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
             </form>
             
             <!-- Tabela de listagem das anuidades -->
@@ -51,7 +92,7 @@
                     {% for anuidade in anuidades %}
                     <tr class="border-b hover:bg-gray-50">
                         <td class="px-4 py-2">{{ anuidade.ano }}</td>
-                        <td class="px-4 py-2 text-center">R$ {{ anuidade.valor_anuidade|floatformat:2 }}</td>
+                        <td class="px-4 py-2 text-center"> {{ anuidade.valor_anuidade|format_real }}</td>
                         <td class="px-4 py-2 text-center">
                             <a href="{% url 'app_finances:edit_anuidade' anuidade.id %}" class="text-blue-500 hover:text-blue-700">Editar</a>
                         </td>
@@ -61,6 +102,7 @@
             </table>
         </div>
     </main>
+        
  <!-- Footer -->
  {% include "components/footer_associacao.html" %}
 {% endblock create_anuidade %}

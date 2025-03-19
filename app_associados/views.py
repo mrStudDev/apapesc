@@ -259,15 +259,13 @@ class EditAssociadoView(GroupPermissionRequiredMixin, UpdateView):
         
             # Obtem associação e repartição selecionadas nos filtros
         associacao_id = self.request.GET.get('associacao')
-        reparticao_id = self.request.GET.get('reparticao')
+
 
         # Busca os objetos de associação e repartição, se fornecidos
         if associacao_id:
             kwargs['associacao'] = get_object_or_404(AssociacaoModel, pk=associacao_id)
-        if reparticao_id:
-            kwargs['reparticao'] = get_object_or_404(ReparticoesModel, pk=reparticao_id)
 
-       
+
         return kwargs
     
     def get_context_data(self, **kwargs):

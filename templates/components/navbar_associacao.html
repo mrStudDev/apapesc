@@ -29,15 +29,20 @@
                 </button>
                 <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
                     <a href="{% url 'app_manager:super_dashboard' %}" class="block px-4 py-2 hover:bg-gray-200">Dashboard</a>
-                    <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_finances:resumo_financeiro' %}" class="block px-4 py-2 hover:bg-gray-200">Finances</a>
-                    <a href="#" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Lançar Despesa</a>
-                    <a href="{% url 'app_finances:list_despesas' %}" class="block px-4 py-2 hover:bg-gray-200">Listas de Despesas</a>
                     <hr class="border-t-2 border-gray-500 my-2">
-                    <a href="{% url 'app_finances:create_anuidade' %}" class="block px-4 py-2 hover:bg-gray-200">Cadastrar Anuidade</a>
+                    <a href="{% url 'app_finances:list_despesas' %}" class="block px-4 py-2 hover:bg-gray-200">Listas de Despesas</a>
+                    <a href="{% url 'app_finances:create_tipo_despesa' %}" class="block px-4 py-2 hover:bg-gray-200">Novo tipo Despesa</a>
+                    <a href="{% url 'app_finances:create_despesa' %}" class="block px-4 py-2 hover:bg-orange-600 hover:text-white">Lançar Despesa</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_finances:list_entradas' %}" class="block px-4 py-2 hover:bg-gray-200">Listas de Entradas</a>
+                    <a href="{% url 'app_finances:create_tipo_servico' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Tipo Serviço</a>
+                    <a href="{% url 'app_finances:create_entrada' %}" class="block px-4 py-2 hover:bg-green-500 hover:text-white">Lançar Entrada</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_finances:list_anuidades' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Anuidades</a>
                     <a href="{% url 'app_finances:tri_condictions' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Tri Anuidaeds</a>
                     <a href="{% url 'app_finances:descontos_anuidades' %}" class="block px-4 py-2 hover:bg-gray-200">Descontos Anuidades</a>
+                    <a href="{% url 'app_finances:create_anuidade' %}" class="block px-4 py-2 hover:bg-blue-600 hover:text-white">Cadastrar Anuidade</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_manager:quadro_associados' %}" class="block px-4 py-2 hover:bg-gray-200">Associados Status</a>
                     <hr class="border-t-2 border-gray-500 my-2">

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}Finceiro {{ associado.user.get_full_name }}{% endblock title %}
 
 {% block financeiro_SingleAssociado %}
@@ -28,16 +28,58 @@
                 {% endfor %}
             </div>
             {% endif %}
-            <!-- Informações Resumidas -->
-            <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-                <h2 class="text-2xl font-semibold text-gray-700">{{ associado.user.get_full_name }}</h2>
-                <p class="mt-2 text-lg text-gray-600"><strong>Data de Filiação:</strong> {{ associado.data_filiacao|date:"d/m/Y" }}</p>
-                <div class="grid grid-cols-3 gap-4 mt-4 text-lg text-gray-700">
-                    <p><strong>Total de Anuidades:</strong> R$ {{ total_anuidades|floatformat:2 }}</p>
-                    <p><strong>Total Pago:</strong> R$ {{ total_pago|floatformat:2 }}</p>
-                    <p><strong>Saldo Devedor:</strong> <span class="{% if saldo_total > 0 %}text-red-500{% else %}text-green-600{% endif %} font-semibold">R$ {{ saldo_total|floatformat:2 }}</span></p>
+            <!-- 🔹 Informações do Associado -->
+            <div class="bg-white p-6 rounded-lg shadow-md mb-6 border-l-4 border-gray-800">
+                <!-- Nome -->
+                <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
+                    <i class="material-icons text-blue-500 mr-2">person</i>
+                    {{ associado.user.get_full_name }}
+                </h2>
+
+                <!-- Associação e Repartição (Sem ícones, mantendo o padrão) -->
+                <p class="mt-2 text-gray-700">
+                    <i class="material-icons text-blue-500">apartment</i>
+                    <strong>Associação:</strong> {{ associado.associacao.nome_fantasia }}</p>
+                <p class="mt-2 text-gray-700">
+                    <i class="material-icons text-blue-500">store_mall_directory</i>
+                    <strong>Repartição:</strong> {{ associado.reparticao|default:"-" }}</p>
+                <!-- Data de Filiação -->
+                <p class="mt-2 text-gray-700">
+                    <i class="material-icons text-blue-400 mr-2">event</i>
+                    <strong>Data de Filiação:</strong> {{ associado.data_filiacao|date:"d/m/Y" }}
+                </p>        
+
+                <!-- Celular com botão copiar -->
+                <div class="flex items-center mt-3">
+                    <i class="material-icons text-green-500 mr-2">phone</i>
+                    <span id="celular-{{ associado.pk }}" class="text-gray-800"><strong>Celular: </strong>{{ associado.celular }}</span>
+                    <button onclick="copyToClipboard('celular-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                        <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                </div>
+
+                <!-- Resumo Financeiro (Discretamente destacado) -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+                    <div class="bg-blue-50 p-4 rounded-md text-center shadow-sm">
+                        <p class="text-sm font-semibold text-gray-600">Total de Anuidades</p>
+                        <p class="text-lg font-bold text-blue-700">R$ {{ total_anuidades|floatformat:2 }}</p>
+                    </div>
+
+                    <div class="bg-green-50 p-4 rounded-md text-center shadow-sm">
+                        <p class="text-sm font-semibold text-gray-600">Total Pago</p>
+                        <p class="text-lg font-bold text-green-700">R$ {{ total_pago|floatformat:2 }}</p>
+                    </div>
+
+                    <div class="bg-red-50 p-4 rounded-md text-center shadow-sm">
+                        <p class="text-sm font-semibold text-gray-600">Saldo Devedor</p>
+                        <p class="text-lg font-bold {% if saldo_total > 0 %}text-red-600{% else %}text-green-600{% endif %}">
+                            R$ {{ saldo_total|floatformat:2 }}
+                        </p>
+                    </div>
                 </div>
             </div>
+
+
 
             <!-- Tabela de Anuidades -->
             <h2 class="text-xl font-semibold mb-4">Detalhes das Anuidades</h2>
@@ -156,7 +198,7 @@
     </main>
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}
-
+<script src="{% static 'js/copy_to_clipboard.js' %}"></script>
 <!-- Script para controle do acordeon -->
 <script>
 function toggleAccordion() {

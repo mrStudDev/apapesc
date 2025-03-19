@@ -1,0 +1,330 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Despesa{% endblock title %}
+
+{% block edit_despesa %}
+        <!-- Navbar -->
+        {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+
+    <main class="flex-grow bg-red-50 py-10">
+            <h1 class="text-2xl font-bold text-gray-500 flex justify-center">Visualizar e Editar</h1>
+        <div class="container mx-auto max-w-6xl bg-white shadow-lg rounded-lg p-8 mb-8">
+
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}            
+            <!-- Título e Status -->
+            <div class="flex justify-between items-center border-b pb-4 mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <i class="material-icons text-blue-500 mr-2">receipt</i> 
+                    {{ despesa.tipo_despesa.nome }}
+                </h2>
+                {% if despesa.esta_vencida and not despesa.pago %}
+                    <span class="px-3 py-1 text-sm font-semibold text-red-700 bg-red-100 rounded-full">
+                        <i class="material-icons text-red-500 align-middle">warning</i> Vencida
+                    </span>
+                {% elif despesa.pago %}
+                    <span class="px-3 py-1 text-sm font-semibold text-green-700 bg-green-100 rounded-full">
+                        <i class="material-icons text-green-500 align-middle">check_circle</i> Paga
+                    </span>
+                {% else %}
+                    <span class="px-3 py-1 text-sm font-semibold text-yellow-700 bg-yellow-100 rounded-full">
+                        <i class="material-icons text-yellow-500 align-middle">pending</i> Aguardando Pagamento
+                    </span>
+                {% endif %}
+            </div>
+    
+            <!-- Informações da Despesa -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <p class="text-gray-700 flex items-center">
+                    <i class="material-icons text-blue-400 mr-2">attach_money</i>
+                    <strong>Valor:</strong> R$ {{ despesa.valor }}
+                </p>
+                <p class="text-gray-700 flex items-center">
+                    <i class="material-icons text-indigo-400 mr-2">event</i>
+                    <strong>Data de Vencimento:</strong> {{ despesa.data_vencimento|date:"d/m/Y" }}
+                </p>
+                <p class="text-gray-700 flex items-center">
+                    <i class="material-icons text-green-400 mr-2">account_balance</i>
+                    <strong>Associação:</strong> {{ despesa.associacao.nome_fantasia }}
+                </p>
+                {% if despesa.reparticao %}
+                    <p class="text-gray-700 flex items-center">
+                        <i class="material-icons text-orange-400 mr-2">business</i>
+                        <strong>Repartição:</strong> {{ despesa.reparticao.nome_reparticao }}
+                    </p>
+                {% endif %}
+                {% if despesa.numero_nota_fiscal %}
+                    <p class="text-gray-700 flex items-center">
+                        <i class="material-icons text-purple-400 mr-2">description</i>
+                        <strong>Nota Fiscal:</strong> {{ despesa.numero_nota_fiscal }}
+                    </p>
+                {% endif %}
+                <p class="text-gray-700 flex items-center">
+                    <i class="material-icons text-gray-500 mr-2">person</i>
+                    <strong>Registrado por:</strong> {{ despesa.registrado_por.get_full_name }}
+                </p>
+                <p class="text-gray-700 flex items-center">
+                    <i class="material-icons text-gray-500 mr-2">schedule</i>
+                    <strong>Data de Lançamento:</strong> {{ despesa.data_lancamento|date:"d/m/Y H:i" }}
+                </p>
+                {% if despesa.descricao %}
+                    <p class="col-span-2 text-gray-700 border-t pt-3">
+                        <i class="material-icons text-gray-400 mr-2">info</i>
+                        <strong>Descrição:</strong> {{ despesa.descricao }}
+                    </p>
+                {% endif %}
+            </div>
+    
+            <!-- Botões de Ação -->
+            <div class="flex justify-end space-x-4 mt-6">
+                <a href="#" class="text-red-500 hover:text-red-700 flex items-center">
+                    <i class="material-icons mr-1">delete</i> Excluir
+                </a>
+            </div>
+        </div>
+        <!-- ✅ Div centralizada para o botão -->
+        <div class="flex justify-center my-4">
+            <a href="{% url 'app_finances:create_despesa' %}" 
+            class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 flex items-center">
+                <i class="material-icons mr-2">add</i> Nova Despesa
+            </a>
+        </div>
+
+        <!-- Formulário de Edição -->
+        <div class="container mx-auto max-w-6xl bg-white shadow-lg rounded-lg p-8 mb-8">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">Editar Despesa</h1>
+    
+            <form method="post">
+                {% csrf_token %}
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Associação -->
+                <div class="mb-4">
+                    <label for="id_associacao" class="block text-sm font-medium text-gray-700 mb-1">Associação</label>
+                    <select name="associacao" id="id_associacao" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+                        <option value="">--- Selecione ---</option>
+                        {% for associacao in associacoes %}
+                            <option value="{{ associacao.id }}" {% if form.instance.associacao.id == associacao.id %}selected{% endif %}>
+                                {{ associacao.nome_fantasia }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+    
+                <!-- Repartição -->
+                <div class="mb-4">
+                    <label for="id_reparticao" class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
+                    <select name="reparticao" id="id_reparticao" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+                        <option value="">--- Selecione ---</option>
+                        {% for reparticao in reparticoes %}
+                            <option value="{{ reparticao.id }}" {% if form.instance.reparticao.id == reparticao.id %}selected{% endif %}>
+                                {{ reparticao.nome_reparticao }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.tipo_despesa.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.tipo_despesa.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.tipo_despesa }}
+                    </div>
+                    {% for error in form.tipo_despesa.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.numero_nota_fiscal.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.numero_nota_fiscal.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.numero_nota_fiscal }}
+                    </div>
+                    {% for error in form.numero_nota_fiscal.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                    
+    
+                <div class="mb-4">
+                    <label for="{{ form.data_vencimento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.data_vencimento.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.data_vencimento }}
+                    </div>
+                    {% for error in form.data_vencimento.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+    
+                <div class="mb-4 bg-orange-100">
+                    <div class="p-2 px-2">
+                        <label for="{{ form.valor.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.valor.label }}
+                        </label>
+                        <div class="mt-1">
+                            {{ form.valor }}
+                        </div>
+                        {% for error in form.valor.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.descricao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.descricao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.descricao }}
+                    </div>
+                    {% for error in form.descricao.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                
+                <div class="mb-4 bg-red-100">
+                    <div class="p-2 px-2">
+                        <small class="text-red-800">Altere a data de lançamento, se necessário</small>
+                        <label for="{{ form.data_lancamento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.data_lancamento.label }}
+                        </label>
+                        <div class="mt-1">
+                            {{ form.data_lancamento }}
+                        </div>
+                        {% for error in form.data_lancamento.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+    
+                <!-- Checkbox "Pago" -->
+                <div class="mb-4 flex items-center">
+                    <input type="checkbox" name="pago" id="id_pago" class="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded" {% if form.instance.pago %}checked{% endif %}>
+                    <label for="id_pago" class="ml-2 text-gray-700">Marque se a despesa foi paga</label>
+                </div>
+                </div>
+                <!-- Botões -->
+                <div class="flex justify-between mt-6">
+                    <button type="submit" class="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 shadow">
+                        Atualizar Despesa
+                    </button>
+                    <a href="{% url 'app_finances:list_despesas' %}" class="text-gray-500 hover:text-gray-700">
+                        Cancelar
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    
+        <!-- Histórico de Alterações -->
+        <div class="container mx-auto max-w-8xl bg-white shadow-lg rounded-lg p-8 mb-8">
+            <h3 class="text-xl font-semibold text-gray-700 mb-4">📜 Histórico de Alterações</h3>
+            <table class="w-full border border-gray-300">
+                <thead class="bg-gray-200">
+                    <tr>
+                        <th class="p-2 border">Campo Alterado</th>
+                        <th class="p-2 border">Valor Anterior</th>
+                        <th class="p-2 border">Novo Valor</th>
+                        <th class="p-2 border">Alterado por</th>
+                        <th class="p-2 border">Data da Alteração</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for alteracao in despesa.alteracoes.all %}
+                        <tr class="border">
+                            <td class="p-2 border">{{ alteracao.campo_alterado }}</td>
+                            <td class="p-2 border">{{ alteracao.valor_anterior|default:"-" }}</td>
+                            <td class="p-2 border">{{ alteracao.valor_novo|default:"-" }}</td>
+                            <td class="p-2 border">{{ alteracao.alterado_por.get_full_name }}</td>
+                            <td class="p-2 border">{{ alteracao.data_alteracao|date:"d/m/Y - H:i" }}</td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5" class="text-center text-gray-600 p-4">Nenhuma alteração registrada.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <!-- ✅ Div centralizada para o botão -->
+        <div class="flex justify-center my-4">
+            <a href="{% url 'app_finances:create_despesa' %}" 
+            class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 flex items-center">
+                <i class="material-icons mr-2">add</i> Nova Despesa
+            </a>
+        </div>
+    </main>
+    
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const associacaoSelect = document.getElementById('id_associacao');
+        const reparticaoSelect = document.getElementById('id_reparticao');
+
+        if (associacaoSelect && reparticaoSelect) {
+            associacaoSelect.addEventListener('change', function () {
+                const associacaoId = this.value;
+
+                // Limpar as opções anteriores
+                reparticaoSelect.innerHTML = '<option value="">--- Selecione ---</option>';
+
+                if (associacaoId) {
+                    fetch(`/financas/carregar-reparticoes/?associacao_id=${associacaoId}`)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Erro na resposta da requisição');
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Repartições recebidas:', data);
+                            if (data.length > 0) {
+                                data.forEach(reparticao => {
+                                    const option = document.createElement('option');
+                                    option.value = reparticao.id;
+                                    option.textContent = reparticao.nome_reparticao;
+                                    reparticaoSelect.appendChild(option);
+                                });
+                            } else {
+                                console.warn('Nenhuma repartição encontrada.');
+                            }
+                        })
+                        .catch(error => console.error('Erro ao buscar repartições:', error));
+                }
+            });
+        }
+    });
+</script>
+{% include 'components/footer_associacao.html' %}
+{% endblock edit_despesa %}

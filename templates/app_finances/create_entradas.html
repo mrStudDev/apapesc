@@ -1,0 +1,319 @@
+{% extends "base.html" %}
+
+{% block title %}Lançar Entrada{% endblock title %}
+
+{% block create_entrada %}
+        <!-- Navbar -->
+        {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+    <main class="flex-grow bg-blue-50">
+        <!-- End Navbar --> 
+        <div class="container mx-auto mt-8 p-6 bg-white shadow rounded-lg max-w-4xl">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <h2 class="text-2xl font-bold mb-4">Lançar Nova Entrada</h2>
+
+        <form method="post">
+            {% csrf_token %}
+        
+            <!-- 🔹 Registrado por -->
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-600 mb-2">Registrado por</label>
+                <div class="mt-1 bg-gray-100 text-green-700 py-2 px-4 rounded-md shadow-sm border border-gray-300">
+                    {{ request.user.get_full_name }}
+                </div>
+            </div>
+        
+            <!-- 🔹 Dados Principais -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- Associação -->
+                <div class="mb-4">
+                    <label for="id_associacao" class="block text-sm font-medium text-gray-700 mb-1">Associação</label>
+                    <select name="associacao" id="id_associacao" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+                        <option value="">--- Selecione ---</option>
+                        {% for associacao in associacoes %}
+                            <option value="{{ associacao.id }}" {% if form.instance.associacao.id == associacao.id %}selected{% endif %}>
+                                {{ associacao.nome_fantasia }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+        
+                <!-- Repartição -->
+                <div class="mb-4">
+                    <label for="id_reparticao" class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
+                    <select name="reparticao" id="id_reparticao" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+                        <option value="">--- Selecione ---</option>
+                        {% for reparticao in reparticoes %}
+                            <option value="{{ reparticao.id }}" {% if form.instance.reparticao.id == reparticao.id %}selected{% endif %}>
+                                {{ reparticao.nome_reparticao }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+        
+                <!-- Tipo de Serviço -->
+                <div class="mb-4">
+                    <label for="{{ form.tipo_servico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.tipo_servico.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.tipo_servico }}
+                    </div>
+                </div>
+        
+                <!-- Valor Total -->
+                <div class="mb-4 bg-blue-100">
+                    <div class="p-2 px-2">
+                        <label for="{{ form.valor_total.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.valor_total.label }} <small>(R$)</small>
+                        </label>
+                        <div class="mt-1">
+                            {{ form.valor_total }}
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-4 bg-red-100">
+                    <div class="p-2 px-2">
+                        <small class="text-red-800">Altere a data de Criação, se necessário</small>
+                        <label for="{{ form.data_criacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.data_criacao.label }}
+                        </label>
+                        <div class="mt-1">
+                            {{ form.data_criacao }}
+                        </div>
+                        {% for error in form.data_criacao.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+        
+                <!-- Descrição -->
+                <div class="mb-4">
+                    <label for="{{ form.descricao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.descricao.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.descricao }}
+                    </div>
+                </div>
+            </div>
+        
+            <!-- 🔹 Forma de Pagamento -->
+            <div class="bg-gray-100 p-4 rounded-lg">
+                <h2 class="text-2xl font-bold mb-4">Forma de Pagamento</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <!-- Forma de Pagamento -->
+                    <div class="mb-4">
+                        <label for="id_forma_pagamento" class="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</label>
+                        <select name="forma_pagamento" id="id_forma_pagamento" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+                            {% for key, value in form.fields.forma_pagamento.choices %}
+                                <option value="{{ key }}" {% if form.instance.forma_pagamento == key %}selected{% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+        
+                    <!-- Parcelamento -->
+                    <div class="mb-4">
+                        <label for="id_parcelamento" class="block text-sm font-medium text-gray-700 mb-1">Parcelamento</label>
+                        <select name="parcelamento" id="id_parcelamento" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+                            {% for key, value in form.fields.parcelamento.choices %}
+                                <option value="{{ key }}" {% if form.instance.parcelamento == key %}selected{% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.status_pagamento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.status_pagamento.label }}
+                        </label>
+                        <div class="mt-1">
+                            {{ form.status_pagamento }}
+                        </div>
+                        {% for error in form.status_pagamento.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="{{ form.valor_pagamento.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.valor_pagamento.label }}
+                        </label>
+                        <div class="mt-1">
+                            {{ form.valor_pagamento }}
+                        </div>
+                        {% for error in form.valor_pagamento.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        
+            <br>
+        
+            <!-- 🔹 Parcelas e Pagamento -->
+            {% if parcelas %}
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <h3 class="text-2xl font-bold mb-4">Parcelas</h3>
+                    <table class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-200">
+                                <th class="border border-gray-300 p-2">Número</th>
+                                <th class="border border-gray-300 p-2">Valor</th>
+                                <th class="border border-gray-300 p-2">Vencimento</th>
+                                <th class="border border-gray-300 p-2">Status</th>
+                                <th class="border border-gray-300 p-2">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for parcela in parcelas %}
+                                <tr class="bg-white">
+                                    <td class="border border-gray-300 p-2">{{ parcela.numero }}</td>
+                                    <td class="border border-gray-300 p-2">R$ {{ parcela.valor|floatformat:2 }}</td>
+                                    <td class="border border-gray-300 p-2">{{ parcela.data_vencimento|date:"d/m/Y" }}</td>
+                                    <td class="border border-gray-300 p-2">
+                                        {% if parcela.pago %}
+                                            <span class="text-green-600">Pago ✅</span>
+                                        {% else %}
+                                            <span class="text-red-600">Pendente ⏳</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="border border-gray-300 p-2">
+                                        {% if not parcela.pago %}
+                                            <form method="post" action="{% url 'app_finances:registrar_pagamento' entrada.id %}">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="parcela_id" value="{{ parcela.id }}">
+                                                <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600">
+                                                    ✅ Pagar
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <span class="text-gray-500">✔️</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        
+            <!-- 🔹 Botões -->
+            <div class="flex space-x-4 mt-6">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                    Salvar
+                </button>
+                <a href="{% url 'app_finances:list_entradas' %}" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+        
+    </div>
+    <br><br>
+</main>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const associacaoSelect = document.getElementById('id_associacao');
+        const reparticaoSelect = document.getElementById('id_reparticao');
+
+        if (associacaoSelect && reparticaoSelect) {
+            associacaoSelect.addEventListener('change', function () {
+                const associacaoId = this.value;
+
+                // Limpar as opções anteriores
+                reparticaoSelect.innerHTML = '<option value="">--- Selecione ---</option>';
+
+                if (associacaoId) {
+                    fetch(`/financas/carregar-reparticoes/?associacao_id=${associacaoId}`)
+                        .then(response => {
+                            if (!response.ok) throw new Error('Erro na resposta da requisição');
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Repartições recebidas:', data);
+                            if (data.length > 0) {
+                                data.forEach(reparticao => {
+                                    const option = document.createElement('option');
+                                    option.value = reparticao.id;
+                                    option.textContent = reparticao.nome_reparticao;
+                                    reparticaoSelect.appendChild(option);
+                                });
+                            } else {
+                                console.warn('Nenhuma repartição encontrada.');
+                            }
+                        })
+                        .catch(error => console.error('Erro ao buscar repartições:', error));
+                }
+            });
+        }
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const parcelamentoSelect = document.getElementById("id_parcelamento");
+        const listaPagamento = document.getElementById("lista_pagamento");
+        const resumoPagamento = document.getElementById("resumo_pagamento");
+
+        function atualizarResumoParcelamento() {
+            let parcelas = JSON.parse('{{ parcelas_json|safe }}');  // Passar dados da view para o template
+            listaPagamento.innerHTML = "";
+
+            if (parcelas.length === 0) {
+                resumoPagamento.classList.add("hidden");
+                return;
+            }
+
+            parcelas.forEach(parcela => {
+                let item = `<li><strong>${parcela.numero}:</strong> R$ ${parcela.valor.toFixed(2)}</li>`;
+                listaPagamento.innerHTML += item;
+            });
+
+            resumoPagamento.classList.remove("hidden");
+        }
+
+        parcelamentoSelect.addEventListener("change", atualizarResumoParcelamento);
+        atualizarResumoParcelamento();  // Chama ao carregar a página
+    });
+</script>
+
+
+    {% include 'components/footer_associacao.html' %}
+{% endblock create_entrada %}

@@ -8,26 +8,48 @@ from django.contrib import messages
 from django.db import models
 from decimal import Decimal
 from django.utils.timezone import now
-
+from datetime import datetime
 from django.views.generic import DetailView, TemplateView, ListView, CreateView, UpdateView
 from django.views import View
 from django.db.models import Value, F
-from django.db.models.functions import Concat, Lower
+from django.db.models.functions import Concat, Lower, ExtractYear, ExtractMonth
 
-from .models import AnuidadeModel, AnuidadeAssociado, Pagamento, DescontoAnuidade
+# App Finances
+from .models import (
+    AnuidadeModel,
+    AnuidadeAssociado,
+    DescontoAnuidade,
+    TipoDespesaModel,
+    DespesaAssociacaoModel,
+    EntradaFinanceira,
+    Pagamento,
+    TipoServicoModel,
+    PagamentoEntrada,  # Added import for PagamentoEntrada
+    EntradaAlteracaoModel,  # Added import for EntradaAlteracaoModel
+)
+# End App Finances ---------
+
 from app_associados.models import AssociadoModel
-from app_associacao.models import AssociacaoModel
+from app_associacao.models import AssociacaoModel, ReparticoesModel
 
-from .models import DespesaAssociacaoModel
-from .forms import AnuidadeForm
+
+from .forms import (
+    AnuidadeForm,
+    DespesaAssociacaoForm,
+    TipoDespesaForm,
+    EntradaFinanceiraForm,
+    TipoServicoForm,
+    )
 
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
+from django.forms.models import model_to_dict
 from django.views.decorators.csrf import csrf_exempt
 from django.apps import apps
+from django.contrib.messages.views import SuccessMessageMixin
 
 
-
+# ANUIDADES
 def lista_anuidades(request):
     # Obter o ano selecionado pelo usuário
     ano_selecionado = request.GET.get('ano')
@@ -58,9 +80,12 @@ def lista_anuidades(request):
             anuidade_assoc.total_pago_ano = pagamentos_ano
 
             # Calcular o saldo devedor total de todas as anuidades do associado
-            total_debito = AnuidadeAssociado.objects.filter(associado=anuidade_assoc.associado, pago=False).aggregate(
-                saldo_devedor=Sum('valor_pro_rata') - Sum('valor_pago')
-            )['saldo_devedor'] or Decimal('0.00')
+            total_debito = (
+                AnuidadeAssociado.objects.filter(associado=anuidade_assoc.associado, pago=False)
+                .aggregate(
+                    saldo_devedor=Sum(F('anuidade__valor_anuidade')) - Sum('valor_pago')
+                )['saldo_devedor'] or Decimal('0.00')
+            )
             anuidade_assoc.saldo_devedor_total = total_debito
 
     else:
@@ -96,20 +121,22 @@ class FinanceiroAssociadoDetailView(DetailView):
         for anuidade in anuidades:
             valor_pago = anuidade.pagamentos.aggregate(total=Sum('valor'))['total'] or Decimal('0.00')
             valor_desconto = anuidade.descontos.aggregate(total=Sum('valor_desconto'))['total'] or Decimal('0.00')
-            saldo = anuidade.valor_pro_rata - valor_pago - valor_desconto
-
-            total_anuidades += anuidade.valor_pro_rata
+            saldo = anuidade.anuidade.valor_anuidade - valor_pago - valor_desconto  # ✅ Agora usa o valor total da anuidade
+            
+            # ✅ Atualiza os totais corretamente
+            total_anuidades += anuidade.anuidade.valor_anuidade  
             total_pago += valor_pago
             total_descontos += valor_desconto
-
+            
             detalhes_anuidades.append({
                 'ano': anuidade.anuidade.ano,
-                'valor_total': anuidade.valor_pro_rata,
+                'valor_total': anuidade.anuidade.valor_anuidade,  # ✅ Mostra o valor cheio da anuidade
                 'valor_pago': valor_pago,
                 'valor_desconto': valor_desconto,
                 'saldo': saldo,
                 'anuidade': anuidade,
             })
+
 
         # Buscar os pagamentos relacionados ao associado        
         pagamentos = Pagamento.objects.filter(anuidade_associado__associado=associado).select_related('registrado_por')
@@ -152,7 +179,6 @@ class FinanceiroAssociadoDetailView(DetailView):
             'descontos': descontos,
             'eventos_financeiros': eventos_financeiros
         })
-        
         return context
 
 
@@ -211,7 +237,9 @@ def associados_triangulo_view(request):
             anuidades_associados__anuidade__ano=ano_atual,
             anuidades_associados__pago=False
         )
-        .annotate(valor_anuidade=Sum('anuidades_associados__valor_pro_rata'))
+        .annotate(
+            valor_anuidade=Sum(F('anuidades_associados__anuidade__valor_anuidade'))  # ✅ Corrigido
+        )
     )
 
     # Associados com anuidades de anos anteriores em atraso
@@ -220,7 +248,9 @@ def associados_triangulo_view(request):
             anuidades_associados__anuidade__ano__lt=ano_atual,
             anuidades_associados__pago=False
         )
-        .annotate(valor_debito=Sum('anuidades_associados__valor_pro_rata') - Sum('anuidades_associados__valor_pago'))
+        .annotate(
+            valor_debito=Sum(F('anuidades_associados__anuidade__valor_anuidade')) - Sum('anuidades_associados__valor_pago')  # ✅ Corrigido
+        )
     )
 
     context = {
@@ -258,18 +288,12 @@ def aplicar_anuidade(request, associado_id):
             if AnuidadeAssociado.objects.filter(anuidade=anuidade, associado=associado).exists():
                 continue  # Pula se a anuidade já existe
 
-            # 📌 Cálculo pró-rata apenas no primeiro ano
-            if anuidade.ano == associado.data_filiacao.year:
-                meses_restantes = associado.calcular_meses_validos(anuidade.ano)
-                valor_a_cobrar = round((anuidade.valor_anuidade / Decimal(12)) * Decimal(meses_restantes), 2)
-            else:
-                valor_a_cobrar = anuidade.valor_anuidade  # Anos seguintes, cobrança total
-
-            # Criar o registro de anuidade do associado
+            # ✅ Sempre aplicar o valor TOTAL da anuidade
             AnuidadeAssociado.objects.create(
                 anuidade=anuidade,
                 associado=associado,
-                valor_pro_rata=valor_a_cobrar
+                valor_pago=0,  # Inicialmente não pago
+                pago=False
             )
             aplicadas.append(anuidade.ano)
 
@@ -316,9 +340,13 @@ def conceder_desconto(request, anuidade_associado_id):
             saldo_atual = anuidade_associado.calcular_saldo()
             novo_saldo = max(saldo_atual - valor_desconto, Decimal('0.00'))  # Evita saldo negativo
 
-            anuidade_associado.valor_pago += valor_desconto  # O desconto age como um pagamento
-            if anuidade_associado.valor_pago >= anuidade_associado.valor_pro_rata:
-                anuidade_associado.pago = True  # Se quitado, marca como pago
+            # 🔥 O desconto é tratado como um pagamento e reduz apenas o saldo
+            anuidade_associado.valor_pago += valor_desconto  # Desconto age como uma baixa
+            saldo_atual = anuidade_associado.calcular_saldo()
+
+            # 🔄 Se o pagamento cobriu toda a anuidade, marcar como quitado
+            if saldo_atual <= 0:
+                anuidade_associado.pago = True  
 
             anuidade_associado.save()
 
@@ -415,7 +443,8 @@ class CreateAnuidadeView(CreateView):
                     AnuidadeAssociado.objects.create(
                         anuidade=anuidade,
                         associado=associado,
-                        valor_pro_rata=anuidade.valor_anuidade  # Valor cheio para anos normais
+                        valor_pago=Decimal('0.00'),  # 🚀 Começa sem pagamento
+                        pago=False  # 🚀 Assume que não está pago ao ser aplicado
                     )
                     aplicadas.append(associado.user.get_full_name() if associado.user else associado.id)
 
@@ -428,8 +457,7 @@ class CreateAnuidadeView(CreateView):
         context['anuidades'] = AnuidadeModel.objects.order_by('-ano')
         return context
     
-    
-    
+
 # View para editar anuidade
 class EditAnuidadeView(UpdateView):
     model = AnuidadeModel
@@ -438,6 +466,466 @@ class EditAnuidadeView(UpdateView):
     success_url = reverse_lazy('app_finances:create_anuidade')
 
 
+# ENTRADAS
+# ✅ View para criar uma nova entrada
+class EntradaCreateView(SuccessMessageMixin, CreateView):
+    model = EntradaFinanceira
+    form_class = EntradaFinanceiraForm
+    template_name = 'app_finances/create_entradas.html'
+    success_url = reverse_lazy('app_finances:list_entradas')
+    success_message = "Entrada registrada com sucesso!"
+
+    def get_form_kwargs(self):
+        """
+        Passa o usuário logado e a associação selecionada para o formulário.
+        """
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user  # ✅ Passa o usuário autenticado
+
+        # 🔹 Obtém a associação selecionada via GET
+        associacao_id = self.request.GET.get('associacao')
+        if associacao_id:
+            kwargs['associacao'] = get_object_or_404(AssociacaoModel, pk=associacao_id)
+
+        return kwargs
+
+
+    def form_valid(self, form):
+        """Garante que a entrada será salva corretamente."""
+        
+        if not form.is_valid():
+            messages.error(self.request, "Erro ao salvar! Verifique os dados informados.")
+            return self.form_invalid(form)  
+
+        # 🔥 Garante que `self.object` seja atribuído corretamente
+        self.object = form.save(commit=False)  
+
+        if self.object is None:  
+            messages.error(self.request, "Erro interno ao salvar a entrada.")  
+            return self.form_invalid(form)
+
+        if not self.request.user.is_authenticated:
+            messages.error(self.request, "Usuário não autenticado.")
+            return self.form_invalid(form)
+
+        # ✅ Define o usuário que criou a entrada
+        self.object.criado_por = self.request.user
+        self.object.save()  # 🔥 Agora `self.object` está definido corretamente
+
+        messages.success(self.request, "Entrada registrada com sucesso!")
+        return HttpResponseRedirect(self.get_success_url()) # 🔥 Redireciona corretamente
+
+
+    def form_invalid(self, form):
+        """
+        Se o formulário for inválido, exibe os erros e mantém os dados.
+        """
+        messages.error(self.request, "Erro ao cadastrar entrada. Verifique os campos obrigatórios.")
+        print("🔴 ERROS NO FORMULÁRIO:", form.errors)  # ✅ Exibe os erros no terminal para depuração
+        return self.render_to_response(self.get_context_data(form=form))
+
+    def get_context_data(self, **kwargs):
+        """
+        Adiciona as associações, repartições e tipos de serviço ao contexto.
+        """
+        context = super().get_context_data(**kwargs)
+        context['associacoes'] = AssociacaoModel.objects.all().order_by('nome_fantasia')
+        context['reparticoes'] = ReparticoesModel.objects.none()  # 🔹 Inicialmente vazio
+        return context
+
+
+
+# Editar Entrada
+class EntradaUpdateView(SuccessMessageMixin, UpdateView):
+    model = EntradaFinanceira
+    form_class = EntradaFinanceiraForm
+    template_name = 'app_finances/edit_entrada.html'
+    success_url = reverse_lazy('app_finances:list_entradas')
+    success_message = "Entrada atualizada com sucesso!"
+
+    def get_form_kwargs(self):
+        """
+        Passa o usuário logado para o formulário.
+        """
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user  # ✅ Agora passa o usuário logado
+        return kwargs
+
+    def form_valid(self, form):
+        """
+        Atualiza a entrada financeira SOMENTE se houver alterações e redireciona corretamente.
+        """
+        entrada = form.instance  # Obtém a instância da entrada
+        dados_atuais = {field: getattr(entrada, field) for field in form.changed_data}
+
+        if not dados_atuais:
+            print("⚠ [DEBUG] Nenhuma alteração detectada no formulário. Redirecionando sem salvar.")
+            messages.info(self.request, "Nenhuma alteração foi feita.")
+            return HttpResponseRedirect(self.get_success_url())  # 🔥 Redirecionamento correto
+
+        entrada.criado_por = self.request.user  # 🔥 Atualiza o usuário que criou a entrad  a
+        entrada.save()  # Salva somente se houve mudanças
+        
+        dados_anteriores = model_to_dict(entrada)
+        self.registrar_alteracoes(entrada, dados_anteriores)
+
+        messages.success(self.request, "Entrada atualizada com sucesso!")
+        return HttpResponseRedirect(self.get_success_url())  # 🔥 Redirecionamento correto
+
+    def registrar_alteracoes(self, entrada, dados_anteriores):
+        """
+        Compara os valores antigos e novos e registra no histórico de alterações,
+        garantindo que associações, repartições e tipo de serviço usem nomes ao invés de IDs.
+        """
+        dados_atualizados = model_to_dict(entrada)  # Obtém os novos valores
+
+        campos_relevantes = [
+            'associacao', 'reparticao', 'tipo_servico', 
+            'descricao', 'valor_total', 'forma_pagamento', 'parcelamento', 'status_pagamento'
+        ]
+
+        for campo in campos_relevantes:
+            valor_antigo = dados_anteriores.get(campo, None)
+            valor_novo = dados_atualizados.get(campo, None)
+
+            # 🔹 Trata FK para exibir o nome e não o ID
+            if campo == "associacao" and valor_antigo:
+                valor_antigo = AssociacaoModel.objects.filter(id=valor_antigo).first()
+                valor_antigo = valor_antigo.nome_fantasia if valor_antigo else "Nenhuma"
+                valor_novo = entrada.associacao.nome_fantasia if entrada.associacao else "Nenhuma"
+
+            elif campo == "reparticao" and valor_antigo:
+                valor_antigo = ReparticoesModel.objects.filter(id=valor_antigo).first()
+                valor_antigo = valor_antigo.nome_reparticao if valor_antigo else "Nenhuma"
+                valor_novo = entrada.reparticao.nome_reparticao if entrada.reparticao else "Nenhuma"
+
+            elif campo == "tipo_servico" and valor_antigo:
+                valor_antigo = TipoServicoModel.objects.filter(id=valor_antigo).first()
+                valor_antigo = valor_antigo.nome if valor_antigo else "Nenhum"
+                valor_novo = entrada.tipo_servico.nome if entrada.tipo_servico else "Nenhum"
+
+            # 🔹 Trata Choices (Parcelamento e Forma de Pagamento)
+            elif campo == "parcelamento":
+                valor_antigo = dict(EntradaFinanceira.PARCELAMENTO_CHOICES).get(valor_antigo, valor_antigo)
+                valor_novo = dict(EntradaFinanceira.PARCELAMENTO_CHOICES).get(valor_novo, valor_novo)
+
+            elif campo == "forma_pagamento":
+                valor_antigo = dict(EntradaFinanceira.FORMA_PAGAMENTO_CHOICES).get(valor_antigo, valor_antigo)
+                valor_novo = dict(EntradaFinanceira.FORMA_PAGAMENTO_CHOICES).get(valor_novo, valor_novo)
+
+            # 🔥 Só grava se houver mudança real
+            if str(valor_antigo) != str(valor_novo):
+                EntradaAlteracaoModel.objects.create(
+                    entrada=entrada,
+                    campo_alterado=campo.replace("_", " ").capitalize(),
+                    valor_anterior=valor_antigo,
+                    valor_novo=valor_novo,
+                    alterado_por=self.request.user
+                )
+
+
+
+    def get_context_data(self, **kwargs):
+        """
+        Adiciona associações, repartições e status de pagamento ao contexto.
+        """
+        context = super().get_context_data(**kwargs)
+        entrada = self.object  # A entrada que está sendo editada
+        valor_ainda_devido = entrada.valor_total - entrada.valor_pagamento
+        # 🔹 Pega pagamentos da entrada
+        pagamentos = entrada.pagamentos.all().order_by("-data_pagamento")
+        alteracoes = entrada.alteracoes.all().order_by("-data_alteracao")
+        # 🔹 Atualizamos o contexto
+        context.update({
+            'entrada': entrada,
+            'associacoes': AssociacaoModel.objects.all(),
+            'reparticoes': ReparticoesModel.objects.all(),
+            "valor_ainda_devido": valor_ainda_devido,
+            "pagamentos": entrada.pagamentos.all().order_by("-data_pagamento"),
+            "alteracoes": entrada.alteracoes.all().order_by("-data_alteracao"),
+        })
+        return context
+
+
+
+from decimal import Decimal, InvalidOperation
+import json
+
+def registrar_pagamento(request, entrada_id):
+    entrada = get_object_or_404(EntradaFinanceira, id=entrada_id)
+
+    if request.method == "POST":
+        valor_pago = request.POST.get("valor_pago")
+
+        # 🔹 Se `valor_pago` for None ou string vazia, define como "0.00"
+        if not valor_pago:
+            valor_pago = "0.00"
+
+        try:
+            # 🔹 Garante que é um Decimal válido
+            valor_pago = Decimal(str(valor_pago).replace(",", "."))
+        except (InvalidOperation, AttributeError, ValueError):
+            messages.error(request, "Valor inválido. Digite um número válido.")
+            return redirect("app_finances:edit_entrada", pk=entrada.id)
+
+        # 🔹 Valida se o pagamento não ultrapassa o devido
+        saldo_restante = entrada.valor_total - entrada.valor_pagamento
+        if valor_pago > saldo_restante:
+            messages.error(request, f"Erro: Você não pode pagar mais do que o valor restante (R$ {saldo_restante:.2f}).")
+            return redirect("app_finances:edit_entrada", pk=entrada.id)
+
+        # 🔹 Registra o pagamento
+        pagamento = PagamentoEntrada.objects.create(
+            entrada=entrada,
+            valor_pago=valor_pago,
+            data_pagamento=now(),
+            registrado_por=request.user
+        )
+
+        # 🔹 Atualiza o valor já pago e recalcula status
+        entrada.calcular_pagamento()
+
+        messages.success(request, f"Pagamento de R$ {valor_pago:.2f} registrado com sucesso!")
+        return redirect("app_finances:edit_entrada", pk=entrada.id)
+
+
+
+# Tipo de Servições - Entradas
+class TipoServicoCreateView(SuccessMessageMixin, CreateView):
+    model = TipoServicoModel
+    form_class = TipoServicoForm
+    template_name = 'app_finances/create_tipo_servico.html'
+    success_url = reverse_lazy('app_finances:create_tipo_servico')  # Redireciona para lista de entradas
+    success_message = "Tipo de Serviço cadastrado com sucesso!"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tipos_servicos"] = TipoServicoModel.objects.all().order_by('nome')
+        return context
+    
+
+
+class ListEntradasView(ListView):
+    model = EntradaFinanceira
+    template_name = 'app_finances/list_entradas.html'
+    context_object_name = 'entradas'
+    paginate_by = 1000  # 🔹 Paginação com 1000 registros por página
+
+    def get_queryset(self):
+        """
+        Filtra as entradas com base nos parâmetros da URL (associação, repartição, ano e mês).
+        """
+        queryset = EntradaFinanceira.objects.select_related('associacao', 'reparticao', 'tipo_servico')
+
+        # 🔹 Obtendo os filtros da URL
+        associacao_id = self.request.GET.get('associacao')
+        reparticao_id = self.request.GET.get('reparticao')
+        ano = self.request.GET.get('ano')
+        mes = self.request.GET.get('mes')
+
+        # 🔹 Aplica filtros somente se valores forem fornecidos
+        if associacao_id:
+            queryset = queryset.filter(associacao_id=associacao_id)
+
+        if reparticao_id:
+            queryset = queryset.filter(reparticao_id=reparticao_id)
+
+        if ano:
+            queryset = queryset.filter(data_criacao__year=ano)  # ✅ Agora filtra pelo ano corretamente
+
+        if mes:
+            queryset = queryset.filter(data_criacao__month=mes)  # ✅ Agora filtra pelo mês corretamente
+
+        return queryset.order_by('-data_criacao')  # 🔹 Mais recentes primeiro
+
+    def get_context_data(self, **kwargs):
+        """
+        Adiciona listas de associações, repartições, anos e meses ao contexto para os filtros.
+        """
+        context = super().get_context_data(**kwargs)
+        context['associacoes'] = AssociacaoModel.objects.all()
+        context['reparticoes'] = ReparticoesModel.objects.all()
+        context['anos'] = EntradaFinanceira.objects.dates('data_criacao', 'year', order='DESC')
+        context['meses'] = range(1, 13)  # 🔹 Lista de meses de 1 a 12
+
+        # 🔹 Mantém os valores selecionados nos filtros para evitar reset após pesquisa
+        context['associacao_selecionada'] = self.request.GET.get('associacao', '')
+        context['reparticao_selecionada'] = self.request.GET.get('reparticao', '')
+        context['ano_selecionado'] = self.request.GET.get('ano', now().year)
+        context['mes_selecionado'] = self.request.GET.get('mes', '')
+
+        return context
+
+
+
+# DESPESAS
+class DespesaCreateView(SuccessMessageMixin, CreateView):
+    model = DespesaAssociacaoModel
+    form_class = DespesaAssociacaoForm
+    template_name = 'app_finances/create_despesa.html'
+    success_url = reverse_lazy('app_finances:list_despesas')
+    success_message = "Despesa lançada com sucesso!"
+
+    def get_form_kwargs(self):
+        """
+        Passa o usuário logado e a associação selecionada para o formulário.
+        """
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user  # Passa o usuário logado para o formulário
+
+        # Obtém a associação selecionada, se houver
+        associacao_id = self.request.GET.get('associacao')
+        if associacao_id:
+            kwargs['associacao'] = get_object_or_404(AssociacaoModel, pk=associacao_id)
+
+        return kwargs
+
+    def get_context_data(self, **kwargs):
+        """
+        Adiciona as associações e repartições ao contexto.
+        """
+        context = super().get_context_data(**kwargs)
+        context['associacoes'] = AssociacaoModel.objects.all().order_by('nome_fantasia')
+        context['reparticoes'] = ReparticoesModel.objects.none()  # Inicialmente, nenhuma repartição
+        context['tipos_despesas'] = TipoDespesaModel.objects.all().order_by('nome') 
+        return context
+    
+    def form_valid(self, form):
+        """Define o usuário que registrou a despesa e redireciona conforme a escolha do usuário."""
+        self.object = form.save(commit=False)
+        self.object.registrado_por = self.request.user  
+        self.object.save()  
+
+        # 🔥 Captura a ação desejada pelo usuário
+        acao = self.request.POST.get("acao")
+
+        if acao == "salvar_editar":
+            return redirect('app_finances:edit_despesa', pk=self.object.pk)  # Redireciona para edição
+
+        if acao == "salvar_nova":
+            return redirect('app_finances:create_despesa')  # Redireciona para novo cadastro
+
+        return super().form_valid(form) # Redireciona para novo cadastro
+
+
+# Editar Despesa
+class DespesaUpdateView(SuccessMessageMixin, UpdateView):
+    model = DespesaAssociacaoModel
+    form_class = DespesaAssociacaoForm
+    template_name = 'app_finances/edit_despesa.html'
+    success_url = reverse_lazy('app_finances:list_despesas')
+    success_message = "Despesa atualizada com sucesso!"
+
+    def get_form_kwargs(self):
+        """
+        Passa o usuário logado para o formulário.
+        """
+        kwargs = super().get_form_kwargs()
+        kwargs['user'] = self.request.user  # ✅ Agora passa o usuário logado
+        return kwargs
+    
+    def form_valid(self, form):
+        """
+        Garante que a alteração será salva com o usuário correto.
+        """
+        despesa = form.save(commit=False)  # ✅ Não salva ainda
+        despesa.save(usuario_atualizacao=self.request.user)  # ✅ Passa o usuário logado corretamente
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        """
+        Adiciona associações e repartições ao contexto.
+        """
+        context = super().get_context_data(**kwargs)
+        context['despesa'] = self.object  # Adiciona a despesa específica
+        context['associacoes'] = AssociacaoModel.objects.all()
+        context['reparticoes'] = ReparticoesModel.objects.all()
+        return context
+
+ # Carregar dados Repartições para Filtro Despesas e Entradas
+def carregar_reparticoes(request):
+    associacao_id = request.GET.get('associacao_id')
+    if associacao_id:
+        reparticoes = ReparticoesModel.objects.filter(associacao_id=associacao_id).values('id', 'nome_reparticao')
+        return JsonResponse(list(reparticoes), safe=False)
+    else:
+        return JsonResponse([], safe=False)  # Retorna uma lista vazia se não houver associacao_id
+
+
+# Tipo Despesa
+class TipoDespesaCreateView(SuccessMessageMixin, CreateView):
+    model = TipoDespesaModel
+    form_class = TipoDespesaForm
+    template_name = 'app_finances/create_tipo_despesa.html'
+    success_url = reverse_lazy('app_finances:create_tipo_despesa')
+    success_message = "Tipo de Despesa criado com sucesso!"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tipos_despesas'] = TipoDespesaModel.objects.all().order_by('nome')  # Adiciona tipos de despesas
+        return context
+
+
+# Despesas - LISTAS
+class ListDespesasView(ListView):
+    model = DespesaAssociacaoModel
+    template_name = 'app_finances/list_despesas.html'
+    context_object_name = 'despesas'
+    paginate_by = 1000  # Exibe 1000 egistros por página
+
+    def get_queryset(self):
+        """
+        Filtra as despesas com base nos parâmetros da URL (associação, repartição, mês e ano).
+        """
+        queryset = DespesaAssociacaoModel.objects.all().select_related('associacao', 'reparticao', 'tipo_despesa')
+
+        # 🔥 Filtros opcionais
+        associacao_id = self.request.GET.get('associacao')
+        reparticao_id = self.request.GET.get('reparticao')
+        mes = self.request.GET.get('mes')
+        ano = self.request.GET.get('ano')
+
+        # Filtro por Associação
+        if associacao_id:
+            queryset = queryset.filter(associacao_id=associacao_id)
+
+        # Filtro por Repartição (se houver)
+        if reparticao_id:
+            queryset = queryset.filter(reparticao_id=reparticao_id)
+
+        # Filtro por Ano
+        if ano:
+            queryset = queryset.filter(data_lancamento__year=ano)
+
+        # Filtro por Mês
+        if mes:
+            queryset = queryset.filter(data_lancamento__month=mes)
+
+        # Ordenação das despesas (mais recentes primeiro)
+        queryset = queryset.order_by('-data_lancamento')
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        """
+        Adiciona listas de associações, repartições, anos e meses ao contexto para os filtros.
+        """
+        context = super().get_context_data(**kwargs)
+        context['associacoes'] = AssociacaoModel.objects.all()
+        context['reparticoes'] = ReparticoesModel.objects.all()
+        context['anos'] = DespesaAssociacaoModel.objects.dates('data_lancamento', 'year', order='DESC')
+        context['meses'] = range(1, 13)  # Lista de meses de 1 a 12
+
+        # Valores selecionados nos filtros (para manter após pesquisa)
+        context['associacao_selecionada'] = self.request.GET.get('associacao', '')
+        context['reparticao_selecionada'] = self.request.GET.get('reparticao', '')
+        context['ano_selecionado'] = self.request.GET.get('ano', now().year)
+        context['mes_selecionado'] = self.request.GET.get('mes', '')
+
+        return context
+
+
+# SUPER FIANCEIRO
 # Financeiro Outras entradas e Despesas
 class ResumoFinanceiroView(TemplateView):
     template_name = 'app_finances/finances_super.html'
@@ -451,6 +939,11 @@ class ResumoFinanceiroView(TemplateView):
         # Total geral de associados
         total_associados = AssociadoModel.objects.count()
         
+        # 🔹 Total Geral das Anuidades Apuradas (Somente associados ativos e aposentados)
+        total_anuidades_apuradas = AnuidadeAssociado.objects.filter(
+            associado__status__in=["Associado Lista Ativo(a)", "Associado Lista Aposentado(a)"]
+        ).aggregate(total=Sum('anuidade__valor_anuidade'))['total'] or Decimal('0.00')
+
         # Resumo geral de despesas
         total_despesas = DespesaAssociacaoModel.objects.aggregate(total=Sum('valor'))['total'] or 0
 
@@ -460,7 +953,7 @@ class ResumoFinanceiroView(TemplateView):
         # Totais financeiros gerais
         receita_total = AnuidadeAssociado.objects.aggregate(total_pago=Sum('valor_pago'))['total_pago'] or Decimal('0.00')
         saldo_pendente = AnuidadeAssociado.objects.aggregate(
-            saldo_devedor=Sum('valor_pro_rata') - Sum('valor_pago')
+            saldo_devedor=Sum(F('anuidade__valor_anuidade')) - Sum('valor_pago')
         )['saldo_devedor'] or Decimal('0.00')
 
         # Total de pagantes = Associados Ativos + Associados Aposentados
@@ -489,7 +982,7 @@ class ResumoFinanceiroView(TemplateView):
             )['total_receita'] or Decimal('0.00')
 
             saldo_assoc = AnuidadeAssociado.objects.filter(associado__in=associados).aggregate(
-                saldo_pendente=Sum('valor_pro_rata') - Sum('valor_pago')
+                saldo_pendente=Sum(F('anuidade__valor_anuidade')) - Sum('valor_pago')
             )['saldo_pendente'] or Decimal('0.00')
 
             associacoes_data.append({
@@ -498,9 +991,175 @@ class ResumoFinanceiroView(TemplateView):
                 'receita_total': receita_assoc,
                 'saldo_pendente': saldo_assoc,
             })
+            
+       # 🔹 Filtra associados ativos e aposentados
+        associados = AssociadoModel.objects.filter(
+            status__in=["Associado Lista Ativo(a)", "Associado Lista Aposentado(a)"]
+        )
 
+
+         # 🔹 Conta os associados por ano e mês de filiação
+        associados_por_periodo = (
+            associados.annotate(ano=ExtractYear('data_filiacao'), mes=ExtractMonth('data_filiacao'))
+            .values('ano', 'mes')
+            .annotate(total=Count('id'))
+            .order_by('ano', 'mes')
+        )
+        # 🔹 Transforma os dados para o gráfico
+        anos_meses = [f"{dado['ano']}-{str(dado['mes']).zfill(2)}" for dado in associados_por_periodo]
+        totais = [dado["total"] for dado in associados_por_periodo]
+        # 🔹 Garante que os dados estejam sempre preenchidos
+        context["anos_meses_filiacao"] = json.dumps(anos_meses if anos_meses else ["2025-01"])
+        context["total_associados_por_periodo"] = json.dumps(totais if totais else [0])
+
+
+       # 🔹 Total geral de despesas
+        total_despesas = DespesaAssociacaoModel.objects.aggregate(total=Sum('valor'))['total'] or Decimal('0.00')
+
+        # 🔹 Total Pago (Somente despesas pagas)
+        total_pagas = DespesaAssociacaoModel.objects.filter(pago=True).aggregate(
+            total=Sum('valor')
+        )['total'] or Decimal('0.00')
+
+        # 🔹 Total a Pagar (Despesas que ainda NÃO foram pagas)
+        total_a_pagar = DespesaAssociacaoModel.objects.filter(pago=False).aggregate(
+            total=Sum('valor')
+        )['total'] or Decimal('0.00')
+
+        # 🔹 Total Vencidas (Despesas pendentes cuja data de vencimento já passou)
+        total_vencidas = DespesaAssociacaoModel.objects.filter(
+            pago=False, data_vencimento__lt=data_atual
+        ).aggregate(
+            total=Sum('valor')
+        )['total'] or Decimal('0.00')
+
+        # 🔥 🔹 Despesas agrupadas por Associação
+        despesas_por_associacao = DespesaAssociacaoModel.objects.values(
+            'associacao__nome_fantasia'
+        ).annotate(
+            total_despesas=Sum('valor')
+        ).order_by('associacao__nome_fantasia')
+
+        # 🔥 🔹 Despesas agrupadas por Repartição dentro de cada Associação
+        despesas_por_reparticao = DespesaAssociacaoModel.objects.values(
+            'associacao__nome_fantasia',
+            'reparticao__nome_reparticao'
+        ).annotate(
+            total_despesas=Sum('valor')
+        ).order_by('associacao__nome_fantasia', 'reparticao__nome_reparticao')
+
+        # 🔥 🔹 Organizando os dados de despesas
+        associacoes_com_reparticoes = {}
+
+        for despesa in despesas_por_associacao:
+            associacao_nome = despesa["associacao__nome_fantasia"]
+            associacoes_com_reparticoes[associacao_nome] = {
+                "total_despesas": despesa["total_despesas"],
+                "reparticoes": []
+            }
+
+        for despesa in despesas_por_reparticao:
+            associacao_nome = despesa["associacao__nome_fantasia"]
+            reparticao_nome = despesa["reparticao__nome_reparticao"] or "Sem Repartição"
+
+            if associacao_nome in associacoes_com_reparticoes:
+                associacoes_com_reparticoes[associacao_nome]["reparticoes"].append({
+                    "reparticao_nome": reparticao_nome,
+                    "total_despesas": despesa["total_despesas"]
+                })
+
+        # 🔹 Total Geral de Entradas (Receitas)
+        total_entradas = EntradaFinanceira.objects.aggregate(total=Sum('valor_total'))['total'] or Decimal('0.00')
+
+        # 🔹 Total Já Recebido
+        total_recebido = EntradaFinanceira.objects.aggregate(total=Sum('valor_pagamento'))['total'] or Decimal('0.00')
+
+        # 🔹 Total a Receber (Falta ser pago)
+        total_a_receber = total_entradas - total_recebido
+
+        # 🔹 Total Atrasado (Entradas vencidas e pendentes)
+        total_atrasado = EntradaFinanceira.objects.filter(
+            status_pagamento__in=["pendente", "parcial"], data_criacao__lt=data_atual
+        ).aggregate(total=Sum(F("valor_total") - F("valor_pagamento")))['total'] or Decimal('0.00')
+
+        # 🔥 🔹 Entradas agrupadas por Associação
+        entradas_por_associacao = EntradaFinanceira.objects.values(
+            'associacao__nome_fantasia'
+        ).annotate(
+            total_receita=Sum('valor_total'),
+            total_recebido=Sum('valor_pagamento')
+        ).order_by('associacao__nome_fantasia')
+
+        # 🔥 🔹 Entradas agrupadas por Repartição dentro de cada Associação
+        entradas_por_reparticao = EntradaFinanceira.objects.values(
+            'associacao__nome_fantasia',
+            'reparticao__nome_reparticao'
+        ).annotate(
+            total_receita=Sum('valor_total'),
+            total_recebido=Sum('valor_pagamento')
+        ).order_by('associacao__nome_fantasia', 'reparticao__nome_reparticao')
+
+        # 🔥 🔹 Organizando os dados de receitas
+        associacoes_com_reparticoes_receitas = {}
+
+        for entrada in entradas_por_associacao:
+            associacao_nome = entrada["associacao__nome_fantasia"]
+            associacoes_com_reparticoes_receitas[associacao_nome] = {
+                "total_receita": entrada["total_receita"],
+                "total_recebido": entrada["total_recebido"],
+                "reparticoes": []
+            }
+
+        for entrada in entradas_por_reparticao:
+            associacao_nome = entrada["associacao__nome_fantasia"]
+            reparticao_nome = entrada["reparticao__nome_reparticao"] or "Sem Repartição"
+
+            if associacao_nome in associacoes_com_reparticoes_receitas:
+                associacoes_com_reparticoes_receitas[associacao_nome]["reparticoes"].append({
+                    "reparticao_nome": reparticao_nome,
+                    "total_receita": entrada["total_receita"],
+                    "total_recebido": entrada["total_recebido"]
+                })
+        # 🔹 Total de Despesas Pagas
+        total_despesas_pagas = DespesaAssociacaoModel.objects.filter(pago=True).aggregate(
+            total=Sum('valor'))['total'] or Decimal('0.00')
+                        
+        # 🔹 Total de Despesas Pendentes
+        total_despesas_pendentes = total_despesas - total_despesas_pagas
+
+        # 🔹 Saldo Atual (Total Recebido - Despesas Pagas)
+        saldo_atual = total_recebido + receita_total- total_despesas_pagas
+
+        # 🔹 Saldo Projetado (Se todas as receitas e despesas forem quitadas)
+        saldo_projetado = (saldo_pendente + total_a_receber) - total_despesas
+
+        # 🔹 Valores a Receber
+        total_a_receber = total_entradas - total_recebido
+        total_anuidades_pendentes = total_anuidades_apuradas - total_recebido
+
+        # 🔹 Valores a Pagar
+        total_entradas_geral = total_entradas + total_anuidades_apuradas
+        total_despesas_geral = total_despesas + total_descontos
+        saldo_geral = total_entradas_geral - total_despesas_geral
+        
+        # 🔹 Contagem de associados por categoria
+        associados_ativos = AssociadoModel.objects.filter(status="Associado Lista Ativo(a)").count()
+        associados_aposentados = AssociadoModel.objects.filter(status="Associado Lista Aposentado(a)").count()
+        associados_especiais = AssociadoModel.objects.filter(status="Cliente Especial").count()
+        total_candidatos = AssociadoModel.objects.filter(status="Candidato(a)").count()
+        total_desassociados = AssociadoModel.objects.filter(status="Desassociado(a)").count()
+
+                
         # Adicionar informações ao contexto
         context.update({
+            "total_associados": total_associados,
+            "associados_ativos": associados_ativos,
+            "associados_aposentados": associados_aposentados,
+            "associados_especiais": associados_especiais,
+            "total_candidatos": total_candidatos,
+            "total_desassociados": total_desassociados,
+            
+            # Associados e Anuidades
             'total_associados': total_associados,
             'associados_em_dia': associados_em_dia,
             'associados_em_atraso': associados_em_atraso,
@@ -509,64 +1168,37 @@ class ResumoFinanceiroView(TemplateView):
             'saldo_pendente': saldo_pendente,
             'data_atual': data_atual,
             'associacoes_data': associacoes_data,
-            'total_despesas': total_despesas,
             'total_pagantes': total_pagantes,
-
-        })
+            'total_anuidades_apuradas': total_anuidades_apuradas,
             
+            # Despesas
+            'total_despesas': total_despesas,
+            "total_pagas": total_pagas,
+            "total_a_pagar": total_a_pagar,
+            "total_vencidas": total_vencidas, 
+            'despesas_por_associacao': despesas_por_associacao,
+            'despesas_por_reparticao': despesas_por_reparticao,  # ✅ Adicionando ao contexto
+            'associacoes_com_reparticoes': associacoes_com_reparticoes,  # ✅ Despesas Total
+            
+            # Entradas
+            "total_entradas": total_entradas,
+            "total_recebido": total_recebido,
+            "total_a_receber": total_a_receber,
+            "total_atrasado": total_atrasado,
+             "associacoes_com_reparticoes_receitas": associacoes_com_reparticoes_receitas,  # ✅ Receitas
+             
+            # Resumo Resumo Financeiro
+            'total_despesas_pagas': total_despesas_pagas,
+            'total_despesas_pendentes': total_despesas_pendentes,
+            'saldo_atual': saldo_atual,
+            'saldo_projetado': saldo_projetado,
+            'total_a_receber': total_a_receber,
+            'total_anuidades_pendentes': total_anuidades_pendentes,
+            'total_entradas_geral': total_entradas_geral,
+            'total_despesas_geral': total_despesas_geral,
+            'saldo_geral': saldo_geral,
+            
+        })
 
         return context
-
-
-
-
-class ListDespesasView(ListView):
-    model = DespesaAssociacaoModel
-    template_name = 'app_finances/list_despesas.html'
-    context_object_name = 'despesas'
-
-    def get_queryset(self):
-        queryset = DespesaAssociacaoModel.objects.select_related('associacao', 'tipo_despesa')
-
-        # Filtrando por associação, ano e mês
-        associacao_id = self.request.GET.get('associacao')
-        ano = self.request.GET.get('ano')
-        mes = self.request.GET.get('mes')
-
-        if associacao_id:
-            queryset = queryset.filter(associacao_id=associacao_id)
-        if ano:
-            queryset = queryset.filter(data_despesa__year=ano)
-        if mes:
-            queryset = queryset.filter(data_despesa__month=mes)
-
-        return queryset
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        despesas_filtradas = self.get_queryset()
-
-        # Recuperar o ano, mês e associação do GET
-        ano = self.request.GET.get('ano')
-        mes = self.request.GET.get('mes')
-        associacao_id = self.request.GET.get('associacao')
-
-        # Calculando o total das despesas filtradas
-        total_despesas = despesas_filtradas.aggregate(total=Sum('valor'))['total'] or 0
-
-        # Lista de nomes dos meses
-        meses_nomes = [
-            (1, "Janeiro"), (2, "Fevereiro"), (3, "Março"), (4, "Abril"), (5, "Maio"), 
-            (6, "Junho"), (7, "Julho"), (8, "Agosto"), (9, "Setembro"), (10, "Outubro"), 
-            (11, "Novembro"), (12, "Dezembro")
-        ]
-
-        # Passando informações ao contexto
-        context['associacoes'] = AssociacaoModel.objects.all()
-        context['anos'] = despesas_filtradas.dates('data_despesa', 'year')
-        context['meses'] = meses_nomes
-        context['total_despesas'] = total_despesas
-        context['associacao_selecionada'] = associacao_id
-        context['ano_selecionado'] = ano
-        context['mes_selecionado'] = mes
-        return context
+    

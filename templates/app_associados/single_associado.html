@@ -301,6 +301,41 @@
             </div>
         </div>
     </div>
+    <!-- Seção: Logins e Senhas -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Usuários e Senhas</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            <!-- CPF -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-red-500" style="font-size: 24px;">fingerprint</i>
+                <div>
+                    <strong class="text-gray-700">Login Gov - CPF:</strong>
+                    <div class="flex items-center">
+                        <span id="cpf-{{ associado.pk }}" class="text-gray-800">{{ associado.cpf }}</span>
+                        <button onclick="copyToClipboard('cpf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-orange-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Senha Gov -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-red-500" style="font-size: 24px;">lock</i>
+                <div>
+                    <strong class="text-gray-700">Senha Gov:</strong>
+                    <div class="flex items-center">
+                        <span id="senha-gov-{{ associado.pk }}" class="text-gray-800">{{ associado.senha_gov }}</span>
+                        <button onclick="copyToClipboard('senha-gov-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+    <br>
     <section class="mb-10">
         <h2 class="text-xl font-semibold text-gray-700 mb-4">Tarefas Relacionadas</h2>
             <!-- Botão para Criar Nova Tarefa -->
@@ -338,7 +373,7 @@
         <p class="text-gray-500 italic">Nenhuma tarefa associada a este associado.</p>
         {% endif %}
     </section>
-    
+
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <!-- Título -->
         <h2 class="text-2xl font-bold text-gray-800 mb-4">Login e Senha do Associado</h2>
@@ -409,40 +444,7 @@
             </div>
         </div>
     </div>
-    <!-- Seção: Logins e Senhas -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Usuários e Senhas</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-            <!-- CPF -->
-            <div class="flex items-center space-x-3">
-                <i class="material-icons text-red-500" style="font-size: 24px;">fingerprint</i>
-                <div>
-                    <strong class="text-gray-700">Login Gov - CPF:</strong>
-                    <div class="flex items-center">
-                        <span id="cpf-{{ associado.pk }}" class="text-gray-800">{{ associado.cpf }}</span>
-                        <button onclick="copyToClipboard('cpf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-orange-500">
-                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Senha Gov -->
-            <div class="flex items-center space-x-3">
-                <i class="material-icons text-red-500" style="font-size: 24px;">lock</i>
-                <div>
-                    <strong class="text-gray-700">Senha Gov:</strong>
-                    <div class="flex items-center">
-                        <span id="senha-gov-{{ associado.pk }}" class="text-gray-800">{{ associado.senha_gov }}</span>
-                        <button onclick="copyToClipboard('senha-gov-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
-                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- Seção: Documentos do Associado -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6 py-4">

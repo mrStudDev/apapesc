@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastrar Tipo de Serviço{% endblock title %}
+
+{% block create_TipoServico %}
+        <!-- Navbar -->
+        {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+
+<main class="flex-grow">
+    <div class="container mx-auto mt-8 max-w-3xl">
+        <!-- Mensagens -->
+        {% if messages %}
+        <div class="mb-6">
+            {% for message in messages %}
+            <div class="p-4 rounded-md text-white shadow-lg {% if message.tags == 'success' %}bg-green-500{% elif message.tags == 'error' %}bg-red-500{% elif message.tags == 'info' %}bg-blue-500{% else %}bg-gray-500{% endif %}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Formulário -->
+        <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Cadastrar Tipo de Serviço</h2>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
+                    Salvar
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- Tabela -->
+    <div class="bg-white shadow-lg rounded-lg p-6 max-w-7xl mx-auto">
+        <h2 class="text-xl font-bold mb-4 text-gray-800">Lista de Tipos de Serviços</h2>
+        <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="py-3 px-4 border-b text-left">Nome</th>
+                    <th class="py-3 px-4 border-b text-left">Descrição</th>
+                    <th class="py-3 px-4 border-b text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tipo in tipos_servicos %}
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 px-4">{{ tipo.nome }}</td>
+                    <td class="py-3 px-4">{{ tipo.descricao }}</td>
+                    <td class="py-3 px-4 text-center">
+                        <a href="#" class="text-blue-500 hover:text-blue-700">
+                            <i class="material-icons align-middle">edit</i>
+                        </a>
+                        <a href="#" class="text-red-500 hover:text-red-700 ml-3">
+                            <i class="material-icons align-middle">delete</i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="py-4 px-4 text-center text-gray-500 italic">
+                        Nenhum tipo de serviço cadastrado.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
+
+{% include 'components/footer_associacao.html' %}
+{% endblock create_TipoServico %}
