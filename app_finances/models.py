@@ -339,7 +339,7 @@ class EntradaFinanceira(models.Model):
         default=Decimal('0.00'),  # 🔥 Usa Decimal para evitar erros
         blank=True,
         null=True,
-        verbose_name="Valor Pagoo"
+        verbose_name="Valor Pago"
     )
     
 
@@ -407,7 +407,7 @@ class EntradaFinanceira(models.Model):
 
 
 class PagamentoEntrada(models.Model):
-    entrada = models.ForeignKey(EntradaFinanceira, on_delete=models.CASCADE, related_name="pagamentos", verbose_name="Entrada")
+    entrada = models.ForeignKey(EntradaFinanceira, on_delete=models.CASCADE, related_name="pagamentos")
     valor_pago = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     data_pagamento = models.DateTimeField(default=now)
     registrado_por = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
@@ -427,7 +427,7 @@ class EntradaAlteracaoModel(models.Model):
         'EntradaFinanceira', 
         on_delete=models.CASCADE, 
         related_name='alteracoes', 
-        verbose_name="Alterações Entrada",
+        verbose_name="Entrada",
         default=None,
         null=True, blank=True, 
     )
