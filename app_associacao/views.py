@@ -31,7 +31,7 @@ class UserListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = User
     template_name = 'app_associacao/list_users.html'
     context_object_name = 'users'
-    paginate_by = 100
+    paginate_by = 200
     group_required = [
         'Superuser',
         'Admin da Associação',
@@ -71,6 +71,8 @@ class UserListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
             associados.values_list('user_id', flat=True)
         )
 
+        context['total_users'] = self.get_queryset().count()
+        
         return context
 
 
