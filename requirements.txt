@@ -1,3 +1,4 @@
+# Requerimentos de produção
 asgiref==3.8.1
 babel==2.17.0
 bleach==6.2.0
@@ -54,3 +55,4 @@ tzdata==2025.1
 uritemplate==4.1.1
 urllib3==2.3.0
 webencodings==0.5.1
+# Requerimentos de desenvolvimento
