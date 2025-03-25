@@ -74,10 +74,8 @@
                     <a href="{% url 'app_documentos:list_tipo_documento' %}" class="block px-4 py-2 hover:bg-gray-200">Tipos Documentos</a> 
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_articles:list_articles' %}" class="block px-4 py-2 hover:bg-gray-200">Artigos</a> 
-                    
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Users/Accounts</a>
-
                 </div>
             </div>
 
@@ -108,7 +106,23 @@
                     <a href="{% url 'app_articles:create_tag' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Tag</a>
                 </div>
             </div>
+            <div class="relative group">
+                <button class="hover:text-gray-200 focus:outline-none">
+                    Servicos
+                    <span class="material-icons align-middle">arrow_drop_down</span>
+                </button>
+                <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
 
+                    <a href="{% url 'app_servicos:list_servicos' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Serviços</a>
+                    <a href="{% url 'app_servicos:painel_etapas' %}"class="block px-4 py-2 hover:bg-gray-200">Painel Etapas</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_servicos:list_extraassociados' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Extra-Associados</a>
+                    <a href="{% url 'app_servicos:create_extraassociado' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Extra-Associado</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_associados:list_geral_associado' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Serviço Associado</a>
+                    <a href="{% url 'app_servicos:list_extraassociados' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Servico Extra-Ass</a>
+                </div>
+            </div>
             <!-- Tarefas  -->
             <div class="relative group">
                 <button class="hover:text-gray-200 focus:outline-none">

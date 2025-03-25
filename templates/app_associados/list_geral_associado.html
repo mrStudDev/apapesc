@@ -1,6 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
+
+{% load filtrosPainel_servicos %}
+
 {% block title %}Lista Geral Associados{% endblock title %}
+
+
+
 {% block list_GeralAssociados %}
     <!-- Navbar Exclusivo Superuser -->
     {% include "components/navbar_associacao.html" %}
@@ -81,6 +87,8 @@
                         <th class="px-4 py-2 border">CPF</th>
                         <th class="px-4 py-2 border">Gov</th>
                         <th class="px-4 py-2 border">Celular</th>
+                        <th class="px-4 py-2 border">Foco</th>
+                        <th class="px-4 py-2 border">Guias</th>
                         <th class="px-4 py-2 border text-center">Ações</th>
                     </tr>
                 </thead>
@@ -101,6 +109,38 @@
                                     <i class="material-icons" style="font-size: 16px;">content_copy</i>
                                 </button></td>
 
+                                <td class="px-4 py-2 border text-center">
+                                    {% if associado.tem_servico %}
+                                        <span class="inline-block w-3 h-3 bg-green-500 rounded-full" title="Serviço ativo"></span>
+                                    {% endif %}
+                                    {% if associado.tem_tarefa %}
+                                        <span class="inline-block w-3 h-3 bg-purple-500 rounded-full ml-1" title="Tarefa ativa"></span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-4 py-2 border text-center">
+                                    <!-- Bolinhas por mês -->
+                                    <div class="flex justify-center flex-wrap gap-1 mt-1">
+                                        {% with guias=guias_por_associado|get_item:associado.id %}
+                                        {% if guias %}
+                                          {% for mes in meses_validos %}
+                                            {% with status=guias|get_item:mes %}
+                                              {% if status == "enviado" %}
+                                                <span class="inline-block w-3 h-3 rounded-full bg-blue-500" title="Guia enviada - Mês {{ mes }}"></span>
+                                              {% else %}
+                                                <span class="inline-block w-3 h-3 rounded-full bg-red-500" title="Guia não enviada - Mês {{ mes }}"></span>
+                                              {% endif %}
+                                            {% endwith %}
+                                          {% endfor %}
+                                        {% endif %}
+                                      {% endwith %}
+                                    </div>
+                                </td>
+                                
+                                
+                                
+                                  
+                                                        
+                            
                             <td class="px-4 py-2 border text-center flex justify-center space-x-2">
                                 <a href="{% url 'app_associados:single_associado' associado.pk %}" 
                                 class="text-blue-500 hover:text-blue-700" 
@@ -108,23 +148,31 @@
                                     <i class="material-icons">visibility</i>
                                 </a>
                                 <a href="{% url 'app_associados:edit_associado' associado.pk %}" 
-                                class="text-yellow-500 hover:text-yellow-700" 
-                                title="Editar">
+                                    class="text-yellow-500 hover:text-yellow-700" 
+                                    title="Editar">
                                     <i class="material-icons">edit</i>
-                                </a>
-
-                                <a href="https://wa.me/{{ associado.celular_clean }}" 
-                                    target="_blank" 
-                                    class="text-green-600 hover:text-green-800" 
-                                    title="WhatsApp">
-                                    <i class="material-icons">phone</i>
+                                </a>                                
+                                <a href="{% url 'app_servicos:create_servico_associado' associado.id %}"
+                                    class="text-green-600 hover:text-green-800" title="Criar Serviço">
+                                    <i class="material-icons text-base">handyman</i>
+                                </a>   
+                                <a href="{% url 'app_tarefas:create_tarefa_associado' associado.id %}"
+                                    class="text-purple-600 hover:text-indigo-800 ml-2"
+                                    title="Nova Tarefa para este Associado">
+                                    <i class="material-icons text-base">add_task</i>
                                 </a>
 
                                 <a href="mailto:{{ associado.email }}" 
-                                class="text-purple-500 hover:text-purple-700" 
+                                class="text-gray-300 hover:text-purple-700" 
                                 title="Enviar Email">
                                     <i class="material-icons">email</i>
                                 </a>
+                                <a href="https://wa.me/{{ associado.celular_clean }}" 
+                                    target="_blank" 
+                                    class="text-gray-300 hover:text-green-800" 
+                                    title="WhatsApp">
+                                    <i class="material-icons">phone</i>
+                                </a>        
                             </td>
                         </tr>
                     {% endfor %}

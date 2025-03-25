@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+
+{% block edit_ServicoExtraAssociado %}
+
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %}
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %}
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %}
+    {% endif %}
+
+    <main class="flex-grow">
+        <div class="container mx-auto max-8xl bg-white p-6 rounded-lg shadow-lg">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Editar Serviço Extra-Associado</h1>
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md text-white 
+                        {% if message.tags == 'success' %}
+                            bg-green-500
+                        {% elif message.tags == 'error' %}
+                            bg-red-500
+                        {% elif message.tags == 'info' %}
+                            bg-blue-500
+                        {% else %}
+                            bg-gray-500
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="max-w-3xl mx-auto bg-white p-6 rounded shadow-md mt-6 border border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-800 mb-4">
+                    Editar Serviço - {{ servico.extra_associado.nome_completo }}
+                </h2>
+
+                {% if servico.entrada_relacionada %}
+                <div class="max-w-3xl mx-auto mt-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        
+                        <!-- Valor Total -->
+                        <div class="bg-green-100 border border-green-300 rounded-lg p-4 shadow-sm">
+                            <p class="text-sm text-green-800 font-medium">Valor Total</p>
+                            <p class="text-xl font-bold text-green-900 mt-1">R$ {{ servico.entrada_relacionada.valor_total }}</p>
+                        </div>
+            
+                        <!-- Forma de Pagamento -->
+                        <div class="bg-blue-100 border border-blue-300 rounded-lg p-4 shadow-sm">
+                            <p class="text-sm text-blue-800 font-medium">Forma de Pagamento</p>
+                            <p class="text-base font-semibold text-blue-900 mt-1">
+                                {{ servico.entrada_relacionada.get_forma_pagamento_display }}
+                            </p>
+                        </div>
+            
+                        <!-- Status do Pagamento -->
+                        <div class="bg-yellow-100 border border-yellow-300 rounded-lg p-4 shadow-sm">
+                            <p class="text-sm text-yellow-800 font-medium">Status do Pagamento</p>
+                            <p class="text-base font-semibold text-yellow-900 mt-1">
+                                {{ servico.entrada_relacionada.get_status_pagamento_display }}
+                            </p>
+                        </div>
+            
+                    </div>
+                </div>
+                {% endif %}
+            
+
+            
+                <form method="POST">
+                    {% csrf_token %}
+            
+                    {% if form.non_field_errors %}
+                        <div class="bg-red-100 text-red-700 p-3 rounded mb-4">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+            
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Associado (Somente leitura) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Extra-Associado/Proprietário</label>
+                        
+                            <input type="text"
+                                value="{{ extra_associado.nome_completo }}"
+                                readonly
+                                class="bg-gray-100 border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 cursor-not-allowed shadow-sm" />
+
+                            <input type="hidden" name="extra_associado_id" value="{{ extra_associado.id }}">
+                            {% for error in servico_form.reparticao.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>                        
+                        <!-- Associação -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.associacao.label }}
+                            </label>
+                        
+                            <input type="text" readonly
+                                   value="{{ form.instance.associacao.nome_fantasia }}"
+                                   class="bg-gray-200 border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 cursor-not-allowed" />
+                        
+                            <!-- Garante que o valor continue sendo enviado no form -->
+                            <input type="hidden" name="associacao" value="{{ form.instance.associacao.id }}">
+                        
+                            {% for error in form.associacao.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Repartição (somente leitura) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.reparticao.label }}
+                            </label>
+                            <input type="text"
+                                value="{{ form.instance.reparticao.nome_reparticao }}"
+                                readonly
+                                class="appearance-none w-full border border-gray-300 bg-gray-200 rounded-md py-2 px-3 text-gray-700 shadow-sm focus:outline-none" />
+                            
+                            <!-- Hidden que envia o ID da repartição -->
+                            <input type="hidden" name="reparticao" value="{{ form.instance.reparticao.id }}">
+                            
+                            {% for error in form.associacao.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+
+                        <!--Natureza do serviço-->
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.natureza_servico.label }}
+                            </label>
+                            <input type="text"
+                                   readonly
+                                   value="{{ form.instance.get_natureza_servico_display }}"
+                                   class="appearance-none w-full border border-gray-300 bg-gray-200 rounded-md py-2 px-3 text-gray-700 shadow-sm focus:outline-none" />
+                            
+                            <!-- 🔒 Campo hidden para manter o valor no POST -->
+                            <input type="hidden" name="natureza_servico" value="{{ form.instance.natureza_servico }}">
+                            
+                            {% for error in form.natureza_servico.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                         <!--Natureza do serviço-->
+                        <div>
+                            <label for="{{ form.natureza_servico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.natureza_servico.label }}
+                            </label>
+                            
+                            {{ form.natureza_servico }}
+
+                            {% for error in form.natureza_servico.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>    
+                        <!-- Tipo de Serviço (somente leitura) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.tipo_servico.label }}
+                            </label>
+                            <input type="text"
+                                value="{{ form.instance.tipo_servico.nome }}"
+                                readonly
+                                class="appearance-none w-full border border-gray-300 bg-blue-200 rounded-md py-2 px-3 text-gray-700 shadow-sm focus:outline-none" />
+                            <input type="hidden" name="tipo_servico" value="{{ form.instance.tipo_servico.id }}">
+                        </div>
+                        
+                        <!-- Status Etapa -->
+                        <div class="md:col-span-2 bg-orange-200 py-4 px-4">
+                            <label for="{{ form.status_etapa.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.status_etapa.label }}
+                            </label>
+                            {{ form.status_etapa }}
+                            {% for error in form.status_etapa.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <br>
+                        
+                    </div>
+                        <!-- Descrição/content -->
+                        <h2 class="text-xl font-semibold text-gray-700 mb-4">Anotações/Exigências</h2>
+                        <div class="mt-1 w-full" style="max-width: 100%; padding: 0; margin: 0;">
+                            {% include 'components/my_editor.html' %}
+                        </div>
+                    </div>
+            
+                    <!-- Submit -->
+                    <div class="mt-6 text-right">
+                        <button type="submit" class="bg-green-600 text-white font-semibold px-6 py-2 rounded hover:bg-green-700">
+                            Atualizar Serviço
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>                
+                  
+
+
+
+    {% include 'components/footer_associacao.html' %}
+{% endblock edit_ServicoExtraAssociado %}

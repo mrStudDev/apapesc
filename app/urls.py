@@ -49,6 +49,7 @@ urlpatterns = [
     path('tarefas/', include('app_tarefas.urls', namespace='app_tarefas')),
     path('artigos/', include('app_articles.urls', namespace='app_articles')),
     path('financas/', include('app_finances.urls', namespace='app_finances')),
+    path('servicos/', include('app_servicos.urls', namespace='app_servicos')),
     
 
     # Rotas de SEO

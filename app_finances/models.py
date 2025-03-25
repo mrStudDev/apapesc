@@ -281,8 +281,6 @@ class TipoServicoModel(models.Model):
     def __str__(self):
         return self.nome
 
-
-
 # Entradas Financeiras de uma Associação
 class EntradaFinanceira(models.Model):
     FORMA_PAGAMENTO_CHOICES = [
@@ -340,6 +338,15 @@ class EntradaFinanceira(models.Model):
         blank=True,
         null=True,
         verbose_name="Valor Pago"
+    )
+    # Em app_finances.models.py
+    servico_extra = models.OneToOneField(
+        'app_servicos.ServicoExtraAssociadoModel',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='entrada_servico_extra',  # 💡 ALTERADO AQUI!
+        verbose_name="Serviço Extra Vinculado"
     )
     
 
@@ -420,6 +427,7 @@ class PagamentoEntrada(models.Model):
 
     def __str__(self):
         return f"Pagamento de R$ {self.valor_pago} em {self.data_pagamento.strftime('%d/%m/%Y')} - Entrada {self.entrada.id}"
+
 
 # Alterações de Entradas
 class EntradaAlteracaoModel(models.Model):

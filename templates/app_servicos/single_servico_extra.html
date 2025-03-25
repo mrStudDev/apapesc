@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+
+{% block single_ServicoExtra %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+
+    <main class="flex-grow">
+        <div class="container mx-auto max-8xl bg-white p-6 rounded-lg shadow-lg">
+
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md text-white 
+                        {% if message.tags == 'success' %}
+                            bg-green-500
+                        {% elif message.tags == 'error' %}
+                            bg-red-500
+                        {% elif message.tags == 'info' %}
+                            bg-blue-500
+                        {% else %}
+                            bg-gray-500
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- Container -->
+            <div class="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md space-y-8">
+
+                <!-- 🔹 Cabeçalho do Serviço -->
+                <div class="border-b border-gray-200 pb-5 mb-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between space-y-4 md:space-y-0">
+                    
+                    <!-- 🧾 Título + Sub -->
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
+                        <i class="material-icons text-blue-500 mr-2">assignment</i>
+                        Detalhes do Serviço Extra Associado
+                        </h2>
+                        <p class="text-sm text-gray-500 mt-1">Informações detalhadas sobre o serviço e sua vinculação financeira.</p>
+                    </div>
+                
+                    <!-- 🔧 Ações -->
+                    <div class="flex items-center space-x-4">
+                        <!-- Editar -->
+                        <a href="{% url 'app_servicos:edit_servico_extra' servico.id %}" 
+                        class="flex items-center text-yellow-500 hover:text-yellow-600 text-sm font-medium"
+                        title="Editar serviço">
+                        <i class="material-icons text-base mr-1">edit</i> Editar Serviço
+                        </a>
+                
+                        <!-- Voltar -->
+                        <a href="{% url 'app_servicos:list_servicos' %}" 
+                        class="flex items-center text-blue-600 hover:text-blue-700 text-sm font-medium">
+                        <i class="material-icons text-sm mr-1">arrow_back</i> Lista de serviços
+                        </a>
+                    </div>
+                    </div>
+                </div>
+  
+            
+                <!-- Dados principais -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700 text-sm">
+                <p><strong class="text-gray-500">Extra Associado:</strong> {{ servico.extra_associado.nome_completo }}</p>
+                <p><strong class="text-gray-500">Associação:</strong> {{ servico.associacao.nome_fantasia }}</p>
+            
+                {% if servico.reparticao %}
+                    <p><strong class="text-gray-500">Repartição:</strong> {{ servico.reparticao.nome_reparticao }}</p>
+                {% endif %}
+            
+                <p><strong class="text-gray-500">Tipo de Serviço:</strong> {{ servico.tipo_servico }}</p>
+                <p><strong class="text-gray-500">Etapa:</strong> {{ servico.get_status_etapa_display }}</p>
+                <p><strong class="text-gray-500">Data de Criação:</strong> {{ servico.data_inicio|date:"d/m/Y H:i" }}</p>
+                <p><strong class="text-gray-500">Última Alteração:</strong> {{ servico.ultima_alteracao|date:"d/m/Y H:i" }}</p>
+                </div>            
+                
+                {% if servico.content %}
+                    <p class="md:col-span-2">
+                    <hr> <p><strong class="text-gray-500">Anotações do Serviço:</strong></p>
+                    {{ servico.content | safe}}
+                    </p>
+                {% endif %}
+            </div>
+            <div class="max-w-5xl mx-auto bg-gray-100 p-8 rounded-lg shadow-md space-y-8">
+                <!-- Entrada Vinculada -->
+                {% if servico.entrada_relacionada %}
+                <div class="bg-green-50 border border-blue-300 p-6 rounded-lg shadow-sm">
+                <h3 class="text-xl font-semibold text-green-700 mb-4 flex items-center">
+                    <i class="material-icons text-blue-500 mr-2">attach_money</i>
+                    Entrada Financeira Vinculada
+                </h3>
+            
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-800 text-sm">
+                    <p><strong class="text-gray-500">Valor Total:</strong> R$ {{ servico.entrada_relacionada.valor_total }}</p>
+                    <p><strong class="text-gray-500">Forma de Pagamento:</strong> {{ servico.entrada_relacionada.get_forma_pagamento_display }}</p>
+                    <p><strong class="text-gray-500">Parcelamento:</strong> {{ servico.entrada_relacionada.get_parcelamento_display }}</p>
+                    <p><strong class="text-gray-500">Status do Pagamento:</strong> {{ servico.entrada_relacionada.get_status_pagamento_display }}</p>
+                    <p><strong class="text-gray-500">Data de Criação:</strong> {{ servico.entrada_relacionada.data_criacao|date:"d/m/Y H:i" }}</p>
+                    <p><strong class="text-gray-500">Lançado por:</strong> {{ servico.entrada_relacionada.criado_por.get_full_name }}</p>
+                </div>
+
+                <!--Descrição entrada OBS Não é content-->
+                {% if servico.entrada_relacionada.descricao %}
+                    <div class="mt-4">
+                    <strong class="text-gray-500">Descrição Entrada:</strong>
+                    <p class="text-gray-700 mt-1">{{ servico.entrada_relacionada.descricao | safe }}</p>
+                    </div>
+                {% endif %}
+            
+                <div class="mt-6 text-right">
+                    <a href="{% url 'app_finances:edit_entrada' servico.entrada_relacionada.id %}" 
+                    class="bg-green-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 text-sm">
+                    Ver/Editar Entrada
+                    </a>
+                </div>
+                </div>
+                {% else %}
+                <p class="italic text-gray-400 text-sm">Nenhuma entrada financeira vinculada a este serviço.</p>
+                {% endif %}
+            
+            </div>
+
+            <hr class="my-8">
+
+            <!-- Histórico do Serviço -->
+            <div class="bg-white p-6 rounded shadow border border-blue-100 mb-6">
+                <h3 class="text-lg font-semibold text-blue-700 mb-4">
+                    Histórico de Alterações do Serviço
+                </h3>
+            
+                {% if historico_servico %}
+                <div class="bg-white border border-blue-100 rounded-md p-4 mt-8 shadow-sm">
+                    <h3 class="text-blue-700 font-semibold mb-4 text-lg flex items-center">
+                        <i class="material-icons mr-2">history</i> Histórico do Serviço
+                    </h3>
+                
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-xs text-gray-700 table-auto">
+                            <thead class="bg-blue-50 text-gray-600">
+                                <tr>
+                                    <th class="text-left px-3 py-2">Campo</th>
+                                    <th class="text-left px-3 py-2">De</th>
+                                    <th class="text-left px-3 py-2">Para</th>
+                                    <th class="text-left px-3 py-2">Alterado por</th>
+                                    <th class="text-left px-3 py-2">Data</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                {% for h in historico_servico %}
+                                <tr>
+                                    <td class="px-3 py-2 font-medium">{{ h.campo }}</td>
+                                    <td class="px-3 py-2 text-gray-500">{{ h.valor_antigo |safe }}</td>
+                                    <td class="px-3 py-2 text-blue-700">{{ h.valor_novo | safe }}</td>
+                                    <td class="px-3 py-2">{{ h.alterado_por.get_full_name }}</td>
+                                    <td class="px-3 py-2">{{ h.data_alteracao|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                
+            
+                {% if historico_entrada %}
+                <div class="bg-white border border-green-100 rounded-md p-4 mt-8 shadow-sm">
+                    <h3 class="text-green-700 font-semibold mb-4 text-lg flex items-center">
+                        <i class="material-icons mr-2">payments</i> Histórico da Entrada
+                    </h3>
+                
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-xs text-gray-700 table-auto">
+                            <thead class="bg-green-50 text-gray-600">
+                                <tr>
+                                    <th class="text-left px-3 py-2">Campo</th>
+                                    <th class="text-left px-3 py-2">De</th>
+                                    <th class="text-left px-3 py-2">Para</th>
+                                    <th class="text-left px-3 py-2">Alterado por</th>
+                                    <th class="text-left px-3 py-2">Data</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                {% for h in historico_entrada %}
+                                <tr>
+                                    <td class="px-3 py-2 font-medium">{{ h.campo_alterado }}</td>
+                                    <td class="px-3 py-2 text-gray-500">{{ h.valor_anterior }}</td>
+                                    <td class="px-3 py-2 text-green-700">{{ h.valor_novo }}</td>
+                                    <td class="px-3 py-2">{{ h.alterado_por.get_full_name }}</td>
+                                    <td class="px-3 py-2">{{ h.data_alteracao|date:"d/m/Y H:i" }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% endif %}
+                {% if pagamentos_entrada %}
+                <div class="bg-white border border-purple-100 rounded-md p-4 mt-8 shadow-sm">
+                    <h3 class="text-purple-700 font-semibold mb-3 text-lg flex items-center">
+                        <i class="material-icons mr-2">credit_score</i> Pagamentos Efetuados
+                    </h3>
+                
+                    <table class="table-auto w-full text-sm">
+                        <thead>
+                            <tr class="bg-purple-50 text-left text-xs text-gray-600">
+                                <th class="px-3 py-2">Data</th>
+                                <th class="px-3 py-2">Valor Pago</th>
+                                <th class="px-3 py-2">Registrado por</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            {% for p in pagamentos_entrada %}
+                            <tr>
+                                <td class="px-3 py-2">{{ p.data_pagamento|date:"d/m/Y H:i" }}</td>
+                                <td class="px-3 py-2 text-green-700 font-semibold">R$ {{ p.valor_pago }}</td>
+                                <td class="px-3 py-2">{{ p.registrado_por.get_full_name }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                <div class="mt-4 text-right">
+                    <p class="text-sm text-gray-600">
+                        Valor Total: <strong class="text-gray-800">R$ {{ entrada.valor_total }}</strong><br>
+                        Total Pago: <strong class="text-green-700">R$ {{ entrada.valor_pagamento }}</strong><br>
+                        Valor Restante: 
+                        {% if valor_restante > 0 %}
+                            <strong class="text-red-600">R$ {{ valor_restante }}</strong>
+                        {% else %}
+                            <strong class="text-green-600">R$ 0,00 (Quitado)</strong>
+                        {% endif %}
+                    </p>
+                </div>                    
+                </div>
+                {% endif %}
+
+                                
+
+        </div>
+    </main>
+
+    <!-- Footer -->
+    {% include "components/footer_associacao.html" %}
+{% endblock single_ServicoExtra %}

@@ -64,315 +64,358 @@
                 <i class="material-icons text-gray-500 mr-2">schedule</i>
                 <strong>Data de Lançamento:</strong> {{ entrada.data_criacao|date:"d/m/Y H:i" }}
             </p>
-            {% if entrada.descricao %}
-                <p class="col-span-2 text-gray-700 border-t pt-3">
-                    <i class="material-icons text-gray-400 mr-2">info</i>
-                    <strong>Descrição:</strong> {{ entrada.descricao }}
-                </p>
-            {% endif %}
-        </div>
 
-        <!-- 🔹 Botões de Ação -->
-        <div class="flex justify-end space-x-4 mt-6">
-            <a href="#" class="text-red-500 hover:text-red-700 flex items-center">
-                <i class="material-icons mr-1">delete</i> Excluir
-            </a>
-        </div>
-    </div>
-
-    <!-- ✅ Botão "Nova Entrada" Centralizado -->
-    <div class="flex justify-center my-4">
-        <a href="{% url 'app_finances:create_entrada' %}" 
-        class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 flex items-center">
-            <i class="material-icons mr-2">add</i> Nova Entrada
-        </a>
-    </div>
-
-    <!-- 🔥 Formulário de Edição -->
-    <div class="container mx-auto max-w-6xl bg-white shadow-lg rounded-lg p-8 mb-8">
-        <h1 class="text-2xl font-bold text-gray-800 mb-6">Editar Entrada</h1>
-        <div class="bg-gray-200 py-4 px-4">
-            <form method="post" action="{% url 'app_finances:edit_entrada' entrada.id %}">
-                {% csrf_token %}
-                {% if form.errors %}
-                <div class="bg-red-100 text-red-700 p-3 rounded-lg mt-4">
-                    <strong>Erro ao salvar!</strong>
-                    <ul>
-                        {% for field, errors in form.errors.items %}
-                            <li>{{ field }}: {{ errors.0 }}</li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endif %}
-                {% if messages %}
-                    <div class="mt-4">
-                        {% for message in messages %}
-                            <div class="p-3 rounded-lg {% if message.tags == 'error' %}bg-red-500 text-white{% elif message.tags == 'success' %}bg-green-500 text-white{% endif %}">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    </div>
+            </div>
+           <!-- 🔹 Detalhes da Entrada -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% if entrada.descricao %}
+                    <p class="col-span-2 text-gray-700 border-t pt-3">
+                        <i class="material-icons text-gray-400 mr-2">info</i>
+                        <strong>Desc. Entrada Financeira:</strong> {{ entrada.descricao }}
+                    </p>
                 {% endif %}
-            
-                <!-- 🔹 Registrado por -->
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-600 mb-2">Registrado por</label>
-                    <div class="mt-1 bg-gray-100 text-green-700 py-2 px-4 rounded-md shadow-sm border border-gray-300">
-                        {{ request.user.get_full_name }}
-                    </div>
-                </div>
-            
-                <!-- 🔹 Dados Principais -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <!-- Associação -->
-                    <div class="mb-4">
-                        <label for="id_associacao" class="block text-sm font-medium text-gray-700 mb-1">Associação</label>
-                        <select name="associacao" id="id_associacao" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
-                            <option value="">--- Selecione ---</option>
-                            {% for associacao in associacoes %}
-                                <option value="{{ associacao.id }}" {% if form.instance.associacao.id == associacao.id %}selected{% endif %}>
-                                    {{ associacao.nome_fantasia }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-            
-                    <!-- Repartição -->
-                    <div class="mb-4">
-                        <label for="id_reparticao" class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
-                        <select name="reparticao" id="id_reparticao" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
-                            <option value="">--- Selecione ---</option>
-                            {% for reparticao in reparticoes %}
-                                <option value="{{ reparticao.id }}" {% if form.instance.reparticao.id == reparticao.id %}selected{% endif %}>
-                                    {{ reparticao.nome_reparticao }}
-                                </option>
-                            {% endfor %}
-                        </select>
-                    </div>
-            
-                    <!-- Tipo de Serviço -->
-                    <div class="mb-4">
-                        <label for="{{ form.tipo_servico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                            {{ form.tipo_servico.label }}
-                        </label>
-                        <div class="mt-1">
-                            {{ form.tipo_servico }}
-                        </div>
-                    </div>
-            
-                    <!-- Valor Total -->
-                    <div class="mb-4 bg-blue-100">
-                        <div class="p-2 px-2">
-                            <label for="{{ form.valor_total.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                                {{ form.valor_total.label }} <small>(R$)</small>
-                            </label>
-                            <div class="mt-1">
-                                {{ form.valor_total }}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-4 bg-red-100">
-                        <div class="p-2 px-2">
-                            <small class="text-red-800">Inalterável</small>
-                            <label for="id_data_criacao" class="block text-sm font-medium text-gray-700 mb-1">
-                                Data de Criação
-                            </label>
-                            <input type="text" id="id_data_criacao" name="data_criacao" 
-                                value="{{ form.instance.data_criacao|date:'Y-m-d H:i' }}"
-                                class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 text-gray-600"
-                                readonly>
-                            {% for error in form.data_criacao.errors %}
-                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <!-- Descrição -->
-                    <div class="mb-4">
-                        <label for="{{ form.descricao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                            {{ form.descricao.label }}
-                        </label>
-                        <div class="mt-1">
-                            {{ form.descricao }}
-                        </div>
-                    </div>
-                </div>
-            
-                <!-- 🔹 Forma de Pagamento -->
-                <div class="bg-gray-50 p-4 rounded-lg">
-                    <h2 class="text-2xl font-bold mb-4">Forma de Pagamento</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <!-- Forma de Pagamento -->
-                        <div class="mb-4">
-                            <label for="id_forma_pagamento" class="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</label>
-                            <select name="forma_pagamento" id="id_forma_pagamento" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
-                                {% for key, value in form.fields.forma_pagamento.choices %}
-                                    <option value="{{ key }}" {% if form.instance.forma_pagamento == key %}selected{% endif %}>{{ value }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-            
-                        <!-- Parcelamento -->
-                        <div class="mb-4">
-                            <label for="id_parcelamento" class="block text-sm font-medium text-gray-700 mb-1">Parcelamento</label>
-                            <select name="parcelamento" id="id_parcelamento" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
-                                {% for key, value in form.fields.parcelamento.choices %}
-                                    <option value="{{ key }}" {% if form.instance.parcelamento == key %}selected{% endif %}>{{ value }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
 
-                        <!-- 🔹 Status do Pagamento (Somente leitura) -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Status do Pagamento</label>
-                            <div class="mt-1 bg-gray-100 text-gray-800 py-2 px-4 rounded-md shadow-sm border border-gray-300">
-                                {{ entrada.get_status_pagamento_display }}  <!-- 🔥 Exibe o status atualizado -->
-                            </div>
-                        </div>
-
-                        <!-- 🔹 Valor Pago -->
-                        <div class="mb-4">
-                            <label for="id_valor_pagamento" class="block text-sm font-medium text-gray-700 mb-1">
-                                Valor Pago
-                            </label>
-                            <div class="mt-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md border border-gray-300">
-                                R$ {{ entrada.valor_pagamento|floatformat:2 }}
-                                <p class="mt-4"><strong>Status do Pagamento:</strong> {{ entrada.get_status_pagamento_display }}</p>
-                            </div>
-                        </div>
+                <!-- 🔗 Vínculo com serviço extra -->
+                {% if entrada.entrada_servico_extra %}
+                    <div class="col-span-2 border-t pt-3">
+                        <p class="text-blue-700 flex items-center font-semibold">
+                            <i class="material-icons text-blue-500 mr-2">link</i>
+                            Entrada Vinculada a um Serviço Extra-Associado:
+                        </p>
+                        <ul class="mt-2 ml-8 list-disc text-sm text-gray-800">
+                            <li>
+                                <strong>Extra Associado:</strong>
+                                {{ entrada.entrada_servico_extra.extra_associado.nome_completo }}
+                            </li>
+                            <li>
+                                <strong>Tipo de Serviço:</strong>
+                                {{ entrada.entrada_servico_extra.tipo_servico }}
+                            </li>
+                            <li>
+                                <strong>Desc. Serviço:</strong>
+                                {{ entrada.entrada_servico_extra.descricao|default:"(sem descrição)" }}
+                            </li>
+                            <br>
+                            <li>
+                                <strong>Visualizar Serviço:</strong>
+                                <a href="{% url 'app_servicos:single_servico_extra' entrada.entrada_servico_extra.id %}"
+                                class="text-blue-600 hover:underline font-medium">
+                                    Ver detalhes do serviço
+                                </a>
+                            </li>
+                        </ul>
                     </div>
-                </div>
-                <!-- 🔹 Botões -->
-                <div class="flex space-x-4 mt-6">
-                    <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
-                        Salvar/lista
-                    </button>
-                    <a href="{% url 'app_finances:list_entradas' %}" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
-                        Cancelar
-                    </a>
-                </div>
-            </form>
-        </div>
-        <br><br>
-        
-        <!-- 🔹 Seção de Pagamento -->
-       <!-- 🔹 Exibir Valor Devido e Pago -->
-        <div class="bg-gray-200 p-4 rounded-lg mt-6">
-            <h3 class="text-xl font-bold mb-4">Pagamento</h3>
-            <p class="text-gray-700">Confira o valor total devido e o valor já pago para esta entrada.</p>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Valor do Produto/Serviço</label>
-                    <div class="mt-1 bg-yellow-200 text-gray-800 py-2 px-4 rounded-md border border-gray-300">
-                        R$ {{ entrada.valor_total|floatformat:2 }}
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Valor Já Pago</label>
-                    <div class="mt-1 bg-green-100 text-green-800 py-2 px-4 rounded-md border border-gray-300">
-                        R$ {{ entrada.valor_pagamento|floatformat:2 }}
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Valor Ainda Devido</label>
-                    <div class="mt-1 bg-red-100 text-red-800 py-2 px-4 rounded-md border border-gray-300">
-                        R$ {{ valor_ainda_devido|floatformat:2 }}
-                    </div>
-                </div>
+                {% else %}
+                    <p class="col-span-2 text-gray-500 flex items-center border-t pt-3 italic">
+                        <i class="material-icons text-gray-400 mr-2">link_off</i>
+                        <span>Sem vínculo com serviço extra.</span>
+                    </p>
+                {% endif %}
             </div>
 
-            <!-- 🔹 Formulário para Registrar Pagamento -->
-            <form method="post" action="{% url 'app_finances:registrar_pagamento' entrada.id %}">
-                {% csrf_token %}
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700">Valor do Pagamento</label>
-                    <input type="number" name="valor_pago" step="0.01" min="0.01" max="{{ entrada.valor_total|floatformat:2 }}"
-                        class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
-                        placeholder="Digite o valor a pagar" required>
-                </div>
 
-                <button type="submit" class="bg-green-400 text-white px-4 py-2 rounded-md hover:bg-green-600">
-                    ✅ Registrar Pagamento
-                </button>
-            </form>
+            <!-- 🔹 Botões de Ação -->
+            <div class="flex justify-end space-x-4 mt-6">
+                <a href="#" class="text-red-500 hover:text-red-700 flex items-center">
+                    <i class="material-icons mr-1">delete</i> Excluir
+                </a>
+            </div>
+        </div>
 
-            <!-- 🔹 Histórico de Pagamentos (Formato de Tabela) -->
-            {% if pagamentos %}
-                <div class="bg-gray-100 p-4 rounded-lg mt-6">
-                    <h3 class="text-xl font-bold mb-4">Pagamentos Registrados</h3>
-                    <table class="w-full border-collapse border border-gray-300">
-                        <thead>
-                            <tr class="bg-gray-200">
-                                <th class="border border-gray-300 p-2">Data do Pagamento</th>
-                                <th class="border border-gray-300 p-2">Valor Pago</th>
-                                <th class="border border-gray-300 p-2">Registrado por</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for pagamento in pagamentos %}
-                                <tr class="bg-white">
-                                    <td class="border border-gray-300 p-2 text-center">
-                                        {{ pagamento.data_pagamento|date:"d/m/Y" }}
-                                    </td>
-                                    <td class="border border-gray-300 p-2 text-center">
-                                        💰 <strong>R$ {{ pagamento.valor_pago|floatformat:2 }}</strong>
-                                    </td>
-                                    <td class="border border-gray-300 p-2 text-center">
-                                        {{ pagamento.registrado_por.get_full_name }}
-                                    </td>
-                                </tr>
+
+        <!-- 🔥 Formulário de Edição -->
+        <div class="container mx-auto max-w-6xl bg-white shadow-lg rounded-lg p-8 mb-8">
+            <h1 class="text-2xl font-bold text-gray-800 mb-6">Editar Entrada</h1>
+            <div class="bg-gray-200 py-4 px-4">
+                <form method="post" action="{% url 'app_finances:edit_entrada' entrada.id %}">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                    <div class="bg-red-100 text-red-700 p-3 rounded-lg mt-4">
+                        <strong>Erro ao salvar!</strong>
+                        <ul>
+                            {% for field, errors in form.errors.items %}
+                                <li>{{ field }}: {{ errors.0 }}</li>
                             {% endfor %}
-                        </tbody>
-                    </table>
+                        </ul>
+                    </div>
+                {% endif %}
+                    {% if messages %}
+                        <div class="mt-4">
+                            {% for message in messages %}
+                                <div class="p-3 rounded-lg {% if message.tags == 'error' %}bg-red-500 text-white{% elif message.tags == 'success' %}bg-green-500 text-white{% endif %}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                
+                    <!-- 🔹 Registrado por -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-600 mb-2">Registrado por</label>
+                        <div class="mt-1 bg-gray-100 text-green-700 py-2 px-4 rounded-md shadow-sm border border-gray-300">
+                            {{ request.user.get_full_name }}
+                        </div>
+                    </div>
+                
+                    <!-- 🔹 Dados Principais -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Associação -->
+                        <div class="mb-4">
+                            <label for="id_associacao" class="block text-sm font-medium text-gray-700 mb-1">Associação</label>
+                            <select name="associacao" id="id_associacao" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+                                <option value="">--- Selecione ---</option>
+                                {% for associacao in associacoes %}
+                                    <option value="{{ associacao.id }}" {% if form.instance.associacao.id == associacao.id %}selected{% endif %}>
+                                        {{ associacao.nome_fantasia }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                
+                        <!-- Repartição -->
+                        <div class="mb-4">
+                            <label for="id_reparticao" class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
+                            <select name="reparticao" id="id_reparticao" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+                                <option value="">--- Selecione ---</option>
+                                {% for reparticao in reparticoes %}
+                                    <option value="{{ reparticao.id }}" {% if form.instance.reparticao.id == reparticao.id %}selected{% endif %}>
+                                        {{ reparticao.nome_reparticao }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                
+                        <!-- Tipo de Serviço -->
+                        <div class="mb-4">
+                            <label for="{{ form.tipo_servico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.tipo_servico.label }}
+                            </label>
+                            <div class="mt-1">
+                                {{ form.tipo_servico }}
+                            </div>
+                        </div>
+                
+                        <!-- Valor Total -->
+                        <div class="mb-4 bg-blue-100">
+                            <div class="p-2 px-2">
+                                <label for="{{ form.valor_total.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                    {{ form.valor_total.label }} <small>(R$)</small>
+                                </label>
+                                <div class="mt-1">
+                                    {{ form.valor_total }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-4 bg-red-100">
+                            <div class="p-2 px-2">
+                                <small class="text-red-800">Inalterável</small>
+                                <label for="id_data_criacao" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Data de Criação
+                                </label>
+                                <input type="text" id="id_data_criacao" name="data_criacao" 
+                                    value="{{ form.instance.data_criacao|date:'Y-m-d H:i' }}"
+                                    class="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 text-gray-600"
+                                    readonly>
+                                {% for error in form.data_criacao.errors %}
+                                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <!-- Descrição -->
+                        <div class="mb-4">
+                            <label for="{{ form.descricao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.descricao.label }}<span class="text-gray-500"> (Entrada Financeira)</span>
+                            </label>
+                            <div class="mt-1">
+                                {{ form.descricao }}
+                            </div>
+                        </div>
+                    </div>
+                
+                    <!-- 🔹 Forma de Pagamento -->
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h2 class="text-2xl font-bold mb-4">Forma de Pagamento</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <!-- Forma de Pagamento -->
+                            <div class="mb-4">
+                                <label for="id_forma_pagamento" class="block text-sm font-medium text-gray-700 mb-1">Forma de Pagamento</label>
+                                <select name="forma_pagamento" id="id_forma_pagamento" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+                                    {% for key, value in form.fields.forma_pagamento.choices %}
+                                        <option value="{{ key }}" {% if form.instance.forma_pagamento == key %}selected{% endif %}>{{ value }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                
+                            <!-- Parcelamento -->
+                            <div class="mb-4">
+                                <label for="id_parcelamento" class="block text-sm font-medium text-gray-700 mb-1">Parcelamento</label>
+                                <select name="parcelamento" id="id_parcelamento" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
+                                    {% for key, value in form.fields.parcelamento.choices %}
+                                        <option value="{{ key }}" {% if form.instance.parcelamento == key %}selected{% endif %}>{{ value }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
 
-                    <p class="mt-4"><strong>Status do Pagamento:</strong> {{ entrada.get_status_pagamento_display }}</p>
+                            <!-- 🔹 Status do Pagamento (Somente leitura) -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Status do Pagamento</label>
+                                <div class="mt-1 bg-gray-100 text-gray-800 py-2 px-4 rounded-md shadow-sm border border-gray-300">
+                                    {{ entrada.get_status_pagamento_display }}  <!-- 🔥 Exibe o status atualizado -->
+                                </div>
+                            </div>
+
+                            <!-- 🔹 Valor Pago -->
+                            <div class="mb-4">
+                                <label for="id_valor_pagamento" class="block text-sm font-medium text-gray-700 mb-1">
+                                    Valor Pago
+                                </label>
+                                <div class="mt-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md border border-gray-300">
+                                    R$ {{ entrada.valor_pagamento|floatformat:2 }}
+                                    <p class="mt-4"><strong>Status do Pagamento:</strong> {{ entrada.get_status_pagamento_display }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 🔹 Botões -->
+                    <div class="flex space-x-4 mt-6">
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">
+                            Salvar/lista
+                        </button>
+                        <a href="{% url 'app_finances:list_entradas' %}" class="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+                        <!-- ✅ Botão "Nova Entrada" Centralizado -->
+                <div class="flex justify-center my-4">
+                    <a href="{% url 'app_finances:create_entrada' %}" 
+                    class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 flex items-center">
+                        <i class="material-icons mr-2">add</i> Nova Entrada
+                    </a>
                 </div>
+            </div>
+            <br><br>
+            
+            <!-- 🔹 Seção de Pagamento -->
+        <!-- 🔹 Exibir Valor Devido e Pago -->
+            <div class="bg-gray-200 p-4 rounded-lg mt-6">
+                <h3 class="text-xl font-bold mb-4">Pagamento</h3>
+                <p class="text-gray-700">Confira o valor total devido e o valor já pago para esta entrada.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Valor do Produto/Serviço</label>
+                        <div class="mt-1 bg-yellow-200 text-gray-800 py-2 px-4 rounded-md border border-gray-300">
+                            R$ {{ entrada.valor_total|floatformat:2 }}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Valor Já Pago</label>
+                        <div class="mt-1 bg-green-100 text-green-800 py-2 px-4 rounded-md border border-gray-300">
+                            R$ {{ entrada.valor_pagamento|floatformat:2 }}
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Valor Ainda Devido</label>
+                        <div class="mt-1 bg-red-100 text-red-800 py-2 px-4 rounded-md border border-gray-300">
+                            R$ {{ valor_ainda_devido|floatformat:2 }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🔹 Formulário para Registrar Pagamento -->
+                <form method="post" action="{% url 'app_finances:registrar_pagamento' entrada.id %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700">Valor do Pagamento</label>
+                        <input type="number" name="valor_pago" step="0.01" min="0.01" max="{{ entrada.valor_total|floatformat:2 }}"
+                            class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500"
+                            placeholder="Digite o valor a pagar" required>
+                    </div>
+
+                    <button type="submit" class="bg-green-400 text-white px-4 py-2 rounded-md hover:bg-green-600">
+                        ✅ Registrar Pagamento
+                    </button>
+                </form>
+
+                <!-- 🔹 Histórico de Pagamentos (Formato de Tabela) -->
+                {% if pagamentos %}
+                    <div class="bg-gray-100 p-4 rounded-lg mt-6">
+                        <h3 class="text-xl font-bold mb-4">Pagamentos Registrados</h3>
+                        <table class="w-full border-collapse border border-gray-300">
+                            <thead>
+                                <tr class="bg-gray-200">
+                                    <th class="border border-gray-300 p-2">Data do Pagamento</th>
+                                    <th class="border border-gray-300 p-2">Valor Pago</th>
+                                    <th class="border border-gray-300 p-2">Registrado por</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pagamento in pagamentos %}
+                                    <tr class="bg-white">
+                                        <td class="border border-gray-300 p-2 text-center">
+                                            {{ pagamento.data_pagamento|date:"d/m/Y" }}
+                                        </td>
+                                        <td class="border border-gray-300 p-2 text-center">
+                                            💰 <strong>R$ {{ pagamento.valor_pago|floatformat:2 }}</strong>
+                                        </td>
+                                        <td class="border border-gray-300 p-2 text-center">
+                                            {{ pagamento.registrado_por.get_full_name }}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <p class="mt-4"><strong>Status do Pagamento:</strong> {{ entrada.get_status_pagamento_display }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        
+            <!-- 🔥 Histórico de Alterações -->
+            {% if alteracoes %}
+            <div class="bg-gray-100 p-4 rounded-lg mt-6">
+                <h3 class="text-xl font-bold mb-4">📜 Histórico de Alterações</h3>
+                <table class="w-full border border-gray-300">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="p-2 border">Campo Alterado</th>
+                            <th class="p-2 border">Valor Anterior</th>
+                            <th class="p-2 border">Novo Valor</th>
+                            <th class="p-2 border">Alterado por</th>
+                            <th class="p-2 border">Data da Alteração</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for alteracao in alteracoes %}
+                            <tr class="border">
+                                <td class="p-2 border">{{ alteracao.campo_alterado }}</td>
+                                <td class="p-2 border">{{ alteracao.valor_anterior|default:"-" }}</td>
+                                <td class="p-2 border">{{ alteracao.valor_novo|default:"-" }}</td>
+                                <td class="p-2 border">{{ alteracao.alterado_por.get_full_name }}</td>
+                                <td class="p-2 border">{{ alteracao.data_alteracao|date:"d/m/Y - H:i" }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center text-gray-600 p-4">
+                                    Nenhuma alteração registrada.
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
             {% endif %}
         </div>
-    
-        <!-- 🔥 Histórico de Alterações -->
-        {% if alteracoes %}
-        <div class="bg-gray-100 p-4 rounded-lg mt-6">
-            <h3 class="text-xl font-bold mb-4">📜 Histórico de Alterações</h3>
-            <table class="w-full border border-gray-300">
-                <thead class="bg-gray-200">
-                    <tr>
-                        <th class="p-2 border">Campo Alterado</th>
-                        <th class="p-2 border">Valor Anterior</th>
-                        <th class="p-2 border">Novo Valor</th>
-                        <th class="p-2 border">Alterado por</th>
-                        <th class="p-2 border">Data da Alteração</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for alteracao in alteracoes %}
-                        <tr class="border">
-                            <td class="p-2 border">{{ alteracao.campo_alterado }}</td>
-                            <td class="p-2 border">{{ alteracao.valor_anterior|default:"-" }}</td>
-                            <td class="p-2 border">{{ alteracao.valor_novo|default:"-" }}</td>
-                            <td class="p-2 border">{{ alteracao.alterado_por.get_full_name }}</td>
-                            <td class="p-2 border">{{ alteracao.data_alteracao|date:"d/m/Y - H:i" }}</td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center text-gray-600 p-4">
-                                Nenhuma alteração registrada.
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
-    </div>
 
-    <!-- ✅ Botão "Nova Entrada" Centralizado -->
-    <div class="flex justify-center my-4">
-        <a href="{% url 'app_finances:create_entrada' %}" 
-        class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 flex items-center">
-            <i class="material-icons mr-2">add</i> Nova Entrada
-        </a>
+        <!-- ✅ Botão "Nova Entrada" Centralizado -->
+        <div class="flex justify-center my-4">
+            <a href="{% url 'app_finances:create_entrada' %}" 
+            class="bg-green-500 text-white px-4 py-2 rounded-md shadow hover:bg-green-600 flex items-center">
+                <i class="material-icons mr-2">add</i> Nova Entrada
+            </a>
+        </div>
     </div>
 </main>
 <script>

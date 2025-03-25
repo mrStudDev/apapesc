@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -472,7 +472,7 @@ class EntradaCreateView(SuccessMessageMixin, CreateView):
     model = EntradaFinanceira
     form_class = EntradaFinanceiraForm
     template_name = 'app_finances/create_entradas.html'
-    success_url = reverse_lazy('app_finances:list_entradas')
+    success_url = reverse_lazy('app_finances:edit_entrada')
     success_message = "Entrada registrada com sucesso!"
 
     def get_form_kwargs(self):
@@ -489,6 +489,15 @@ class EntradaCreateView(SuccessMessageMixin, CreateView):
 
         return kwargs
 
+    def get_initial(self):
+        initial = super().get_initial()
+        initial.update({
+            'associacao': self.request.GET.get('associacao'),
+            'reparticao': self.request.GET.get('reparticao'),
+            'tipo_servico': self.request.GET.get('tipo_servico'),
+            'descricao': self.request.GET.get('descricao'),
+        })
+        return initial
 
     def form_valid(self, form):
         """Garante que a entrada será salva corretamente."""
@@ -511,9 +520,19 @@ class EntradaCreateView(SuccessMessageMixin, CreateView):
         # ✅ Define o usuário que criou a entrada
         self.object.criado_por = self.request.user
         self.object.save()  # 🔥 Agora `self.object` está definido corretamente
+        
+        servico_extra_id = self.request.GET.get('servico_extra_id')
+        if servico_extra_id:
+            from app_servicos.models import ServicoExtraAssociadoModel
+            try:
+                servico = ServicoExtraAssociadoModel.objects.get(id=servico_extra_id)
+                servico.entrada_relacionada = self.object  # self.object é a entrada
+                servico.save()
+            except ServicoExtraAssociadoModel.DoesNotExist:
+                pass
 
         messages.success(self.request, "Entrada registrada com sucesso!")
-        return HttpResponseRedirect(self.get_success_url()) # 🔥 Redireciona corretamente
+        return HttpResponseRedirect(reverse('app_finances:edit_entrada', args=[self.object.pk])) # 🔥 Redireciona corretamente
 
 
     def form_invalid(self, form):
@@ -525,13 +544,22 @@ class EntradaCreateView(SuccessMessageMixin, CreateView):
         return self.render_to_response(self.get_context_data(form=form))
 
     def get_context_data(self, **kwargs):
-        """
-        Adiciona as associações, repartições e tipos de serviço ao contexto.
-        """
         context = super().get_context_data(**kwargs)
         context['associacoes'] = AssociacaoModel.objects.all().order_by('nome_fantasia')
-        context['reparticoes'] = ReparticoesModel.objects.none()  # 🔹 Inicialmente vazio
+        context['reparticoes'] = ReparticoesModel.objects.none()
+
+        # ✅ Se estiver criando a entrada a partir de um serviço extra
+        servico_extra_id = self.request.GET.get('servico_extra_id')
+        if servico_extra_id:
+            from app_servicos.models import ServicoExtraAssociadoModel
+            try:
+                servico = ServicoExtraAssociadoModel.objects.get(pk=servico_extra_id)
+                context['servico_relacionado'] = servico
+            except ServicoExtraAssociadoModel.DoesNotExist:
+                context['servico_relacionado'] = None
+
         return context
+
 
 
 

@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block single_servico %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+
+    <main class="flex-grow">
+        <div class="container mx-auto max-8xl bg-white p-6 rounded-lg shadow-lg">
+
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md text-white 
+                        {% if message.tags == 'success' %}
+                            bg-green-500
+                        {% elif message.tags == 'error' %}
+                            bg-red-500
+                        {% elif message.tags == 'info' %}
+                            bg-blue-500
+                        {% else %}
+                            bg-gray-500
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+      <!-- 🔹 Título Principal -->
+      <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+          <i class="material-icons text-blue-500 mr-2">description</i> 
+          Detalhes do Serviço Associado
+        </h2>
+        
+        <!-- 🔸 Card Principal -->
+        <div class="bg-white rounded-lg shadow p-6 space-y-8 border border-gray-100">
+        
+          <!-- 🔹 Cabeçalho do Card -->
+          <div class="flex justify-between items-center border-b pb-4">
+            <div>
+              <h3 class="text-xl font-semibold text-gray-800">Informações do Serviço</h3>
+              <p class="text-sm text-gray-500">Registrado em {{ servico.data_inicio|date:"d/m/Y H:i" }}</p>
+            </div>
+            <span class="text-xs text-gray-400">Última alteração: {{ servico.ultima_alteracao|date:"d/m/Y H:i" }}</span>
+          </div>
+        
+          <!-- 🔹 Informações em Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800">
+        
+            <div>
+              <strong class="block text-gray-600 mb-1">Proprietário:</strong>
+              {% if servico.associado %}
+                <p>{{ servico.associado.user.get_full_name }}</p>
+              {% else %}
+                <span class="text-gray-400">Não informado</span>
+              {% endif %}
+            </div>
+        
+            <div>
+              <strong class="block text-gray-600 mb-1">Tipo de Serviço:</strong>
+              <p>{{ servico.tipo_servico }}</p>
+            </div>
+        
+            <div>
+              <strong class="block text-gray-600 mb-1">Associação Responsável:</strong>
+              {% if servico.associacao %}
+                <p>{{ servico.associacao.nome_fantasia }}</p>
+              {% else %}
+                <span class="text-gray-400">Não informada</span>
+              {% endif %}
+            </div>
+        
+            <div>
+              <strong class="block text-gray-600 mb-1">Repartição Responsável:</strong>
+              {% if servico.reparticao %}
+                <p>{{ servico.reparticao.nome_reparticao }}</p>
+              {% else %}
+                <span class="text-gray-400">Não informada</span>
+              {% endif %}
+            </div>
+        
+            <div>
+              <strong class="block text-gray-600 mb-1">Status do Serviço:</strong>
+              <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs font-semibold">
+                {{ servico.get_status_etapa_display }}
+              </span>
+            </div>
+        
+            <div>
+              <strong class="block text-gray-600 mb-1">Valor do Serviço:</strong>
+              {% if servico.valor_servico %}
+                <p class="text-green-600 font-semibold">R$ {{ servico.valor_servico|floatformat:2 }}</p>
+              {% else %}
+                <span class="text-gray-400">N/A</span>
+              {% endif %}
+            </div>
+          </div>
+        
+          <!-- 🔸 Descrição -->
+          <div>
+            <strong class="block text-gray-600 mb-2">Descrição do Serviço:</strong>
+            <div class="bg-gray-50 border border-gray-200 rounded p-2 text-gray-700 text-sm whitespace-pre-wrap shadow-sm">
+              {{ servico.content |safe }}
+            </div>
+          </div>
+        
+
+        <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
+
+          <!-- 🔙 Voltar para lista -->
+          <a href="{% url 'app_servicos:list_servicos' %}" 
+            class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition">
+            <i class="material-icons text-base mr-1">arrow_back</i> Voltar para lista
+          </a>
+        
+          <!-- ✏️ Editar serviço (associado) -->
+          {% if servico.pk %}
+          <a href="{% url 'app_servicos:edit_servico_associado' servico.pk %}" 
+            class="inline-flex items-center text-sm text-yellow-600 hover:text-yellow-800 transition">
+            <i class="material-icons text-base mr-1">edit</i> Editar Serviço
+          </a>
+          {% endif %}
+        
+        </div>
+        
+        <!-- 🔸 Tabela Alternativa (se necessário) -->
+        {% if historico %}
+        <div class="bg-white border border-blue-100 rounded-md p-4 mt-8 shadow-sm">
+          <h3 class="text-blue-700 font-semibold mb-3 text-lg flex items-center">
+            <i class="material-icons mr-2">history</i> Histórico do Serviço
+          </h3>
+          <table class="table-auto w-full text-sm">
+            <thead>
+              <tr class="bg-blue-50 text-left text-xs text-gray-600">
+                <th class="px-3 py-2">Campo</th>
+                <th class="px-3 py-2">De</th>
+                <th class="px-3 py-2">Para</th>
+                <th class="px-3 py-2">Alterado por</th>
+                <th class="px-3 py-2">Data</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              {% for h in historico %}
+              <tr>
+                <td class="px-3 py-2 font-medium">{{ h.campo }}</td>
+                <td class="px-3 py-2 text-gray-600">{{ h.valor_antigo }}</td>
+                <td class="px-3 py-2 text-blue-700 font-semibold">{{ h.valor_novo }}</td>
+                <td class="px-3 py-2">{{ h.alterado_por.get_full_name }}</td>
+                <td class="px-3 py-2 text-xs">{{ h.data_alteracao|date:"d/m/Y H:i" }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% endif %}
+      
+    </main>
+
+{% include "components/footer_associacao.html" %}
+{% endblock single_servico %}

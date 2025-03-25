@@ -49,6 +49,18 @@
         {% endif %}
 
         <h2 class="text-2xl font-bold mb-4">Lançar Nova Entrada</h2>
+        {% if servico_relacionado %}
+        <div class="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-800 p-4 mb-6 rounded">
+            <p class="font-semibold">Esta entrada está sendo vinculada ao serviço:</p>
+            <ul class="text-sm mt-1">
+                <li><strong>Proprietário:</strong> {{ servico_relacionado.extra_associado.nome_completo }}</li>
+                <li><strong>Tipo de Serviço:</strong> {{ servico_relacionado.tipo_servico }}</li>
+                <li><strong>Associação:</strong> {{ servico_relacionado.associacao.nome_fantasia }}</li>
+                <li><strong>Repartição:</strong> {{ servico_relacionado.reparticao }}</li>
+           </ul>
+        </div>
+        {% endif %}
+
 
         <form method="post">
             {% csrf_token %}

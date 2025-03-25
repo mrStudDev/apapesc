@@ -10,11 +10,13 @@ from django.db.models import Q
 from app_associacao.models import AssociacaoModel, ReparticoesModel, MunicipiosModel, IntegrantesModel
 from app_associados.models import STATUS_CHOICES
 from app_associados.models import AssociadoModel, ProfissoesModel
-from app_tarefas.models import TarefaModel
+from app_tarefas.models import TarefaModel, GuiaINSSModel
+from app_servicos.models import ServicoAssociadoModel, StatusEtapaChoices
 from django.contrib.auth.models import User
 from accounts.mixins import GroupPermissionRequiredMixin 
 from django.contrib.auth.mixins import LoginRequiredMixin
 import logging
+from django.utils.timezone import now
 from django.contrib.auth.models import Group
 from app_documentos.models import Documento
 from django.http import QueryDict
@@ -169,10 +171,49 @@ class ListAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListV
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Manipulação do celular_clean
-        for associado in context['associados']:
+        ano_selecionado = now().year
+        meses_validos = list(range(4, 12))  # Abril a Novembro
+        associados_inss = AssociadoModel.objects.filter(recolhe_inss="Sim").values("id")
+
+        guias_por_associado = {}
+        for associado in associados_inss:
+            associado_id = associado["id"]
+            guias = {mes: None for mes in meses_validos}
+            guias_existentes = GuiaINSSModel.objects.filter(associado_id=associado_id, ano=ano_selecionado)
+
+            for guia in guias_existentes:
+                guias[guia.mes_referencia] = guia.status
+
+            guias_por_associado[associado_id] = guias
+
+
+
+
+        # Obtem os associados já filtrados
+        associados = list(self.get_queryset())
+
+        # IDs de serviços com status ≠ 'arquivado'
+        ids_servico = ServicoAssociadoModel.objects.exclude(status_etapa=StatusEtapaChoices.ARQUIVADO) \
+            .exclude(associado__isnull=True) \
+            .values_list('associado_id', flat=True)
+
+        # IDs de tarefas com status ≠ 'arquivada'
+        ids_tarefa = TarefaModel.objects.exclude(status='arquivada') \
+            .exclude(associado__isnull=True) \
+            .values_list('associado_id', flat=True)
+
+        ids_com_servico = set(ids_servico)
+        ids_com_tarefa = set(ids_tarefa)
+
+        for associado in associados:
+            associado.tem_servico = associado.id in ids_com_servico
+            associado.tem_tarefa = associado.id in ids_com_tarefa
+
             if associado.celular:
                 associado.celular_clean = associado.celular.replace('-', '').replace(' ', '')
+
+        # Atualiza a lista tratada
+        context['associados'] = associados
 
         # Recupera o ID da ASSOCIAÇÂO selecionada
         selected_associacao_id = self.request.GET.get('associacao', '')
@@ -186,12 +227,16 @@ class ListAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListV
         else:
             context['reparticoes'] = ReparticoesModel.objects.all()
 
+        
         context['status_choices'] = STATUS_CHOICES
-
         # Passa os valores selecionados para o template
         context['selected_associacao'] = selected_associacao_id
         context['selected_reparticao'] = self.request.GET.get('reparticao', '')
         context['selected_status'] = self.request.GET.get('status', '')
+
+        context['guias_por_associado'] = guias_por_associado
+        context['meses_validos'] = meses_validos
+
 
         return context
 
@@ -220,7 +265,7 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
 
         # Tarefas relacionadas ao associado
         context['tarefas'] = TarefaModel.objects.filter(associado=associado).order_by('-data_criacao')
-
+        context['servicos'] = ServicoAssociadoModel.objects.filter(associado=associado).order_by('-data_inicio')
         context['associado'] = associado
         context['drive_folder_id'] = associado.drive_folder_id
 

@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load filtrosPainel_servicos %}
+
+{% block painel_fluxoEtapas %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+
+    <main class="flex-grow">
+        <div class="container mx-auto max-8xl bg-white p-6 rounded-lg shadow-lg">
+
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md text-white 
+                        {% if message.tags == 'success' %}
+                            bg-green-500
+                        {% elif message.tags == 'error' %}
+                            bg-red-500
+                        {% elif message.tags == 'info' %}
+                            bg-blue-500
+                        {% else %}
+                            bg-gray-500
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        <!-- 🔹 Título principal -->
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="material-icons text-blue-500 mr-2 text-base">description</i>
+            Emissão de Documentos
+        </h2>
+        
+        <!-- 🔹 Grid de Documentos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+            {% for status, servicos in painel_docs.items %}
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                <h3 class="text-blue-600 font-semibold text-sm mb-3 flex justify-between items-center">
+                    {{ status_labels|get_item:status|default:status|capfirst }}
+                    <span class="text-xs text-gray-400">({{ servicos|length }})</span>
+                </h3>
+            
+                <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                    {% for s in servicos %}
+                    <div class="border border-gray-200 rounded p-2 hover:bg-gray-50 transition">
+                        <a href="{% url 'app_servicos:single_servico' s.pk %}" class="block text-sm text-blue-700 font-medium hover:underline">
+                            {% if s.origem == 'associado' %}
+                                {{ s.associado.user.get_full_name }}
+                            {% elif s.origem == 'extra' %}
+                                {{ s.extra_associado.nome_completo }}
+                            {% else %}
+                                <span class="text-red-500 italic">Proprietário não definido</span>
+                            {% endif %}
+                        </a>
+                        <p class="text-xs text-gray-600 mt-1">
+                            {{ s.tipo_servico }} <br>
+                            <span class="text-gray-400">Atualizado em {{ s.ultima_alteracao|date:"d/m/Y H:i" }}</span>
+                        </p>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-400 italic">Nenhum serviço</p>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- 🔹 Título de Consultorias -->
+        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="material-icons text-indigo-500 mr-2 text-base">build</i>
+            Consultorias e Serviços Gerais
+        </h2>
+        
+        <!-- 🔹 Grid de Consultorias -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {% for status, servicos in painel_consultorias.items %}
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+            <h3 class="text-indigo-600 font-semibold text-sm mb-3 flex justify-between items-center">
+                {{ status_labels|get_item:status|default:status|capfirst }}
+                <span class="text-xs text-gray-400">({{ servicos|length }})</span>
+            </h3>
+        
+            <ul class="text-sm text-gray-700 space-y-1 max-h-48 overflow-y-auto pr-1">
+                {% for s in servicos %}
+                <li>
+                <a href="{% url 'app_servicos:single_servico' s.pk %}" class="text-indigo-600 hover:underline">
+                    {% if s.origem == 'associado' %}
+                    {% if s.associado and s.associado.user %}
+                        {{ s.associado.user.get_full_name }}
+                    {% endif %}
+                    {% elif s.origem == 'extra' %}
+                    {% if s.extra_associado %}
+                        {{ s.extra_associado.nome_completo }}
+                    {% else %}
+                        <span class="text-red-500 italic">Extra associado inválido</span>
+                    {% endif %}
+                    {% else %}
+                    <span class="text-red-500 italic">Sem origem definida</span>
+                    {% endif %}
+                </a>
+                </li>
+                {% empty %}
+                <li class="text-gray-400 italic">Nenhum serviço</li>
+                {% endfor %}
+            </ul>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    {% include "components/footer_associacao.html" %}
+{% endblock painel_fluxoEtapas %}

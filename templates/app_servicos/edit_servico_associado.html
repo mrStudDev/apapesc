@@ -1,0 +1,187 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Editar Serviço Associado{% endblock title %}
+{% block edit_servicoAssociado %}
+
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+
+    <main class="flex-grow">
+        <div class="container mx-auto max-8xl bg-white p-6 rounded-lg shadow-lg">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Editar Serviço Associado</h1>
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md text-white 
+                        {% if message.tags == 'success' %}
+                            bg-green-500
+                        {% elif message.tags == 'error' %}
+                            bg-red-500
+                        {% elif message.tags == 'info' %}
+                            bg-blue-500
+                        {% else %}
+                            bg-gray-500
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="max-w-4xl mx-auto py-10 px-6 bg-white rounded-lg shadow-md">
+
+           
+                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                    <i class="material-icons text-blue-600 mr-2">build</i> Novo Serviço para: 
+                    <span class="ml-2 text-gray-700 font-semibold">{{ associado.user.get_full_name }}</span>
+                </h2>
+            
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <!-- Associado Edit Serviço Associado (Somente leitura) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Associado/Proprietário</label>
+                        
+                            <input type="text"
+                                value="{{ associado.user.get_full_name }}"
+                                readonly
+                                class="bg-gray-100 border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 cursor-not-allowed shadow-sm" />
+                        
+                            <input type="hidden" name="associado_id" value="{{ associado.id }}">
+                        </div>
+                        
+                        
+                        <!-- Associação (Somente leitura) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Associação</label>
+                            <input type="text" readonly
+                                   value="{{ form.instance.associacao.nome_fantasia }}"
+                                   class="bg-gray-100 border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 cursor-not-allowed shadow-sm" />
+                            <input type="hidden" name="associacao" value="{{ form.instance.associacao.id }}">
+                        </div>
+                
+                        <!-- Repartição (Somente leitura) -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
+                            <input type="text" readonly
+                                   value="{{ form.instance.reparticao.nome_reparticao }}"
+                                   class="bg-gray-100 border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 cursor-not-allowed shadow-sm" />
+                            <input type="hidden" name="reparticao" value="{{ form.instance.reparticao.id }}">
+                        </div>
+                        <!--Natureza do serviço-->
+                        <div>
+                            <label for="{{ form.natureza_servico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.natureza_servico.label }}
+                            </label>
+                            
+                            {{ form.natureza_servico }}
+
+                            {% for error in form.natureza_servico.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        <!-- Tipo de Serviço (Somente leitura) -->
+                        <div class="sm:col-span-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Serviço</label>
+                            <input type="text" readonly
+                                   value="{{ form.instance.tipo_servico.nome }}"
+                                   class="bg-gray-100 border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 cursor-not-allowed shadow-sm" />
+                            <input type="hidden" name="tipo_servico" value="{{ form.instance.tipo_servico.id }}">
+                        </div>
+                
+                        <!-- Status Etapa (Editável) -->
+                        <div class="sm:col-span-2">
+                            <label for="{{ form.status_etapa.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                {{ form.status_etapa.label }}
+                            </label>
+                            {{ form.status_etapa }}
+                            {% for error in form.status_etapa.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                
+                    </div>
+                
+                    <!-- Descrição 
+
+                    </div>-->
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Anotações/Exigências</h2>
+                    <div class="mt-1 w-full" style="max-width: 100%; padding: 0; margin: 0;">
+                        {% include 'components/my_editor.html' %}
+                    </div>
+                    <!-- Ações -->
+                    <div class="pt-6">
+                        <button type="submit"
+                                class="inline-flex items-center px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded shadow transition">
+                            <i class="material-icons text-sm mr-2">check_circle</i>
+                            Salvar Serviço
+                        </button>
+                        <a href="{% url 'app_servicos:list_servicos' %}" 
+                           class="ml-3 text-sm text-gray-600 hover:underline">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+                         
+            </div>
+        </div>
+    </main>
+
+<!-- JavaScript para filtrar repartições -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const associacaoSelect = document.getElementById('associacao');
+        const reparticaoSelect = document.getElementById('id_reparticao');
+
+        associacaoSelect.addEventListener('change', function () {
+            const associacaoId = this.value;
+
+            // Limpa o select de repartição
+            reparticaoSelect.innerHTML = '<option value="">Carregando...</option>';
+
+            fetch(`/servicos/ajax/reparticoes/?associacao=${associacaoId}`)
+
+                .then(response => response.json())
+                .then(data => {
+                    reparticaoSelect.innerHTML = '<option value="">--- Selecione ---</option>';
+                    data.forEach(reparticao => {
+                        const option = document.createElement('option');
+                        option.value = reparticao.id;
+                        option.textContent = reparticao.nome_reparticao;
+                        reparticaoSelect.appendChild(option);
+                    });
+                });
+        });
+    });
+</script>
+
+    
+    
+    
+
+    {% include "components/footer_associacao.html" %}
+
+{% endblock edit_servicoAssociado %}

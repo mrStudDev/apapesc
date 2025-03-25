@@ -173,28 +173,28 @@ class EntradaFinanceiraForm(forms.ModelForm):
             }),  # 🔥 Agora não editável                        
         }
 
-    def __init__(self, *args, user=None, **kwargs):
+    def __init__(self, *args, user=None, associacao=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user = user
 
-        super().__init__(*args, **kwargs)  # Chama super() apenas uma vez
-        self.user = user  # Guarda o usuário autenticado
         self.fields['associacao'].queryset = AssociacaoModel.objects.all()
-        self.fields['reparticao'].queryset = ReparticoesModel.objects.all()
         self.fields['tipo_servico'].queryset = TipoServicoModel.objects.all()
         
-        # Filtra repartições com base na associação
+        # Ajusta o queryset das repartições
         if 'associacao' in self.data:
             associacao_id = self.data.get('associacao')
             if associacao_id:
                 self.fields['reparticao'].queryset = ReparticoesModel.objects.filter(associacao_id=associacao_id)
             else:
                 self.fields['reparticao'].queryset = ReparticoesModel.objects.none()
-        elif self.instance.pk:  # Se a despesa já existir
+        elif associacao:
+            self.fields['reparticao'].queryset = ReparticoesModel.objects.filter(associacao=associacao)
+        elif self.instance.pk:
             self.fields['reparticao'].queryset = ReparticoesModel.objects.filter(associacao=self.instance.associacao)
         else:
             self.fields['reparticao'].queryset = ReparticoesModel.objects.none()
-    
-        
-        
+
+            
     def clean(self):
         cleaned_data = super().clean()
         

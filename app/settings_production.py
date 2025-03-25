@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'app_tarefas',
     'app_articles',
     'app_finances',
+    'app_servicos',
     
 ]
 

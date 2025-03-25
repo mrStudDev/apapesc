@@ -303,7 +303,7 @@
     </div>
     <!-- Seção: Logins e Senhas -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Usuários e Senhas</h2>
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Conta Gov do Associado</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
             <!-- CPF -->
@@ -337,42 +337,107 @@
     </div> 
     <br>
     <section class="mb-10">
-        <h2 class="text-xl font-semibold text-gray-700 mb-4">Tarefas Relacionadas</h2>
-            <!-- Botão para Criar Nova Tarefa -->
-        <a href="{% url 'app_tarefas:create_tarefa_associado' associado.id %}" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-700 transition">
-            Nova Tarefa
-        </a>
+        <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-blue-600">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-semibold text-blue-700 flex items-center">
+                    <i class="material-icons mr-2">build_circle</i> Serviços Relacionados
+                </h2>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">
+                <strong>Serviços associados a este membro</strong>. Veja os serviços em andamento ou já concluídos.
+            </p>
+            <a href="{% url 'app_servicos:create_servico_associado' associado.id %}"
+               class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded shadow transition">
+                <i class="material-icons mr-2 text-sm">add_circle</i>
+                Novo Serviço
+            </a>
 
-        {% if tarefas %}
-        <div class="overflow-x-auto bg-white shadow-md rounded-lg py-4">
-            <table class="min-w-full table-auto border-collapse">
-                <thead class="bg-gray-100 border-b">
-                    <tr>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Título</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Data de Criação</th>
-                        <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for tarefa in tarefas %}
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="py-3 px-4 text-gray-800 text-sm">{{ tarefa.titulo }}</td>
-                        <td class="py-3 px-4 text-gray-800 text-sm">{{ tarefa.get_status_display }}</td>
-                        <td class="py-3 px-4 text-gray-800 text-sm">{{ tarefa.data_criacao|date:"d/m/Y" }}</td>
-                        <td class="py-3 px-4 text-blue-500 text-sm">
-                            <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" class="hover:underline">Ver Detalhes</a>
-                            | <a href="{% url 'app_tarefas:edit_tarefa' tarefa.pk %}" class="hover:underline text-yellow-600">Editar</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+    
+            {% if servicos %}
+            <div class="overflow-x-auto bg-white shadow-md rounded-lg py-4 mt-6">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Tipo</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Data de Criação</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for servico in servicos %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ servico.tipo_servico }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ servico.get_status_etapa_display }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ servico.data_inicio|date:"d/m/Y H:i" }}</td>
+                            <td class="py-3 px-4 text-blue-500 text-sm">
+                                <a href="{% url 'app_servicos:single_servico' servico.pk %}" class="hover:underline">Ver Detalhes</a>
+                                | <a href="#" class="hover:underline text-yellow-600">Editar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 italic mt-3">Nenhum serviço cadastrado para este associado.</p>
+            {% endif %}
         </div>
-        {% else %}
-        <p class="text-gray-500 italic">Nenhuma tarefa associada a este associado.</p>
-        {% endif %}
     </section>
+    
+    
+    <br>
+    <section class="mb-10">
+        <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-indigo-600 mb-6">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-semibold text-indigo-700 flex items-center">
+                    <i class="material-icons mr-2">assignment</i> Tarefas Relacionadas
+                </h2>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">
+                <strong>Adequada para processos de filiação!</strong> Gerencie atividades específicas internas relacionadas a este associado. Crie novas tarefas e acompanhe o andamento.
+            </p>
+            <a href="{% url 'app_tarefas:create_tarefa_associado' associado.id %}"
+               class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded shadow transition">
+                <i class="material-icons mr-2 text-sm">add_task</i>
+                Nova Tarefa
+            </a>
+
+        
+            {% if tarefas %}
+            <div class="overflow-x-auto bg-white shadow-md rounded-lg py-4">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Título</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Data de Criação</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for tarefa in tarefas %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ tarefa.titulo }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ tarefa.get_status_display }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ tarefa.data_criacao|date:"d/m/Y" }}</td>
+                            <td class="py-3 px-4 text-blue-500 text-sm">
+                                <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" class="hover:underline">Ver Detalhes</a>
+                                | <a href="{% url 'app_tarefas:edit_tarefa' tarefa.pk %}" class="hover:underline text-yellow-600">Editar</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 italic">Nenhuma tarefa associada a este associado.</p>
+            {% endif %}
+        </div>
+    </section>
+    
+
+
 
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <!-- Título -->
@@ -387,10 +452,12 @@
         <!-- Grade com duas colunas -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <!-- Login: Email -->
-            <div class="flex items-center space-x-3">
-                <i class="material-icons text-red-500" style="font-size: 24px;">email</i>
+            <div class="flex items-center space-x-3 bg-blue-50">
+                <!-- Substituindo o ícone por imagem da Apapesc -->
+                <img src="{% static 'images/Logo_Apapesc_2025.png' %}" alt="Logo Apapesc" class="w-6 h-6 object-contain" />
+                
                 <div>
-                    <strong class="text-gray-700">Login - Email:</strong>
+                    <strong class="text-gray-700">Usuário Apapesc:</strong>
                     <div class="flex items-center">
                         <span id="email-{{ associado.pk }}" class="text-gray-800 font-mono">{{ associado.email }}</span>
                         <button onclick="copyToClipboard('email-{{ associado.pk }}')" 
@@ -400,10 +467,12 @@
                     </div>
                 </div>
             </div>
-    
+            
             <!-- Senha do Site -->
-            <div class="flex items-center space-x-3">
-                <i class="material-icons text-red-500" style="font-size: 24px;">g_translate</i>
+            <div class="flex items-center space-x-3 bg-blue-50">
+                <!-- Logo da Apapesc no lugar do ícone g_translate -->
+                <img src="{% static 'images/Logo_Apapesc_2025.png' %}" alt="Logo Apapesc" class="w-6 h-6 object-contain" />
+            
                 <div>
                     <strong class="text-gray-700">Senha:</strong>
                     <div class="flex items-center">
@@ -415,11 +484,12 @@
                     </div>
                 </div>
             </div>
+            <hr class="my-4"><hr class="my-4">
             <!-- Login:Email -->
             <div class="flex items-center space-x-3">
-                <i class="material-icons text-gray-500" style="font-size: 24px;">email</i>
+                <i class="material-icons text-gray-500" style="font-size: 24px;">language</i>
                 <div>
-                    <strong class="text-gray-700">Login Google - Email:</strong>
+                    <strong class="text-gray-700">Conta Google - Email:</strong>
                     <div class="flex items-center">
                         <span id="email-{{ associado.pk }}" class="text-gray-800">{{ associado.email }}</span>
                         <button onclick="copyToClipboard('email-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-purple-500">
@@ -531,6 +601,45 @@
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentos do Cidadão</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+        <!-- Recolhe INSS -->
+        <div class="flex items-center space-x-3">
+            <i class="material-icons text-green-500" style="font-size: 24px;">verified_user</i>
+            <div>
+                <strong class="text-gray-700">Recolhe INSS:</strong>
+                <div class="mt-1 text-sm">
+                    {% if associado.recolhe_inss %}
+                        <span class="inline-block px-2 py-1 rounded bg-yellow-100 text-gray-600 font-medium">
+                            {{associado.recolhe_inss}}
+                        </span>
+                    {% else %}
+                        <span class="inline-block px-2 py-1 rounded bg-yellow-100 text-gray-600 font-medium">
+                            Não
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Recebe Seguro -->
+        <div class="flex items-center space-x-3">
+            <i class="material-icons text-red-400" style="font-size: 24px;">security</i>
+            <div>
+                <strong class="text-gray-700">Recebe Seguro:</strong>
+                <div class="mt-1 text-sm">
+                    {% if associado.recebe_seguro %}
+                        <span class="inline-block px-2 py-1 rounded bg-yellow-100 text-gray-600 font-medium">
+                            {{associado.recebe_seguro}}
+                        </span>
+                    {% else %}
+                        <span class="inline-block px-2 py-1 rounded bg-yellow-100 text-gray-600 font-medium">
+                            Não
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
 
             <!-- NIT -->
             <div class="flex items-center space-x-3">

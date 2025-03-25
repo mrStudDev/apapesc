@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block list_servicos %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+
+    <main class="flex-grow">
+        <div class="container mx-auto max-8xl bg-white p-6 rounded-lg shadow-lg">
+            <h1 class="text-2xl font-bold text-gray-800 mb-4 text-center">Lista de Serviços</h1>
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md text-white 
+                        {% if message.tags == 'success' %}
+                            bg-green-500
+                        {% elif message.tags == 'error' %}
+                            bg-red-500
+                        {% elif message.tags == 'info' %}
+                            bg-blue-500
+                        {% else %}
+                            bg-gray-500
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <!-- 🔍 Filtros -->
+            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                    <i class="material-icons text-blue-500 mr-2">filter_alt</i> Filtros de Busca
+                </h3>
+
+                <form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <!-- Busca por nome -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Buscar por nome</label>
+                        <input type="text" name="q" value="{{ termo_busca }}" placeholder="Digite o nome..."
+                            class="w-full border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    </div>
+
+                    <!-- Tipo -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Serviço</label>
+                        <select name="tipo"
+                            class="w-full border border-gray-300 rounded-md py-2 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Todos</option>
+                            <option value="associado" {% if filtro_ativo == 'associado' %}selected{% endif %}>Associado</option>
+                            <option value="extra" {% if filtro_ativo == 'extra' %}selected{% endif %}>Extra Associado</option>
+                        </select>
+                    </div>
+
+                    <!-- Botão -->
+                    <div class="flex">
+                        <button type="submit"
+                            class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 w-full mt-auto">
+                            Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            
+            <table class="min-w-full border border-gray-300 text-sm">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-3 py-2 text-left">#</th>
+                        <th class="px-3 py-2 text-left">Proprietário</th>
+                        <th class="px-3 py-2 text-left">Tipo</th>
+                        <th class="px-3 py-2 text-left">Status</th>
+                        <th class="px-3 py-2 text-left">Data Início</th>
+                        <th class="px-3 py-2 text-left">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for servico in servicos %}
+                    <tr class="border-t {% if servico.origem == 'extra' %}bg-blue-50{% else %}bg-blue-100{% endif %} hover:bg-green-200">
+                        <td class="px-3 py-2">{{ forloop.counter }}</td>
+                        
+                        <td class="px-3 py-2">
+                            {% if servico.origem == 'associado' %}
+                                {% if servico.associado and servico.associado.user %}
+                                    {{ servico.associado.user.get_full_name }}
+                                {% else %}
+                                    <span class="text-gray-400 italic">Sem nome</span>
+                                {% endif %}
+                            {% else %}
+                                {{ servico.extra_associado.nome_completo }}
+                            {% endif %}
+                        </td>
+                        
+                
+                        <td class="px-3 py-2">
+                            {{ servico.tipo_servico }}
+                            {% if servico.origem == 'extra' %}
+                                <span class="ml-1 text-xs text-blue-600">(Extra)</span>
+                            {% else %}
+                                <span class="ml-1 text-xs text-green-600">(Associado)</span>
+                            {% endif %}
+                        </td>
+                
+                        <td class="px-3 py-2">{{ servico.get_status_etapa_display }}</td>
+                        <td class="px-3 py-2">{{ servico.data_inicio|date:"d/m/Y H:i" }}</td>
+                        <td class="px-3 py-2">
+                            {% if servico.origem == 'extra' %}
+                                <!-- Ver detalhes -->
+                                <a href="{% url 'app_servicos:single_servico_extra' servico.id %}" 
+                                class="text-blue-600 hover:text-blue-800" title="Ver detalhes">
+                                    <i class="material-icons text-base">visibility</i>
+                                </a>
+                        
+                                <!-- Editar -->
+                                <a href="{% url 'app_servicos:edit_servico_extra' servico.id %}" 
+                                class="text-yellow-500 hover:text-yellow-600" title="Editar serviço">
+                                    <i class="material-icons text-base">edit</i>
+                                </a>
+                            {% else %}
+                        
+                                <!-- Apenas ver detalhes para associado -->
+                                <a href="{% url 'app_servicos:single_servico' servico.id %}" 
+                                class="text-blue-600 hover:text-blue-800" title="Ver detalhes">
+                                    <i class="material-icons text-base">visibility</i>
+                                </a>
+                                <!-- Editar -->
+                                <a href="{% url 'app_servicos:edit_servico_associado' servico.id %}" 
+                                class="text-yellow-500 hover:text-yellow-600" title="Editar serviço">
+                                    <i class="material-icons text-base">edit</i>
+                                </a>                                    
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="px-3 py-4 text-center text-gray-500">Nenhum serviço encontrado.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>                
+            </table>
+        </div>
+    </main>
+
+{% include "components/footer_associacao.html" %}
+{% endblock list_servicos %}
