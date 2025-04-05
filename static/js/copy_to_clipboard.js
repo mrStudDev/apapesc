@@ -51,6 +51,6 @@ function showToast(message) {
     setTimeout(function () {
       document.body.removeChild(toast);
     }, 500);
-  }, 2300);
+  }, 2000);
 }
 

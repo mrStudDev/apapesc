@@ -1,14 +1,14 @@
 from django.shortcuts import render, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView, View
 from django.contrib import messages
-from django.utils.timezone import now
+from django.utils.timezone import now, timezone
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.mixins import GroupPermissionRequiredMixin
 from django.contrib.auth.models import Group
 from .models import TarefaModel, HistoricoStatusModel, HistoricoResponsaveisModel
 from .forms import TarefaForm
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.db.models import Q, F
 from django.shortcuts import get_object_or_404
@@ -24,7 +24,10 @@ from app_associacao.models import IntegrantesModel, AssociacaoModel, Reparticoes
 from app_documentos.models import Documento
 from django.db.models import Count
 from .models import GuiaINSSModel
-from django.utils import timezone
+from django.template.loader import render_to_string
+
+
+
 
 class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = TarefaModel
@@ -456,78 +459,273 @@ class TarefaDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteV
 
 
 # ========= INSS =========
-
+# Lista com os associados que recolhem o inss
 class EmissaoGuiasView(LoginRequiredMixin, TemplateView):
     template_name = "app_tarefas/emissao_guias.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        ano_selecionado = self.request.GET.get("ano", now().year)
+        
+        ano_selecionado = int(self.request.GET.get("ano", now().year))
+        ano_atual = now().year
         meses_validos = list(range(4, 12))  # Abril a Novembro
+        termo_busca = self.request.GET.get("busca", "")
 
-        # 🔥 Filtra somente associados que recolhem INSS e inclui CPF e Senha_Gov
-        associados_inss = AssociadoModel.objects.filter(recolhe_inss="Sim").values(
-            "id", "user__first_name", "user__last_name", "cpf", "senha_gov", "celular_correspondencia"
+        # Query base já ordenada por sobrenome e nome
+        associados_query = AssociadoModel.objects.filter(
+            recolhe_inss="Sim"
+        ).select_related('user').order_by(
+           'user__first_name',            
+            'user__last_name'
         )
 
+        # Aplica filtro de busca se existir
+        if termo_busca:
+            associados_query = associados_query.filter(
+                Q(user__first_name__icontains=termo_busca) |
+                Q(user__last_name__icontains=termo_busca)
+            )
 
+        # Lista ordenada de associados
+        associados_ordenados = list(associados_query)
+        
+        # Prepara a estrutura de dados mantendo a ordenação original
         guias_por_associado = {}
-        for associado in associados_inss:
-            associado_id = associado["id"]  # ✅ Garante que ID está presente
+        for associado in associados_ordenados:
+            # Verifica se o associado pode ter guias no ano selecionado
+            ano_filiacao = associado.data_filiacao.year if associado.data_filiacao else ano_atual
+            if ano_selecionado < ano_filiacao:
+                continue  # Pula associados filiados após o ano selecionado
+
             guias = {mes: None for mes in meses_validos}
-            guias_existentes = GuiaINSSModel.objects.filter(associado_id=associado_id, ano=ano_selecionado)
+            guias_existentes = GuiaINSSModel.objects.filter(
+                associado=associado, 
+                ano=ano_selecionado
+            )
 
             for guia in guias_existentes:
-                guias[guia.mes_referencia] = guia  # ✅ Associamos corretamente
+                guias[guia.mes_referencia] = guia
 
-            guias_por_associado[associado_id] = {
-                "dados": associado,
+            guias_por_associado[associado.id] = {
+                "dados": {
+                    "id": associado.id,
+                    "user__first_name": associado.user.first_name,
+                    "user__last_name": associado.user.last_name,
+                    "cpf": associado.cpf,
+                    "senha_gov": associado.senha_gov,
+                    "celular_correspondencia": associado.celular_correspondencia,
+                    "nome_completo": f"{associado.user.last_name} {associado.user.first_name}",
+                    "ano_filiacao": ano_filiacao  # Adicionado para referência
+                },
                 "guias": guias
             }
 
+        # Calcula anos disponíveis considerando a filiação mais antiga
+        anos_disponiveis = range(2022, ano_atual + 1)
+        if associados_ordenados:
+            primeiro_ano = min(assoc.data_filiacao.year if assoc.data_filiacao else ano_atual 
+                             for assoc in associados_ordenados)
+            anos_disponiveis = range(max(2022, primeiro_ano), ano_atual + 1)
 
         context.update({
-            "ano_selecionado": int(ano_selecionado),
-            "anos_disponiveis": range(2022, now().year + 1),  # Mostra anos de 2023 até o atual
+            "ano_selecionado": ano_selecionado,
+            "anos_disponiveis": anos_disponiveis,
             "meses_validos": meses_validos,
-            "associados_inss": associados_inss,
             "guias_por_associado": guias_por_associado,
+            "termo_busca": termo_busca,
         })
         return context
 
-
-
-@method_decorator(login_required, name='dispatch')
-class CriarGuiaView(View):
+# Lógica para processo de emissão
+class CriarGuiaView(LoginRequiredMixin, View):
     def post(self, request, associado_id, mes, ano):
         associado = get_object_or_404(AssociadoModel, id=associado_id)
+        
+        if GuiaINSSModel.objects.filter(associado=associado, mes_referencia=mes, ano=ano).exists():
+            return JsonResponse({
+                'success': False,
+                'message': 'Já existe uma guia para este período'
+            }, status=400)
 
-        # Verifica se a guia já existe
-        guia, created = GuiaINSSModel.objects.get_or_create(
+        guia = GuiaINSSModel.objects.create(
             associado=associado,
             mes_referencia=mes,
             ano=ano,
-            defaults={"status": "pendente"},
+            emitido_por=request.user,
+            status="pendente"
         )
 
-        if created:
-            messages.success(request, f"Guia de {mes}/{ano} criada para {associado.user.get_full_name()}.")
+        # HTML para o estado pendente
+        html = f"""
+        <div class="guia-pendente">
+            <!-- DIV de dados separada do formulário -->
+            <div class="dados-associado mt-2 space-y-1 bg-yellow-50 p-2 rounded-md shadow-inner text-left">
+                <div class="flex justify-between items-center">
+                    <span id="cpf-{associado.id}" class="text-gray-800 font-mono text-[11px]">{associado.cpf}</span>
+                    <button type="button" data-copy-target="cpf-{associado.id}" 
+                            class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span id="senha-{associado.id}" class="text-gray-800 font-mono text-[11px]">{associado.senha_gov}</span>
+                    <button type="button" data-copy-target="senha-{associado.id}" 
+                            class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span id="link-{associado.id}" class="text-gray-700 text-[10px] truncate">https://login.esocial.gov.br/login.aspx</span>
+                    <button type="button" data-copy-target="link-{associado.id}" 
+                            class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
+                </div>
+            </div>
 
-        return JsonResponse({"success": True, "guia_id": guia.id})
+            <!-- Formulário separado -->
+            <form method="post" class="form-avancar-status mt-2" 
+                  action="{reverse('app_tarefas:atualizar_status_guia', args=[guia.id])}">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded shadow transition">
+                    Confirmar Emissão (Etapa 1)
+                </button>
+            </form>
+            
+            <form method="post" class="form-reiniciar-guia mt-1" 
+                  action="{reverse('app_tarefas:zerar_status_guia', args=[guia.id])}">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
+                <button type="submit" class="w-full text-xs text-red-500 hover:text-red-700 underline">
+                    🔄 Reiniciar Processo
+                </button>
+            </form>
+        </div>
+        """
 
+        return JsonResponse({
+            'success': True,
+            'html': html,
+            'guia_id': guia.id
+        })
 
+# Atualização do Status - parte da Lógica
 class AtualizarStatusGuiaView(LoginRequiredMixin, View):
     def post(self, request, guia_id):
-        guia = get_object_or_404(GuiaINSSModel, id=guia_id)
-        
-        if guia.status == "pendente":
-            guia.status = "emitido"
-            messages.success(request, f"Guia {guia.get_mes_referencia_display()} marcada como EMITIDA.")
-        elif guia.status == "emitido":
-            guia.status = "enviado"
-            messages.success(request, f"Guia {guia.get_mes_referencia_display()} marcada como ENVIADA.")
+        try:
+            guia = get_object_or_404(GuiaINSSModel, id=guia_id)
+            
+            # Lógica de transição de status
+            if guia.status == "pendente":
+                guia.status = "emitido"
+            elif guia.status == "emitido":
+                guia.status = "enviado"
+            elif guia.status == "enviado":
+                guia.status = "pago"
+            else:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Status inválido para transição'
+                }, status=400)
+            
+            guia.save()
+            
+            return JsonResponse({
+                'success': True,
+                'reload': True,  # Indica que a página deve ser recarregada
+                'message': 'Status atualizado com sucesso'
+            })
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Erro ao atualizar: {str(e)}'
+            }, status=400)
         
         guia.save()
-        return redirect("app_tarefas:emissao_guias")
+        return JsonResponse({'success': True, 'html': html})
+    
 
+    def _html_emitido(self, guia, associado, request):
+        return f"""
+        <div class="guia-emitida">
+            <form method="post" class="form-avancar-status" 
+                  action="{reverse('app_tarefas:atualizar_status_guia', args=[guia.id])}">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
+                <button type="submit" class="bg-gray-900 hover:bg-green-600 text-white text-xs px-3 py-1 rounded shadow transition">
+                    Guia Enviada
+                </button>
+            </form>
+            
+            <form method="post" class="form-reiniciar-guia mt-1" 
+                  action="{reverse('app_tarefas:zerar_status_guia', args=[guia.id])}">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
+                <button type="submit" class="text-xs text-red-500 hover:text-red-700 underline">
+                    🔄 Reiniciar
+                </button>
+            </form>
+            
+            <div class="dados-celular mt-2 bg-green-50 p-2 rounded-md shadow-inner text-left">
+                <div class="flex justify-between items-center">
+                    <span id="celular-{associado.id}" class="text-gray-800 font-mono text-[11px]">{associado.celular_correspondencia}</span>
+                    <button onclick="copyToClipboard('celular-{associado.id}')" class="text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                </div>
+            </div>
+        </div>
+        """
+
+    def _html_enviado(self, guia, associado, request):
+        return f"""
+        <div class="guia-enviada">
+            <form method="post" class="form-avancar-status" 
+                  action="{reverse('app_tarefas:atualizar_status_guia', args=[guia.id])}">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
+                <p class="text-green-600">Guia Enviada!</p>
+                <button type="submit" class="bg-yellow-200 hover:bg-yellow-200 text-xs px-3 py-1 rounded shadow transition mt-1">
+                    Marcar Pg
+                </button>
+            </form>
+            
+            <form method="post" class="form-reiniciar-guia mt-1" 
+                  action="{reverse('app_tarefas:zerar_status_guia', args=[guia.id])}">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
+                <button type="submit" class="text-xs text-red-500 hover:text-red-700 underline">
+                    🔄 Reiniciar
+                </button>
+            </form>
+        </div>
+        """
+
+    def _html_pago(self, guia, associado, request):
+        return f"""
+        <div class="guia-paga">
+            <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+                💸 Guia Paga
+            </span>
+            
+            <form method="post" class="form-reiniciar-guia mt-1" 
+                  action="{reverse('app_tarefas:zerar_status_guia', args=[guia.id])}">
+                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
+                <button type="submit" class="text-xs text-red-500 hover:text-red-700 underline">
+                    🔄 Reiniciar
+                </button>
+            </form>
+        </div>
+        """
+
+# Reiniciar - Parte da Lógica
+class ZerarStatusGuiaView(LoginRequiredMixin, View):
+    def post(self, request, guia_id):
+        try:
+            guia = get_object_or_404(GuiaINSSModel, id=guia_id)
+            associado_id = guia.associado.id
+            mes = guia.mes_referencia
+            ano = guia.ano
+            
+            # Deletar permanentemente
+            guia.hard_delete()
+            
+            return JsonResponse({
+                'success': True,
+                'redirect_url': reverse('app_tarefas:emissao_guias'),  # Atualize com sua URL
+                'message': 'Processo reiniciado com sucesso'
+            })
+
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': f'Erro ao reiniciar: {str(e)}'
+            }, status=400)

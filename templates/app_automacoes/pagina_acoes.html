@@ -42,7 +42,7 @@
                     <i class="material-icons text-blue-500 text-2xl mr-3">file_download</i>
                     <div>
                         <a href="{{ pdf_url }}" class="text-blue-600 font-semibold hover:underline" download>
-                            Baixar Declaração
+                            Baixar Documento
                         </a>
                         <p class="text-sm text-gray-600">Faça o download do arquivo PDF da declaração.</p>
                     </div>
@@ -72,17 +72,37 @@
                     </div>
                 </li>
             </ul>
-                        <!-- Link para voltar ao associado -->
-            <div class="flex items-center justify-center bg-gray-100 py-10">
-                {% if associado %}
-                    <a href="{% url 'app_associados:single_associado' associado.id %}" class="text-blue-500 font-semibold hover:underline">
-                        Voltar para os detalhes do associado
-                    </a>
-                {% else %}
-                    <p>Informações do associado não disponíveis.</p>
-                {% endif %}
-            </div>
+            <!-- Link para voltar ao associado -->
+            <div class="flex flex-col items-center justify-center bg-gray-100 py-10 space-y-4">
 
+                {% if tipo_recibo == "servico_extra" and entrada %}
+                    <a href="{% url 'app_finances:edit_entrada' entrada.id %}" class="text-purple-600 font-semibold hover:underline">
+                        🧾 Voltar para a entrada do serviço extra associado
+                    </a>
+                    <p><strong>Recibo gerado para:</strong> {{ extra_associado.nome_completo }}</p>
+            
+                {% elif tipo_recibo == "anuidade" and associado %}
+                    <a href="{% url 'app_finances:financeiro_associado' associado.id %}" class="text-green-600 font-semibold hover:underline">
+                        💰 Voltar para o financeiro do associado
+                    </a>
+                    <p><strong>Recibo de anuidade para:</strong> {{ associado.user.get_full_name }}</p>
+            
+                {% elif tipo_recibo == "documento" and associado %}
+                    <a href="{% url 'app_associados:single_associado' associado.id %}" class="text-blue-600 font-semibold hover:underline">
+                        🔙 Voltar para os detalhes do associado
+                    </a>
+                    <p><strong>Documento gerado para:</strong> {{ associado.user.get_full_name }}</p>
+            
+                {% else %}
+                    <p class="text-gray-500 italic">Informações não disponíveis para identificar origem.</p>
+                {% endif %}
+            
+            </div>
+            
+                
+            
+            </div>            
+            
         </div>
     </div>
 </main>

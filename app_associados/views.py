@@ -6,21 +6,24 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse
-from django.db.models import Q
+from django.db.models import Q, Count
 from app_associacao.models import AssociacaoModel, ReparticoesModel, MunicipiosModel, IntegrantesModel
 from app_associados.models import STATUS_CHOICES
 from app_associados.models import AssociadoModel, ProfissoesModel
 from app_tarefas.models import TarefaModel, GuiaINSSModel
 from app_servicos.models import ServicoAssociadoModel, StatusEtapaChoices
+from app_embarcacoes.models import EmbarcacoesModel
 from django.contrib.auth.models import User
 from accounts.mixins import GroupPermissionRequiredMixin 
 from django.contrib.auth.mixins import LoginRequiredMixin
 import logging
 from django.utils.timezone import now
+from datetime import timedelta, date
 from django.contrib.auth.models import Group
 from app_documentos.models import Documento
 from django.http import QueryDict
 from django.http import JsonResponse
+from app_licencas.models import LicencasModel  # Import LicencasModel
 
 
 logger = logging.getLogger(__name__)
@@ -186,28 +189,44 @@ class ListAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListV
 
             guias_por_associado[associado_id] = guias
 
-
-
-
         # Obtem os associados já filtrados
         associados = list(self.get_queryset())
 
-        # IDs de serviços com status ≠ 'arquivado'
-        ids_servico = ServicoAssociadoModel.objects.exclude(status_etapa=StatusEtapaChoices.ARQUIVADO) \
+        # Contagem de serviços (≠ arquivado)
+        servicos_raw = ServicoAssociadoModel.objects.exclude(status_etapa=StatusEtapaChoices.ARQUIVADO) \
             .exclude(associado__isnull=True) \
-            .values_list('associado_id', flat=True)
+            .values('associado_id') \
+            .annotate(total=Count('id'))
 
-        # IDs de tarefas com status ≠ 'arquivada'
-        ids_tarefa = TarefaModel.objects.exclude(status='arquivada') \
+        servicos_por_associado = {
+            item['associado_id']: item['total']
+            for item in servicos_raw
+        }
+
+        # Contagem de tarefas (≠ arquivada)
+        tarefas_raw = TarefaModel.objects.exclude(status='arquivada') \
             .exclude(associado__isnull=True) \
-            .values_list('associado_id', flat=True)
+            .values('associado_id') \
+            .annotate(total=Count('id'))
 
-        ids_com_servico = set(ids_servico)
-        ids_com_tarefa = set(ids_tarefa)
+        tarefas_por_associado = {
+            item['associado_id']: item['total']
+            for item in tarefas_raw
+        }
+
+        # Contagem de embarcações (já tínhamos feito)
+        embarcacoes_raw = EmbarcacoesModel.objects.values('proprietario_id') \
+            .annotate(total=Count('id'))
+
+        embarcacoes_por_associado = {
+            item['proprietario_id']: item['total']
+            for item in embarcacoes_raw
+        }
 
         for associado in associados:
-            associado.tem_servico = associado.id in ids_com_servico
-            associado.tem_tarefa = associado.id in ids_com_tarefa
+            associado.qtd_servicos = servicos_por_associado.get(associado.id, 0)
+            associado.qtd_tarefas = tarefas_por_associado.get(associado.id, 0)
+            associado.qtd_embarcacoes = embarcacoes_por_associado.get(associado.id, 0)
 
             if associado.celular:
                 associado.celular_clean = associado.celular.replace('-', '').replace(' ', '')
@@ -262,7 +281,11 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
 
         # Documentos relacionados ao associado
         context['documentos'] = Documento.objects.filter(associado=associado)
+        context['embarcacoes'] = EmbarcacoesModel.objects.filter(proprietario=associado)
 
+        # 👇 Adicione aqui a data de hoje
+        from datetime import date
+        context['today'] = date.today()
         # Tarefas relacionadas ao associado
         context['tarefas'] = TarefaModel.objects.filter(associado=associado).order_by('-data_criacao')
         context['servicos'] = ServicoAssociadoModel.objects.filter(associado=associado).order_by('-data_inicio')
@@ -276,6 +299,27 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
         else:
             print("Nenhum Drive Folder ID associado.")
 
+        # Pega embarcações desse associado
+        embarcacoes = EmbarcacoesModel.objects.filter(proprietario=self.object).select_related('tipo_embarcacao')
+        hoje = date.today()
+
+        for emb in embarcacoes:
+            # ✅ Buscar a licença da embarcação
+            licenca = LicencasModel.objects.filter(embarcacao=emb).order_by('-validade_final').first()
+            emb.licenca_vigente = licenca
+
+            if licenca and licenca.validade_final:
+                if licenca.validade_final < hoje:
+                    emb.status_licenca = 'vencida'
+                elif licenca.validade_final <= hoje + timedelta(days=30):
+                    emb.status_licenca = 'alerta'
+                else:
+                    emb.status_licenca = 'ok'
+            else:
+                emb.status_licenca = 'sem_licenca'
+
+        context['embarcacoes'] = embarcacoes
+        
         return context
 
 

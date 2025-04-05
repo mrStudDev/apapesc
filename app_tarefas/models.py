@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.db import models
-from django.utils.timezone import now
+from django.utils.timezone import now, timezone
 from django.utils.text import slugify
 
 from django.contrib.auth import get_user_model
@@ -173,6 +173,12 @@ class HistoricoResponsaveisModel(models.Model):
 
 # ======== INSS ==========
 
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
 MESES_GUIAS = [
     (4, "Abril"), (5, "Maio"), (6, "Junho"), (7, "Julho"),
     (8, "Agosto"), (9, "Setembro"), (10, "Outubro"), (11, "Novembro")
@@ -180,29 +186,50 @@ MESES_GUIAS = [
 
 class GuiaINSSModel(models.Model):
     associado = models.ForeignKey(
-        AssociadoModel, 
+        'app_associados.AssociadoModel',
         on_delete=models.CASCADE, 
         related_name="guias_inss",
         verbose_name="Associado"
     )
     mes_referencia = models.PositiveSmallIntegerField(choices=MESES_GUIAS, verbose_name="Mês de Referência")
-    ano = models.PositiveIntegerField(default=now().year, verbose_name="Ano")
+    ano = models.PositiveIntegerField(default=timezone.now().year, verbose_name="Ano")  # Removido o lambda
     data_emissao = models.DateTimeField(auto_now_add=True, verbose_name="Data de Emissão")
     emitido_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Emitido por")
 
     STATUS_CHOICES = [
         ("pendente", "Pendente"),
         ("emitido", "Emitido"),
-        ("enviado", "Enviado")
+        ("enviado", "Enviado"),
+        ("pago", "Pago")
     ]
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pendente", verbose_name="Status")
-
+    deleted = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    
+    objects = models.Manager()
+    available_objects = models.Manager()
+    
+    def save(self, *args, **kwargs):
+        """Garante que o ano seja atualizado se não estiver definido"""
+        if not self.ano:
+            self.ano = timezone.now().year
+        super().save(*args, **kwargs)
+    
+    def delete(self, *args, **kwargs):
+        """Implementação do soft delete"""
+        self.deleted = True
+        self.deleted_at = timezone.now()
+        self.save()
+        
+    def hard_delete(self, *args, **kwargs):
+        """Delete permanente"""
+        super().delete(*args, **kwargs)
+        
     class Meta:
         ordering = ["ano", "mes_referencia"]
         verbose_name = "Guia INSS"
         verbose_name_plural = "Guias INSS"
+        default_manager_name = 'objects'
 
     def __str__(self):
         return f"{self.get_mes_referencia_display()} - {self.ano} | {self.associado}"
-
-

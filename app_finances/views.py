@@ -464,9 +464,12 @@ class EditAnuidadeView(UpdateView):
     form_class = AnuidadeForm
     template_name = 'app_finances/edit_anuidade.html'
     success_url = reverse_lazy('app_finances:create_anuidade')
+#======================================================================================
 
 
-# ENTRADAS
+
+# ENTRADAS ==================================================================================
+
 # ✅ View para criar uma nova entrada
 class EntradaCreateView(SuccessMessageMixin, CreateView):
     model = EntradaFinanceira
@@ -562,14 +565,15 @@ class EntradaCreateView(SuccessMessageMixin, CreateView):
 
 
 
-
 # Editar Entrada
 class EntradaUpdateView(SuccessMessageMixin, UpdateView):
     model = EntradaFinanceira
     form_class = EntradaFinanceiraForm
     template_name = 'app_finances/edit_entrada.html'
-    success_url = reverse_lazy('app_finances:list_entradas')
     success_message = "Entrada atualizada com sucesso!"
+
+    def get_success_url(self):
+        return reverse_lazy('app_finances:edit_entrada', kwargs={'pk': self.object.pk})
 
     def get_form_kwargs(self):
         """
@@ -651,8 +655,6 @@ class EntradaUpdateView(SuccessMessageMixin, UpdateView):
                     alterado_por=self.request.user
                 )
 
-
-
     def get_context_data(self, **kwargs):
         """
         Adiciona associações, repartições e status de pagamento ao contexto.
@@ -664,6 +666,8 @@ class EntradaUpdateView(SuccessMessageMixin, UpdateView):
         pagamentos = entrada.pagamentos.all().order_by("-data_pagamento")
         alteracoes = entrada.alteracoes.all().order_by("-data_alteracao")
         # 🔹 Atualizamos o contexto
+        context['exibir_botao_recibo'] = entrada.status_pagamento == 'pago' and hasattr(entrada, 'entrada_servico_extra') and entrada.entrada_servico_extra.extra_associado
+        
         context.update({
             'entrada': entrada,
             'associacoes': AssociacaoModel.objects.all(),

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block delete_licenca %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+    <main class="flex-grow flex items-center justify-center px-4 py-16 bg-gray-50">
+        <div class="bg-white p-8 rounded-xl shadow-lg max-w-md w-full border border-gray-200">
+          <h2 class="text-2xl font-bold text-red-600 mb-4">{{ titulo }}</h2>
+          <p class="text-gray-700 mb-6">
+            Tem certeza que deseja <strong>excluir</strong> a licença 
+            <span class="font-medium text-gray-900">{{ licenca.numero_licenca }}</span>?
+            Esta ação <span class="text-red-500 font-semibold">não poderá ser desfeita</span>.
+          </p>
+      
+          <form method="post" class="flex flex-col gap-4">
+            {% csrf_token %}
+            <button type="submit"
+                    class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded transition">
+              🚫 Sim, excluir
+            </button>
+            <a href="{% url 'app_licencas:single_licenca' licenca.pk %}"
+               class="w-full text-center bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2 px-4 rounded transition">
+              Cancelar
+            </a>
+          </form>
+        </div>
+      </main>
+      
+    <!-- Footer -->
+    {% include "components/footer_associacao.html" %}
+            
+{% endblock delete_licenca %}

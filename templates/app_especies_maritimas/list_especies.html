@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+
+{% block list_especies %}
+<!-- Navbar -->
+{% include "components/navbar_home.html" %}
+
+<main class="flex-grow">
+    <div class="container mx-auto px-4 py-10">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 text-center">
+        🌊 Catálogo de Espécies Marinhas
+        </h1>
+    
+        <form method="get" class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-8 items-end">
+          <!-- Busca genérica -->
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Buscar por nome</label>
+            <input
+              type="text"
+              name="q"
+              value="{{ search_term }}"
+              placeholder="Pesquisar nome comum ou científico..."
+              class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+          </div>
+        
+          <!-- Reino -->
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Reino</label>
+            <select name="reino" class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm">
+              <option value="">Todos</option>
+              {% for r in reinos %}
+              <option value="{{ r.id }}" {% if r.id|stringformat:"s" == selected_reino %}selected{% endif %}>{{ r.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        
+          <!-- Filo -->
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Filo</label>
+            <select name="filo" class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm">
+              <option value="">Todos</option>
+              {% for f in filos %}
+              <option value="{{ f.id }}" {% if f.id|stringformat:"s" == selected_filo %}selected{% endif %}>{{ f.nome }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        
+          <!-- Família (opcional) -->
+          <div>
+            <label class="block text-xs font-medium text-gray-600 mb-1">Família</label>
+            <select name="familia" class="w-full border border-gray-300 rounded-md py-2 px-3 text-sm">
+              <option value="">Todas</option>
+              {% for f in familias %}
+              <option value="{{ f.0 }}" {% if f.0|stringformat:"s" == selected_familia %}selected{% endif %}>{{ f.1 }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        
+          <!-- Botão -->
+          <div>
+            <button
+              type="submit"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm rounded-md transition"
+            >
+              🔍 Buscar
+            </button>
+          </div>
+        </form>
+        
+
+        <p class="text-center text-sm text-gray-500 mb-6">{{ total_especies }} espécie(s) cadastrada(s)</p>
+
+        <!-- Grade de Espécies -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {% for especie in especies %}
+            <div class="bg-white rounded-md shadow-sm hover:shadow-md transition border border-gray-100 p-3">
+              <a href="{% url 'app_especies_maritimas:single_especie' especie.slug %}">
+                {% if especie.imagem_principal %}
+                <div class="w-full aspect-[4/3] overflow-hidden rounded mb-2">
+                  <img
+                    src="{{ especie.imagem_principal.url }}"
+                    alt="{{ especie.nome_comum }}"
+                    class="w-full h-full object-cover"
+                  />
+                </div>
+                {% endif %}
+                <p class="text-sm font-medium text-gray-800 truncate">{{ especie.nome_comum }}</p>
+                <small class="text-[11px] text-gray-500 italic truncate">{{ especie.nome_cientifico }}</small>
+                <!-- 🔎 Extra info com ícones -->
+                <div class="mt-1 flex justify-between items-center text-[10px] text-gray-600">
+                  <!-- Reino à esquerda -->
+                  <span class="flex items-center space-x-1 truncate" title="Reino">
+                    <strong class="text-gray-700">Reino:</strong>
+                    <span class="truncate max-w-[60px]">{{ especie.reino.nome }}</span>
+                  </span>
+                
+                  <!-- Econômica à direita -->
+                  {% if especie.importancia_economica %}
+                    <span class="flex items-center space-x-1" title="Importância Econômica">
+                      <i class="material-icons text-[12px] text-yellow-500">monetization_on</i>
+                    </span>
+                  {% endif %}
+                </div>
+                
+              </a>
+            </div>
+            {% endfor %}
+          </div>
+          
+        
+    </div>
+</main>
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock list_especies %}

@@ -1,0 +1,42 @@
+
+{% load static %}
+<!-- Toolbar do Editor -->
+<div class="toolbar mb-4">
+    <button type="button" onclick="MainEditor.formatText('formatBlock', 'H1')" class="btn">T1</button>
+    <button type="button" onclick="MainEditor.formatText('formatBlock', 'H2')" class="btn">T2</button>
+    <button type="button" onclick="MainEditor.returnToParagraph()" class="btn">Normal</button>
+    <button type="button" onclick="MainEditor.formatText('bold')" class="btn">B</button>
+    <button type="button" onclick="MainEditor.formatText('italic')" class="btn">I</button>
+    <button type="button" onclick="MainEditor.formatText('underline')" class="btn">U</button>
+    <button type="button" onclick="MainEditor.createLink()" class="btn" target="_blank">Link</button>
+    
+    
+</div>
+<div class="toolbar mb-4">
+    <button type="button" onclick="MainEditor.addBlockquote()" class="btn">" "</button>
+    <select onchange="MainEditor.changeTextColor(this.value)" class="btn">
+        <option value="">Cor</option>
+        <option value="black">Preto</option>
+        <option value="red">Vermelho</option>
+        <option value="blue">Azul</option>
+        <option value="green">Verde</option>
+    </select>
+    <select onchange="MainEditor.changeBackgroundColor(this.value)" class="btn">
+        <option value="">Fundo</option>
+        <option value="white">Branco</option>
+        <option value="yellow">Amarelo</option>
+        <option value="lightblue">Azul Claro</option>
+        <option value="lightgreen">Verde Claro</option>
+    </select>
+</div>
+
+
+<div id="editor" contenteditable="true" class="border border-gray-300 rounded-md p-3">
+    {{ form.ingredientes.value|safe }}
+</div>
+<input type="hidden" id="hidden-editor" name="{{ form.ingredientes.name }}" value="{{ form.ingredientes.value|default:'' }}">
+<script src="{% static 'js/editor.js' %}"></script>
+
+<!-- CSS do Editor -->
+<link rel="stylesheet" href="{% static 'css/editor.css' %}">
+

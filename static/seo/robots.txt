@@ -8,5 +8,8 @@ Disallow: /documentos/
 Disallow: /automacoes/
 Disallow: /tarefas/
 Disallow: /financas/
+Disallow:/servicos/
+Disallow:/embarcacoes/
+Disallow:/licencas/
 
 Sitemap: https://www.apapesc.com/sitemap.xml

@@ -59,6 +59,7 @@
                                 <th class="px-3 py-2 text-left">CPF</th>
                                 <th class="px-3 py-2 text-left">Celular</th>
                                 <th class="px-3 py-2 text-left">Ações</th>
+                                <th class="px-3 py-2 text-left">Novo</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -69,13 +70,16 @@
                                 <td class="px-3 py-2">{{ extra.cpf }}</td>
                                 <td class="px-3 py-2">{{ extra.celular }}</td>
                                 <td class="px-3 py-2 space-x-2">
-                                    <a href="{% url 'app_servicos:create_servico_extra' extra.id %}"
-                                       class="text-green-600 hover:text-green-800" title="Criar Serviço">
-                                        <i class="material-icons text-base">build</i>
-                                    </a>
                                     <!-- Futuro botão de visualizar ou editar -->
                                     <a href="{% url 'app_servicos:detail_extraassociado' extra.id  %}" class="text-blue-600 hover:text-blue-800"><i class="material-icons text-base">visibility</i></a>
-                                </td>
+                                    <a href="{% url 'app_servicos:edit_extraassociado' extra.id  %}" class="text-yellow-600 hover:text-yellow-800"><i class="material-icons text-base">edit</i></a>
+                                </td>         
+                                <td class="px-3 py-2 space-x-2">
+                                    <a href="{% url 'app_servicos:create_servico_extra' extra.id %}"
+                                       class="text-green-600 hover:text-green-800" title="Criar Serviço">
+                                        <i class="material-icons text-base">handyman</i>
+                                    </a>                                    
+                                </td>                                                       
                             </tr>
                             {% empty %}
                             <tr>

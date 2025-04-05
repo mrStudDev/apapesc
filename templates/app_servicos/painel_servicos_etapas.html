@@ -26,8 +26,8 @@
     {% endif %}
 
     <main class="flex-grow">
-        <div class="container mx-auto max-8xl bg-white p-6 rounded-lg shadow-lg">
-
+        <br>
+        <div class="container mx-auto max-8xl bg-gray-100 p-6 rounded-lg shadow-lg">
             {% if messages %}
             <div class="mb-4">
                 {% for message in messages %}
@@ -48,17 +48,65 @@
             </div>
             {% endif %}
 
-        <!-- 🔹 Título principal -->
-        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <i class="material-icons text-blue-500 mr-2 text-base">description</i>
-            Emissão de Documentos
-        </h2>
+            <!-- 🔹 Título principal -->
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="material-icons text-blue-500 mr-2 text-base">description</i>
+                Emissão de Documentos
+            </h2>
+            
+            <!-- 🔹 Grid de Documentos -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+                {% for status, servicos in painel_docs.items %}
+                <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                    <h3 class="text-gray-600 font-semibold text-sm mb-3 flex justify-between items-center">
+                        {{ status_labels|get_item:status|default:status|capfirst }}
+                        <span class="text-xs text-gray-400">({{ servicos|length }})</span>
+                    </h3>
+                
+                    <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
+                        {% for s in servicos %}
+                        <div class="border border-gray-200 rounded p-2 hover:bg-gray-50 transition">
+                            <a href="{% if s.origem == 'extra' %}
+                                        {% url 'app_servicos:single_servico_extra' s.pk %}
+                                    {% else %}
+                                        {% url 'app_servicos:single_servico' s.pk %}
+                                    {% endif %}"
+                            class="block text-sm text-blue-500 font-medium hover:underline">
+                            {% if s.origem == 'associado' and s.associado and s.associado.user %}
+                                {{ s.associado.user.get_full_name }} <span class="text-gray-500">(Associado)</span>
+                            {% elif s.origem == 'extra' and s.extra_associado %}
+                                {{ s.extra_associado.nome_completo }} <span class="text-gray-500">(Extra)</span>
+                            {% else %}
+                                <span class="text-red-500 italic">Proprietário não definido</span>
+                            {% endif %}
+                            </a>
+                            <p class="text-xs text-gray-600 mt-1">
+                            {{ s.tipo_servico }} <br>
+                            <span class="text-gray-400">Atualizado em {{ s.ultima_alteracao|date:"d/m/Y H:i" }}</span>
+                            </p>
+                        </div>
+                        {% empty %}
+                        <p class="text-gray-400 italic">Nenhum serviço</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <br>
+        <div class="container mx-auto max-8xl bg-gray-100 p-6 rounded-lg shadow-lg">
         
-        <!-- 🔹 Grid de Documentos -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-            {% for status, servicos in painel_docs.items %}
-            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-                <h3 class="text-blue-600 font-semibold text-sm mb-3 flex justify-between items-center">
+            <!-- 🔹 Título de Consultorias -->
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="material-icons text-indigo-500 mr-2 text-base">build</i>
+                Consultorias e Serviços Gerais
+            </h2>
+        
+            <!-- 🔹 Grid de Consultorias -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+                {% for status, servicos in painel_consultorias.items %}
+                <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                <h3 class="text-gray-600 font-semibold text-sm mb-3 flex justify-between items-center">
                     {{ status_labels|get_item:status|default:status|capfirst }}
                     <span class="text-xs text-gray-400">({{ servicos|length }})</span>
                 </h3>
@@ -66,68 +114,32 @@
                 <div class="space-y-3 max-h-96 overflow-y-auto pr-1">
                     {% for s in servicos %}
                     <div class="border border-gray-200 rounded p-2 hover:bg-gray-50 transition">
-                        <a href="{% url 'app_servicos:single_servico' s.pk %}" class="block text-sm text-blue-700 font-medium hover:underline">
-                            {% if s.origem == 'associado' %}
-                                {{ s.associado.user.get_full_name }}
-                            {% elif s.origem == 'extra' %}
-                                {{ s.extra_associado.nome_completo }}
-                            {% else %}
-                                <span class="text-red-500 italic">Proprietário não definido</span>
-                            {% endif %}
+                        <a href="{% if s.origem == 'extra' %}
+                                    {% url 'app_servicos:single_servico_extra' s.pk %}
+                                {% else %}
+                                    {% url 'app_servicos:single_servico' s.pk %}
+                                {% endif %}"
+                        class="block text-sm text-blue-500 font-medium hover:underline">
+                        {% if s.origem == 'associado' and s.associado and s.associado.user %}
+                            {{ s.associado.user.get_full_name }} <span class="text-gray-500">(Associado)</span>
+                        {% elif s.origem == 'extra' and s.extra_associado %}
+                            {{ s.extra_associado.nome_completo }} <span class="text-gray-500">(Extra)</span>
+                        {% else %}
+                            <span class="text-red-500 italic">Proprietário não definido</span>
+                        {% endif %}
                         </a>
                         <p class="text-xs text-gray-600 mt-1">
-                            {{ s.tipo_servico }} <br>
-                            <span class="text-gray-400">Atualizado em {{ s.ultima_alteracao|date:"d/m/Y H:i" }}</span>
+                        {{ s.tipo_servico }} <br>
+                        <span class="text-gray-400">Atualizado em {{ s.ultima_alteracao|date:"d/m/Y H:i" }}</span>
                         </p>
                     </div>
                     {% empty %}
                     <p class="text-gray-400 italic">Nenhum serviço</p>
                     {% endfor %}
                 </div>
-            </div>
-            {% endfor %}
-        </div>
-        
-        <!-- 🔹 Título de Consultorias -->
-        <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
-            <i class="material-icons text-indigo-500 mr-2 text-base">build</i>
-            Consultorias e Serviços Gerais
-        </h2>
-        
-        <!-- 🔹 Grid de Consultorias -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {% for status, servicos in painel_consultorias.items %}
-            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-            <h3 class="text-indigo-600 font-semibold text-sm mb-3 flex justify-between items-center">
-                {{ status_labels|get_item:status|default:status|capfirst }}
-                <span class="text-xs text-gray-400">({{ servicos|length }})</span>
-            </h3>
-        
-            <ul class="text-sm text-gray-700 space-y-1 max-h-48 overflow-y-auto pr-1">
-                {% for s in servicos %}
-                <li>
-                <a href="{% url 'app_servicos:single_servico' s.pk %}" class="text-indigo-600 hover:underline">
-                    {% if s.origem == 'associado' %}
-                    {% if s.associado and s.associado.user %}
-                        {{ s.associado.user.get_full_name }}
-                    {% endif %}
-                    {% elif s.origem == 'extra' %}
-                    {% if s.extra_associado %}
-                        {{ s.extra_associado.nome_completo }}
-                    {% else %}
-                        <span class="text-red-500 italic">Extra associado inválido</span>
-                    {% endif %}
-                    {% else %}
-                    <span class="text-red-500 italic">Sem origem definida</span>
-                    {% endif %}
-                </a>
-                </li>
-                {% empty %}
-                <li class="text-gray-400 italic">Nenhum serviço</li>
+                </div>
                 {% endfor %}
-            </ul>
             </div>
-            {% endfor %}
         </div>
     </main>
 

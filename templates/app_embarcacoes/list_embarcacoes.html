@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters_embarcacao %}
+
+{% block title %}Lista Embarcações{% endblock title %}
+
+{% block list_embarcacoes %}
+<!-- Página de acesso restrito ao Superuser -->
+{% include 'components/navbar_associacao.html' %}
+
+
+<main class="flex-grow">
+    <div class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+            <i class="material-icons mr-2 text-blue-600">directions_boat</i> {{ titulo }}
+        </h2>
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}bg-green-500
+                    {% elif message.tags == 'error' %}bg-red-500
+                    {% elif message.tags == 'info' %}bg-blue-500
+                    {% else %}bg-gray-500
+                    {% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}        
+    
+        {% if embarcacoes %}
+            <div class="overflow-x-auto">
+                <table class="table-auto w-full border border-gray-200 text-sm rounded-md overflow-hidden">
+                    <thead class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
+                        <tr>
+                            <th class="px-4 py-2 border text-left">Nome da Embarcação</th>
+                            <th class="px-4 py-2 border text-left">Proprietário</th>
+                            <th class="px-4 py-2 border text-left">Validade TIE</th>
+                            <th class="px-6 py-3 border-b text-center">🧭 Licença</th>
+                            <th class="px-4 py-2 border text-center">Ações</th>
+                            <th class="px-4 py-2 border text-center">Nova</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for embarcacao in embarcacoes %}
+                            <tr class="hover:bg-gray-50 transition">
+                                <td class="px-4 py-2 border">{{ embarcacao.nome_embarcacao }}</td>
+                                <td class="px-4 py-2 border">
+                                    {{ embarcacao.proprietario.user.get_full_name }}
+                                </td>
+                                <td class="px-4 py-2 border text-sm text-center">
+                                    {% if embarcacao.status_tie == 'vencida' %}
+                                      <span class="inline-block bg-red-100 text-red-800 px-2 py-1 rounded font-semibold">
+                                        ❌ Vencida
+                                      </span><br>
+                                      <span class="text-red-600 italic">
+                                        venceu em {{ embarcacao.validade_tie|date:"d/m/Y" }}
+                                      </span>
+                                    {% elif embarcacao.status_tie == 'alerta' %}
+                                      <span class="inline-block bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-semibold">
+                                        ⚠️ Vence logo
+                                      </span><br>
+                                      <span class="text-yellow-700 italic">
+                                        {{ embarcacao.dias_para_vencimento_tie }} dias restantes (vence em {{ embarcacao.validade_tie|date:"d/m/Y" }})
+                                      </span>
+                                    {% elif embarcacao.status_tie == 'ok' %}
+                                      <span class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded font-semibold">
+                                        ✅ Em dia
+                                      </span><br>
+                                      <span class="text-green-700 italic">
+                                        {{ embarcacao.dias_para_vencimento_tie }} dias restantes (vence em {{ embarcacao.validade_tie|date:"d/m/Y" }})
+                                      </span>
+                                    {% else %}
+                                      <span class="text-gray-400 italic">Sem TIE</span>
+                                    {% endif %}
+                                  </td>
+                                  
+                                <td class="px-6 py-4 text-center text-sm">
+                                    {% if embarcacao.status_validade == 'vencida' %}
+                                      <span class="inline-block bg-red-100 text-red-800 px-2 py-1 rounded font-semibold">
+                                        ❌ Vencida
+                                      </span><br>
+                                      <span class="text-red-600 italic">
+                                        venceu em {{ embarcacao.data_validade_mais_recente|date:"d/m/Y" }}
+                                      </span>
+                                    {% elif embarcacao.status_validade == 'alerta' %}
+                                      <span class="inline-block bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-semibold">
+                                        ⚠️ Vence logo
+                                      </span><br>
+                                      <span class="text-yellow-700 italic">
+                                        {{ embarcacao.dias_para_vencimento }} dias restantes (vence em {{ embarcacao.data_validade_mais_recente|date:"d/m/Y" }})
+                                      </span>
+                                    {% elif embarcacao.status_validade == 'ok' %}
+                                      <span class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded font-semibold">
+                                        ✅ Em dia
+                                      </span><br>
+                                      <span class="text-green-700 italic">
+                                        {{ embarcacao.dias_para_vencimento }} dias restantes (vence em {{ embarcacao.data_validade_mais_recente|date:"d/m/Y" }})
+                                      </span>
+                                    {% else %}
+                                      <span class="text-gray-400 italic">S/L</span>
+                                    {% endif %}
+                                  </td>
+                                  
+                                <td class="px-4 py-2 border text-center">
+                                    <a href="{% url 'app_embarcacoes:single_embarcacao' embarcacao.id %}" class="text-blue-600 hover:text-blue-800" title="Ver detalhes">
+                                        <i class="material-icons">visibility</i>
+                                    </a>
+                                    <a href="{% url 'app_embarcacoes:edit_embarcacao' embarcacao.id %}" class="text-yellow-500 hover:text-yellow-800" title="Ver detalhes">
+                                        <i class="material-icons">edit</i>
+                                    </a>                                    
+                                </td>
+                              
+                                <td class="px-4 py-2 border text-center">
+                                    <a href="{% url 'app_associados:list_geral_associado' %}"
+                                      class="text-orange-600 hover:text-orange-800 ml-2"
+                                      title="Nova Embarcação para este Associado">
+                                      <i class="material-icons text-base">sailing</i>
+                                  </a>                                    
+                                    <a href="{% url 'app_licencas:create_licenca' embarcacao.id %}"
+                                        class="text-yellow-600 hover:text-yellow-800"
+                                        title="Cadastrar licença">
+                                        <i class="material-icons text-base">description</i>
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-gray-500">Nenhuma embarcação cadastrada.</p>
+        {% endif %}
+    </div>
+</main>
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock list_embarcacoes %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block single_receita %}
+<!-- Navbar -->
+{% include "components/navbar_home.html" %}
+
+<main class="flex-grow">
+    <div class="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center">
+            🍴 Receita: {{ receita.nome_receita }}
+          </h1>
+          
+    <div class="bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+        {% if receita.imagem %}
+        <div class="relative overflow-hidden rounded-2xl shadow-lg border border-gray-200 mb-8">
+            <img
+              src="{{ receita.imagem.url }}"
+              alt="{{ receita.nome_receita }}"
+              class="w-full h-80 sm:h-[30rem] object-cover transition-transform duration-300 hover:scale-105"
+            >
+            <div class="absolute inset-0 bg-black/10 hover:bg-black/20 transition duration-300"></div>
+          </div>
+          
+        {% endif %}
+
+
+        <div class="p-6">
+        <h1 class="text-2xl font-bold text-indigo-800 mb-2">{{ receita.nome_receita }}</h1>
+        <p class="text-sm text-gray-600 italic mb-4">Espécie: <a href="{% url 'app_especies_maritimas:single_especie' receita.especie.slug %}" class="text-blue-600 hover:underline">{{ receita.especie.nome_comum }}</a></p>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700 mb-4">
+            <p><strong>Tipo:</strong> {{ receita.get_tipo_display }}</p>
+            <p><strong>Dificuldade:</strong> {{ receita.get_dificuldade_display }}</p>
+            <p><strong>Tempo de Preparo:</strong> {{ receita.get_tempo_formatado }}</p>
+            <p><strong>Porções:</strong> {{ receita.porcoes }}</p>
+        </div>
+
+        <div class="mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">Ingredientes</h2>
+            <p class="text-gray-700 whitespace-pre-line">{{ receita.ingredientes|safe  }}</p>
+        </div>
+
+        <div class="mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">Modo de Preparo</h2>
+            <p class="text-gray-700 whitespace-pre-line">{{ receita.modo_preparo|safe }}</p>
+        </div>
+
+        {% if receita.dicas %}
+        <div class="mb-4">
+            <h2 class="text-lg font-semibold text-gray-800">Dicas e Variações</h2>
+            <p class="text-gray-700 whitespace-pre-line">{{ receita.dicas|safe  }}</p>
+        </div>
+        {% endif %}
+
+        {% if receita.fonte %}
+        <div class="mt-6 text-sm text-gray-500 italic">
+            <p>Fonte: {{ receita.fonte }}</p>
+        </div>
+        {% endif %}
+        
+        {% if receita.link_referencia %}
+        <a href="{{ receita.link_referencia }}" target="_blank" class="text-blue-600 hover:underline text-sm">🔗 Ver referência externa</a>
+        {% endif %}
+        </div>
+    </div>
+    </div>
+</main>
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock single_receita %}

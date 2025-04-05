@@ -12,6 +12,7 @@ from .views import (
     EmissaoGuiasView,
     AtualizarStatusGuiaView,
     CriarGuiaView,
+    ZerarStatusGuiaView
     )
 
 
@@ -27,6 +28,10 @@ urlpatterns = [
     path("emissao-guias/", EmissaoGuiasView.as_view(), name="emissao_guias"),
     path("atualizar-status-guia/<int:guia_id>/", AtualizarStatusGuiaView.as_view(), name="atualizar_status_guia"),
     path("criar-guia/<int:associado_id>/<int:mes>/<int:ano>/", CriarGuiaView.as_view(), name="criar_guia"),
+    path('tarefas/zerar-status-guia/<int:guia_id>/', ZerarStatusGuiaView.as_view(), name='zerar_status_guia'),
+
+
+
 
     path('starus/<int:pk>/alterar-status/', views.alterar_status_tarefa, name='alterar_status'),
     path('responsaveis/<int:pk>/alterar-responsaveis/', views.alterar_responsaveis_tarefa, name='alterar_responsaveis'),

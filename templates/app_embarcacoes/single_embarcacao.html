@@ -1,0 +1,489 @@
+<!-- app_embarcacoes/templates/app_embarcacoes/single_embarcacao.html -->
+
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters_embarcacao %}
+
+{% block single_embarcacao %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <!-- Conteúdo Principal -->
+        <div class="container mx-auto py-6 px-4 max-w-5xl">
+            {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-4 rounded-md text-white 
+                        {% if message.tags == 'success' %}
+                            bg-green-500
+                        {% elif message.tags == 'error' %}
+                            bg-red-500
+                        {% elif message.tags == 'info' %}
+                            bg-blue-500
+                        {% else %}
+                            bg-gray-500
+                        {% endif %}
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <!-- 🔹 Barra de Ações (Padrão visual unificado) -->
+    <div class="flex justify-center gap-4 mt-4 mb-10">
+        
+        <!-- Lista de Embarcações -->
+        <a href="{% url 'app_embarcacoes:list_embarcacoes' %}"
+            class="flex items-center bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-md shadow-sm border border-blue-200 transition"
+            title="Voltar para lista de associados">
+            <i class="material-icons mr-2 text-blue-500">list</i>
+            Lista
+        </a>
+
+        <!-- Editar Embarcação -->
+        <a href="{% url 'app_embarcacoes:edit_embarcacao' embarcacao.pk %}"
+            class="flex items-center bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-md shadow-sm border border-blue-200 transition"
+            title="Editar dados do associado">
+            <i class="material-icons mr-2 text-blue-500">edit</i>
+            Editar
+        </a>
+
+        <!-- Upload de Documento -->
+        <a href="#"
+            class="flex items-center bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-md shadow-sm border border-blue-200 transition"
+            title="Enviar documento para o associado">
+            <i class="material-icons mr-2 text-blue-500">upload_file</i>
+            Upload Doc
+        </a>
+    </div>    
+    <div class="container mx-auto py-6 px-4 max-w-5xl">
+        <!-- Hero de Embarcação -->
+        <div class="bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            
+                <!-- Imagem -->
+                <div class="p-4 flex items-center justify-center bg-gray-50">
+                    {% if embarcacao.destaque_embarcacao_img %}
+                    <img src="{{ embarcacao.destaque_embarcacao_img.url }}" alt="Imagem da embarcação"
+                        class="rounded-lg shadow-md max-w-xs w-full object-cover">
+                    {% else %}
+                    <div class="text-gray-400 italic">Sem imagem disponível</div>
+                    {% endif %}
+                </div>
+            
+                <!-- Informações principais -->
+                <div class="md:col-span-2 p-6 flex flex-col justify-center space-y-4">
+                    <h1 class="text-3xl font-extrabold text-blue-800 flex items-center">
+                    <i class="material-icons text-blue-600 mr-2">directions_boat</i>
+                    {{ embarcacao.nome_embarcacao }}
+                    </h1>
+            
+                    <div class="text-gray-700 text-sm">
+                        <p>
+                            <strong class="text-gray-600">Proprietário:</strong> {{ embarcacao.proprietario.user.get_full_name }}
+                            <a href="{% url 'app_associados:single_associado' embarcacao.proprietario.id %}" 
+                            class="text-blue-500 hover:text-blue-700 ml-2" 
+                            title="Ver detalhes do associado">
+                            <i class="material-icons">visibility</i>
+                            </a>
+                        </p>
+                            
+                        <p>
+                            <strong class="text-gray-600">Co-Proprietário:</strong>
+                            {% if embarcacao.co_proprietario_nome %}
+                            {{ embarcacao.co_proprietario_nome }}
+                            {% else %}
+                            <span class="italic text-gray-400">Não informado</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+  
+        <!-- Detalhes Técnicos -->
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-8">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+            <i class="material-icons text-blue-500 mr-2">assignment</i>
+            Informações Técnicas da Embarcação
+            </h2>
+        
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-800">
+                <div class="bg-gray-50 p-4 rounded-md shadow-sm border">
+                    <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Inscrição</p>
+                    <p class="font-medium">{{ embarcacao.inscricao_embarcacao }}</p>
+                </div>
+            
+                <div class="bg-gray-50 p-4 rounded-md shadow-sm border">
+                    <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Tipo</p>
+                    <p class="font-medium">{{ embarcacao.tipo_embarcacao }}</p>
+                </div>
+            
+                <div class="p-4 rounded-md shadow-sm border
+                    {% if embarcacao.status_tie == 'vencida' %}
+                    bg-red-50 border-red-200
+                    {% elif embarcacao.status_tie == 'alerta' %}
+                    bg-yellow-50 border-yellow-200
+                    {% elif embarcacao.status_tie == 'ok' %}
+                    bg-green-50 border-green-200
+                    {% else %}
+                    bg-gray-50 border-gray-200
+                    {% endif %}
+                ">
+                    <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Validade TIE</p>
+                    
+                    {% if embarcacao.validade_tie %}
+                        <p class="font-medium">
+                        {{ embarcacao.validade_tie|date:"d/m/Y" }}
+                        </p>
+                    
+                        <p class="text-sm mt-1">
+                        {% if embarcacao.status_tie == 'vencida' %}
+                            <span class="text-red-700 italic">❌ Vencida ({{ embarcacao.dias_para_vencimento_tie }} dias atrás)</span>
+                        {% elif embarcacao.status_tie == 'alerta' %}
+                            <span class="text-yellow-700 italic">⚠️ {{ embarcacao.dias_para_vencimento_tie }} dias restantes</span>
+                        {% elif embarcacao.status_tie == 'ok' %}
+                            <span class="text-green-700 italic">✅ {{ embarcacao.dias_para_vencimento_tie }} dias restantes</span>
+                        {% endif %}
+                        </p>
+                    {% else %}
+                        <p class="text-gray-400 italic text-sm">Sem data informada</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    
+
+        <!-- ⛵ Informações Operacionais -->
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+            <i class="material-icons text-indigo-500 mr-2">sailing</i>
+            Informações Operacionais
+            </h2>
+        
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-800">
+                <div>
+                    <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Atividade</p>
+                    <p>{{ embarcacao.atividade }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Área de Navegação</p>
+                    <p>{{ embarcacao.area_navegacao }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Tripulantes</p>
+                    <p>{{ embarcacao.numero_tripulantes }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Passageiros</p>
+                    <p>{{ embarcacao.numero_passageiros }}</p>
+                </div>
+                <div>
+                    <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Porte</p>
+                    <p>{{ embarcacao.porte }}</p>
+                </div>
+            </div>
+        </div>
+    
+        <!-- 📐 Especificações Técnicas -->
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+            <i class="material-icons text-blue-500 mr-2">engineering</i>
+            Especificações Técnicas
+            </h2>
+        
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-800">
+            <div>
+                <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Comprimento</p>
+                <p>{{ embarcacao.cumprimento }} metros</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Boca</p>
+                <p>{{ embarcacao.boca }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">AB/GT</p>
+                <p>{{ embarcacao.ab_gt }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Tipo de Propulsão</p>
+                <p>{{ embarcacao.tipo_propulsao }}</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-xs uppercase mb-1 font-semibold">Combustível</p>
+                <p>{{ embarcacao.get_combustivel_display }}</p>
+            </div>
+            </div>
+        </div>
+    
+
+        <div class="bg-white shadow rounded-lg p-6 border border-gray-200 mt-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+            <i class="material-icons text-blue-500 mr-2">settings</i> Motores da Embarcação
+            </h2>
+        
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-800">
+            <!-- Motor 1 -->
+            <div class="bg-gray-50 rounded-md p-4 border border-gray-100 shadow-sm">
+                <p class="font-semibold text-blue-600 flex items-center">
+                <i class="material-icons text-blue-500 mr-1">memory</i> Motor 1
+                </p>
+                {% if embarcacao.motor_1 %}
+                <p><strong>Modelo:</strong> {{ embarcacao.motor_1 }}</p>
+                <p><strong>Série:</strong> {{ embarcacao.numero_serie_1 }}</p>
+                <p><strong>Potência HP 1:</strong> {{ embarcacao.potencia_hp1 }}</p>
+                {% else %}
+                <p class="text-gray-400 italic">Não cadastrado</p>
+                {% endif %}
+            </div>
+        
+            <!-- Motor 2 -->
+            <div class="bg-gray-50 rounded-md p-4 border border-gray-100 shadow-sm">
+                <p class="font-semibold text-blue-600 flex items-center">
+                <i class="material-icons text-blue-500 mr-1">memory</i> Motor 2
+                </p>
+                {% if embarcacao.motor_2 %}
+                <p><strong>Modelo:</strong> {{ embarcacao.motor_2 }}</p>
+                <p><strong>Série:</strong> {{ embarcacao.numero_serie_2 }}</p>
+                <p><strong>Potência HP 2:</strong> {{ embarcacao.potencia_hp2 }}</p>
+                {% else %}
+                <p class="text-gray-400 italic">Não cadastrado</p>
+                {% endif %}
+            </div>
+        
+            <!-- Motor 3 -->
+            <div class="bg-gray-50 rounded-md p-4 border border-gray-100 shadow-sm">
+                <p class="font-semibold text-blue-600 flex items-center">
+                <i class="material-icons text-blue-500 mr-1">memory</i> Motor 3
+                </p>
+                {% if embarcacao.motor_3 %}
+                <p><strong>Modelo:</strong> {{ embarcacao.motor_3 }}</p>
+                <p><strong>Série:</strong> {{ embarcacao.numero_serie_3 }}</p>
+                <p><strong>Potência HP 3:</strong> {{ embarcacao.potencia_hp3 }}</p>
+                {% else %}
+                <p class="text-gray-400 italic">Não cadastrado</p>
+                {% endif %}
+            </div>
+        
+            <!-- Motor 4 -->
+            <div class="bg-gray-50 rounded-md p-4 border border-gray-100 shadow-sm">
+                <p class="font-semibold text-blue-600 flex items-center">
+                <i class="material-icons text-blue-500 mr-1">memory</i> Motor 4
+                </p>
+                {% if embarcacao.motor_4 %}
+                <p><strong>Modelo:</strong> {{ embarcacao.motor_4 }}</p>
+                <p><strong>Série:</strong> {{ embarcacao.numero_serie_4 }}</p>
+                <p><strong>Potência HP 4:</strong> {{ embarcacao.potencia_hp4 }}</p>
+                {% else %}
+                <p class="text-gray-400 italic">Não cadastrado</p>
+                {% endif %}
+            </div>
+            </div>
+        
+            {% if not embarcacao.motor_1 and not embarcacao.motor_2 and not embarcacao.motor_3 and not embarcacao.motor_4 %}
+            <p class="text-gray-500 italic mt-4">Nenhum motor cadastrado para esta embarcação.</p>
+            {% endif %}
+        </div>
+        
+
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mt-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+            <i class="material-icons text-indigo-500 mr-2">gavel</i>
+            Informações de Registro
+            </h2>
+        
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
+        
+            <!-- Alienação com destaque -->
+                <div>
+                    <strong class="block text-gray-600 mb-1">Alienação:</strong>
+                    {% if embarcacao.alienacao == "sim" %}
+                    <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-700">
+                        <i class="material-icons text-sm mr-1">report_problem</i>
+                        Alienada
+                    </span>
+                    {% elif embarcacao.alienacao == "nao" %}
+                    <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                        <i class="material-icons text-sm mr-1">check_circle</i>
+                        Livre de Alienação
+                    </span>
+                    {% else %}
+                    <span class="text-gray-400 italic">Não informado</span>
+                    {% endif %}
+                </div>
+
+                <!-- Ano Construção -->
+                <div>
+                    <strong class="block text-gray-600 mb-1">Ano Construção/Fabricação:</strong>
+                    <p>{{ embarcacao.ano_construcao|date:"d/m/Y" }}</p>
+                </div>
+                <!-- Data Nome Construtor -->
+                <div>
+                    <strong class="block text-gray-600 mb-1">Nome Cosntrutor:</strong>
+                    <p>{{ embarcacao.construtor_nome }}</p>
+                </div>
+                <!-- Material Construção-->
+                <div>
+                    <strong class="block text-gray-600 mb-1">Material Construção:</strong>
+                    <p>{{ embarcacao.material_construcao }}</p>
+                </div>
+                <!-- Arqueação Bruta-->
+                <div>
+                    <strong class="block text-gray-600 mb-1">Arqueação Bruta:</strong>
+                    <p>{{ embarcacao.arqueacao_bruta }}</p>
+                </div>
+                <!-- Município -->
+                <div>
+                    <strong class="block text-gray-600 mb-1">Município de Emissão:</strong>
+                    <p>{{ embarcacao.municipio_emissao|default:"-" }}</p>
+                </div>
+            
+                <!-- Data de Emissão -->
+                <div>
+                    <strong class="block text-gray-600 mb-1">Data de Emissão:</strong>
+                    <p>{{ embarcacao.data_emissao|date:"d/m/Y" }}</p>
+                </div>
+                
+                <!-- Última Atualização -->
+                <div>
+                    <strong class="block text-gray-600 mb-1">Atualização Cadastro:</strong>
+                    <p>{{ embarcacao.data_atualizacao|date:"d/m/Y" }}</p>
+                </div>
+            </div>
+        </div>
+        
+
+        <!-- 📸 Galeria de Imagens da Embarcação -->
+        <div class="bg-white p-6 rounded-lg shadow-md border border-gray-200 mt-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+            <i class="material-icons text-indigo-500 mr-2">photo_library</i>
+            Galeria da Embarcação
+            </h2>
+        
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% if embarcacao.traves_img %}
+                <div>
+                <img src="{{ embarcacao.traves_img.url }}" alt="Imagem do Través" class="rounded-md shadow-md w-full h-auto object-cover">
+                <p class="text-sm text-gray-600 mt-2 italic">Vista lateral da embarcação (Través).</p>
+                </div>
+            {% endif %}
+        
+            {% if embarcacao.popa_img %}
+                <div>
+                <img src="{{ embarcacao.popa_img.url }}" alt="Imagem da Popa" class="rounded-md shadow-md w-full h-auto object-cover">
+                <p class="text-sm text-gray-600 mt-2 italic">Imagem traseira da embarcação (Popa).</p>
+                </div>
+            {% endif %}
+            </div>
+        </div>
+        <br>
+
+        <!-- Licenças vinculadas -->
+        <div class="md:col-span-3 px-6 pb-6">
+            <div class="mt-4 bg-yellow-50 border border-indigo-200 rounded p-4">
+            <h2 class="text-indigo-800 font-semibold text-lg flex items-center gap-2">
+                <span class="material-icons">description</span>
+                Licença(s) vinculada(s)
+            </h2>
+        
+            {% if licencas %}
+                <ul class="mt-2 list-disc list-inside text-sm text-indigo-900 space-y-2">
+                {% for licenca in licencas %}
+                    {% with licenca.validade_final as validade %}
+                    {% with hoje=now|date:"Y-m-d" %}
+                    <li>
+                    <a href="{% url 'app_licencas:single_licenca' licenca.id %}" class="text-blue-600 hover:underline font-medium">
+                        {{ licenca.get_licenca_nome_display }}
+                    </a>
+                    –
+                    <span class="text-sm text-gray-700">
+                        {{ validade|date:"d/m/Y" }}
+                    </span>
+        
+                    {% if licenca.status_validade == 'vencida' %}
+                        <span class="ml-2 bg-red-100 text-red-800 px-2 py-0.5 text-xs font-semibold rounded">Vencida</span>
+                        {% elif licenca.status_validade == 'alerta' %}
+                        <span class="ml-2 bg-yellow-100 text-yellow-800 px-2 py-0.5 text-xs font-semibold rounded">Vence logo</span>
+                        {% elif licenca.status_validade == 'ok' %}
+                        <span class="ml-2 bg-green-100 text-green-800 px-2 py-0.5 text-xs font-semibold rounded">Em dia</span>
+                        {% endif %}
+
+                    </li>
+                    {% endwith %}
+                    {% endwith %}
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-600 mt-2 italic">Nenhuma licença foi vinculada a esta embarcação.</p>
+            {% endif %}
+            </div>
+        </div>
+
+        {% if embarcacao.content %}
+        <div style="margin-left:10px; margin-right: 10px;">
+            <div class="prose max-w-none text-gray-700">
+                <h3 class="font-semibold mt-4 text-gray-700">Anotações:</h3>
+                <p class="text-gray-800">{{ embarcacao.content|safe }}</p>
+            </div>
+        </div>
+        {% endif %}
+        <br>
+        <hr>
+        <!-- 🔹 Barra de Ações (Padrão visual unificado) -->
+        <div class="flex justify-center gap-4 mt-4 mb-10">
+            
+            <!-- Lista de Embarcações -->
+            <a href="{% url 'app_embarcacoes:list_embarcacoes' %}"
+                class="flex items-center bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-md shadow-sm border border-blue-200 transition"
+                title="Voltar para lista de associados">
+                <i class="material-icons mr-2 text-blue-500">list</i>
+                Lista
+            </a>
+
+            <!-- Editar Embarcação -->
+            <a href="{% url 'app_embarcacoes:edit_embarcacao' embarcacao.pk %}"
+                class="flex items-center bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-md shadow-sm border border-blue-200 transition"
+                title="Editar dados do associado">
+                <i class="material-icons mr-2 text-blue-500">edit</i>
+                Editar
+            </a>
+
+            <!-- Upload de Documento -->
+            <a href="#"
+                class="flex items-center bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded-md shadow-sm border border-blue-200 transition"
+                title="Enviar documento para o associado">
+                <i class="material-icons mr-2 text-blue-500">upload_file</i>
+                Upload Doc
+            </a>
+        </div>    
+    </div>
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+
+<script src="{% static 'js/copy_to_clipboard.js' %}"></script>
+{% endblock single_embarcacao %}

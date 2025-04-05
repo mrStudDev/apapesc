@@ -64,8 +64,8 @@
                     <a href="{% url 'app_associacao:list_reparticao' %}" class="block px-4 py-2 hover:bg-gray-200">Repartições</a>
                     <a href="{% url 'app_associacao:list_municipio' %}" class="block px-4 py-2 hover:bg-gray-200">Mun. de Circunscrição</a>
                     <hr class="border-t-2 border-gray-500 my-2">
-                    <a href="#embarcacoes" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Embarcações</a>
-                    <a href="#embarcacoes" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Licenças</a>
+                    <a href="{% url 'app_embarcacoes:list_embarcacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Embarcações</a>
+                    <a href="{% url 'app_licencas:list_licencas' %}" class="block px-4 py-2 hover:bg-gray-200">Licenças</a>
                     <hr class="border-t-2 border-gray-500 my-2">                    
                     <a href="{% url 'app_associacao:list_integrante' %}" class="block px-4 py-2 hover:bg-gray-200">Integrantes Associação</a>
                     <a href="{% url 'app_associacao:list_cargo' %}" class="block px-4 py-2 hover:bg-gray-200">Cargos</a>
@@ -90,14 +90,14 @@
                     <a href="{% url 'app_associacao:create_reparticao' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Repartição</a>
                     <a href="{% url 'app_associacao:create_municipio' %}" class="block px-4 py-2 hover:bg-gray-200">Mun. Circunscrição</a>
                     <hr class="border-t-2 border-gray-500 my-2">
-                    <a href="#embarcacoes" class="block px-4 text-gray-400 py-2 hover:bg-gray-200">Nova Embarcação</a>
-                    <a href="#licencas" class="block px-4 py-2 text-gray-400 hover:bg-gray-200">Nova Licença</a>
+                    <a href="{% url 'app_associados:list_geral_associado' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Embarcação</a>
+                    <a href="{% url 'app_embarcacoes:list_embarcacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Licença</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_associacao:create_cargo' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Cargo(Integrante)</a>
                     <a href="{% url 'app_associados:create_profissao' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Profissão</a>
                     <!-- CADASTRA NOVO INTEGRANTE E ASSOCIADO A PARTIR DE UM USUÁRIO -->
-                    <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 hover:bg-orange-200">Novo Integrante</a>
-                    <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 text-white bg-blue-950 hover:bg-green-700">Novo Associado</a>
+                    <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Integrante</a>
+                    <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 text-white bg-blue-950 hover:bg-blue-700">Novo Associado</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_documentos:create_tipo_documento' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Tipo de Documento</a> 
                     <hr class="border-t-2 border-gray-500 my-2">

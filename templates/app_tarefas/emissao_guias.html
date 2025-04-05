@@ -33,20 +33,42 @@
         <div class="container mx-auto mt-8">
             <h1 class="text-3xl font-extrabold text-gray-900 mb-8">Controle de Emissão de Guias INSS</h1>
     
+        <!-- Filtros -->
+        <form method="get" class="mb-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Filtro por Nome -->
+            <div>
+                <label for="busca" class="block text-lg font-semibold text-gray-700 mb-1">Buscar Associado:</label>
+                <div class="relative">
+                    <input type="text" name="busca" id="busca" value="{{ request.GET.busca }}"
+                           class="w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 h-12 text-lg"
+                           placeholder="Digite o nome...">
+                    <button type="submit" class="absolute right-2 top-2 text-gray-500 hover:text-gray-700">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
             <!-- Filtro de Ano -->
-            <form method="get" class="mb-6 flex items-center space-x-4">
-                <label for="ano" class="text-lg font-semibold text-gray-700">Selecione o Ano:</label>
+            <div>
+                <label for="ano" class="block text-lg font-semibold text-gray-700 mb-1">Selecione o Ano:</label>
                 <select name="ano" id="ano"
-                    class="border border-gray-300 rounded-md py-2 pl-3 pr-10 h-12 text-lg">
+                        class="w-full border border-gray-300 rounded-md py-2 pl-3 pr-10 h-12 text-lg">
                     {% for ano in anos_disponiveis %}
                     <option value="{{ ano }}" {% if ano == ano_selecionado %}selected{% endif %}>{{ ano }}</option>
                     {% endfor %}
                 </select>
+            </div>
+
+            <!-- Botão Filtrar -->
+            <div class="flex items-end">
                 <button type="submit"
-                    class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600">
-                    Filtrar
+                        class="w-full md:w-auto bg-blue-500 text-white font-medium py-2 px-6 rounded hover:bg-blue-600 h-12">
+                    Aplicar Filtros
                 </button>
-            </form>
+            </div>
+        </form>
     
             <!-- Tabela -->
             <div class="overflow-x-auto shadow-md rounded-lg">
@@ -59,104 +81,174 @@
                             {% endfor %}
                         </tr>
                     </thead>
+
                     <tbody>
                         {% for associado_id, associado_info in guias_por_associado.items %}
-                        <tr class="hover:bg-gray-100">
+                        <tr class="hover:bg-gray-50 border-b">
                             <!-- Nome do Associado -->
-                            <td class="px-6 py-4 text-gray-800 whitespace-nowrap">
+                            <td class="px-6 py-4 text-gray-800 font-medium whitespace-nowrap text-sm">
                                 {{ associado_info.dados.user__first_name }} {{ associado_info.dados.user__last_name }}
                             </td>
-                
+                      
                             <!-- Iterando pelos meses -->
                             {% for mes in meses_validos %}
-                            <td class="px-6 py-4 text-center" id="guia-{{ associado_id }}-{{ mes }}">
-                                {% with guia=associado_info.guias|dict_key:mes %}
-                                    {% if guia %}
-                                        {% if guia.status == "pendente" %}
-                                            <form method="post" action="{% url 'app_tarefas:atualizar_status_guia' guia.id %}">
-                                                {% csrf_token %}
-                                                <button type="submit" class="bg-yellow-500 text-white px-3 py-1 rounded">
-                                                    Continuar
-                                                </button>
-                                                <div id="dados-{{ associado_id }}-{{ mes }}" class="mt-2 text-left bg-gray-100 p-2 rounded-md">
-                                                    <small class="text-gray-700 font-medium">
-                                                        <span id="cpf-{{ associado_id }}" style="font-size: 7px;">{{ associado_info.dados.cpf }}</span>
-                                                        <button onclick="copyToClipboard('cpf-{{ associado_id }}')" class="ml-2 text-blue-600 hover:text-blue-800">📋</button>
-                                                    </small><br>
-                                                    <small class="text-gray-700 font-medium">
-                                                        <span id="senha-{{ associado_id }}" style="font-size: 7px;">{{ associado_info.dados.senha_gov }}</span>
-                                                        <button onclick="copyToClipboard('senha-{{ associado_id }}')" class="ml-2 text-blue-600 hover:text-blue-800">📋</button>
-                                                    </small><br>
-                                                    <small class="text-gray-700 font-medium">
-                                                        <span id="link-{{ associado_id }}" style="font-size: 3px;">https://login.esocial.gov.br/login.aspx</span>
-                                                        <button onclick="copyToClipboard('link-{{ associado_id }}')" class="ml-2 text-blue-600 hover:text-blue-800">📋</button>
-                                                    </small><br>
-                                                </div>
-                                            </form>
-                                        {% elif guia.status == "emitido" %}
-                                        
-                                            <!-- Formulário para marcar como enviado -->
-                                            <form method="post" action="{% url 'app_tarefas:atualizar_status_guia' guia.id %}"
-                                                  onsubmit="mostrarCelular('{{ associado_id }}', '{{ mes }}');">
-                                                {% csrf_token %}
-                                                <button type="submit" class="bg-green-500 text-white px-3 py-1 rounded">
-                                                    Finalizar
-                                                </button>
-                                            </form>
-                                        
-                                            <!-- Dados do Celular -->
-                                            <div id="celular-{{ associado_id }}-{{ mes }}" class="mt-2 text-left bg-gray-100 p-2 rounded-md">
-                                                <small class="text-gray-700 font-medium">
-                                                    <span id="celular-correspondencia-{{ associado_id }}" style="font-size: 7px;">{{ associado_info.dados.celular_correspondencia }}</span>
-                                                    <button onclick="copyToClipboard('celular-correspondencia-{{ associado_id }}')" class="ml-2 text-blue-600 hover:text-blue-800">📋</button>
-                                                </small><br>
-                                            </div>
-                                        {% else %}
-                                            <span class="text-green-600 font-semibold">Enviado</span>
-                                        {% endif %}
-                                    {% else %}
-                                        <!-- Criar Guia -->
-                                        <form method="post" action="{% url 'app_tarefas:criar_guia' associado_id mes ano_selecionado %}" 
-                                        onsubmit="return criarGuia(this, '{{ associado_id }}', '{{ mes }}', '{{ ano_selecionado }}');"
-                                        id="form-iniciar-{{ associado_id }}-{{ mes }}">
-                                        {% csrf_token %}
-                                        <button type="submit" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
-                                            Iniciar
-                                        </button>
-                                        </form>
-
-                                        <!-- Div oculta para exibir os dados do associado e o botão "Marcar Emitido" -->
-                                        <div id="dados-{{ associado_id }}-{{ mes }}" class="hidden mt-2 text-left bg-gray-100 p-2 rounded-md">
-                                        <small class="text-gray-700 font-medium">
-                                            <span id="cpf-{{ associado_id }}" style="font-size: 7px;">{{ associado_info.dados.cpf }}</span>
-                                            <button onclick="copyToClipboard('cpf-{{ associado_id }}')" class="ml-2 text-blue-600 hover:text-blue-800">📋</button>
-                                        </small><br>
-                                        <small class="text-gray-700 font-medium">
-                                            <span id="senha-{{ associado_id }}" style="font-size: 7px;">{{ associado_info.dados.senha_gov }}</span>
-                                            <button onclick="copyToClipboard('senha-{{ associado_id }}')" class="ml-2 text-blue-600 hover:text-blue-800">📋</button>
-                                        </small><br>
-                                        <small class="text-gray-700 font-medium">
-                                            <span id="link-{{ associado_id }}" style="font-size: 3px;">https://login.esocial.gov.br/login.aspx</span>
-                                            <button onclick="copyToClipboard('link-{{ associado_id }}')" class="ml-2 text-blue-600 hover:text-blue-800">📋</button>
-                                        </small><br>
-
-                                        <!-- O botão "Continuar" agora terá um ID atualizado via JavaScript -->
-                                        <form method="post" action="{% url 'app_tarefas:atualizar_status_guia' 0 %}" 
-                                            id="form-marcar-emitido-{{ associado_id }}-{{ mes }}" class="hidden">
-                                            {% csrf_token %}
-                                            <button type="submit" class="bg-yellow-500 text-white px-3 py-1 rounded">
-                                                Continuar
-                                            </button>
-                                        </form>
+                            <td class="px-4 py-3 text-center align-top text-xs" id="guia-{{ associado_id }}-{{ mes }}">
+                              {% with guia=associado_info.guias|dict_key:mes %}
+                              {% if guia %}
+                                <!-- Estado: Pendente (Etapa 1) -->
+                                {% if guia.status == "pendente" %}
+                                  <div class="guia-pendente">
+                                      <div class="dados-associado mt-2 space-y-1 bg-yellow-50 p-2 rounded-md shadow-inner text-left">
+                                        <!-- CPF -->
+                                        <div class="flex justify-between items-center">
+                                            <span id="cpf-{{ associado_id }}" class="text-gray-800 font-mono text-[11px]">{{ associado_info.dados.cpf }}</span>
+                                            <button type="button" data-copy-target="cpf-{{ associado_id }}" 
+                                                class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
                                         </div>
-                                    {% endif %}
-                                {% endwith %}
+                                      
+                                        <!-- Senha Gov -->
+                                        <div class="flex justify-between items-center">
+                                            <span id="senha-{{ associado_id }}" class="text-gray-800 font-mono text-[11px]">{{ associado_info.dados.senha_gov }}</span>
+                                            <button type="button" data-copy-target="senha-{{ associado_id }}" 
+                                                  class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
+                                        </div>
+                                      </div>
+                            
+                                      <div class="mt-2 space-y-1">
+                                        <!-- Botão Continuar -->
+                                        <form method="post" class="form-avancar-status" 
+                                              action="{% url 'app_tarefas:atualizar_status_guia' guia.id %}">
+                                          {% csrf_token %}
+                                          <button type="submit" 
+                                                  class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded shadow transition">
+                                            Confirmar Emissão (Etapa 1)
+                                          </button>
+                                        </form>
+                                        
+                                        <!-- Botão Reiniciar -->
+                                        <form method="post" class="form-reiniciar-guia"
+                                              action="{% url 'app_tarefas:zerar_status_guia' guia.id %}">
+                                          {% csrf_token %}
+                                          <button type="submit" 
+                                                  class="w-full text-xs text-red-500 hover:text-red-700 underline">
+                                            🔄 Reiniciar Processo
+                                          </button>
+                                        </form>
+                                      </div>
+                                  </div>
+                            
+                                <!-- Estado: Emitido (Etapa 2) -->
+                                {% elif guia.status == "emitido" %}
 
+                                <div class="guia-emitida">
+                                  <div class="dados-celular mt-2 bg-green-50 p-2 rounded-md shadow-inner text-left">
+                                    <div class="flex justify-between items-center">
+                                      <span id="celular-{{ associado_id }}" class="text-gray-800 font-mono text-[11px]">{{ associado_info.dados.celular_correspondencia }}</span>
+                                      <button type="button" data-copy-target="celular-{{ associado_id }}" 
+                                              class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
+                                    </div>
+                                  </div>
+                            
+                                  <div class="mt-2 space-y-1">
+                                    <!-- Botão Continuar -->
+                                    <form method="post" class="form-avancar-status" 
+                                          action="{% url 'app_tarefas:atualizar_status_guia' guia.id %}">
+                                      {% csrf_token %}
+                                      <button type="submit" 
+                                              class="w-full bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded shadow transition">
+                                        Confirmar Envio (Etapa 2)
+                                      </button>
+                                    </form>
+                                    
+                                    <!-- Botão Reiniciar -->
+                                    <form method="post" class="form-reiniciar-guia"
+                                          action="{% url 'app_tarefas:zerar_status_guia' guia.id %}">
+                                      {% csrf_token %}
+                                      <button type="submit" 
+                                              class="w-full text-xs text-red-500 hover:text-red-700 underline">
+                                        🔄 Reiniciar Processo
+                                      </button>
+                                    </form>
+                                  </div>
+                                </div>
+                            
+                                <!-- Estado: Enviado (Etapa 3) -->
+                                {% elif guia.status == "enviado" %}
+                                <div class="guia-enviada">
+                                  <p class="text-green-600 text-xs mb-2">Guia enviada ao associado!</p>
+                                  
+                                  <div class="space-y-1">
+                                    <!-- Botão Continuar -->
+                                    <form method="post" class="form-avancar-status" 
+                                          action="{% url 'app_tarefas:atualizar_status_guia' guia.id %}">
+                                      {% csrf_token %}
+                                      <button type="submit" 
+                                        class="w-full bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1 rounded shadow transition relative">
+                                        Confirmar Pgto??? (Final)
+                                        <span class="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
+                                            <span class="absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-yellow-300"></span>
+                                        </span>
+                                      </button>
+                                    </form>
+                                    
+                                    <!-- Botão Reiniciar -->
+                                    <form method="post" class="form-reiniciar-guia"
+                                          action="{% url 'app_tarefas:zerar_status_guia' guia.id %}">
+                                      {% csrf_token %}
+                                      <button type="submit" 
+                                              class="w-full text-xs text-red-500 hover:text-red-700 underline">
+                                        🔄 Reiniciar Processo
+                                      </button>
+                                    </form>
+                                  </div>
+                                </div>
+                            
+                                <!-- Estado: Pago (Processo Finalizado) -->
+                                {% elif guia.status == "pago" %}
+                                <div class="guia-paga">
+                                    <div class="flex items-center justify-center">
+                                        <span class="inline-flex items-center bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-semibold shadow-sm ring-1 ring-green-100">
+                                          <span class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                                          ✅ Guia Paga!
+                                        </span>
+                                      </div>
+                                  
+                                  <!-- Botão Reiniciar -->
+                                  <form method="post" class="form-reiniciar-guia mt-2 text-center"
+                                        action="{% url 'app_tarefas:zerar_status_guia' guia.id %}">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                            class="text-xs text-red-500 hover:text-red-700 underline">
+                                      🔄 Reiniciar Processo
+                                    </button>
+                                  </form>
+                                </div>
+                                {% endif %}
+                            
+                              {% else %}
+                                <!-- Estado: Sem Guia (Iniciar Processo) -->
+                                <div class="sem-guia">
+                                  <form method="post" class="form-criar-guia" 
+                                        action="{% url 'app_tarefas:criar_guia' associado_id mes ano_selecionado %}">
+                                    {% csrf_token %}
+                                    <button type="submit" 
+                                        class="w-full bg-blue-500 hover:bg-blue-600 text-white text-xs px-3 py-1 rounded shadow transition relative">
+                                        Iniciar Processo
+                                        <span class="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
+                                            <span class="absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                        </span>
+                                    </button>
+                                  </form>
+                                </div>
+                              {% endif %}
+                            {% endwith %}
                             </td>
                             {% endfor %}
                         </tr>
                         {% endfor %}
-                    </tbody>                   
+                    </tbody>                                     
                 </table>
             </div>
         </div>
@@ -166,48 +258,185 @@
     {% include "components/footer_associacao.html" %}
 
     <script>
-        function criarGuia(form, associadoId, mes, ano) {
-            event.preventDefault();  // Evita o envio do formulário padrão
-        
-            // Faz a requisição AJAX para criar a guia
-            fetch(form.action, {
-                method: "POST",
-                body: new FormData(form),
-            })
-            .then(response => response.json())  // Espera resposta JSON
-            .then(data => {
-                if (data.success) {
-                    // 1️⃣ Esconde o botão "Iniciar" após a criação da guia
-                    form.style.display = "none";
-        
-                    // 2️⃣ Mostra os dados do associado
-                    let dadosDiv = document.getElementById(`dados-${associadoId}-${mes}`);
-                    if (dadosDiv) {
-                        dadosDiv.classList.remove("hidden");
-                    }
-        
-                    // 3️⃣ Atualiza e exibe o botão "Continuar"
-                    let formMarcarEmitido = document.getElementById(`form-marcar-emitido-${associadoId}-${mes}`);
-                    if (formMarcarEmitido) {
-                        formMarcarEmitido.action = `/tarefas/atualizar-status-guia/${data.guia_id}/`;
-                        formMarcarEmitido.classList.remove("hidden"); // Exibe o botão
-                    }
-                } else {
-                    alert("Erro ao criar guia. Tente novamente.");
-                }
-            })
-            .catch(error => console.error("Erro ao criar guia:", error));
-        }
-        
-    </script>
-    <script>
-        function mostrarCelular(associadoId, mes) {
-            let celularDiv = document.getElementById(`celular-${associadoId}-${mes}`);
-            if (celularDiv) {
-                celularDiv.classList.remove("hidden"); // Mostra o celular
-            }
-        }
-    </script>
-    
-<script src="{% static 'js/copy_to_clipboard.js' %}"></script>    
+      // Configuração inicial quando o DOM estiver pronto
+      document.addEventListener('DOMContentLoaded', function() {
+          // Configura todos os event listeners
+          setupEventListeners();
+          
+          // Define a função global de copiar para clipboard
+          window.copyToClipboard = copyToClipboard;
+      });
+      
+      /**
+       * Configura todos os event listeners necessários
+       */
+      function setupEventListeners() {
+          // Delegação de eventos para formulários
+          document.body.addEventListener('submit', function(e) {
+              // Formulários de avançar status ou criar guia
+              if (e.target.classList.contains('form-avancar-status') || 
+                  e.target.classList.contains('form-criar-guia')) {
+                  e.preventDefault();
+                  handleFormSubmit(e.target);
+              }
+              
+              // Formulários de reiniciar guia
+              if (e.target.classList.contains('form-reiniciar-guia')) {
+                  e.preventDefault();
+                  if(confirm('Deseja realmente reiniciar este processo?')) {
+                      handleFormSubmit(e.target, true);
+                  }
+              }
+          });
+          
+          // Delegação de eventos para botões de cópia
+          document.body.addEventListener('click', function(e) {
+              if (e.target.classList.contains('btn-copiar')) {
+                  handleCopyClick(e);
+              }
+          });
+      }
+      
+      /**
+       * Manipula o clique em botões de cópia
+       */
+      function handleCopyClick(event) {
+          event.preventDefault();
+          event.stopPropagation();
+          
+          const target = event.target.getAttribute('data-copy-target');
+          copyToClipboard(target).then(success => {
+              if (success) {
+                  showCopyFeedback(event.target);
+              }
+          });
+      }
+      
+      /**
+       * Mostra feedback visual quando o texto é copiado
+       */
+      function showCopyFeedback(button) {
+          const originalText = button.innerHTML;
+          button.innerHTML = '✓ Copiado!';
+          setTimeout(() => {
+              button.innerHTML = originalText;
+          }, 2000);
+      }
+      
+      /**
+       * Função para copiar texto para o clipboard
+       */
+      function copyToClipboard(elementId) {
+          const element = document.getElementById(elementId);
+          if (!element) {
+              console.error('Elemento não encontrado:', elementId);
+              return Promise.resolve(false);
+          }
+          
+          const textToCopy = element.textContent.trim();
+          return navigator.clipboard.writeText(textToCopy)
+              .then(() => true)
+              .catch(err => {
+                  console.error('Erro ao copiar:', err);
+                  return false;
+              });
+      }
+      
+      /**
+       * Manipula o envio de formulários via AJAX
+       */
+      function handleFormSubmit(form, isReload = false) {
+          const cell = form.closest('td');
+          const button = form.querySelector('button[type="submit"]');
+          const originalText = button?.textContent;
+          
+          // Mostrar estado de carregamento
+          if (button) {
+              button.disabled = true;
+              button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processando...';
+          }
+          
+          fetch(form.action, {
+              method: 'POST',
+              body: new FormData(form),
+              headers: {
+                  'X-CSRFToken': getCSRFToken(),
+                  'Accept': 'application/json',
+                  'X-Requested-With': 'XMLHttpRequest'
+              }
+          })
+          .then(response => {
+              if (!response.ok) {
+                  return response.json().then(err => {
+                      throw new Error(err.message || 'Erro na requisição');
+                  });
+              }
+              return response.json();
+          })
+          .then(data => {
+              if (data.success) {
+                  // Recarrega a página se for reiniciar ou se solicitado
+                  if (isReload || data.reload) {
+                      window.location.reload();
+                  } 
+                  // Atualiza apenas a célula se houver HTML retornado
+                  else if (data.html) {
+                      cell.innerHTML = data.html;
+                      setupEventListeners(); // Reconecta os eventos
+                  }
+                  
+                  if (data.message) {
+                      showMessage(data.message, 'success');
+                  }
+              } else {
+                  throw new Error(data.message || 'Erro na operação');
+              }
+          })
+          .catch(error => {
+              console.error('Erro:', error);
+              showMessage(error.message, 'error');
+              
+              // Restaurar botão se existir
+              if (button) {
+                  button.disabled = false;
+                  button.textContent = originalText;
+              }
+          });
+      }
+      
+      /**
+       * Obtém o token CSRF do formulário
+       */
+      function getCSRFToken() {
+          const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+          return csrfInput ? csrfInput.value : '';
+      }
+      
+      /**
+       * Mostra mensagens flutuantes para o usuário
+       */
+      function showMessage(text, type = 'info') {
+          // Remove mensagens antigas
+          document.querySelectorAll('.mensagem-flutuante').forEach(msg => msg.remove());
+          
+          const typeClasses = {
+              'success': 'bg-green-500 text-white',
+              'error': 'bg-red-500 text-white',
+              'info': 'bg-blue-500 text-white'
+          };
+          
+          const messageDiv = document.createElement('div');
+          messageDiv.className = `mensagem-flutuante fixed top-4 right-4 p-4 rounded-md shadow-lg ${typeClasses[type] || typeClasses.info} z-50`;
+          messageDiv.innerHTML = `<div class="flex items-center"><span>${text}</span></div>`;
+          
+          document.body.appendChild(messageDiv);
+          
+          // Remove a mensagem após 3 segundos
+          setTimeout(() => {
+              messageDiv.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+              setTimeout(() => messageDiv.remove(), 300);
+          }, 3000);
+      }
+      </script>
+          
 {% endblock emissao_inss %}

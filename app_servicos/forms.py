@@ -108,7 +108,46 @@ class ServicoAssociadoForm(forms.ModelForm):
                 }
             )
 
+        servico = self.instance
 
+        if editar_status:
+            natureza = None
+
+            # 🔍 Primeira tentativa via instance
+            if self.instance and self.instance.natureza_servico:
+                natureza = self.instance.natureza_servico
+            # 🔁 Fallback: formulário sendo POSTado
+            elif 'natureza_servico' in self.data:
+                natureza = self.data.get('natureza_servico')
+
+            if natureza == 'emissao_documento':
+                choices_permitidos = [
+                    StatusEtapaChoices.PENDENTE,
+                    StatusEtapaChoices.DOC_PROTOCOLADO,
+                    StatusEtapaChoices.DOC_EXIGENCIA,
+                    StatusEtapaChoices.DOC_ANALISE,
+                    StatusEtapaChoices.DOC_RECURSO,
+                    StatusEtapaChoices.DOC_DEFERIDO,
+                    StatusEtapaChoices.DOC_INDEFERIDO,
+                    StatusEtapaChoices.ARQUIVADO,
+                ]
+            else:
+                choices_permitidos = [
+                    StatusEtapaChoices.PENDENTE,
+                    StatusEtapaChoices.SERVICO_ANDAMENTO,
+                    StatusEtapaChoices.SERVICO_CONCLUIDO,
+                    StatusEtapaChoices.SERVICO_ESPERA,
+                    StatusEtapaChoices.ARQUIVADO,
+                ]
+
+            self.fields['status_etapa'].widget = forms.Select(
+                choices=[(c.value, c.label) for c in choices_permitidos],
+                attrs={
+                    'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                }
+            )
+
+        
                 
 class ServicoExtraAssociadoForm(forms.ModelForm):
     class Meta:
@@ -156,7 +195,37 @@ class ServicoExtraAssociadoForm(forms.ModelForm):
                 self.fields['reparticao'].queryset = ReparticoesModel.objects.filter(associacao_id=assoc_id)
             except (ValueError, TypeError):
                 pass
+            
+        servico = self.instance
 
+        if not servico or not servico.natureza_servico:
+            return  # evita erro se chamado sem instância
+
+        natureza = servico.natureza_servico
+
+        if natureza == 'emissao_documento':
+            choices_permitidos = [
+                StatusEtapaChoices.PENDENTE,
+                StatusEtapaChoices.DOC_PROTOCOLADO,
+                StatusEtapaChoices.DOC_EXIGENCIA,
+                StatusEtapaChoices.DOC_ANALISE,
+                StatusEtapaChoices.DOC_RECURSO,
+                StatusEtapaChoices.DOC_DEFERIDO,
+                StatusEtapaChoices.DOC_INDEFERIDO,
+                StatusEtapaChoices.ARQUIVADO,
+            ]
+        else:
+            choices_permitidos = [
+                StatusEtapaChoices.PENDENTE,
+                StatusEtapaChoices.SERVICO_ANDAMENTO,
+                StatusEtapaChoices.SERVICO_CONCLUIDO,
+                StatusEtapaChoices.SERVICO_ESPERA,
+                StatusEtapaChoices.ARQUIVADO,
+            ]
+
+        self.fields['status_etapa'].choices = [
+            (choice.value, choice.label) for choice in choices_permitidos
+        ]
         
         
     # Validação dos dígitos verificadores do CPF

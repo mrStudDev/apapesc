@@ -383,6 +383,21 @@ class CreateExtraAssociadoView(LoginRequiredMixin, CreateView):
         context['titulo'] = "Novo Extra-associado"
         return context
 
+class EditExtraAssociadoView(LoginRequiredMixin, UpdateView):
+    model = ExtraAssociadoModel
+    form_class = ExtraAssociadoForm
+    template_name = 'app_servicos/edit_extraassociado.html'
+    context_object_name = 'extra_associado'
+
+    def get_success_url(self):
+        messages.success(self.request, "Extra-associado atualizado com sucesso!")
+        return reverse_lazy('app_servicos:list_extraassociados')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = "Editar Extra-associado"
+        return context
+
 # Lista de Extra-associados
 class ListExtraAssociadosView(LoginRequiredMixin, ListView):
     model = ExtraAssociadoModel
@@ -398,9 +413,8 @@ class DetailExtraAssociadoView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['servicos'] = ServicoAssociadoModel.objects.filter(extra_associado=self.object)
+        context['servicos'] = ServicoExtraAssociadoModel.objects.filter(extra_associado=self.object)
         return context
-
 
 # Painel Fluxo Etapas
 
@@ -423,9 +437,8 @@ class PainelServicosEtapasView(LoginRequiredMixin, TemplateView):
         etapas_docs = [
             StatusEtapaChoices.PENDENTE,
             StatusEtapaChoices.DOC_PROTOCOLADO,
+            StatusEtapaChoices.DOC_EXIGENCIA,                     
             StatusEtapaChoices.DOC_ANALISE,
-            StatusEtapaChoices.DOC_EXIGENCIA,
-            StatusEtapaChoices.DOC_CUMPRIMENTO,
             StatusEtapaChoices.DOC_RECURSO,
             StatusEtapaChoices.DOC_DEFERIDO,
             StatusEtapaChoices.DOC_INDEFERIDO,

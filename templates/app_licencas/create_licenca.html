@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Nova Licença{% endblock %}
+
+{% block create_licenca %}
+
+{% include 'components/navbar_associacao.html' %}
+
+{% if messages %}
+<div class="mb-4">
+    {% for message in messages %}
+        <div class="p-4 rounded-md text-white 
+            {% if message.tags == 'success' %}bg-green-500
+            {% elif message.tags == 'error' %}bg-red-500
+            {% elif message.tags == 'info' %}bg-blue-500
+            {% else %}bg-gray-500
+            {% endif %}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<main class="flex-grow">
+  <div class="max-w-4xl mx-auto py-6">
+    <h1 class="text-2xl font-bold text-gray-800 mb-6">Nova Licença para a Embarcação: {{ embarcacao.nome_embarcacao }}</h1>
+<!-- Informações de Identificação -->
+<div class="col-span-2 bg-gray-50 p-4 rounded-md border border-gray-200 mb-4">
+  <p class="text-sm text-gray-700"><strong>Vinculada à Embarcação:</strong> {{ embarcacao.nome_embarcacao }}</p>
+  <p class="text-sm text-gray-700"><strong>Proprietário:</strong> {{ embarcacao.proprietario.user.get_full_name }}</p>
+</div>
+
+    <!-- Mensagens -->
+    {% if messages %}
+        <ul class="mb-4">
+            {% for message in messages %}
+              <li class="text-sm text-{{ message.tags }}-600">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Identificação da embarcação -->
+        <div class="md:col-span-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1">Embarcação</label>
+        
+          <!-- Campo somente leitura para exibir nome -->
+          <input type="text" value="{{ embarcacao.nome_embarcacao }}" readonly
+                 class="bg-gray-100 border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 shadow-sm" />
+        
+          <!-- Campo real do form (oculto para submissão) -->
+          {{ form.embarcacao }}
+        
+          {% for error in form.embarcacao.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+        
+
+        <!-- Órgão -->
+        <div>
+          <label for="id_orgao_nome" class="block text-sm font-medium text-gray-700 mb-1">Órgão</label>
+          {{ form.orgao_nome }}
+          {% for error in form.orgao_nome.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <!-- Tipo de Licença -->
+        <div>
+          <label for="id_licenca_nome" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Licença</label>
+          {{ form.licenca_nome }}
+          {% for error in form.licenca_nome.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <!-- Nº Processo -->
+        <div>
+          <label for="id_num_processo" class="block text-sm font-medium text-gray-700 mb-1">Nº do Processo</label>
+          {{ form.num_processo }}
+          {% for error in form.num_processo.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <!-- Nº Ato Administrativo -->
+        <div>
+          <label for="id_num_atoAdmConcede" class="block text-sm font-medium text-gray-700 mb-1">Nº Ato Administrativo</label>
+          {{ form.num_atoAdmConcede }}
+          {% for error in form.num_atoAdmConcede.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <!-- Código Frota -->
+        <div>
+          <label for="id_codigo_frota" class="block text-sm font-medium text-gray-700 mb-1">Código da Frota</label>
+          {{ form.codigo_frota }}
+          {% for error in form.codigo_frota.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <!-- Inscrição Naval -->
+        <div>
+          <label for="id_inscricao_aut_naval" class="block text-sm font-medium text-gray-700 mb-1">Inscrição Naval</label>
+          {{ form.inscricao_aut_naval }}
+          {% for error in form.inscricao_aut_naval.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <!-- Modalidade -->
+        <div>
+          <label for="id_modalidade_permissionamento" class="block text-sm font-medium text-gray-700 mb-1">Modalidade</label>
+          {{ form.modalidade_permissionamento }}
+          {% for error in form.modalidade_permissionamento.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <!-- Validade Inicial -->
+        <div>
+          <label for="id_validade_inicial" class="block text-sm font-medium text-gray-700 mb-1">Validade Inicial</label>
+          {{ form.validade_inicial }}
+          {% for error in form.validade_inicial.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+
+        <!-- Validade Final -->
+        <div>
+          <label for="id_validade_final" class="block text-sm font-medium text-gray-700 mb-1">Validade Final</label>
+          {{ form.validade_final }}
+          {% for error in form.validade_final.errors %}
+            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="mt-6">
+        <button type="submit"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow text-sm font-medium">
+          Salvar Licença
+        </button>
+      </div>
+    </form>
+  </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock create_licenca %}

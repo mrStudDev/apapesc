@@ -9,20 +9,22 @@ from django.contrib.auth.models import User
 
 
 class StatusEtapaChoices(models.TextChoices):
+    # Comum
     PENDENTE = "pendente", "Pendente"
+    ARQUIVADO = "arquivado", "Arquivado"
+
     # Documento
-    DOC_PROTOCOLADO = "doc_protocolado", "Documento Protocolado"    
-    DOC_ANALISE = "doc_analise", "Documento em Análise"
+    DOC_PROTOCOLADO = "doc_protocolado", "Documento Protocolado"
     DOC_EXIGENCIA = "doc_exigencia", "Documento em Exigência"
-    DOC_CUMPRIMENTO = "doc_cumprimento", "Documento em Cumprimento"
+    DOC_ANALISE = "doc_analise", "Documento em Análise"
     DOC_RECURSO = "doc_recurso", "Documento em Recurso"
     DOC_DEFERIDO = "doc_deferido", "Documento Deferido"
     DOC_INDEFERIDO = "doc_indeferido", "Documento Indeferido"
+
     # Serviço
     SERVICO_ANDAMENTO = "servico_andamento", "Serviço em Andamento"
     SERVICO_CONCLUIDO = "servico_concluido", "Serviço Concluído"
     SERVICO_ESPERA = "servico_espera", "Serviço em Espera"
-    ARQUIVADO = "arquivado", "Arquivado"
 
 
 # Serviço associado
@@ -218,3 +220,7 @@ class ExtraAssociadoModel(models.Model):
 
     def __str__(self):
         return self.nome_completo
+
+    @property
+    def servicos(self):
+        return self.servicoextraassociadomodel_set.all()      

@@ -18,10 +18,14 @@ from urllib.parse import urlencode
 from django.contrib.staticfiles import finders
 from reportlab.lib.colors import lightgrey, grey
 from reportlab.platypus import Table, TableStyle
+from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+from pdfrw.buildxobj import pagexobj
 
+from app_finances.models import AnuidadeAssociado
 from app_associados.models import AssociadoModel
 from app_associacao.models import AssociacaoModel
 from django.contrib import messages
+from app_finances.models import EntradaFinanceira
 
 from .models import (
     DeclaracaoResidenciaModel,
@@ -29,6 +33,8 @@ from .models import (
     DeclaracaoAtividadePesqueiraModel,
     DeclaracaoHipossuficienciaModel,
     ProcuracaoJuridicaModel,
+    ReciboAnuidadeModel,
+    ReciboServicoExtraModel,
     )
 
 # Deletes
@@ -39,6 +45,8 @@ MODELO_MAP = {
     'atividade_pesqueira': DeclaracaoAtividadePesqueiraModel,
     'hipossuficiencia': DeclaracaoHipossuficienciaModel,
     'procuracao_juridica': ProcuracaoJuridicaModel,
+    'recibos_anuidades': ReciboAnuidadeModel,
+    'recibos_servicos_extra': ReciboServicoExtraModel,
 }
 
 def delete_pdf(request, automacao, declaracao_id):
@@ -72,6 +80,8 @@ def upload_pdf_base(request, automacao):
         'atividade_pesqueira': DeclaracaoAtividadePesqueiraModel,
         'hipossuficiencia': DeclaracaoHipossuficienciaModel,
         'procuracao_juridica': ProcuracaoJuridicaModel,
+        'recibos_anuidades': ReciboAnuidadeModel,
+        'recibos_servicos_extra': ReciboServicoExtraModel,
     }
     
     modelo = modelo_map.get(automacao)
@@ -113,6 +123,8 @@ class ListaTodosArquivosView(LoginRequiredMixin, GroupPermissionRequiredMixin, T
         context['declaracoes_atividade_pesqueira'] = DeclaracaoAtividadePesqueiraModel.objects.all()
         context['declaracoes_hipossuficiencia'] = DeclaracaoHipossuficienciaModel.objects.all()
         context['procuracoes_procuracao_juridica'] = ProcuracaoJuridicaModel.objects.all()
+        context['recibos_anuidades'] = ReciboAnuidadeModel.objects.all()
+        context['recibos_servicos_extra'] = ReciboServicoExtraModel.objects.all()
         
         return context
 
@@ -120,14 +132,21 @@ class ListaTodosArquivosView(LoginRequiredMixin, GroupPermissionRequiredMixin, T
 # Automações
 
 # PÁGINA DE AÇÕES -  AS AÇÕES GERAR ESTÃO VÍNCULADAS NESSA PÁGINA
-def pagina_acoes(request, associado_id=None):
+def pagina_acoes(request, associado_id=None, entrada_id=None):
     pdf_url = request.GET.get('pdf_url')
-    if not pdf_url:
-        return HttpResponse("URL do PDF não encontrada.", status=400)
+    tipo_recibo = request.GET.get('tipo', 'documento')  # 👉 valor padrão agora é "documento"
 
     associado = None
+    entrada = None
+    extra_associado = None
+
     if associado_id:
         associado = get_object_or_404(AssociadoModel, pk=associado_id)
+
+    if entrada_id:
+        entrada = get_object_or_404(EntradaFinanceira, pk=entrada_id)
+        if hasattr(entrada, 'entrada_servico_extra'):
+            extra_associado = entrada.entrada_servico_extra.extra_associado
 
     associacao = AssociacaoModel.objects.first()
     if not associacao:
@@ -135,9 +154,13 @@ def pagina_acoes(request, associado_id=None):
 
     return render(request, 'app_automacoes/pagina_acoes.html', {
         'pdf_url': pdf_url,
+        'tipo_recibo': tipo_recibo,
         'associado': associado,
+        'entrada': entrada,
+        'extra_associado': extra_associado,
         'associacao': associacao,
     })
+
     
 #=======================================================================================================
 
@@ -841,4 +864,280 @@ def gerar_procuracao_juridica(request, associado_id):
     # Preparando o redirecionamento
     pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
     return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")
+# ======================================================================================================
+
+# GERAR RECIBO DE ANUIDADE
+def gerar_recibo_anuidade(request, anuidade_assoc_id):
+    anuidade_assoc = get_object_or_404(AnuidadeAssociado, id=anuidade_assoc_id, pago=True)
+    associado = anuidade_assoc.associado
+    associacao = associado.associacao
+
+    # Caminho para o PDF de template
+    template_path = os.path.join(settings.MEDIA_ROOT, 'pdf/recibo_anuidade.pdf')
+    if not os.path.exists(template_path):
+        return HttpResponse("O PDF base para o Recibo de Anuidade não foi encontrado.", status=404)
+
+    template_pdf = PdfReader(template_path)
+
+    # Último pagamento registrado
+    ultimo_pagamento = anuidade_assoc.pagamentos.last()
+    if not ultimo_pagamento:
+        return HttpResponse("Nenhum pagamento encontrado para gerar recibo.", status=404)
+
+    buffer = BytesIO()
+    data_pagamento = ultimo_pagamento.data_pagamento.strftime('%d/%m/%Y')
+    data_hoje = datetime.now().strftime('%d/%m/%Y')
+
+    # Estilos
+    # Estilos personalizados
+    styles = getSampleStyleSheet()
+    style_title = ParagraphStyle(
+        'Title',
+        parent=styles['Title'],
+        fontName='Times-Bold',
+        fontSize=14,  # Levemente maior pra se destacar
+        alignment=TA_CENTER,
+        leading=28,
+        spaceBefore=40,  # 🔽 Aumenta distância do topo
+        textColor=colors.black,
+    )
+
+    style_normal = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=18,  # 🔼 Tamanho de linha mais compacto
+        alignment=TA_JUSTIFY,
+        spaceBefore=0,  # 🔼 remove espaço extra antes do parágrafo
+    )
+
+
+    style_assinatura = ParagraphStyle(
+        'Assinatura',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=18,
+        alignment=TA_CENTER,
+        spaceBefore=10,
+    )
+    style_presidente = ParagraphStyle(
+        'Presidente',
+        parent=styles['Normal'],
+        fontName='Times-Bold',
+        fontSize=12,
+        alignment=2,
+        leading=16,
+        spaceBefore=10,  # 🔼 Menos espaço acima
+        textColor=colors.grey,
+    )
+    nome_presidente = ( f"{associacao.presidente.user.get_full_name()}")
+
+    # Data atual
+    data_hoje = datetime.now().strftime('%d/%m/%Y')
+
+    texto = (
+        f"Recebemos de <strong>{associado.user.get_full_name()}</strong>, "
+        f"inscrito no CPF sob o nº <strong>{associado.cpf}</strong>, "
+        f"a importância de <strong>R$ {anuidade_assoc.valor_pago:.2f}</strong> "
+        f"(referente à anuidade do exercício de <strong>{anuidade_assoc.anuidade.ano}</strong>), "
+        f"quitada na data de <strong>{data_pagamento}</strong>. "
+        f"<br/><br/>Este pagamento foi efetuado à <strong>{associacao.razao_social}</strong>, "
+        f"inscrita no CNPJ sob o nº {associacao.cnpj}, com sede na {associacao.logradouro}, nº {associacao.numero}, "
+        f"{associacao.bairro}, {associacao.municipio or 'Município não informado'}/{associacao.uf}. "
+        f"<br/><br/><i>Aproveitamos para agradecer por sua confiança, por fazer parte do nosso grupo de associados e por acreditar em nosso trabalho. "
+        f"A contribuição anual é essencial para a manutenção e fortalecimento das atividades da associação, refletindo diretamente no apoio prestado à categoria.</i>"
+    )
+
+
+    assinatura = (
+        f"{associacao.presidente.user.get_full_name()}<br/>"
+        f"Presidente da Associação"
+    )
+
+    municipio = associacao.municipio.upper() if associacao.municipio else "CIDADE NÃO DEFINIDA"
+    local_data = f"{municipio}, {data_hoje}."
+
+    # Elementos do PDF
+    elements = [
+        Spacer(1, 50),
+        Paragraph(nome_presidente, style_presidente),
+        Spacer(1, 35),
+        Paragraph("RECIBO DE PAGAMENTO DE ANUIDADE", style_title),
+        Spacer(1, 20),
+        Paragraph(texto, style_normal),
+        Spacer(1, 24),
+        Paragraph(local_data, style_normal),
+        Spacer(1, 20),
+        Paragraph(assinatura, style_assinatura),
+    ]
+
+    # Geração do PDF em memória
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=50,
+        leftMargin=50,
+        topMargin=120,
+        bottomMargin=50,
+    )
+    doc.build(elements)
+    buffer.seek(0)
+
+    # Mesclando conteúdo dinâmico com o template
+    overlay_pdf = PdfReader(buffer)
+
+    for index, template_page in enumerate(template_pdf.pages):
+        if index < len(overlay_pdf.pages):
+            overlay_page = overlay_pdf.pages[index]
+            PageMerge(template_page).add(overlay_page).render()
+
+    # Salvando o PDF final
+    pdf_name = f"recibo_anuidade_{associado.id}_{anuidade_assoc.anuidade.ano}.pdf"
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+    PdfWriter(pdf_path, trailer=template_pdf).write()
+
+    # Redireciona com link do PDF
+    pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
+    query_string = urlencode({'pdf_url': pdf_url})
+    #return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?{query_string}")
+    return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?{query_string}&tipo=anuidade")
+
+# =======================================================================================================
+# GERAR RECIBO DE ENTRADA EXTRA ASSOCIADO
+# app_automacoes/views.py
+
+def gerar_recibo_entrada_extra(request, entrada_id):
+    entrada = get_object_or_404(EntradaFinanceira, id=entrada_id, status_pagamento='pago')
+
+    servico = getattr(entrada, 'entrada_servico_extra', None)
+    if not servico or not servico.extra_associado:
+        return HttpResponse("Esta entrada não está vinculada a um serviço de extra associado.", status=400)
+
+    extra = servico.extra_associado
+    associacao = entrada.associacao
+
+    # Caminho para o PDF de template
+    template_path = os.path.join(settings.MEDIA_ROOT, 'pdf/recibo_servico_extra.pdf')
+    if not os.path.exists(template_path):
+        return HttpResponse("O PDF base para o Recibo de Entrada Extra não foi encontrado.", status=404)
+
+    template_pdf = PdfReader(template_path)
+    buffer = BytesIO()
+    data_hoje = datetime.now().strftime('%d/%m/%Y')
+
+    # Último pagamento
+    pagamento = entrada.pagamentos.order_by('-data_pagamento').first()
+    if not pagamento:
+        return HttpResponse("Nenhum pagamento registrado para essa entrada.", status=400)
+
+    data_pagamento = pagamento.data_pagamento.strftime('%d/%m/%Y')
+
+    # Estilos
+    styles = getSampleStyleSheet()
+    style_title = ParagraphStyle(
+        'Title',
+        parent=styles['Title'],
+        fontName='Times-Bold',
+        fontSize=14,
+        alignment=TA_CENTER,
+        leading=28,
+        spaceBefore=40,
+        textColor=colors.black,
+    )
+    style_normal = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=18,
+        alignment=TA_JUSTIFY,
+        spaceBefore=0,
+    )
+    style_assinatura = ParagraphStyle(
+        'Assinatura',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=18,
+        alignment=TA_CENTER,
+        spaceBefore=10,
+    )
+    style_presidente = ParagraphStyle(
+        'Presidente',
+        parent=styles['Normal'],
+        fontName='Times-Bold',
+        fontSize=12,
+        alignment=2,
+        leading=16,
+        spaceBefore=10,
+        textColor=colors.grey,
+    )
+    nome_presidente = associacao.presidente.user.get_full_name()
+
+    municipio = associacao.municipio.upper() if associacao.municipio else "CIDADE NÃO DEFINIDA"
+    local_data = f"{municipio}, {data_hoje}."
+
+    # Texto
+    texto = (
+        f"Recebemos de <strong>{extra.nome_completo}</strong>, "
+        f"inscrito no CPF sob o nº <strong>{extra.cpf}</strong>, "
+        f"a importância de <strong>R$ {entrada.valor_pagamento:.2f}</strong> "
+        f"(referente ao serviço de <strong>{entrada.tipo_servico.nome}</strong>), "
+        f"pelo qual, registramos a confirmação de pagamento na data de <strong>{data_pagamento}</strong>. "
+        f"<br/><br/>Este pagamento foi efetuado à <strong>{associacao.razao_social}</strong>, "
+        f"inscrita no CNPJ sob o nº {associacao.cnpj}, com sede na {associacao.logradouro}, nº {associacao.numero}, "
+        f"{associacao.bairro}, {associacao.municipio or 'Município não informado'}/{associacao.uf}. "
+        f"<br/><br/><i>Salientamos o nosso agradecimento pela contratação dos nossos serviços e pela confiação no nosso trabalho. "
+        f" Estaremos sempre à sua disposição! Conte Gente.</i>"
+    )
+
+    assinatura = (
+        f"{nome_presidente}<br/>"
+        f"Presidente da Associação"
+    )
+
+    # Elementos do PDF
+    elements = [
+        Spacer(1, 50),
+        Paragraph(nome_presidente, style_presidente),
+        Spacer(1, 35),
+        Paragraph("RECIBO DE SERVIÇO PRESTADO", style_title),
+        Spacer(1, 20),
+        Paragraph(texto, style_normal),
+        Spacer(1, 24),
+        Paragraph(local_data, style_normal),
+        Spacer(1, 20),
+        Paragraph(assinatura, style_assinatura),
+    ]
+
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=50,
+        leftMargin=50,
+        topMargin=120,
+        bottomMargin=50,
+    )
+    doc.build(elements)
+    buffer.seek(0)
+
+    overlay_pdf = PdfReader(buffer)
+    for index, template_page in enumerate(template_pdf.pages):
+        if index < len(overlay_pdf.pages):
+            overlay_page = overlay_pdf.pages[index]
+            PageMerge(template_page).add(overlay_page).render()
+
+    pdf_name = f"recibo_servico_extra_{extra.id}_{entrada.id}.pdf"
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+    PdfWriter(pdf_path, trailer=template_pdf).write()
+
+    pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
+    query_string = urlencode({'pdf_url': pdf_url})
+    return redirect(f"{reverse('app_automacoes:pagina_acoes_entrada', args=[entrada.id])}?{query_string}&tipo=servico_extra")
+
+
 

@@ -50,6 +50,9 @@ urlpatterns = [
     path('artigos/', include('app_articles.urls', namespace='app_articles')),
     path('financas/', include('app_finances.urls', namespace='app_finances')),
     path('servicos/', include('app_servicos.urls', namespace='app_servicos')),
+    path('embarcacoes/', include('app_embarcacoes.urls', namespace='app_embarcacoes')),
+    path('licencas/', include('app_licencas.urls', namespace='app_licencas')),
+    path('especies/', include('app_especies_maritimas.urls', namespace='app_especies_maritimas')),
     
 
     # Rotas de SEO

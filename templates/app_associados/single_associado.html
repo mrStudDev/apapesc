@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}Detalhes do Associado(a){% endblock title %}
 
 {% block single_associado %}
@@ -183,10 +184,6 @@
         <p><em>Nenhuma pasta associada.</em></p>
     {% endif %}
     
-        
-        
-      
-
     </div>
 
     <!-- Seção: Informações Pessoais -->
@@ -336,10 +333,11 @@
         </div>
     </div> 
     <br>
+
     <section class="mb-10">
-        <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-blue-600">
+        <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-green-600">
             <div class="flex items-center justify-between mb-3">
-                <h2 class="text-lg font-semibold text-blue-700 flex items-center">
+                <h2 class="text-lg font-semibold text-green-700 flex items-center">
                     <i class="material-icons mr-2">build_circle</i> Serviços Relacionados
                 </h2>
             </div>
@@ -347,18 +345,18 @@
                 <strong>Serviços associados a este membro</strong>. Veja os serviços em andamento ou já concluídos.
             </p>
             <a href="{% url 'app_servicos:create_servico_associado' associado.id %}"
-               class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded shadow transition">
+               class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded shadow transition">
                 <i class="material-icons mr-2 text-sm">add_circle</i>
                 Novo Serviço
             </a>
 
-    
             {% if servicos %}
             <div class="overflow-x-auto bg-white shadow-md rounded-lg py-4 mt-6">
                 <table class="min-w-full table-auto border-collapse">
                     <thead class="bg-gray-100 border-b">
                         <tr>
-                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Tipo</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Natureza</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Tipo Serviço</th>
                             <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
                             <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Data de Criação</th>
                             <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Ações</th>
@@ -367,12 +365,21 @@
                     <tbody>
                         {% for servico in servicos %}
                         <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ servico.get_natureza_servico_display }}</td>
                             <td class="py-3 px-4 text-gray-800 text-sm">{{ servico.tipo_servico }}</td>
                             <td class="py-3 px-4 text-gray-800 text-sm">{{ servico.get_status_etapa_display }}</td>
                             <td class="py-3 px-4 text-gray-800 text-sm">{{ servico.data_inicio|date:"d/m/Y H:i" }}</td>
                             <td class="py-3 px-4 text-blue-500 text-sm">
-                                <a href="{% url 'app_servicos:single_servico' servico.pk %}" class="hover:underline">Ver Detalhes</a>
-                                | <a href="#" class="hover:underline text-yellow-600">Editar</a>
+                                <a href="{% url 'app_servicos:single_servico' servico.pk %}" 
+                                    class="text-blue-500 hover:text-blue-700" 
+                                    title="Ver Detalhes">
+                                        <i class="material-icons">visibility</i>
+                                    </a>
+                                <a href="{% url 'app_servicos:edit_servico_associado' servico.pk %}" 
+                                    class="text-yellow-500 hover:text-yellow-700" 
+                                    title="Editar">
+                                    <i class="material-icons">edit</i>
+                                </a>                                 
                             </td>
                         </tr>
                         {% endfor %}
@@ -388,9 +395,9 @@
     
     <br>
     <section class="mb-10">
-        <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-indigo-600 mb-6">
+        <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-purple-600 mb-6">
             <div class="flex items-center justify-between mb-3">
-                <h2 class="text-lg font-semibold text-indigo-700 flex items-center">
+                <h2 class="text-lg font-semibold text-purple-700 flex items-center">
                     <i class="material-icons mr-2">assignment</i> Tarefas Relacionadas
                 </h2>
             </div>
@@ -398,7 +405,7 @@
                 <strong>Adequada para processos de filiação!</strong> Gerencie atividades específicas internas relacionadas a este associado. Crie novas tarefas e acompanhe o andamento.
             </p>
             <a href="{% url 'app_tarefas:create_tarefa_associado' associado.id %}"
-               class="inline-flex items-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded shadow transition">
+               class="inline-flex items-center px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium rounded shadow transition">
                 <i class="material-icons mr-2 text-sm">add_task</i>
                 Nova Tarefa
             </a>
@@ -411,7 +418,10 @@
                         <tr>
                             <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Título</th>
                             <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
-                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Data de Criação</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Criação</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Prioridade</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Data Limite</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Hora</th>
                             <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Ações</th>
                         </tr>
                     </thead>
@@ -421,9 +431,49 @@
                             <td class="py-3 px-4 text-gray-800 text-sm">{{ tarefa.titulo }}</td>
                             <td class="py-3 px-4 text-gray-800 text-sm">{{ tarefa.get_status_display }}</td>
                             <td class="py-3 px-4 text-gray-800 text-sm">{{ tarefa.data_criacao|date:"d/m/Y" }}</td>
+                           
+                            <td class="py-3 px-4 text-sm font-semibold">
+                                {% if tarefa.prioridade == "alta" %}
+                                <span class="text-red-600">🔺 Alta</span>
+                                {% elif tarefa.prioridade == "media" %}
+                                <span class="text-yellow-600">⚠️ Média</span
+                                {% elif tarefa.prioridade == "baixa" %}
+                                <span class="text-green-600">🔽 Baixa</span>
+                                {% else %}
+                                  <span class="text-gray-400 italic">Sem prioridade</span>
+                                {% endif %}
+                            </td>
+                              
+                            <td class="py-3 px-4 text-sm">
+                                {% if tarefa.data_limite|date:"Y-m-d" < today|date:"Y-m-d" %}
+                                  <span class="inline-block bg-red-100 text-red-800 text-xs font-semibold px-2 py-1 rounded">
+                                    ❌ {{ tarefa.data_limite|date:"d/m/Y" }} (vencida)
+                                  </span>
+                                {% elif tarefa.data_limite|date:"Y-m-d" == today|date:"Y-m-d" %}
+                                  <span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-2 py-1 rounded">
+                                    ⚠️ {{ tarefa.data_limite|date:"d/m/Y" }} (vence hoje)
+                                  </span>
+                                {% else %}
+                                  <span class="inline-block bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded">
+                                    ✅ {{ tarefa.data_limite|date:"d/m/Y" }}
+                                  </span>
+                                {% endif %}
+                              </td>
+                              
+
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ tarefa.hora_limite|time:"H:i" }}</td>
+
                             <td class="py-3 px-4 text-blue-500 text-sm">
-                                <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" class="hover:underline">Ver Detalhes</a>
-                                | <a href="{% url 'app_tarefas:edit_tarefa' tarefa.pk %}" class="hover:underline text-yellow-600">Editar</a>
+                                <a href="{% url 'app_tarefas:single_tarefa' tarefa.pk %}" 
+                                    class="text-blue-500 hover:text-blue-700" 
+                                    title="Ver Detalhes">
+                                        <i class="material-icons">visibility</i>
+                                    </a>
+                                <a href="{% url 'app_tarefas:edit_tarefa' tarefa.pk %}" 
+                                    class="text-yellow-500 hover:text-yellow-700" 
+                                    title="Editar">
+                                    <i class="material-icons">edit</i>
+                                </a>  
                             </td>
                         </tr>
                         {% endfor %}
@@ -435,9 +485,109 @@
             {% endif %}
         </div>
     </section>
+    <br>
+    <section class="mb-10">
+        <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-orange-600">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-semibold text-orange-700 flex items-center">
+                    <i class="material-icons mr-2">sailing</i> Embarcações do Associado
+                </h2>
+            </div>
+            <p class="text-sm text-gray-600 mb-4">
+                <strong>Cadastro de Embarcações</strong>. Veja as embarcações do associado.
+            </p>
     
+            <a href="{% url 'app_embarcacoes:create_embarcacao' associado.id %}"
+               class="inline-flex items-center px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white text-sm font-medium rounded shadow transition">
+                <i class="material-icons mr-2 text-sm">add_circle</i>
+                Nova Embarcação
+            </a>
+    
+            {% if embarcacoes %}
+            <div class="overflow-x-auto bg-white shadow-md rounded-lg py-4 mt-6">
+                <table class="min-w-full table-auto border-collapse">
+                    <thead class="bg-gray-100 border-b">
+                        <tr>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Nome</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Inscrição</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Tipo</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Validade Licença</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Status Licença</th>
+                            <th class="text-center py-3 px-4 text-sm font-medium text-gray-600">Validade TIE</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for embarcacao in embarcacoes %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ embarcacao.nome_embarcacao }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ embarcacao.inscricao_embarcacao }}</td>
+                            <td class="py-3 px-4 text-gray-800 text-sm">{{ embarcacao.tipo_embarcacao.nome }}</td>
+                            
+                            <td class="py-3 px-4 text-gray-800 text-sm">
+                                {% if embarcacao.licenca_vigente %}
+                                  {{ embarcacao.licenca_vigente.validade_final|date:"d/m/Y" }}
+                                {% else %}
+                                  <span class="text-gray-400 italic">Sem licença</span>
+                                {% endif %}
+                            </td>
+                              
+                            <td class="py-3 px-4 text-sm">
+                                {% if embarcacao.status_licenca == 'vencida' %}
+                                  <span class="inline-block px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded">❌ Vencida</span>
+                                {% elif embarcacao.status_licenca == 'alerta' %}
+                                  <span class="inline-block px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded">⚠️ Vence logo</span>
+                                {% elif embarcacao.status_licenca == 'ok' %}
+                                  <span class="inline-block px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded">✅ Em dia</span>
+                                {% else %}
+                                  <span class="inline-block px-2 py-1 text-xs font-semibold bg-gray-200 text-gray-500 rounded">S/L</span>
+                                {% endif %}
+                            </td>
 
-
+                            <td class="py-3 px-4 text-sm">
+                                {% if embarcacao.validade_tie %}
+                                        {{ embarcacao.validade_tie|date:"d/m/Y" }}
+                                {% if embarcacao.status_tie == 'vencida' %}
+                                    <span class="inline-block mt-1 bg-red-100 text-red-800 px-2 py-0.5 text-xs font-semibold rounded">
+                                      ❌ Vencida ({{ embarcacao.dias_para_vencimento_tie_abs }}
+                                      dias atrás)
+                                    </span>
+                                {% elif embarcacao.status_tie == 'alerta' %}
+                                    <span class="inline-block mt-1 bg-yellow-100 text-yellow-800 px-2 py-0.5 text-xs font-semibold rounded">
+                                      ⚠️ Vence em {{ embarcacao.dias_para_vencimento_tie }} dias
+                                    </span>
+                                {% elif embarcacao.status_tie == 'ok' %}
+                                    <span class="inline-block mt-1 bg-green-100 text-green-800 px-2 py-0.5 text-xs font-semibold rounded">
+                                      ✅ Em dia ({{ embarcacao.dias_para_vencimento_tie }} dias restantes)
+                                    </span>
+                                {% endif %}
+                                {% else %}
+                                    <span class="text-gray-400 italic">Sem validade</span>
+                                {% endif %}
+                            </td>
+                              
+                            <td class="py-3 px-4 text-blue-500 text-sm">
+                                <a href="{% url 'app_embarcacoes:single_embarcacao' embarcacao.pk %}" 
+                                    class="text-blue-500 hover:text-blue-700" 
+                                    title="Ver Detalhes">
+                                        <i class="material-icons">visibility</i>
+                                    </a>
+                                <a href="{% url 'app_embarcacoes:edit_embarcacao' embarcacao.pk %}" 
+                                    class="text-yellow-500 hover:text-yellow-700" 
+                                    title="Editar">
+                                    <i class="material-icons">edit</i>
+                                </a> 
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-gray-500 italic mt-3">Nenhuma embarcação cadastrada para este associado.</p>
+            {% endif %}
+        </div>
+    </section>
 
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <!-- Título -->

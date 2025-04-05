@@ -1,0 +1,145 @@
+    
+{% extends 'base.html' %}
+{% load static %}
+
+
+{% block list_licencas %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+    <main class="flex-grow">
+
+        <div class="container mx-auto px-4 py-8">
+          <h1 class="text-3xl font-extrabold text-indigo-700 mb-8">📄 Licenças Cadastradas</h1>
+          <form method="get" class="mb-6 flex flex-col sm:flex-row gap-4 items-end">
+            <div class="w-full sm:w-1/3">
+              <label for="embarcacao" class="block text-sm font-medium text-gray-700">Nome da Embarcação</label>
+              <input type="text" id="embarcacao" name="embarcacao" value="{{ nome_embarcacao }}"
+                     class="mt-1 block w-full border border-gray-300 rounded px-4 py-2" />
+            </div>
+          
+            <div class="w-full sm:w-1/3">
+              <label for="associado" class="block text-sm font-medium text-gray-700">Nome do Associado</label>
+              <input type="text" id="associado" name="associado" value="{{ nome_associado }}"
+                     class="mt-1 block w-full border border-gray-300 rounded px-4 py-2" />
+            </div>
+          
+            <div class="flex gap-2">
+              <button type="submit"
+                      class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 transition">
+                🔍 Buscar
+              </button>
+              <a href="{% url 'app_licencas:list_licencas' %}"
+                 class="bg-gray-300 text-gray-800 px-4 py-2 rounded hover:bg-gray-400 transition">
+                ❌ Limpar
+              </a>
+            </div>
+          </form>
+          
+          
+          
+          <div class="overflow-x-auto rounded-lg">
+            <table class="min-w-full table-auto text-sm text-left border border-gray-200 shadow-sm">
+              <thead class="bg-indigo-50 text-indigo-800 uppercase text-xs font-semibold">
+                <tr>
+                  <th class="px-6 py-3 border-b">🚤 Embarcação</th>
+                  <th class="px-6 py-3 border-b">👤 Proprietário</th>
+                  <th class="px-6 py-3 border-b">📄 Nº Processo</th>
+                  <th class="px-6 py-3 border-b">🗓️ Validade Final</th>
+                  <th class="px-6 py-3 border-b text-center">📊 Status</th>
+                  <th class="px-6 py-3 border-b text-center">⚙️ Ações</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                {% for licenca in licencas %}
+                <tr class="hover:bg-indigo-50 transition-colors duration-150 ease-in-out">
+                  <td class="px-6 py-4">{{ licenca.embarcacao.nome_embarcacao }}</td>
+                  <td class="px-6 py-4">{{ licenca.embarcacao.proprietario.user.get_full_name }}</td>
+                  <td class="px-6 py-4">{{ licenca.num_processo|default:"—" }}</td>
+                  <td class="px-6 py-4">
+                    {{ licenca.validade_final|date:"d/m/Y" }}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-center">
+                    {% if licenca.status_validade == 'vencida' %}
+                      <span class="inline-block bg-red-100 text-red-800 px-2 py-0.5 text-xs font-semibold rounded">
+                        ❌ Vencida
+                        <small class="font-normal">({{ licenca.dias_para_vencimento_abs }} dias atrás)</small>
+                      </span>
+                      {% elif licenca.status_validade == 'alerta' %}
+                      <span class="inline-block bg-yellow-100 text-yellow-800 px-2 py-0.5 text-xs font-semibold rounded">
+                        ⚠️ Vencendo
+                        <small class="font-normal">
+                          ({% if licenca.dias_para_vencimento != None %}{{ licenca.dias_para_vencimento }} dias restantes{% else %}Data inválida{% endif %})
+                        </small>
+                      </span>
+                    
+                    {% elif licenca.status_validade == 'ok' %}
+                      <span class="inline-block bg-green-100 text-green-800 px-2 py-0.5 text-xs font-semibold rounded">
+                        ✅ Em dia
+                        <small class="font-normal">({{ licenca.dias_para_vencimento }} dias restantes)</small>
+                      </span>
+                    {% else %}
+                      <span class="text-gray-400 italic">Sem validade</span>
+                    {% endif %}
+                  </td>
+                  
+                  
+                  <td class="px-6 py-4 text-center flex justify-center gap-4">
+                    <!-- Botão Ver -->
+                    <a href="{% url 'app_licencas:single_licenca' licenca.id %}"
+                       class="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 transition">
+                      <span class="material-icons text-base">visibility</span>
+                      <span class="text-sm">Ver</span>
+                    </a>
+                    <a href="{% url 'app_licencas:edit_licenca' licenca.id %}"
+                       class="inline-flex items-center gap-1 text-yellow-500 hover:text-yellow-800 transition">
+                      <span class="material-icons text-base">edit</span>
+                      <span class="text-sm">edit</span>
+                    </a>                  
+                    <!-- Botão Deletar -->
+                    <a href="{% url 'app_licencas:delete_licenca' licenca.id %}"
+                       class="inline-flex items-center gap-1 text-red-600 hover:text-red-800 transition"
+                       onclick="return confirm('Tem certeza que deseja excluir esta licença?')">
+                      <span class="material-icons text-base">delete</span>
+                      <span class="text-sm">Excluir</span>
+                    </a>
+                  </td>
+                  
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center py-6 text-gray-500 italic">
+                    Nenhuma licença cadastrada.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+      
+      <!-- Footer -->
+      {% include "components/footer_associacao.html" %}
+     
+{% endblock list_licencas %}
+      

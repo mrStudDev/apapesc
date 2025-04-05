@@ -1,0 +1,173 @@
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filterLicencas %}
+
+{% block single_licenca %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+
+    <main class="max-w-5xl mx-auto py-10 px-4">
+      <div class="bg-white shadow-lg rounded-xl p-8 border border-gray-200 space-y-8">
+
+        <!-- Hero Licença -->
+        <div class="bg-gradient-to-r from-orange-50 to-white border border-indigo-200 shadow-md rounded-xl p-6 mb-8 flex items-center space-x-6">
+          <!-- Ícone -->
+          <div class="flex-shrink-0">
+            <img src="{% static 'images/Selo_licencas.png' %}" alt="Ícone Licença" class="w-20 h-20 object-contain rounded-md shadow-sm border border-indigo-100">
+          </div>
+
+          <!-- Informações principais -->
+          <div class="flex flex-col space-y-1">
+            <span class="text-xs text-gray-500 uppercase tracking-wide font-medium">Documento Oficial</span>
+            <h1 class="text-3xl font-bold text-indigo-800 leading-snug">
+              Licença: {{ licenca.get_licenca_nome_display }}
+            </h1>
+            <p class="text-sm text-gray-600">
+              Concedida por <strong>{{ licenca.get_orgao_nome_display }}</strong>
+            </p>
+          </div>
+        </div>
+      
+        <!-- Informações principais -->
+        <div class="space-y-3 text-gray-700 text-base mt-4">
+          <p><strong class="text-gray-600">Órgão Concedente:</strong> {{ licenca.get_orgao_nome_display }}</p>
+      
+          <p>
+            <strong class="text-gray-600">Embarcação:</strong> {{ embarcacao.nome_embarcacao }}
+            <a href="{% url 'app_embarcacoes:single_embarcacao' embarcacao.pk %}" class="text-blue-600 hover:underline ml-2">
+              Ver Embarcação
+            </a>
+          </p>
+      
+          <p>
+            <strong class="text-gray-600">Proprietário:</strong> {{ associado.user.get_full_name }}
+            <a href="{% url 'app_associados:single_associado' associado.pk %}" class="text-blue-600 hover:underline ml-2">
+              Ver Associado
+            </a>
+          </p>
+      
+          {% if licenca.num_processo %}
+            <p><strong class="text-gray-600">Nº Processo:</strong> {{ licenca.num_processo }}</p>
+          {% endif %}
+          {% if licenca.num_atoAdmConcede %}
+            <p><strong class="text-gray-600">Nº Ato Administrativo:</strong> {{ licenca.num_atoAdmConcede }}</p>
+          {% endif %}
+          {% if licenca.codigo_frota %}
+            <p><strong class="text-gray-600">Código da Frota:</strong> {{ licenca.codigo_frota }}</p>
+          {% endif %}
+          {% if licenca.inscricao_aut_naval %}
+            <p><strong class="text-gray-600">Inscrição de Aut. Naval:</strong> {{ licenca.inscricao_aut_naval }}</p>
+          {% endif %}
+        </div>
+      
+      
+    
+        <!-- Detalhes da Embarcação -->
+        <section class="bg-gray-50 p-6 rounded-lg border border-indigo-200">
+          <h2 class="text-xl font-semibold text-indigo-800 mb-4 flex items-center">
+            <i class="material-icons mr-2 text-indigo-600">directions_boat</i>
+            Detalhes da Embarcação
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
+            <p><strong>Nome da Embarcação:</strong> {{ embarcacao.nome_embarcacao }}</p>
+            <p><strong>Ano de Construção:</strong> {{ embarcacao.ano_construcao|default:"-" }}</p>
+            <p><strong>Nº Tripulantes:</strong> {{ embarcacao.numero_tripulantes }}</p>
+            <p><strong>Comprimento:</strong> {{ embarcacao.cumprimento }} m</p>
+            <p><strong>Arqueação Bruta:</strong> {{ embarcacao.ab_gt }}</p>
+            <p><strong>Material de Construção:</strong> {{ embarcacao.material_construcao|default:"-" }}</p>
+            <p><strong>Propulsão:</strong> {{ embarcacao.tipo_propulsao }}</p>
+            <p><strong>Combustível:</strong> {{ embarcacao.get_combustivel_display }}</p>
+    
+            {% for i in '1234' %}
+              {% with motor=embarcacao|get_attr:'motor_'|add:i potencia=embarcacao|get_attr:'potencia_hp'|add:i %}
+                {% if motor %}
+                  <p><strong>Motor {{ i }}:</strong> {{ motor }} - {{ potencia }} HP</p>
+                {% endif %}
+              {% endwith %}
+            {% endfor %}
+          </div>
+        </section>
+    
+        {% if licenca.modalidade_permissionamento %}
+          <div class="text-gray-700">
+            <p><strong class="text-gray-600">Modalidade de Permissionamento:</strong></p>
+            <p>{{ licenca.modalidade_permissionamento }}</p>
+          </div>
+        {% endif %}
+    
+        <!-- Info do Associado -->
+        <section class="bg-blue-50 p-6 rounded-lg border border-blue-200">
+          <h2 class="text-xl font-semibold text-blue-800 mb-4 flex items-center">
+            <i class="material-icons mr-2 text-blue-600">person</i>
+            Informações do Associado
+          </h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-800">
+            <p><strong>Nome:</strong> {{ associado.user.get_full_name }}</p>
+            <p><strong>CPF:</strong> {{ associado.cpf }}</p>
+            <p><strong>Nº RGP:</strong> {{ associado.rgp }}</p>
+            <p><strong>CEP:</strong> {{ associado.cep }}</p>
+            <p><strong>Logradouro:</strong> {{ associado.logradouro }}</p>
+            <p><strong>Número:</strong> {{ associado.numero }}</p>
+            <p><strong>Complemento:</strong> {{ associado.complemento }}</p>
+            <p><strong>Município:</strong> {{ associado.municipio }}</p>
+            <p><strong>UF:</strong> {{ associado.uf }}</p>
+          </div>
+        </section>
+    
+        <!-- Datas -->
+        <div class="space-y-2 text-gray-700">
+          <p><strong class="text-gray-600">Validade Inicial:</strong> {{ licenca.validade_inicial|date:"d/m/Y" }}</p>
+          <p><strong class="text-gray-600">Validade Final:</strong> {{ licenca.validade_final|date:"d/m/Y" }}</p>
+          <p><strong class="text-gray-600">Última Alteração:</strong> {{ licenca.data_alteracao|date:"d/m/Y H:i" }}</p>
+        </div>
+    
+        {% if licenca.content %}
+          <div>
+            <p><strong class="text-gray-600">Anotações:</strong></p>
+            <p class="text-gray-700">{{ licenca.content }}</p>
+          </div>
+        {% endif %}
+    
+        <!-- Ações -->
+        <div class="pt-6 flex justify-end space-x-3">
+          <a href="{% url 'app_licencas:list_licencas' %}"
+             class="inline-block px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300">
+            Voltar para Lista
+          </a>
+    
+          <a href="{% url 'app_licencas:edit_licenca' licenca.pk %}"
+             class="inline-block px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600">
+            Editar Licença
+          </a>
+        </div>
+    
+      </div>
+    </main>
+    
+
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock %}

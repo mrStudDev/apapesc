@@ -1,0 +1,285 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load custom_filters_embarcacao %}
+
+{% block title %}Cadastrar Embarcação{% endblock title %}
+
+{% block create_embarcacao %}
+<!-- Página de acesso restrito ao Superuser -->
+{% include 'components/navbar_associacao.html' %}
+
+{% if messages %}
+<div class="mb-4">
+    {% for message in messages %}
+        <div class="p-4 rounded-md text-white 
+            {% if message.tags == 'success' %}bg-green-500
+            {% elif message.tags == 'error' %}bg-red-500
+            {% elif message.tags == 'info' %}bg-blue-500
+            {% else %}bg-gray-500
+            {% endif %}">
+            {{ message }}
+        </div>
+    {% endfor %}
+</div>
+{% endif %}
+<main class="flex-grow">
+    <div class="container mx-auto mt-8 p-4 bg-white shadow-md rounded">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Cadastrar Nova Embarcação</h1>
+
+        <div class="max-w-5xl mx-auto mt-10 bg-white p-8 rounded shadow">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
+                <i class="material-icons text-blue-500 mr-2">directions_boat</i>
+                Nova Embarcação para: <span class="ml-2 text-gray-700 font-semibold">{{ nome_completo }}</span>
+            </h2>
+        
+            <form method="post" enctype="multipart/form-data">
+
+                {% csrf_token %}
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                    {% if messages %}
+                    <div class="mb-4">
+                        {% for message in messages %}
+                        <div class="p-3 rounded text-sm 
+                            {% if message.tags == 'error' %}bg-red-100 text-red-700 
+                            {% elif message.tags == 'success' %}bg-green-100 text-green-700 
+                            {% else %}bg-gray-100 text-gray-700{% endif %}">
+                            {{ message }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+
+                    <!-- Proprietário: exibido como readonly + hidden para envio real -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Proprietário</label>
+                        <input type="text" value="{{ associado.user.get_full_name }}" readonly
+                            class="bg-gray-100 border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 shadow-sm" />
+                    
+                        <!-- 🔥 Aqui é o pulo do gato: esse campo faz o POST funcionar -->
+                        <input type="hidden" name="proprietario" value="{{ associado.id }}">
+                    
+                        {% for error in form.proprietario.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+  
+                    <!-- Destaque d embarcação-->
+                    <div>
+                        <label for="{{ form.destaque_embarcacao_img.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.destaque_embarcacao_img.label }}
+                        </label>
+                        {{ form.destaque_embarcacao_img }}
+                        {% for error in form.destaque_embarcacao_img.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                
+                    <!-- Inscrição -->
+                    <div>
+                        <label for="id_inscricao_embarcacao" class="block text-sm font-medium text-gray-700 mb-1">Inscrição da Embarcação</label>
+                        {{ form.inscricao_embarcacao }}
+                        {% for error in form.inscricao_embarcacao.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}                         
+                    </div>
+        
+                    <!-- Tipo de Embarcação -->
+                    <div>
+                        <label for="id_tipo_embarcacao" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Embarcação</label>
+                        {{ form.tipo_embarcacao }}
+                        {% for error in form.tipo_embarcacao.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}                         
+                    </div>
+        
+                    <!-- Validade TIE -->
+                    <div>
+                        <label for="id_validade_tie" class="block text-sm font-medium text-gray-700 mb-1">Validade TIE</label>
+                        {{ form.validade_tie }}
+                        {% for error in form.validade_tie.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}                         
+                    </div>
+        
+                    <!-- Nome da Embarcação -->
+                    <div>
+                        <label for="id_nome_embarcacao" class="block text-sm font-medium text-gray-700 mb-1">Nome da Embarcação</label>
+                        {{ form.nome_embarcacao }}
+                    </div>
+        
+                    <!-- Atividade -->
+                    <div>
+                        <label for="id_atividade" class="block text-sm font-medium text-gray-700 mb-1">Atividade</label>
+                        {{ form.atividade }}
+                    </div>
+        
+                    <!-- Área de Navegação -->
+                    <div>
+                        <label for="id_area_navegacao" class="block text-sm font-medium text-gray-700 mb-1">Área de Navegação</label>
+                        {{ form.area_navegacao }}
+                    </div>
+        
+                    <!-- Tripulantes -->
+                    <div>
+                        <label for="id_numero_tripulantes" class="block text-sm font-medium text-gray-700 mb-1">Nº de Tripulantes</label>
+                        {{ form.numero_tripulantes }}
+                    </div>
+        
+                    <!-- Passageiros -->
+                    <div>
+                        <label for="id_numero_passageiros" class="block text-sm font-medium text-gray-700 mb-1">Nº de Passageiros</label>
+                        {{ form.numero_passageiros }}
+                    </div>
+        
+                    <!-- Cumprimento -->
+                    <div>
+                        <label for="id_cumprimento" class="block text-sm font-medium text-gray-700 mb-1">Cumprimento</label>
+                        {{ form.cumprimento }}
+                    </div>
+        
+                    <!-- AB/GT -->
+                    <div>
+                        <label for="id_ab_gt" class="block text-sm font-medium text-gray-700 mb-1">AB/GT</label>
+                        {{ form.ab_gt }}
+                    </div>
+        
+                    <!-- Boca -->
+                    <div>
+                        <label for="id_boca" class="block text-sm font-medium text-gray-700 mb-1">Boca</label>
+                        {{ form.boca }}
+                    </div>
+        
+                    <!-- Tipo de Propulsão -->
+                    <div>
+                        <label for="id_tipo_propulsao" class="block text-sm font-medium text-gray-700 mb-1">Tipo de Propulsão</label>
+                        {{ form.tipo_propulsao }}
+                    </div>
+                    <!-- Tipo de Propulsão -->
+                    <div>
+                        <label for="id_porte" class="block text-sm font-medium text-gray-700 mb-1">Porte Embarcação</label>
+                        {{ form.porte }}
+                    </div>        
+                    <!-- Combustível -->
+                    <div>
+                        <label for="id_combustivel" class="block text-sm font-medium text-gray-700 mb-1">Combustível</label>
+                        {{ form.combustivel }}
+                    </div>
+        
+                    <!-- Motores -->
+                    <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {% for i in '1234' %}
+                          <div class="grid grid-cols-3 gap-4">
+                            {% with motor_field='motor_'|add:i serie_field='numero_serie_'|add:i potencia_field='potencia_hp'|add:i %}
+                              <!-- Motor -->
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Motor {{ i }}</label>
+                                {{ form|get_field:motor_field }}
+                              </div>
+                              <!-- Nº Série -->
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nº de Série {{ i }}</label>
+                                {{ form|get_field:serie_field }}
+                              </div>
+                              <!-- Potência -->
+                              <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Potência (HP) {{ i }}</label>
+                                {{ form|get_field:potencia_field }}
+                              </div>
+                            {% endwith %}
+                          </div>
+                        {% endfor %}
+                      </div>
+
+                    <!-- Ano Construção -->
+                    <div>
+                        <label for="id_ano_construcao" class="block text-sm font-medium text-gray-700 mb-1">Ano Construção</label>
+                        {{ form.ano_construcao }}
+                    </div>                      
+                    <!--Nome Cinstrutor -->
+                    <div>
+                        <label for="id_construtor_nome" class="block text-sm font-medium text-gray-700 mb-1">Nome Construtor</label>
+                        {{ form.construtor_nome }}
+                    </div>
+                    <!-- Material Construcao -->
+                    <div>
+                        <label for="id_material_construcao" class="block text-sm font-medium text-gray-700 mb-1">Material Construção</label>
+                        {{ form.material_construcao }}
+                    </div>
+                    <!-- Arqueação Bruta -->
+                    <div>
+                        <label for="id_arqueacao_bruta" class="block text-sm font-medium text-gray-700 mb-1">Arqueação Bruta</label>
+                        {{ form.arqueacao_bruta }}
+                    </div>
+                    <!-- 📷 Traves -->
+                    <div>
+                        <label for="{{ form.traves_img.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.traves_img.label }}
+                        </label>
+                        {{ form.traves_img }}
+                        {% for error in form.traves_img.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                
+                    <!-- 📷 Popa -->
+                    <div>
+                        <label for="{{ form.popa_img.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.popa_img.label }}
+                        </label>
+                        {{ form.popa_img }}
+                        {% for error in form.popa_img.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div> 
+
+                    <!-- Alienação -->
+                    <div>
+                        <label for="id_alienacao" class="block text-sm font-medium text-gray-700 mb-1">Alienação</label>
+                        {{ form.alienacao }}
+                    </div>
+                    <!-- Co-Proprietário -->
+                    <div>
+                        <label for="id_co_proprietario_nome" class="block text-sm font-medium text-gray-700 mb-1">Co-Proprietário</label>
+                        {{ form.co_proprietario_nome }}
+                    </div>        
+                    <!-- Município -->
+                    <div>
+                        <label for="id_municipio_emissao" class="block text-sm font-medium text-gray-700 mb-1">Município de Emissão</label>
+                        {{ form.municipio_emissao }}
+                    </div>
+        
+                    <!-- Data Emissão -->
+                    <div>
+                        <label for="id_data_emissao" class="block text-sm font-medium text-gray-700 mb-1">Data de Emissão</label>
+                        {{ form.data_emissao }}
+                    </div>
+        
+                </div>
+        
+
+                <!-- Descrição -->
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Anotações/Exigências</h2>
+                <div class="mt-1 w-full" style="max-width: 100%; padding: 0; margin: 0;">
+                    {% include 'components/my_editor.html' %}
+                </div>
+            
+        
+                <!-- Ações -->
+                <div class="mt-6 text-right">
+                    <button type="submit"
+                            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded shadow">
+                        Salvar Embarcação
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+
+{% endblock create_embarcacao %}
+
