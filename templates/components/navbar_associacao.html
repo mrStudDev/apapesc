@@ -22,7 +22,7 @@
         <!-- Menu para desktop -->
         <div class="hidden md:flex space-x-6 items-center text-sm">
             <!-- Dropdown Manager -->
-            <div class="relative group">
+            <div class="relative group" style="font-size:13px;">
                 <button class="hover:text-gray-200 focus:outline-none">
                     Super
                     <span class="material-icons align-middle">arrow_drop_down</span>
@@ -33,16 +33,15 @@
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_finances:list_despesas' %}" class="block px-4 py-2 hover:bg-gray-200">Listas de Despesas</a>
                     <a href="{% url 'app_finances:create_tipo_despesa' %}" class="block px-4 py-2 hover:bg-gray-200">Novo tipo Despesa</a>
-                    <a href="{% url 'app_finances:create_despesa' %}" class="block px-4 py-2 hover:bg-orange-600 hover:text-white">Lançar Despesa</a>
+                    <a href="{% url 'app_finances:create_despesa' %}" class="block px-4 py-2 bg-gray-200 hover:bg-red-500 hover:text-white">Lançar Despesa</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_finances:list_entradas' %}" class="block px-4 py-2 hover:bg-gray-200">Listas de Entradas</a>
-                    <a href="{% url 'app_finances:create_tipo_servico' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Tipo Serviço</a>
-                    <a href="{% url 'app_finances:create_entrada' %}" class="block px-4 py-2 hover:bg-green-500 hover:text-white">Lançar Entrada</a>
+                    <a href="{% url 'app_finances:create_entrada' %}" class="block px-4 py-2 bg-gray-200 hover:bg-red-600 hover:text-white">Entrada Desvinculada</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_finances:list_anuidades' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Anuidades</a>
                     <a href="{% url 'app_finances:tri_condictions' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Tri Anuidaeds</a>
                     <a href="{% url 'app_finances:descontos_anuidades' %}" class="block px-4 py-2 hover:bg-gray-200">Descontos Anuidades</a>
-                    <a href="{% url 'app_finances:create_anuidade' %}" class="block px-4 py-2 hover:bg-blue-600 hover:text-white">Cadastrar Anuidade</a>
+                    <a href="{% url 'app_finances:create_anuidade' %}" class="block px-4 py-2 bg-gray-200 hover:bg-red-600 hover:text-white">Cadastrar Anuidade</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_manager:quadro_associados' %}" class="block px-4 py-2 hover:bg-gray-200">Associados Status</a>
                     <hr class="border-t-2 border-gray-500 my-2">
@@ -52,7 +51,7 @@
                 </div>
             </div>           
             <!-- Dropdown Listas -->
-            <div class="relative group">
+            <div class="relative group" style="font-size:13px;">
                 <button class="hover:text-gray-200 focus:outline-none">
                     Listas
                     <span class="material-icons align-middle">arrow_drop_down</span>
@@ -80,7 +79,7 @@
             </div>
 
             <!-- Dropdown Cadastros -->
-            <div class="relative group">
+            <div class="relative group" style="font-size:13px;">
                 <button class="hover:text-gray-200 focus:outline-none">
                     Cadastrar
                     <span class="material-icons align-middle">arrow_drop_down</span>
@@ -93,10 +92,10 @@
                     <a href="{% url 'app_associados:list_geral_associado' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Embarcação</a>
                     <a href="{% url 'app_embarcacoes:list_embarcacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Licença</a>
                     <hr class="border-t-2 border-gray-500 my-2">
-                    <a href="{% url 'app_associacao:create_cargo' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Cargo(Integrante)</a>
+                    <a href="{% url 'app_associacao:create_cargo' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Cargo <strong>(Integrante)</strong></a>
                     <a href="{% url 'app_associados:create_profissao' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Profissão</a>
                     <!-- CADASTRA NOVO INTEGRANTE E ASSOCIADO A PARTIR DE UM USUÁRIO -->
-                    <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Integrante</a>
+                    <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Integrante <strong>(Equipe)</strong></a>
                     <a href="{% url 'app_associacao:list_users' %}" class="block px-4 py-2 text-white bg-blue-950 hover:bg-blue-700">Novo Associado</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_documentos:create_tipo_documento' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Tipo de Documento</a> 
@@ -106,7 +105,7 @@
                     <a href="{% url 'app_articles:create_tag' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Tag</a>
                 </div>
             </div>
-            <div class="relative group">
+            <div class="relative group" style="font-size:13px;">
                 <button class="hover:text-gray-200 focus:outline-none">
                     Servicos
                     <span class="material-icons align-middle">arrow_drop_down</span>
@@ -114,6 +113,7 @@
                 <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
 
                     <a href="{% url 'app_servicos:list_servicos' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Serviços</a>
+                    <a href="{% url 'app_finances:create_tipo_servico' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Tipo Serviço</a>
                     <a href="{% url 'app_servicos:painel_etapas' %}"class="block px-4 py-2 hover:bg-gray-200">Painel Etapas</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_servicos:list_extraassociados' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Extra-Associados</a>
@@ -124,7 +124,7 @@
                 </div>
             </div>
             <!-- Tarefas  -->
-            <div class="relative group">
+            <div class="relative group" style="font-size:13px;">
                 <button class="hover:text-gray-200 focus:outline-none">
                     Tarefas
                     <span class="material-icons align-middle">arrow_drop_down</span>

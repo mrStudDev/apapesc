@@ -19,41 +19,27 @@
 <!-- Navbar -->
 {% include "components/navbar_home.html" %}
 
-<main class="flex-grow" style="background-color:#111827">
+
 <link rel="stylesheet" href="{% static 'css/styles_home.css' %}">
 <!-- Seção Principal (Hero) -->
-<section class="relative w-full h-[400px] md:h-[500px] bg-cover bg-center" style="background-image: url('{% static "images/lanca_rede.jpg" %}');">
-    <!-- Overlay Escuro para Melhorar Contraste -->
-    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-  
-    <!-- Conteúdo da Hero Section -->
-    <div class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-6">
-      <!-- Título Principal -->
-      <h1 class="associacao-title">
-        APAPESC
-      </h1>
-  
-      <!-- Título Secundário -->
-      <h2 class="text-3xl md:text-4xl font-semibold mb-6">
-        Proteger e Apoiar!
-      </h2>
-  
-      <!-- Subtítulo -->
-      <p class="text-lg md:text-xl max-w-3xl leading-relaxed">
-        Justos construimos a nossa história.
-      </p>
-    </div>
-    <!-- Link de Referência -->
-    <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white text-sm px-3 py-1 rounded-md shadow-md">
-      Imagem - <a href="https://pixabay.com/" target="_blank" class="underline hover:text-gray-300">Pixabay</a>
-    </div>
-  </section>
-  
-    
+<main class="flex-grow text-gray-800" style="background-color:#111827">
+    <!-- Hero Section -->
+    <section class="relative w-full h-[400px] md:h-[500px] bg-cover bg-center" style="background-image: url('{% static "images/lanca_rede.jpg" %}');">
+      <div class="absolute inset-0 bg-black bg-opacity-40"></div>
+      <div class="relative z-10 flex flex-col items-center justify-center h-full text-center text-white px-6">
+        <h1 class="text-5xl md:text-6xl font-extrabold tracking-wide drop-shadow-lg">APAPESC</h1>
+        <h2 class="text-2xl md:text-3xl font-medium mt-4">Proteger e Apoiar</h2>
+        <p class="mt-4 text-lg md:text-xl max-w-2xl">Juntos construímos a nossa história.</p>
+      </div>
+      <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white text-xs px-3 py-1 rounded-md">
+        Imagem - <a href="https://pixabay.com/" target="_blank" class="underline hover:text-gray-300">Pixabay</a>
+      </div>
+    </section>
+
+
     <!-- Seção Sobre a APAPESC -->
     <section 
-    style="background-color:background: rgb(152,81,7);
-    background: linear-gradient(180deg, rgba(152,81,7,1) 0%, rgba(18,40,135,1) 100%);" 
+    style="background-color:background:#111827" 
     class="max-w-6xl mx-auto mt-10 p-6 space-y-6 text-gray-200">
         <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Sobre a APAPESC</h2>
         <p class="leading-relaxed">
@@ -64,23 +50,17 @@
         </p>
         <p class="leading-relaxed">
         Com a APAPESC, nossos associados têm acesso a um atendimento próximo, humanizado e especializado, garantindo que suas demandas sejam atendidas com eficiência e compromisso. Junte-se a nós e fortaleça a nossa comunidade!
-        </p>
+        </p><br>
+          <!-- Imagem -->
+          <img src="{% static 'images/campo.jpg' %}" alt="Pescador"  class="w-full h-full object-cover rounded-lg shadow-[0_8px_20px_rgba(192,192,192,0.15)]">
+
     </section>
-    <br>
-    <section class="relative w-full h-[300px] md:h-[500px] py-4">
-        <!-- Imagem -->
-        <img src="{% static 'images/campo.jpg' %}" alt="Pescador" class="w-full h-full object-cover">
-      
-        <!-- Link de Referência -->
-        <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white text-sm px-3 py-1 rounded-md shadow-md">
-          Imagem - <a href="https://pixabay.com/" target="_blank" class="underline hover:text-gray-300">Pixabay</a>
-        </div>
-      </section>
+
+
     <!-- Seção Sobre a Pesca -->
     <section
-    style="background-color:background: rgb(5,23,125);
-    background: linear-gradient(180deg, rgba(5,23,125,1) 0%, rgba(47,64,7,1) 100%);" 
-    class="max-w-6xl mx-auto mt-10 p-6 space-y-6 text-gray-200">
+      style="background-color:background:#111827"  
+      class="max-w-6xl mx-auto mt-10 p-6 space-y-6 text-gray-200">
         <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Sobre a Pesca</h2>
         <p class="leading-relaxed">
         A pesca é uma atividade essencial para muitas famílias catarinenses, garantindo o sustento de diversas comunidades que vivem dessa prática há gerações. Santa Catarina possui uma das maiores tradições pesqueiras do Brasil, sendo reconhecida pela qualidade e variedade de seus pescados.
@@ -90,24 +70,14 @@
         </p>
         <p class="leading-relaxed">
         A <strong>APAPESC</strong> está aqui para garantir que o pescador tenha acesso a benefícios sociais, como o <strong>Seguro Defeso</strong>, e para orientar sobre regularização de documentos, cadastros e defesa da atividade pesqueira. Valorizamos a pesca artesanal e lutamos pela continuidade dessa tradição que é o sustento de tantas famílias.
-        </p>
+        </p><br>
+        <img src="{% static 'images/rio.jpg' %}" alt="Pescador" class="w-full h-full object-cover rounded-lg shadow-[0_8px_20px_rgba(192,192,192,0.15)]">
     </section>
-    <br>
-    <section class="relative w-full h-[300px] md:h-[500px] py-4">
-        <!-- Imagem -->
-        <img src="{% static 'images/rio.jpg' %}" alt="Pescador" class="w-full h-full object-cover">
-      
-        <!-- Link de Referência -->
-        <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white text-sm px-3 py-1 rounded-md shadow-md">
-          Imagem - <a href="https://pixabay.com/" target="_blank" class="underline hover:text-gray-300">Pixabay</a>
-        </div>
-      </section>
 
     <!-- Seção Sobre a Agricultura -->
     <section
-    style="background-color:background: rgb(47,64,7);
-    background: linear-gradient(180deg, rgba(47,64,7,1) 0%, rgba(10,112,6,1) 100%);"
-    class="max-w-6xl mx-auto mt-10 p-6 space-y-6 text-gray-200">
+      style="background-color:background:#111827"
+      class="max-w-6xl mx-auto mt-10 p-6 space-y-6 text-gray-200">
         <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Sobre a Agricultura</h2>
         <p class="leading-relaxed">
         A agricultura é a base da nossa alimentação e uma das atividades mais importantes para o desenvolvimento econômico de Santa Catarina. Os agricultores familiares são responsáveis por grande parte dos alimentos que chegam à mesa das famílias brasileiras, desempenhando um papel essencial na segurança alimentar e no equilíbrio ambiental.
@@ -117,19 +87,11 @@
         </p>
         <p class="leading-relaxed">
         A <strong>APAPESC</strong> acredita que a união dos agricultores e pescadores é a chave para o sucesso. Juntos, podemos promover o desenvolvimento sustentável das nossas comunidades, garantir direitos e benefícios e preservar nossas tradições. Venha fazer parte dessa história!
-        </p>
+        </p><br>
+        <img src="{% static 'images/uvas.jpg' %}" alt="Pescador" class="w-full h-full object-cover rounded-lg shadow-[0_8px_20px_rgba(192,192,192,0.15)]">
     </section>
-    <br>
-    <section class="relative w-full h-[300px] md:h-[500px] py-4">
-        <!-- Imagem -->
-        <img src="{% static 'images/uvas.jpg' %}" alt="Pescador" class="w-full h-full object-cover">
-      
-        <!-- Link de Referência -->
-        <div class="absolute bottom-4 left-4 bg-black bg-opacity-50 text-white text-sm px-3 py-1 rounded-md shadow-md">
-          Imagem - <a href="https://pixabay.com/" target="_blank" class="underline hover:text-gray-300">Pixabay</a>
-        </div>
-    </section>
-  
+    
+    <br><br><hr class="border-gray-200">
 </main>
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}

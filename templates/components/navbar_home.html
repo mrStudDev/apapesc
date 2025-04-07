@@ -1,78 +1,73 @@
 {% load static %}
-<nav class="text-white" style="background-color:#111827">
+
+<nav class="text-white bg-gray-900">
     <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-        <!-- Logo -->
-        <a href="/" class="flex items-center">
-            <img src="{% static 'images/Logo_Apapesc_2025.png' %}" alt="Logo APAPESC" class="w-16 h-16 md:w-24 md:h-24 object-contain rounded-md">
+      <!-- 🔸 Logo -->
+      <a href="/" class="flex items-center">
+        <img src="{% static 'images/Logo_Apapesc_2025.png' %}" alt="Logo APAPESC"
+             class="w-16 h-16 md:w-24 md:h-24 object-contain rounded-md">
+      </a>
+  
+      <!-- 🔸 Menu Desktop -->
+      <div class="hidden md:flex items-center space-x-4 text-sm">
+        <!-- Ícones Navegação -->
+        <a href="/" class="hover:bg-blue-700 px-3 py-2 rounded" title="Página Inicial">
+          <span class="material-icons align-middle">home</span>
         </a>
-
-        <!-- Menu para desktop -->
-        <div class="hidden md:flex space-x-6">
-            <a href="/" class="hover:text-gray-200">Home</a>
-            <a href="/sobre" class="hover:text-gray-200">Sobre</a>
-            <a href="/servicos" class="hover:text-gray-200">Serviços</a>
-            <a href="{% url 'app_articles:list_articles' %}" class="hover:text-gray-200">Artigos</a>
-            <a href="{% url 'app_especies_maritimas:list_especies' %}" class="hover:text-gray-200">Espécies</a>
-            <a href="{% url 'app_home:associe_se' %}" class="hover:text-gray-200">Associe-se</a>
-            <a href="/contato" class="hover:text-gray-200">Contato</a>
-
-            {% if not user.is_authenticated %}
-            <a href="{% url 'account_login' %}" class="hover:text-gray-200">Entrar</a>
-            <a href="{% url 'account_signup' %}" class="hover:text-gray-200">Cadastrar</a>
-            {% else %}
-            <a href="{% url 'account_logout' %}" class="hover:text-gray-200">Sair</a>
-            <a href="#" class="hover:bg-blue-700"><strong class="text-yellow-300">{{ user.username }}</strong></a>
-                <!-- Dashboards-->
-                {% if is_superuser %}
-                    <a href="{% url 'app_manager:super_dashboard' %}" class="hover:text-gray-200">Super</a>
-                {% elif is_admin_associacao %}
-                    <a href="{% url 'app_manager:admin_dashboard' %}" class="hover:text-gray-200">Admin</a>
-                {% elif is_delegado_reparticao %}
-                    <a href="{% url 'app_manager:delegado_dashboard' %}" class="hover:text-gray-200">Delegado</a>
-                {% elif is_diretor_associacao %}
-                    <a href="{% url 'app_manager:diretor_associacao_dashboard' %}" class="hover:text-gray-200">Diretor(a)</a>
-                {% elif is_presidente_associacao %}
-                    <a href="{% url 'app_manager:presidente_associacao_dashboard' %}" class="hover:text-gray-200">Presidente</a>
-                {% elif is_auxiliar_associacao %}
-                    <a href="{% url 'app_manager:auxiliar_associacao_dashboard' %}" class="hover:text-gray-200">AuxAss</a>
-                {% elif is_auxiliar_reparticao %}
-                        <a href="{% url 'app_manager:auxiliar_reparticao_dashboard' %}" class="hover:text-gray-200">AuxRep</a>
-                {% elif is_associado_associacao %}
-                    <a href="{% url 'app_manager:associado_dashboard' %}" class="hover:text-gray-200">Associado</a>
-                {% elif is_vip %}
-                    <a href="{% url 'app_manager:vip_dashboard' %}" class="hover:text-gray-200">VipDash</a>
-                {% else %}                
-                    <a href="#" class="hover:text-gray-200">Planos</a>
-                {% endif %}
-            {% endif %}
-        
-        
-        </div>
-
-        <!-- Botão do menu para dispositivos móveis -->
-        <div class="md:hidden">
-            <button id="menu-btn" class="text-2xl focus:outline-none">
-                <span class="material-icons">menu</span>
-            </button>
-        </div>
-    </div>
-
-    <!-- Menu para dispositivos móveis (oculto por padrão) -->
-    <div id="mobile-menu" class="hidden md:hidden bg-blue-500">
-        <a href="/" class="block px-4 py-2 hover:bg-blue-700">Home</a>
-        <a href="/sobre" class="block px-4 py-2 hover:bg-blue-700">Sobre</a>
-        <a href="{% url 'app_articles:list_articles' %}" class="block px-4 py-2 hover:bg-blue-700">Artigos</a>
-        <a href="{% url 'app_home:associe_se' %}" class="block px-4 py-2 hover:bg-blue-700">Associe-se</a>
-        <a href="/contato" class="block px-4 py-2 hover:bg-blue-700">Contato</a>
-
-        <!-- Link de login para dispositivos móveis -->
+        <a href="/sobre" class="hover:bg-blue-700 px-3 py-2 rounded" title="Sobre a APAPESC">
+          <span class="material-icons align-middle">info</span>
+        </a>
+        <a href="/contato" class="hover:bg-blue-700 px-3 py-2 rounded" title="Contato">
+          <span class="material-icons align-middle">contact_mail</span>
+        </a>
+        <a href="{% url 'app_especies_maritimas:list_especies' %}" class="hover:bg-blue-700 px-3 py-2 rounded" title="Espécies Marinhas">
+          <span class="material-icons align-middle">eco</span>
+        </a>
+        <a href="{% url 'app_articles:list_articles' %}" class="hover:bg-blue-700 px-3 py-2 rounded" title="Artigos e Notícias">
+          <span class="material-icons align-middle">article</span>
+        </a>
+  
+        <!-- Links de Texto -->
+        <a href="/servicos" class="text-white hover:text-blue-300">Serviços</a>
+        <a href="{% url 'app_home:associe_se' %}" class="text-white hover:text-blue-300">Associe-se</a>
+  
+        <!-- Autenticação -->
         {% if not user.is_authenticated %}
-            <a href="{% url 'account_login' %}" class="block px-4 py-2 hover:bg-blue-700">Login</a>
+          <a href="{% url 'account_login' %}" class="text-white hover:text-blue-300">Entrar</a>
+          <a href="{% url 'account_signup' %}" class="text-white hover:text-blue-300">Cadastrar</a>
         {% else %}
-            <a href="{% url 'account_logout' %}" class="block px-4 py-2 hover:bg-blue-700">Logout</a>
+          <a href="{% url 'account_logout' %}" class="text-white hover:text-blue-300">Sair</a>
+          <span class="text-yellow-300 font-semibold">{{ user.username }}</span>
+          <!-- Dashboards, como antes... -->
         {% endif %}
+      </div>
+  
+      <!-- 🔸 Botão Mobile -->
+      <div class="md:hidden">
+        <button id="menu-btn" class="text-white text-2xl focus:outline-none">
+          <span class="material-icons">menu</span>
+        </button>
+      </div>
     </div>
-</nav>
+  
+    <!-- 🔸 Menu Mobile (escondido por padrão) -->
+    <div id="mobile-menu" class="md:hidden hidden px-6 pb-4 space-y-2 bg-gray-800 text-sm">
+      <a href="/" class="block px-4 py-2 hover:bg-blue-700 rounded">Home</a>
+      <a href="/sobre" class="block px-4 py-2 hover:bg-blue-700 rounded">Sobre</a>
+      <a href="/contato" class="block px-4 py-2 hover:bg-blue-700 rounded">Contato</a>
+      <a href="{% url 'app_especies_maritimas:list_especies' %}" class="block px-4 py-2 hover:bg-blue-700 rounded">Espécies</a>
+      <a href="{% url 'app_articles:list_articles' %}" class="block px-4 py-2 hover:bg-blue-700 rounded">Artigos</a>
+      <a href="/servicos" class="block px-4 py-2 hover:bg-blue-700 rounded">Serviços</a>
+      <a href="{% url 'app_home:associe_se' %}" class="block px-4 py-2 hover:bg-blue-700 rounded">Associe-se</a>
+  
+      {% if not user.is_authenticated %}
+        <a href="{% url 'account_login' %}" class="block px-4 py-2 hover:bg-blue-700 rounded">Login</a>
+      {% else %}
+        <a href="{% url 'account_logout' %}" class="block px-4 py-2 hover:bg-blue-700 rounded">Logout</a>
+      {% endif %}
+    </div>
+  </nav>
+  
 
 <!-- Importar Google Material Icons -->
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">

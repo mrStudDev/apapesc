@@ -127,7 +127,7 @@ class CargoCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateVi
     model = CargosModel
     template_name = 'app_associacao/create_cargo.html'
     fields = '__all__'
-    success_url = reverse_lazy('app_associacao:list_cargo')    
+    success_url = reverse_lazy('app_associacao:create_cargo')    
     group_required = [
         'Superuser',
         'Admin da Associação',

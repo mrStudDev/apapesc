@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block title %}Detalhes do Extra-Associado{% endblock %}
 
 {% block single_ExtraAssociado %}
@@ -24,127 +25,127 @@
     {% else %}
         {% include "components/navbar_aux_reparticao.html" %} 
     {% endif %}
-<main class="flex-grow bg-gray-50 py-10 px-4">
+    <main class="flex-grow bg-gray-50 py-10 px-4">
     <div class="max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-xl space-y-10 border border-gray-200">
-  
-      <!-- Cabeçalho -->
-      <div class="flex justify-between items-center border-b pb-4">
-        <div>
-          <h2 class="text-3xl font-bold text-indigo-700">Extra-Associado</h2>
-          <p class="text-sm text-gray-500">Detalhes cadastrais e serviços vinculados</p>
-        </div>
-        <a href="{% url 'app_servicos:list_extraassociados' %}" class="text-indigo-600 hover:underline text-sm">
-          ← Voltar à lista
-        </a>
-      </div>
-  
-      <!-- Dados Pessoais -->
-      <section class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800">
-        <div>
-          <p class="text-gray-500 text-xs uppercase mb-1">Nome Completo</p>
-          <p>{{ extra.nome_completo }}</p>
-        </div>
-        <div>
-          <p class="text-gray-500 text-xs uppercase mb-1">CPF</p>
-          <p>{{ extra.cpf }}</p>
-        </div>
-        <div>
-          <p class="text-gray-500 text-xs uppercase mb-1">Celular</p>
-          <p>{{ extra.celular }}</p>
-        </div>
-        <div>
-          <p class="text-gray-500 text-xs uppercase mb-1">Senha Gov</p>
-          {% if extra.senha_gov %}
-            <p class="font-mono text-gray-800">{{ extra.senha_gov }}</p>
-          {% else %}
-            <span class="text-gray-400 italic">Não informado</span>
-          {% endif %}
-        </div>
-      </section>
-  
-      <!-- Fontes de Pesquisa -->
-      <section>
-        <p class="text-gray-500 text-xs uppercase mb-2">Conteúdo Adicional / Fontes de Pesquisa</p>
-        <div class="bg-gray-100 border border-gray-200 rounded p-4 text-gray-700 text-sm whitespace-pre-wrap">
-          {{ extra.content }}
-        </div>
-      </section>
-  
-      <!-- Serviços Vinculados -->
-      <section>
-        <h3 class="text-lg font-semibold text-gray-800 mb-3">Serviços Vinculados</h3>
-        {% if servicos %}
-        <div class="overflow-x-auto">
-          <table class="min-w-full text-sm border border-gray-200 shadow-sm rounded-md overflow-hidden">
-            <thead class="bg-indigo-50 text-gray-700 text-xs uppercase">
-              <tr>
-                <th class="px-4 py-2">#</th>
-                <th class="px-4 py-2">Tipo</th>
-                <th class="px-4 py-2">Status</th>
-                <th class="px-4 py-2">Início</th>
-                <th class="px-4 py-2">Ações</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              {% for servico in servicos %}
-              <tr>
-                <td class="px-4 py-2">{{ forloop.counter }}</td>
-                <td class="px-4 py-2">{{ servico.tipo_servico }}</td>
-                <td class="px-4 py-2">
-                  <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
-                    {{ servico.get_status_etapa_display }}
-                  </span>
-                </td>
-                <td class="px-4 py-2">{{ servico.data_inicio|date:"d/m/Y" }}</td>
-                <td class="px-4 py-2">
-                  <a href="{% url 'app_servicos:single_servico_extra' servico.id %}" class="text-indigo-600 hover:underline">
-                    Ver
-                  </a>
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-        {% else %}
-        <p class="text-gray-500 italic">Nenhum serviço cadastrado para este extra-associado.</p>
-        {% endif %}
-      </section>
-  
-      <!-- Histórico -->
-      {% if historico %}
-      <section class="bg-white border border-blue-100 rounded-lg p-6 shadow-sm">
-        <h3 class="text-blue-700 font-semibold text-lg flex items-center mb-4">
-          <i class="material-icons mr-2 text-blue-500">history</i> Histórico do Serviço
-        </h3>
-  
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm border border-gray-200 rounded-md">
-            <thead>
-              <tr class="bg-blue-50 text-left text-xs text-gray-600">
-                <th class="px-4 py-2">Campo</th>
-                <th class="px-4 py-2">De</th>
-                <th class="px-4 py-2">Para</th>
-                <th class="px-4 py-2">Alterado por</th>
-                <th class="px-4 py-2">Data</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-100">
-              {% for h in historico %}
-              <tr>
-                <td class="px-4 py-2 font-medium text-gray-700">{{ h.campo }}</td>
-                <td class="px-4 py-2 text-gray-600">{{ h.valor_antigo }}</td>
-                <td class="px-4 py-2 text-indigo-700 font-semibold">{{ h.valor_novo }}</td>
-                <td class="px-4 py-2">{{ h.alterado_por.get_full_name }}</td>
-                <td class="px-4 py-2 text-xs text-gray-500">{{ h.data_alteracao|date:"d/m/Y H:i" }}</td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-        </div>
-      </section>
+
+    <!-- Cabeçalho -->
+    <div class="flex justify-between items-center border-b pb-4">
+    <div>
+      <h2 class="text-3xl font-bold text-indigo-700">Extra-Associado</h2>
+      <p class="text-sm text-gray-500">Detalhes cadastrais e serviços vinculados</p>
+    </div>
+    <a href="{% url 'app_servicos:list_extraassociados' %}" class="text-indigo-600 hover:underline text-sm">
+      ← Voltar à lista
+    </a>
+    </div>
+
+    <!-- Dados Pessoais -->
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800">
+    <div>
+      <p class="text-gray-500 text-xs uppercase mb-1">Nome Completo</p>
+      <p>{{ extra.nome_completo }}</p>
+    </div>
+    <div>
+      <p class="text-gray-500 text-xs uppercase mb-1">CPF</p>
+      <p>{{ extra.cpf }}</p>
+    </div>
+    <div>
+      <p class="text-gray-500 text-xs uppercase mb-1">Celular</p>
+      <p>{{ extra.celular }}</p>
+    </div>
+    <div>
+      <p class="text-gray-500 text-xs uppercase mb-1">Senha Gov</p>
+      {% if extra.senha_gov %}
+        <p class="font-mono text-gray-800">{{ extra.senha_gov }}</p>
+      {% else %}
+        <span class="text-gray-400 italic">Não informado</span>
       {% endif %}
-  
+    </div>
+    </section>
+
+    <!-- Fontes de Pesquisa -->
+    <section>
+    <p class="text-gray-500 text-xs uppercase mb-2">Conteúdo Adicional / Fontes de Pesquisa</p>
+    <div class="bg-gray-100 border border-gray-200 rounded p-4 text-gray-700 text-sm whitespace-pre-wrap">
+      {{ extra.content }}
+    </div>
+    </section>
+
+    <!-- Serviços Vinculados -->
+    <section>
+    <h3 class="text-lg font-semibold text-gray-800 mb-3">Serviços Vinculados</h3>
+    {% if servicos %}
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm border border-gray-200 shadow-sm rounded-md overflow-hidden">
+        <thead class="bg-indigo-50 text-gray-700 text-xs uppercase">
+          <tr>
+            <th class="px-4 py-2">#</th>
+            <th class="px-4 py-2">Tipo</th>
+            <th class="px-4 py-2">Status</th>
+            <th class="px-4 py-2">Início</th>
+            <th class="px-4 py-2">Ações</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for servico in servicos %}
+          <tr>
+            <td class="px-4 py-2">{{ forloop.counter }}</td>
+            <td class="px-4 py-2">{{ servico.tipo_servico }}</td>
+            <td class="px-4 py-2">
+              <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
+                {{ servico.get_status_etapa_display }}
+              </span>
+            </td>
+            <td class="px-4 py-2">{{ servico.data_inicio|date:"d/m/Y" }}</td>
+            <td class="px-4 py-2">
+              <a href="{% url 'app_servicos:single_servico_extra' servico.id %}" class="text-indigo-600 hover:underline">
+                Ver
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-gray-500 italic">Nenhum serviço cadastrado para este extra-associado.</p>
+    {% endif %}
+    </section>
+
+    <!-- Histórico -->
+    {% if historico %}
+    <section class="bg-white border border-blue-100 rounded-lg p-6 shadow-sm">
+    <h3 class="text-blue-700 font-semibold text-lg flex items-center mb-4">
+      <i class="material-icons mr-2 text-blue-500">history</i> Histórico do Serviço
+    </h3>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm border border-gray-200 rounded-md">
+        <thead>
+          <tr class="bg-blue-50 text-left text-xs text-gray-600">
+            <th class="px-4 py-2">Campo</th>
+            <th class="px-4 py-2">De</th>
+            <th class="px-4 py-2">Para</th>
+            <th class="px-4 py-2">Alterado por</th>
+            <th class="px-4 py-2">Data</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          {% for h in historico %}
+          <tr>
+            <td class="px-4 py-2 font-medium text-gray-700">{{ h.campo }}</td>
+            <td class="px-4 py-2 text-gray-600">{{ h.valor_antigo }}</td>
+            <td class="px-4 py-2 text-indigo-700 font-semibold">{{ h.valor_novo }}</td>
+            <td class="px-4 py-2">{{ h.alterado_por.get_full_name }}</td>
+            <td class="px-4 py-2 text-xs text-gray-500">{{ h.data_alteracao|date:"d/m/Y H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    </section>
+    {% endif %}
+
     </div>
   </main>
   

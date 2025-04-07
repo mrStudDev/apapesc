@@ -374,14 +374,14 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
         # Valor pago real = total_pago - total_desconto
         total_pago_real = total_pago - total_desconto
 
-        context = {
-            'associado': associado,
+        context.update({
             'anuidades_aplicadas': anuidades_aplicadas,
             'total_pago': total_pago_real,
             'total_debito': total_debito,
             'total_aplicado': total_aplicado,
             'total_desconto': total_desconto,
-        }         
+        })
+        
         
         return context
 

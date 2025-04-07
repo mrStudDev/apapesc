@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block single_servico %}
     <!-- Navbar -->
     {% if is_superuser %}
@@ -130,12 +131,16 @@
                 </div>
               
                 <!-- 🔸 Descrição -->
-                <div>
-                  <strong class="block text-gray-600 mb-2">Descrição do Serviço:</strong>
-                  <div class="bg-gray-50 border border-gray-200 rounded p-2 text-gray-700 text-sm whitespace-pre-wrap shadow-sm">
-                    {{ servico.content |safe }}
+                <div class="mt-6">
+                  <h4 class="text-sm font-semibold text-gray-600 mb-2">📝 Descrição do Serviço:</h4>
+                
+                  <div class="bg-gray-50 border border-gray-200 rounded-md p-4 shadow-sm">
+                    <div class="prose max-w-none text-gray-700 text-sm leading-relaxed">
+                      {{ servico.content|safe }}
+                    </div>
                   </div>
                 </div>
+                
               
 
               <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
@@ -176,8 +181,8 @@
                     {% for h in historico %}
                     <tr>
                       <td class="px-3 py-2 font-medium">{{ h.campo }}</td>
-                      <td class="px-3 py-2 text-gray-600">{{ h.valor_antigo }}</td>
-                      <td class="px-3 py-2 text-blue-700 font-semibold">{{ h.valor_novo }}</td>
+                      <td class="px-3 py-2 text-gray-600">{{ h.valor_antigo|safe }}</td>
+                      <td class="px-3 py-2 text-blue-700 font-semibold">{{ h.valor_novo|safe }}</td>
                       <td class="px-3 py-2">{{ h.alterado_por.get_full_name }}</td>
                       <td class="px-3 py-2 text-xs">{{ h.data_alteracao|date:"d/m/Y H:i" }}</td>
                     </tr>
@@ -188,6 +193,7 @@
               {% endif %}
       
     </main>
-
+<!-- CSS do Editor -->
+<link rel="stylesheet" href="{% static 'css/editor.css' %}">
 {% include "components/footer_associacao.html" %}
 {% endblock single_servico %}
