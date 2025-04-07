@@ -1,56 +1,50 @@
-// static/js/copy_to_clipboard.js
-
 function copyToClipboard(elementId) {
-  var text = document.getElementById(elementId).textContent;
+  const text = document.getElementById(elementId).textContent;
 
-  var textArea = document.createElement("textarea");
+  const textArea = document.createElement("textarea");
   textArea.value = text;
-  textArea.style.position = "fixed"; // Evita rolagem da página
+  textArea.style.position = "fixed";
   textArea.style.left = "-9999px";
   document.body.appendChild(textArea);
   textArea.select();
 
   try {
-    var successful = document.execCommand('copy');
+    const successful = document.execCommand("copy");
+
     if (successful) {
-      showToast("Texto copiado!");
+      const button = document.querySelector(
+        `button[onclick="copyToClipboard('${elementId}')"]`
+      );
+      if (button) showCheckIcon(button);
     } else {
-      showToast("Falha ao copiar o texto.");
+      console.warn("Falha ao copiar");
     }
   } catch (err) {
-    console.error("Erro ao copiar: ", err);
-    showToast("Erro ao copiar o texto.");
+    console.error("Erro ao copiar:", err);
   }
 
   document.body.removeChild(textArea);
 }
 
-// ✅ Exibe a mensagem no centro da tela
-function showToast(message) {
-  var toast = document.createElement("div");
-  toast.textContent = message;
-  toast.style.position = "fixed";
-  toast.style.top = "50%";
-  toast.style.left = "50%";
-  toast.style.transform = "translate(-50%, -50%)"; // 🔥 Centraliza na tela
-  toast.style.background = "#333";
-  toast.style.color = "#fff";
-  toast.style.padding = "15px 30px";
-  toast.style.borderRadius = "8px";
-  toast.style.boxShadow = "0px 4px 10px rgba(0, 0, 0, 0.2)";
-  toast.style.opacity = "0.9";
-  toast.style.fontSize = "16px";
-  toast.style.textAlign = "center";
-  toast.style.transition = "opacity 0.5s ease-in-out";
+function showCheckIcon(triggerElement) {
+  // Já existe o ícone?
+  if (triggerElement.querySelector(".copy-check")) return;
 
-  document.body.appendChild(toast);
+  const icon = document.createElement("span");
+  icon.textContent = "✔️";
+  icon.className = "copy-check";
+  icon.style.color = "green";
+  icon.style.marginLeft = "6px";
+  icon.style.fontSize = "12px";
+  icon.style.opacity = "0.85";
+  icon.style.transition = "opacity 0.3s ease";
 
-  // 🔥 Remove a mensagem após 2 segundos
-  setTimeout(function () {
-    toast.style.opacity = "0";
-    setTimeout(function () {
-      document.body.removeChild(toast);
-    }, 500);
-  }, 2000);
+  triggerElement.appendChild(icon);
+
+  setTimeout(() => {
+    icon.style.opacity = "0";
+    setTimeout(() => {
+      triggerElement.removeChild(icon);
+    }, 300);
+  }, 1200);
 }
-
