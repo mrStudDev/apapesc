@@ -165,6 +165,26 @@
             </div>
         </div>
 
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+          <!-- 📌 Anuidades Pagas x Em Atraso -->
+          <div class="bg-white p-4 rounded-lg shadow text-center">
+            <h4 class="font-semibold text-gray-700 mb-2">💳 Situação dos Associados</h4>
+            <canvas id="graficoAnuidadesPagas"></canvas>
+          </div>
+        
+          <!-- 💰 Valor Recebido vs Pendente -->
+          <div class="bg-white p-4 rounded-lg shadow text-center">
+            <h4 class="font-semibold text-gray-700 mb-2">📊 Valores Pagos x Pendentes</h4>
+            <canvas id="graficoValoresAnuidade"></canvas>
+          </div>
+        
+          <!-- 🏷️ Total de Descontos -->
+          <div class="bg-white p-4 rounded-lg shadow text-center">
+            <h4 class="font-semibold text-gray-700 mb-2">🏷️ Descontos Concedidos</h4>
+            <canvas id="graficoDescontosAnuidade"></canvas>
+          </div>
+        </div>
+        
 
     <!-- Tabela Total por Associação -->
     <div class="mt-10">
@@ -195,14 +215,6 @@
         </table>
     </div>
 
-
-    <!-- 🔹 Gráfico de Linhas para Filiação de Associados -->
-    <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
-        <h3 class="text-xl font-semibold text-gray-800">Filiação de Associados por Ano e Mês</h3>
-        <div style="height: 400px; width: 100%;">
-            <canvas id="graficoAssociados"></canvas>
-        </div>
-    </div>
 
 
   <br><br>
@@ -304,6 +316,7 @@
     </table>
   </div>
 
+
   <br><br>
     <!-- Painéis Entradas -->
     <!-- 🔹 Linha Principal -->
@@ -323,9 +336,16 @@
 
         <!-- 🔹 Botão: Nova Entrada -->
         <a href="{% url 'app_finances:create_entrada' %}" 
-            class="bg-green-500 text-white px-3 py-1.5 text-sm rounded-md shadow hover:bg-green-600 flex items-center">
-            <i class="material-icons text-base mr-1">add</i> Nova Entrada
+            class="bg-orange-500 text-white px-3 py-1.5 text-sm rounded-md shadow hover:bg-green-600 flex items-center">
+            <i class="material-icons text-base mr-1">add</i> Nova Entrada Desvinculada
         </a>
+        <!-- 🔹 Botão: Nova Entrada Extra Associado -->
+        <a href="{% url 'app_servicos:list_extraassociados' %}" 
+        class="bg-green-500 text-white px-3 py-1.5 text-sm rounded-md shadow hover:bg-green-600 inline-flex items-center gap-1.5">
+        <i class="material-icons text-sm">person</i>
+        Nova Extra_Associado
+        </a>
+       
     </div>
     </h2>
 
@@ -365,6 +385,7 @@
           <p class="mt-2 text-sm text-gray-600">Receitas vencidas que ainda não foram pagas.</p>
       </div>
   </div>
+  
 <!-- 🔥 Tabela de Receitas por Associação com Repartições -->
 <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
   <h3 class="text-xl font-semibold text-gray-800">Resumo de Receitas por Associação e Repartição</h3>
@@ -403,8 +424,7 @@
           {% endfor %}
       </tbody>
   </table>
-</div>
-
+</div>      
 
 <!-- 🔥 Resumo Financeiro -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
@@ -463,6 +483,25 @@
     </div>
   </div>
 </div>
+    <!-- Gráficos -->
+    <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+      <!-- 🔹 Gráfico de Entradas Financeiras (ocupa a largura total) -->
+            <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
+            <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Receita x Saldo por Associação</h3>
+            <!-- Altura ajustada aqui -->
+            <div class="w-full h-60">
+                <canvas id="graficoReceitaSaldo" class="w-full h-full"></canvas>
+            </div>
+        </div>
+
+      <!-- Gráfico de Débitos -->
+      <div class="bg-white p-6 rounded-lg shadow-md">
+        <div class="bg-white p-6 rounded-lg shadow mt-8">
+          <h3 class="text-xl font-semibold text-gray-800 mb-4">📊 Entradas Mensais</h3>
+            <canvas id="graficoReceitaDespesaAssociacao"></canvas>
+        </div>
+      </div>
+    </div>
 <div class="bg-white p-6 rounded-lg shadow-lg mt-8">
   <!-- Título -->
   <h2 class="text-2xl font-bold text-gray-800 flex items-center border-b pb-3 mb-4">
@@ -528,74 +567,170 @@
       </ul>
     </div>
 
-    <!-- Gráficos -->
-    <div class="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-      <!-- Gráfico de Receitas -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-lg font-semibold text-gray-800">Receitas por Mês</h3>
-        <canvas id="chart-receitas" class="h-40 w-full mt-4"></canvas>
-      </div>
 
-      <!-- Gráfico de Débitos -->
-      <div class="bg-white p-6 rounded-lg shadow-md">
-        <h3 class="text-lg font-semibold text-gray-800">Débitos por Mês</h3>
-        <canvas id="chart-debitos" class="h-40 w-full mt-4"></canvas>
-      </div>
-    </div>
 
   </div>
 </div>
 <!-- 🔹 Carregar o Chart.js -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+<!-- 🔹 Grafico Anuidades -->
 <script>
-    window.onload = function() {
-        var ctx = document.getElementById("graficoAssociados").getContext("2d");
-
-        // 🔹 Pegamos os dados do Django e garantimos que são válidos
-        var labels = JSON.parse('{{ anos_meses_filiacao|safe }}');
-        var dataValues = JSON.parse('{{ total_associados_por_periodo|safe }}');
-
-        if (labels.length === 0 || dataValues.length === 0) {
-            console.error("❌ Nenhum dado para exibir no gráfico.");
-            return;
+  // 📌 Anuidades Pagas vs Em Atraso
+  new Chart(document.getElementById('graficoAnuidadesPagas'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Pagas', 'Em Atraso'],
+      datasets: [{
+        data: {{ grafico_anuidades_pagamento|safe }},
+        backgroundColor: ['#10b981', '#f43f5e']  // verde, vermelho
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.label}: ${ctx.parsed} associados`
+          }
         }
+      }
+    }
+  });
 
-        new Chart(ctx, {
-            type: "line",  // ✅ Mudamos para gráfico de linha 📈
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: "Número de Associados",
-                    data: dataValues,
-                    borderColor: "rgba(54, 162, 235, 1)",
-                    backgroundColor: "rgba(54, 162, 235, 0.2)",
-                    borderWidth: 2,
-                    pointRadius: 4,  // 🔹 Ponto em cada dado
-                    pointBackgroundColor: "rgba(54, 162, 235, 1)",
-                    tension: 0.4  // 🔹 Suaviza as curvas da linha
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false }
-                },
-                scales: {
-                    x: { 
-                        title: { display: true, text: "Ano-Mês" },
-                        ticks: { autoSkip: true, maxTicksLimit: 10 }  // 🔹 Evita poluição no eixo X
-                    },
-                    y: { 
-                        title: { display: true, text: "Número de Associados" },
-                        beginAtZero: true
-                    }
-                }
+  // 💰 Valores Pagos x Pendentes
+  new Chart(document.getElementById('graficoValoresAnuidade'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Pago', 'Pendente'],
+      datasets: [{
+        data: {{ grafico_valores_anuidades|safe }},
+        backgroundColor: ['#10b981', '#f97316']  // azul, amarelo
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return `${ctx.label}: R$ ${ctx.parsed.toFixed(2).replace('.', ',')}`;
             }
-        });
-    };
+          }
+        }
+      }
+    }
+  });
+
+  // 🏷️ Descontos x Sem Desconto
+  new Chart(document.getElementById('graficoDescontosAnuidade'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Descontos', 'Sem Desconto'],
+      datasets: [{
+        data: {{ grafico_descontos_anuidades|safe }},
+        backgroundColor: ['#8b5cf6', '#60a5fa']  // roxo, cinza claro
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { position: 'bottom' },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) {
+              return `${ctx.label}: R$ ${ctx.parsed.toFixed(2).replace('.', ',')}`;
+            }
+          }
+        }
+      }
+    }
+  });
 </script>
+
+
+
+<!-- 🔹 Receita x Saldo -->
+<script>
+    const ctx = document.getElementById('graficoReceitaSaldo').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: {{ grafico_associacoes_labels|safe }},
+        datasets: [
+          {
+            label: 'Receita Total',
+            data: {{ grafico_associacoes_receitas|safe }},
+            backgroundColor: 'rgba(37, 99, 235, 0.7)', // azul
+          },
+          {
+            label: 'Saldo Pendente',
+            data: {{ grafico_associacoes_saldos|safe }},
+            backgroundColor: 'rgba(251, 191, 36, 0.7)', // amarelo
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: {
+            position: 'top'
+          },
+          title: {
+            display: true,
+            text: '💰 Comparativo de Receita vs Pendência por Associação'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: { precision: 0 }
+          }
+        }
+      }
+    });
+</script>
+<!-- 🔹 Gráfico de Entradas Mensais -->
+<script>
+  const ctx3 = document.getElementById('graficoReceitaDespesaAssociacao').getContext('2d');
+
+  new Chart(ctx3, {
+    type: 'line',
+    data: {
+      labels: {{ meses_entradas|safe }},
+      datasets: [{
+        label: 'Entradas Mensais (R$)',
+        data: {{ valores_entradas|safe }},
+        fill: true,
+        tension: 0.3,
+        backgroundColor: 'rgba(59,130,246,0.1)',
+        borderColor: '#3b82f6',
+        pointBackgroundColor: '#1d4ed8',
+        pointRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: 'top' },
+        title: {
+          display: true,
+          text: 'Receita Registrada Mês a Mês'
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return 'R$ ' + value.toFixed(2).replace('.', ',');
+            }
+          }
+        }
+      }
+    }
+  });
+</script>
+
 
   <!-- Footer -->
   {% include "components/footer_associacao.html" %}

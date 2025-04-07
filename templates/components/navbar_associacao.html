@@ -119,8 +119,8 @@
                     <a href="{% url 'app_servicos:list_extraassociados' %}" class="block px-4 py-2 hover:bg-gray-200">Lista Extra-Associados</a>
                     <a href="{% url 'app_servicos:create_extraassociado' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Extra-Associado</a>
                     <hr class="border-t-2 border-gray-500 my-2">
-                    <a href="{% url 'app_associados:list_geral_associado' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Serviço Associado</a>
-                    <a href="{% url 'app_servicos:list_extraassociados' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Servico Extra-Ass</a>
+                    <a href="{% url 'app_associados:list_geral_associado' %}" class="block px-4 py-2 hover:bg-gray-200">Criar Serviço Associado</a>
+                    <a href="{% url 'app_servicos:list_extraassociados' %}" class="block px-4 py-2 hover:bg-gray-200">Criar Servico Extra-Ass</a>
                 </div>
             </div>
             <!-- Tarefas  -->
@@ -134,7 +134,14 @@
                     <a href="{% url 'app_tarefas:create_tarefa' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Tarefa</a>
                     <a href="{% url 'app_tarefas:board_tarefas' %}" class="block px-4 py-2 hover:bg-gray-200">Fluxo Tarefas</a>
                     <a href="{% url 'app_tarefas:tarefas_arquivadas' %}" class="block px-4 py-2 hover:bg-gray-200">Tarefas Arquivadas</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_tarefas:emissao_guias' %}" class="block px-4 py-2 hover:bg-gray-200">Emissão INSS</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_beneficios:beneficios' %}" class="block px-4 py-2 hover:bg-gray-200">Benefícios Cadastrados</a>
+                    <a href="{% url 'app_beneficios:create_beneficio' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Benefício</a>
+                    <a href="{% url 'app_beneficios:lista_beneficios' %}" class="block px-4 py-2 hover:bg-gray-200">Lista de Controle</a>
+                    <a href="{% url 'app_beneficios:painel_beneficios' %}" class="block px-4 py-2 hover:bg-gray-200">Painel Benefício</a>
+
                 </div>
             </div>
        

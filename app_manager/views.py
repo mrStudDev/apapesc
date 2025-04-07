@@ -3,6 +3,12 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.mixins import GroupPermissionRequiredMixin
 from app_associados.models import AssociadoModel
 from app_associacao.models import ReparticoesModel, MunicipiosModel, IntegrantesModel, AssociacaoModel
+from app_embarcacoes.models import EmbarcacoesModel
+from app_licencas.models import LicencasModel
+from app_servicos.models import ServicoAssociadoModel, ServicoExtraAssociadoModel, ExtraAssociadoModel
+from app_especies_maritimas.models import EspecieMarinhaModel
+from django.db.models.functions import TruncMonth, ExtractYear, ExtractMonth
+from collections import OrderedDict
 from django.db.models import Count
 import json
 from app_home.models import LeadInformacoes, ContactMessagesModel
@@ -94,10 +100,110 @@ class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateVi
         context['tarefas'] = TarefaModel.objects.all().order_by('-data_criacao')[:5]
         context['total_tarefas'] = TarefaModel.objects.count()
         
-        # Tarefas
+        # Artigos
         context['articles'] = ArticlesModel.objects.all().order_by('-date_created')[:5]
+        
         context['total_articles'] = ArticlesModel.objects.count()
         
+        context['total_licencas'] = LicencasModel.objects.count()   
+             
+        context['total_embarcacoes'] = EmbarcacoesModel.objects.count()
+        context['embarcacoes_motor'] = EmbarcacoesModel.objects.filter(tipo_propulsao__nome__iexact='Motor').count()
+        context['embarcacoes_vela'] = EmbarcacoesModel.objects.filter(tipo_propulsao__nome__iexact='Vela').count()
+
+
+        # Serviços para associados
+        context['total_servicos_associados'] = ServicoAssociadoModel.objects.count()
+    
+        # Serviços para extra-associados
+        context['total_servicos_extras'] = ServicoExtraAssociadoModel.objects.count()
+
+        # Serviços para associados (limite 2)
+        context['servicos_associados_recentes'] = (
+            ServicoAssociadoModel.objects
+            .select_related('associado', 'tipo_servico')
+            .order_by('-data_inicio')[:2]
+        )
+        # Serviços para extra-associados (limite 2)
+        context['servicos_extras_recentes'] = (
+            ServicoExtraAssociadoModel.objects
+            .select_related('extra_associado', 'tipo_servico')
+            .order_by('-data_inicio')[:2]
+        )
+        # Serviços para Extra-associados (limite 2)
+        context['total_extra_associados'] = ExtraAssociadoModel.objects.count()
+
+        # Dois serviços mais recentes de extra associados
+        context['servicos_extras_recentes'] = (
+            ServicoExtraAssociadoModel.objects
+            .filter(extra_associado__isnull=False)
+            .select_related('extra_associado', 'tipo_servico')
+            .order_by('-data_inicio')[:3]
+        )
+        # Agrupamento por mês/ano
+        servicos_associados = (
+            ServicoAssociadoModel.objects
+            .annotate(mes=TruncMonth('data_inicio'))
+            .values('mes')
+            .annotate(qtd=Count('id'))
+            .order_by('mes')
+        )
+
+        servicos_extra = (
+            ServicoExtraAssociadoModel.objects
+            .annotate(mes=TruncMonth('data_inicio'))
+            .values('mes')
+            .annotate(qtd=Count('id'))
+            .order_by('mes')
+        )
+
+        # Meses únicos e ordenados
+        meses = sorted(set(
+            [x['mes'] for x in servicos_associados if x['mes']] +
+            [x['mes'] for x in servicos_extra if x['mes']
+        ]))
+
+        # Inicializa com 0 em vez de None
+        dados_associado = {m.strftime('%Y-%m'): 0 for m in meses}
+        dados_extra = {m.strftime('%Y-%m'): 0 for m in meses}
+
+        # Preenche os dados
+        for s in servicos_associados:
+            if s['mes']:
+                dados_associado[s['mes'].strftime('%Y-%m')] = s['qtd']
+
+        for s in servicos_extra:
+            if s['mes']:
+                dados_extra[s['mes'].strftime('%Y-%m')] = s['qtd']
+
+        # Garante a ordem correta e formatação
+        labels = [m.strftime('%b/%Y') for m in meses]  # Formato "Jan/2023"
+        valores_associado = [dados_associado[m.strftime('%Y-%m')] for m in meses]
+        valores_extra = [dados_extra[m.strftime('%Y-%m')] for m in meses]
+
+        context['grafico_servicos_labels'] = json.dumps(labels)
+        context['grafico_servicos_associado'] = json.dumps(valores_associado)
+        context['grafico_servicos_extra'] = json.dumps(valores_extra)
+
+        # 🔹 Define a queryset Associados Grafico
+        associados = AssociadoModel.objects.filter(data_filiacao__isnull=False)
+         # 🔹 Conta os associados por ano e mês de filiação
+        associados_por_periodo = (
+            associados.annotate(ano=ExtractYear('data_filiacao'), mes=ExtractMonth('data_filiacao'))
+            .values('ano', 'mes')
+            .annotate(total=Count('id'))
+            .order_by('ano', 'mes')
+        )
+        # 🔹 Transforma os dados para o gráfico
+        anos_meses = [f"{dado['ano']}-{str(dado['mes']).zfill(2)}" for dado in associados_por_periodo]
+        totais = [dado["total"] for dado in associados_por_periodo]
+        # 🔹 Garante que os dados estejam sempre preenchidos
+        context["anos_meses_filiacao"] = json.dumps(anos_meses if anos_meses else ["2025-01"])
+        context["total_associados_por_periodo"] = json.dumps(totais if totais else [0])
+
+        # Espécies Marinhas
+        context['total_especies'] = EspecieMarinhaModel.objects.count()
+        context['ultimas_especies'] = EspecieMarinhaModel.objects.order_by('-id')[:5]
 
         return context
 

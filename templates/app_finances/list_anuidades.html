@@ -34,34 +34,74 @@
             <h1 class="text-3xl font-extrabold text-gray-900 mb-8">Relatório de Anuidades por Associado</h1>
 
             <!-- Filtro de anos -->
-            <form method="get" class="mb-6 flex items-center space-x-4">
+            <form method="get" class="mb-6 flex flex-wrap items-center gap-4">
 
-                <label for="ano" class="text-lg font-semibold text-gray-700">Selecione o Ano:</label>
-                <div class="relative inline-block w-full sm:w-auto">
-                <select name="ano" id="ano" class="border border-gray-300 rounded-md py-2 pl-3 pr-10 h-12 text-lg appearance-none focus:ring-2 focus:ring-blue-500 focus:outline-none w-full">
-                    <option value="">--- Selecione ---</option>
-                    {% for ano in anos_disponiveis %}
-                    <option value="{{ ano }}" {% if ano == ano_selecionado %}selected{% endif %}>{{ ano }}</option>
-                    {% endfor %}
-                </select>
+                <!-- Ano -->
+                <div>
+                  <label for="ano" class="text-sm font-semibold text-gray-700 block mb-1">Ano:</label>
+                  <div class="relative">
+                    <select name="ano" id="ano" class="border border-gray-300 rounded-md py-2 pl-3 pr-10 h-10 text-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:outline-none w-full">
+                      <option value="">--- Todos ---</option>
+                      {% for ano in anos_disponiveis %}
+                        <option value="{{ ano }}" {% if ano == ano_selecionado %}selected{% endif %}>{{ ano }}</option>
+                      {% endfor %}
+                    </select>
                     <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                        </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                      </svg>
                     </div>
+                  </div>
                 </div>
-
-                <button type="submit" class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
+              
+                <!-- Associação -->
+                <div>
+                  <label for="associacao" class="text-sm font-semibold text-gray-700 block mb-1">Associação:</label>
+                  <div class="relative">
+                    <select name="associacao" id="associacao" class="border border-gray-300 rounded-md py-2 pl-3 pr-10 h-10 text-sm appearance-none focus:ring-2 focus:ring-blue-500 focus:outline-none w-full">
+                      <option value="">--- Todas ---</option>
+                      {% for assoc in associacoes %}
+                        <option value="{{ assoc.id }}" {% if assoc.id|stringformat:"s" == associacao_selecionada %}selected{% endif %}>
+                          {{ assoc.nome_fantasia }}
+                        </option>
+                      {% endfor %}
+                    </select>
+                    <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              
+                <!-- Botão -->
+                <div class="self-end">
+                  <button type="submit" class="bg-blue-500 text-white font-medium py-2 px-4 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
                     Filtrar
-                </button>
-
-                <!-- Indicação do ano selecionado -->
-                {% if ano_selecionado %}
-                <span class="text-gray-700 text-lg font-medium ml-6">
-                    Ano Selecionado: <span class="font-bold">{{ ano_selecionado }}</span>
-                </span>
+                  </button>
+                </div>
+                {% if ano_selecionado or associacao_selecionada %}
+                <div class="mt-2 text-sm text-gray-600">
+                    <span class="inline-block mr-4">
+                        <strong>Ano selecionado:</strong>
+                        <span class="text-gray-800">{{ ano_selecionado }}</span>
+                    </span>
+              
+                    {% if associacao_selecionada %}
+                        {% for assoc in associacoes %}
+                            {% if assoc.id|stringformat:"s" == associacao_selecionada %}
+                                <span class="inline-block">
+                                <strong>Associação:</strong>
+                                <span class="text-gray-800">{{ assoc.nome_fantasia }}</span>
+                                </span>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
                 {% endif %}
-            </form>
+              
+              </form>
+              
 
             <!-- Tabela de resultados -->
             {% if anuidades_associados %}

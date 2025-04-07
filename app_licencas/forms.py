@@ -33,9 +33,10 @@ class LicencaForm(forms.ModelForm):
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700',
                 'placeholder': 'Inscrição/autorização naval'
             }),
-            'modalidade_permissionamento': forms.TextInput(attrs={
+            'modalidade_permissionamento': forms.Textarea(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700',
-                'placeholder': 'Modalidade de permissionamento'
+                'placeholder': 'Modalidade de permissionamento',
+                'rows': 10  # <-- agora sim com 5 linhas
             }),
             'validade_inicial': forms.DateInput(
                 attrs={

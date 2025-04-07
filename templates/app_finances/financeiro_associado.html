@@ -30,11 +30,14 @@
             {% endif %}
             <!-- 🔹 Informações do Associado -->
             <div class="bg-white p-6 rounded-lg shadow-md mb-6 border-l-4 border-gray-800">
-                <!-- Nome -->
-                <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
-                    <i class="material-icons text-blue-500 mr-2">person</i>
-                    {{ associado.user.get_full_name }}
-                </h2>
+            <!-- Nome com ícone e link para o próprio perfil -->
+            <h2 class="text-2xl font-semibold text-gray-800 flex items-center">
+                <i class="material-icons text-blue-500 mr-2">person</i>
+                <a href="{% url 'app_associados:single_associado' associado.id %}" class="hover:underline hover:text-blue-600 transition">
+                {{ associado.user.get_full_name }}
+                </a>
+            </h2>
+  
 
                 <!-- Associação e Repartição (Sem ícones, mantendo o padrão) -->
                 <p class="mt-2 text-gray-700">
@@ -79,7 +82,21 @@
                 </div>
             </div>
 
+            <!-- 🔹 Botões de Ação (Mais Delicados) -->
+            <div class="flex space-x-2 justify-end">
+                <!-- 🔹 Botão: Lista de Anuidades -->
+                <a href="{% url 'app_finances:list_anuidades' %}" 
+                    class="bg-gray-500 text-white px-3 py-1.5 text-sm rounded-md shadow hover:bg-gray-600 flex items-center">
+                    <i class="material-icons text-base mr-1">list</i> Lista de Anuidades
+                </a>
+                
+                <!-- 🔹 Botão: Lista Triangular -->
+                <a href="{% url 'app_finances:tri_condictions' %}" 
+                    class="bg-red-500 text-white px-3 py-1.5 text-sm rounded-md shadow hover:bg-red-600 flex items-center">
+                    <i class="material-icons text-base mr-1">warning</i> Lista Triangular 
+                </a>
 
+            </div>
 
             <!-- Tabela de Anuidades -->
             <h2 class="text-xl font-semibold mb-4">Detalhes das Anuidades</h2>

@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load beneficio_tags %}
+
+{% block title %}Painel de Benefícios{% endblock title %}
+
+
+{% block painel_beneficios %}
+
+{% include 'components/navbar_associacao.html' %}
+<main class="flex-grow">
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-gray-800">Painel de Benefícios</h1>
+        <p class="text-gray-600">Acompanhe o status dos pedidos de benefícios</p>
+
+        <!-- Filtro por benefício -->
+        <form method="get" class="mt-6 bg-gray-50 border border-gray-200 rounded-xl p-6 shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Campo: Benefício -->
+                <div>
+                    <label for="beneficio" class="block text-sm font-medium text-gray-700 mb-1">🎯 Benefício</label>
+                    <select name="beneficio" id="beneficio" class="w-full rounded-lg border-gray-300 shadow-sm text-sm">
+                        <option value="">Todos os benefícios</option>
+                        {% for nome, beneficios in beneficios_agrupados.items %}
+                        <optgroup label="{{ beneficios.0.get_nome_display }}">
+                            {% for beneficio in beneficios %}
+                            <option value="{{ beneficio.nome }}__{{ beneficio.ano_concessao }}__{{ beneficio.estado }}"
+                                {% if request.GET.beneficio == beneficio.nome|add:"__"|add:beneficio.ano_concessao|stringformat:"s"|add:"__"|add:beneficio.estado %}
+                                selected
+                                {% endif %}>
+                                {{ beneficio.ano_concessao }} - {{ beneficio.get_estado_display }}
+                            </option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <!-- Campo: Status (somente visualização) -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">📌 Status</label>
+                    <select 
+                        name="status" 
+                        id="status" 
+                        class="w-full rounded-lg border-gray-300 shadow-sm text-sm bg-gray-100"
+                        disabled
+                    >
+                        <option value="">Todos os status</option>
+                        {% for value, label in status_labels.items %}
+                        <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="status" value="{{ request.GET.status }}">
+                </div>
+            </div>
+            
+            <!-- Ações -->
+            <div class="mt-6 flex items-center justify-end gap-4">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+                    🔍 Filtrar
+                </button>
+                <a href="?" class="text-sm text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                    Limpar
+                </a>
+                <a href="{% url 'app_beneficios:lista_beneficios' %}" 
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-blue-50 hover:bg-gray-50">
+                    📋 Ver Lista Completa
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Painel de status -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+        {% for status, beneficios in painel_beneficios.items %}
+        <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+            <h3 class="text-gray-600 font-semibold text-sm mb-3 flex justify-between items-center">
+                {{ status_labels|get_item:status|default:status|title }}
+                <span class="text-xs text-gray-400">({{ beneficios|length }})</span>
+            </h3>
+        
+            <div class="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+                {% for b in beneficios %}
+                <div class="border border-gray-200 rounded p-2 hover:bg-gray-50 transition">
+                    <a href="{% url 'app_beneficios:controle_detalhe' b.pk %}"
+                       class="block text-sm text-blue-500 font-medium hover:underline">
+                        {{ b.associado.user.get_full_name }}
+                    </a>
+                    
+                    <p class="text-xs text-gray-600 mt-1">
+                        <span class="font-medium">{{ b.beneficio.get_nome_display }}</span> - 
+                        {{ b.beneficio.ano_concessao }}/{{ b.beneficio.estado }}
+                    </p>
+                    
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="text-xs text-gray-400">
+                            Atualizado em {{ b.atualizado_em|date:"d/m/Y H:i" }}
+                        </span>
+                        {% if b.numero_protocolo %}
+                        <span class="text-xs bg-gray-100 px-2 py-1 rounded">
+                            {{ b.numero_protocolo }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-400 italic">Nenhum benefício</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock painel_beneficios %}

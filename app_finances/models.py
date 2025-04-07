@@ -31,39 +31,41 @@ class AnuidadeModel(models.Model):
         Ao salvar a anuidade, atribuir a todos os associados existentes.
         """
         super().save(*args, **kwargs)
-        self.atribuir_anuidades_associados()
 
 
     def atribuir_anuidades_associados(self):
         """
-        Atribui esta anuidade apenas aos associados ATIVOS e APOSENTADOS,
-        garantindo que o filtro funcione corretamente.
+        Atribui esta anuidade somente aos associados ATIVOS ou APOSENTADOS
+        que já estavam filiados no ano da anuidade (ou antes).
         """
-        # Evita import circular com app_associados
         AssociadoModel = apps.get_model('app_associados', 'AssociadoModel')
         AnuidadeAssociado = apps.get_model('app_finances', 'AnuidadeAssociado')
 
-        # 🔥 🚀 Filtra APENAS os associados ATIVOS e APOSENTADOS 🚀 🔥
         associados = AssociadoModel.objects.annotate(
             status_lower=Lower('status')
         ).filter(
-            status_lower__in=['associado lista ativo(a)', 'associado lista aposentado(a)']
+            status_lower__in=['associado lista ativo(a)', 'associado lista aposentado(a)'],
+            data_filiacao__isnull=False,
+            data_filiacao__year__lte=self.ano  # ✅ Associado já existia no ano da anuidade
         )
 
-        print(f"✅ Associados válidos encontrados: {associados.count()}")  # DEBUG
+        if not associados.exists():
+            print(f"⚠️ Nenhum associado estava filiado no ano {self.ano}, nenhuma aplicação feita.")
+            return
+
+        print(f"✅ Aplicando anuidade {self.ano} para {associados.count()} associados...")
 
         with transaction.atomic():
             for associado in associados:
                 if not AnuidadeAssociado.objects.filter(anuidade=self, associado=associado).exists():
-                    # ✅ Aplica o valor TOTAL da anuidade, sem cálculo pró-rata
                     AnuidadeAssociado.objects.create(
                         anuidade=self,
                         associado=associado,
                         valor_pago=Decimal('0.00'),
                         pago=False
-                    ) 
-                    
+                    )
 
+    
     def calcular_meses_validos(self, associado):
         """
         Calcula o número de meses para o cálculo pró-rata

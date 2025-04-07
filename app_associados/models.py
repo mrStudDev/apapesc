@@ -133,10 +133,7 @@ RECOLHE_INSS_CHOICES = [
 ]
 SEGURO_DEFESO_CHOICES = [
     ('Não Recebe', 'Não Recebe'),
-    ('A partir de Dez', 'A partir de Dez'),
-    ('A partir de Jan', 'A partir de Jan'),
-    ('A partir de Fev', 'A partir de Fev'),
-    ('A partir de Março', 'A partir de Março'),
+    ('Recebe', 'Recebe'),
     ('Não declarado', 'Não declarado'),     
 ]
 
@@ -151,7 +148,6 @@ class ProfissoesModel(models.Model):
 
 # Create your models here.
 class AssociadoModel(models.Model):
-    # Usuarios associados - Acessos à perfís e notificações
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL, 
         on_delete=models.CASCADE,

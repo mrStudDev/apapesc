@@ -12,7 +12,7 @@ from datetime import datetime
 from django.views.generic import DetailView, TemplateView, ListView, CreateView, UpdateView
 from django.views import View
 from django.db.models import Value, F
-from django.db.models.functions import Concat, Lower, ExtractYear, ExtractMonth
+from django.db.models.functions import Concat, Lower, ExtractYear, ExtractMonth, TruncMonth
 
 # App Finances
 from .models import (
@@ -49,20 +49,31 @@ from django.apps import apps
 from django.contrib.messages.views import SuccessMessageMixin
 
 
-# ANUIDADES
 def lista_anuidades(request):
-    # Obter o ano selecionado pelo usuário
     ano_selecionado = request.GET.get('ano')
+    associacao_selecionada = request.GET.get('associacao')
 
-    # Obter todos os anos de anuidades já cadastrados
     anos_disponiveis = AnuidadeModel.objects.values_list('ano', flat=True).distinct().order_by('ano')
+    associacoes = AssociacaoModel.objects.order_by('nome_fantasia')
 
-    # Filtrar os dados das anuidades com base no ano selecionado
+    anuidades_associados = []
+
     if ano_selecionado:
-        anuidade = get_object_or_404(AnuidadeModel, ano=ano_selecionado)
+        # Convertendo para inteiro para comparação
+        ano_int = int(ano_selecionado)
+
+        # Filtro inicial
+        filtro = {
+            'associado__data_filiacao__year__lte': ano_int,
+            'anuidade__ano': ano_int,
+        }
+
+        if associacao_selecionada:
+            filtro['associado__associacao_id'] = associacao_selecionada
+
         anuidades_associados = (
-            AnuidadeAssociado.objects.filter(anuidade=anuidade)
-            .select_related('associado__user')
+            AnuidadeAssociado.objects.filter(**filtro)
+            .select_related('associado__user', 'associado__associacao', 'anuidade')
             .annotate(
                 full_name=Concat(
                     F('associado__user__first_name'),
@@ -73,27 +84,28 @@ def lista_anuidades(request):
             .order_by('full_name')
         )
 
-        # Adicionar informações extras para cada associado
+        # Enriquecimento dos dados
         for anuidade_assoc in anuidades_associados:
-            # Calcular total de pagamentos para o ano atual
-            pagamentos_ano = anuidade_assoc.pagamentos.aggregate(total_pago=Sum('valor'))['total_pago'] or Decimal('0.00')
+            pagamentos_ano = anuidade_assoc.pagamentos.aggregate(
+                total_pago=Sum('valor')
+            )['total_pago'] or Decimal('0.00')
             anuidade_assoc.total_pago_ano = pagamentos_ano
 
-            # Calcular o saldo devedor total de todas as anuidades do associado
             total_debito = (
-                AnuidadeAssociado.objects.filter(associado=anuidade_assoc.associado, pago=False)
-                .aggregate(
+                AnuidadeAssociado.objects.filter(
+                    associado=anuidade_assoc.associado,
+                    pago=False
+                ).aggregate(
                     saldo_devedor=Sum(F('anuidade__valor_anuidade')) - Sum('valor_pago')
                 )['saldo_devedor'] or Decimal('0.00')
             )
             anuidade_assoc.saldo_devedor_total = total_debito
 
-    else:
-        anuidades_associados = []
-
     context = {
         'anos_disponiveis': anos_disponiveis,
         'ano_selecionado': ano_selecionado,
+        'associacao_selecionada': associacao_selecionada,
+        'associacoes': associacoes,
         'anuidades_associados': anuidades_associados,
     }
 
@@ -306,6 +318,61 @@ def aplicar_anuidade(request, associado_id):
     return redirect('app_associados:single_associado', pk=associado.id)
 
 
+
+class CreateAnuidadeView(CreateView):
+    model = AnuidadeModel
+    form_class = AnuidadeForm
+    template_name = 'app_finances/create_anuidade.html'
+    success_url = reverse_lazy('app_finances:create_anuidade')
+
+    def form_valid(self, form):
+        anuidade = form.save(commit=False)  # Ainda não salva no banco
+
+        # Modelos relacionados
+        AssociadoModel = apps.get_model('app_associados', 'AssociadoModel')
+        AnuidadeAssociado = apps.get_model('app_finances', 'AnuidadeAssociado')
+
+        # ✅ Filtra apenas associados filiados no ano da anuidade
+        associados_para_aplicar = AssociadoModel.objects.annotate(
+            status_lower=Lower('status')
+        ).filter(
+            status_lower__in=['associado lista ativo(a)', 'associado lista aposentado(a)'],
+            data_filiacao__isnull=False,
+            data_filiacao__year__lte=anuidade.ano  # filiado até esse ano
+        )
+
+        # ⚠️ Validação: se ninguém está filiado no ano, bloqueia criação
+        if not associados_para_aplicar.exists():
+            messages.error(self.request, f"Nenhum associado estava filiado no ano {anuidade.ano}. A anuidade não foi criada.")
+            return self.form_invalid(form)  # retorna erro
+
+        # ✅ Agora sim salva no banco
+        anuidade.save()
+
+        aplicadas = []
+        with transaction.atomic():
+            for associado in associados_para_aplicar:
+                if not AnuidadeAssociado.objects.filter(anuidade=anuidade, associado=associado).exists():
+                    AnuidadeAssociado.objects.create(
+                        anuidade=anuidade,
+                        associado=associado,
+                        valor_pago=Decimal('0.00'),
+                        pago=False
+                    )
+                    aplicadas.append(associado.user.get_full_name() if associado.user else associado.id)
+
+        messages.success(self.request, f"Anuidade {anuidade.ano} criada e aplicada para {len(aplicadas)} associado(s).")
+        return super().form_valid(form)
+
+
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['anuidades'] = AnuidadeModel.objects.order_by('-ano')
+        return context
+    
+    
+
 @login_required
 @csrf_exempt
 def conceder_desconto(request, anuidade_associado_id):
@@ -407,56 +474,6 @@ class DescontosAnuidadesView(TemplateView):
 
         return context
 
-
-
-class CreateAnuidadeView(CreateView):
-    model = AnuidadeModel
-    form_class = AnuidadeForm
-    template_name = 'app_finances/create_anuidade.html'
-    success_url = reverse_lazy('app_finances:create_anuidade')
-
-    def form_valid(self, form):
-        """
-        Após salvar a anuidade, aplica apenas aos associados com status:
-        - "Associado Lista Ativo(a)"
-        - "Associado Lista Aposentado(a)"
-        """
-        response = super().form_valid(form)  # Salva a anuidade primeiro
-        anuidade = self.object  # Obtém a anuidade recém-criada
-
-        # ✅ Obtém os modelos corretamente usando apps.get_model
-        AssociadoModel = apps.get_model('app_associados', 'AssociadoModel')
-        AnuidadeAssociado = apps.get_model('app_finances', 'AnuidadeAssociado')
-
-        # ✅ 🚀 Corrigindo a filtragem dos associados válidos 🚀
-        associados_validos = AssociadoModel.objects.filter(
-            status__exact="Associado Lista Ativo(a)"
-        ) | AssociadoModel.objects.filter(
-            status__exact="Associado Lista Aposentado(a)"
-        )
-
-        aplicadas = []
-        with transaction.atomic():
-            for associado in associados_validos:
-                # Verifica se a anuidade já foi aplicada para evitar duplicação
-                if not AnuidadeAssociado.objects.filter(anuidade=anuidade, associado=associado).exists():
-                    AnuidadeAssociado.objects.create(
-                        anuidade=anuidade,
-                        associado=associado,
-                        valor_pago=Decimal('0.00'),  # 🚀 Começa sem pagamento
-                        pago=False  # 🚀 Assume que não está pago ao ser aplicado
-                    )
-                    aplicadas.append(associado.user.get_full_name() if associado.user else associado.id)
-
-        messages.success(self.request, f"Anuidade {anuidade.ano} criada e aplicada para {len(aplicadas)} associados ativos e aposentados.")
-        return response  # Retorna a resposta padrão após o sucesso
-
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['anuidades'] = AnuidadeModel.objects.order_by('-ano')
-        return context
-    
 
 # View para editar anuidade
 class EditAnuidadeView(UpdateView):
@@ -1030,21 +1047,6 @@ class ResumoFinanceiroView(TemplateView):
         )
 
 
-         # 🔹 Conta os associados por ano e mês de filiação
-        associados_por_periodo = (
-            associados.annotate(ano=ExtractYear('data_filiacao'), mes=ExtractMonth('data_filiacao'))
-            .values('ano', 'mes')
-            .annotate(total=Count('id'))
-            .order_by('ano', 'mes')
-        )
-        # 🔹 Transforma os dados para o gráfico
-        anos_meses = [f"{dado['ano']}-{str(dado['mes']).zfill(2)}" for dado in associados_por_periodo]
-        totais = [dado["total"] for dado in associados_por_periodo]
-        # 🔹 Garante que os dados estejam sempre preenchidos
-        context["anos_meses_filiacao"] = json.dumps(anos_meses if anos_meses else ["2025-01"])
-        context["total_associados_por_periodo"] = json.dumps(totais if totais else [0])
-
-
        # 🔹 Total geral de despesas
         total_despesas = DespesaAssociacaoModel.objects.aggregate(total=Sum('valor'))['total'] or Decimal('0.00')
 
@@ -1181,7 +1183,45 @@ class ResumoFinanceiroView(TemplateView):
         total_candidatos = AssociadoModel.objects.filter(status="Candidato(a)").count()
         total_desassociados = AssociadoModel.objects.filter(status="Desassociado(a)").count()
 
-                
+        # 🔹 Graficos
+        entradas_por_mes = (
+            EntradaFinanceira.objects
+            .annotate(mes=TruncMonth('data_criacao'))
+            .values('mes')
+            .annotate(valor=Sum('valor_pagamento'))
+            .order_by('mes')
+        )
+
+        meses_entradas = [d['mes'].strftime('%Y-%m') for d in entradas_por_mes]
+        valores_entradas = [float(d['valor']) for d in entradas_por_mes]
+        # 🔹 Gráficos de receitas e despesas por associação
+        context["grafico_associacoes_labels"] = json.dumps([a["nome"] for a in associacoes_data])
+        context["grafico_associacoes_receitas"] = json.dumps([float(a["receita_total"]) for a in associacoes_data])
+        context["grafico_associacoes_saldos"] = json.dumps([float(a["saldo_pendente"]) for a in associacoes_data])
+        # Total sem desconto (para o gráfico de comparação)
+        
+        total_sem_desconto = total_anuidades_apuradas - total_descontos
+
+        # 🔹 Gráfico: Pagas x Em Atraso
+        context["grafico_anuidades_pagamento"] = json.dumps([
+            associados_em_dia,
+            associados_em_atraso
+        ])
+
+        # 🔹 Gráfico: Valores Pagos x Pendentes
+        context["grafico_valores_anuidades"] = json.dumps([
+            float(receita_total),
+            float(saldo_pendente)
+        ])
+
+        # 🔹 Gráfico: Descontos x Sem Desconto
+        total_sem_desconto = float(total_anuidades_apuradas) - float(total_descontos)
+        context["grafico_descontos_anuidades"] = json.dumps([
+            float(total_descontos),
+            total_sem_desconto
+        ])
+        
+        
         # Adicionar informações ao contexto
         context.update({
             "total_associados": total_associados,
@@ -1202,6 +1242,7 @@ class ResumoFinanceiroView(TemplateView):
             'associacoes_data': associacoes_data,
             'total_pagantes': total_pagantes,
             'total_anuidades_apuradas': total_anuidades_apuradas,
+
             
             # Despesas
             'total_despesas': total_despesas,
@@ -1229,6 +1270,10 @@ class ResumoFinanceiroView(TemplateView):
             'total_entradas_geral': total_entradas_geral,
             'total_despesas_geral': total_despesas_geral,
             'saldo_geral': saldo_geral,
+            
+            # Gráficos
+            'meses_entradas': json.dumps(meses_entradas),
+            'valores_entradas': json.dumps(valores_entradas)
             
         })
 

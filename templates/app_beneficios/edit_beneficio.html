@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% load beneficio_tags %}
+
+{% block title %}Edita e Exclui Benefícios{% endblock title %}
+
+{% block edit_beneficio %}
+{% include 'components/navbar_associacao.html' %}
+<main class="flex-grow">
+    <div class="max-w-5xl mx-auto bg-white shadow-md rounded p-6">
+
+        {% if messages %}
+            <div class="mb-4">
+                {% for message in messages %}
+                    <div class="p-3 rounded text-white 
+                        {% if message.tags == 'success' %}bg-green-600
+                        {% elif message.tags == 'error' %}bg-red-600
+                        {% else %}bg-gray-600{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div class="max-w-5xl mx-auto p-6 bg-white rounded shadow">
+            <h2 class="text-2xl font-bold mb-6">⚙️ Editar Benefício</h2>
+        
+            {% if form %}
+            <form method="post" class="bg-gray-50 p-6 rounded border border-blue-300 shadow mb-8">
+                {% csrf_token %}
+                <input type="hidden" name="beneficio_id" value="{{ beneficio_editando.id }}">
+        
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Benefício (Somente leitura) -->
+                    <div>
+                      <label class="text-sm font-medium text-gray-700 mb-1 block">Benefício</label>
+                      <input type="hidden" name="nome" value="{{ beneficio.nome }}">
+                      <input type="text"
+                             value="{{ beneficio_editando.get_nome_display }}"
+                             readonly
+                             class="form-input w-full text-sm bg-gray-100 border-gray-300 rounded-lg cursor-not-allowed">
+                    </div>
+                  
+                    <!-- Ano de Concessão -->
+                    <div>
+                      <label class="text-sm font-medium text-red-700 block mb-1">⚠️ Ano de concessão</label>
+                      {{ form.ano_concessao|attr:"readonly:readonly,class=form-input w-full text-sm bg-gray-100 border-gray-300 rounded-lg cursor-not-allowed" }}
+                    </div>
+                  
+                    <!-- Estado -->
+                    <div>
+                      <!-- Campo visual somente leitura -->
+                        <label class="text-sm font-medium text-red-700 block mb-1">⚠️ Estado</label>
+                        {{ form.estado|attr:"disabled:disabled,class=form-select w-full text-sm bg-gray-100 border-gray-300 rounded-lg cursor-not-allowed" }}
+
+                        <!-- Campo oculto para garantir envio -->
+                        <input type="hidden" name="estado" value="{{ form.estado.value }}">
+
+                    </div>
+                  </div>
+                  
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- Data de Início -->
+                    <div>
+                      <label class="text-sm font-medium text-red-700 block mb-1">⚠️ Data de início</label>
+                      {{ form.data_inicio|attr:"readonly:readonly,class=form-input w-full text-sm bg-gray-100 border-gray-300 rounded-lg cursor-not-allowed" }}
+                    </div>
+                  
+                    <!-- Data de Fim (ajustável) -->
+                    <div>
+                      <label class="text-sm font-medium text-blue-700 block mb-1">ℹ️ Você pode ajustar a data final</label>
+                      {{ form.data_fim }}
+                    </div>
+                  </div>
+                    
+                  
+        
+                <div class="mt-4">
+                    {{ form.anotacoes.label_tag }}
+                    {{ form.anotacoes }}
+                </div>
+        
+                <div class="text-right mt-4">
+                    <button type="submit"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow text-sm">
+                        💾 Salvar Alterações
+                    </button>
+                    <a href="{% url 'app_beneficios:lista_edita_beneficios' %}" 
+                    class="ml-2 text-sm text-gray-500 hover:underline">Cancelar</a>
+                </div>
+            </form>
+            {% endif %}
+        
+            <div class="bg-gray-100 p-4 rounded shadow">
+                <h3 class="text-lg font-semibold text-gray-700 mb-3">📋 Benefícios Cadastrados</h3>
+                <ul class="space-y-2 text-sm">
+                    {% for beneficio in beneficios %}
+                    <li class="flex justify-between items-center border-b pb-2">
+                        <span>
+                            {{ beneficio.get_nome_display }} ({{ beneficio.ano_concessao }}/{{ beneficio.estado }})
+                        </span>
+                        <a href="?id={{ beneficio.id }}"
+                            class="text-blue-600 hover:underline text-sm">✏️ Editar
+                        </a>
+                        <form method="post" action="{% url 'app_beneficios:deletar_beneficio' beneficio.id %}" onsubmit="return confirm('Tem certeza que deseja excluir este benefício? Isso apagará TODOS os controles vinculados.')">
+                            {% csrf_token %}
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded shadow">
+                                🗑️ Excluir
+                            </button>
+                        </form>
+                        
+                    </li>
+                    {% empty %}
+                    <li class="text-gray-500">Nenhum benefício encontrado.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% if form.errors %}
+        <div class="bg-red-100 text-red-800 p-4 border-l-4 border-red-500 rounded mb-4">
+            <h4 class="font-bold mb-2">Erros encontrados:</h4>
+            <ul class="list-disc list-inside text-sm">
+                {% for field, errors in form.errors.items %}
+                    <li><strong>{{ field }}:</strong> {{ errors.0 }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+{% endif %}
+
+    </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+
+    
+{% endblock edit_beneficio%}

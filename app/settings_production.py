@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'app_embarcacoes',
     'app_licencas',
     'app_especies_maritimas',
+    'app_beneficios',
 ]
 
 MIDDLEWARE = [

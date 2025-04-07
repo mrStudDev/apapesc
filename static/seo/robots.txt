@@ -11,5 +11,6 @@ Disallow: /financas/
 Disallow:/servicos/
 Disallow:/embarcacoes/
 Disallow:/licencas/
+Disallow:/beneficios/
 
 Sitemap: https://www.apapesc.com/sitemap.xml

@@ -6,24 +6,30 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
+
 from app_associacao.models import AssociacaoModel, ReparticoesModel, MunicipiosModel, IntegrantesModel
 from app_associados.models import STATUS_CHOICES
 from app_associados.models import AssociadoModel, ProfissoesModel
 from app_tarefas.models import TarefaModel, GuiaINSSModel
 from app_servicos.models import ServicoAssociadoModel, StatusEtapaChoices
 from app_embarcacoes.models import EmbarcacoesModel
+from app_licencas.models import LicencasModel  # Import LicencasModel
+from app_beneficios.models import ControleBeneficioModel, BeneficioModel  # Import ControleBeneficioModel and BeneficioModel
+from app_documentos.models import Documento
+from app_finances.models import AnuidadeAssociado,DescontoAnuidade
+
 from django.contrib.auth.models import User
 from accounts.mixins import GroupPermissionRequiredMixin 
 from django.contrib.auth.mixins import LoginRequiredMixin
 import logging
 from django.utils.timezone import now
 from datetime import timedelta, date
+from decimal import Decimal
 from django.contrib.auth.models import Group
-from app_documentos.models import Documento
+
 from django.http import QueryDict
 from django.http import JsonResponse
-from app_licencas.models import LicencasModel  # Import LicencasModel
 
 
 logger = logging.getLogger(__name__)
@@ -319,8 +325,87 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
                 emb.status_licenca = 'sem_licenca'
 
         context['embarcacoes'] = embarcacoes
+
+         # 🔥 BENEFÍCIOS DISPONÍVEIS PARA APLICAR
+        from app_beneficios.models import BeneficioModel, ControleBeneficioModel
+        from datetime import date
+
+        beneficios_disponiveis = []
+        beneficios_aplicados = []
+
+        today = date.today()
+        for beneficio in BeneficioModel.objects.filter(data_inicio__lte=today, data_fim__gte=today):
+
+            # 🧠 Campo esperado no associado
+            campo = 'recebe_seguro' if beneficio.nome == 'seguro_defeso' else f"recebe_{beneficio.nome}"
+
+            # ⚠️ Verifica se o estado do benefício corresponde ao estado do município do associado
+            if associado.municipio_circunscricao is None or associado.municipio_circunscricao.uf != beneficio.estado:
+                continue  # pula esse benefício
+
+            if hasattr(associado, campo) and getattr(associado, campo) == 'Recebe':
+                ja_aplicado = ControleBeneficioModel.objects.filter(
+                    associado=associado,
+                    beneficio=beneficio
+                ).exists()
+
+                if ja_aplicado:
+                    beneficios_aplicados.append(beneficio)
+                else:
+                    beneficios_disponiveis.append(beneficio)
+
+        context['beneficios_disponiveis'] = beneficios_disponiveis
+        context['beneficios_aplicados'] = beneficios_aplicados
+        
+        # Anuidades aplicadas
+
+
+        anuidades_aplicadas = AnuidadeAssociado.objects.filter(associado=associado)
+
+        total_pago = anuidades_aplicadas.aggregate(total=Sum('valor_pago'))['total'] or Decimal('0.00')
+        total_aplicado = sum([a.anuidade.valor_anuidade for a in anuidades_aplicadas])
+        total_debito = sum([a.calcular_saldo() for a in anuidades_aplicadas])
+
+        # 🔥 Total de descontos aplicados oficialmente (registro)
+        total_desconto = DescontoAnuidade.objects.filter(
+            anuidade_associado__associado=associado
+        ).aggregate(total=Sum('valor_desconto'))['total'] or Decimal('0.00')
+
+        # Valor pago real = total_pago - total_desconto
+        total_pago_real = total_pago - total_desconto
+
+        context = {
+            'associado': associado,
+            'anuidades_aplicadas': anuidades_aplicadas,
+            'total_pago': total_pago_real,
+            'total_debito': total_debito,
+            'total_aplicado': total_aplicado,
+            'total_desconto': total_desconto,
+        }         
         
         return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        associado = self.object
+        beneficio_id = request.POST.get("aplicar_beneficio_id")
+
+        if beneficio_id:
+            beneficio = get_object_or_404(BeneficioModel, pk=beneficio_id)
+
+            # Verifica se ainda não foi aplicado
+            if not ControleBeneficioModel.objects.filter(associado=associado, beneficio=beneficio).exists():
+                ControleBeneficioModel.objects.create(
+                    associado=associado,
+                    beneficio=beneficio,
+                    status_pedido='EM_PREPARO'
+                )
+                messages.success(request, f"✅ Benefício '{beneficio.get_nome_display()}' aplicado com sucesso!")
+            else:
+                messages.warning(request, "⚠️ Este benefício já foi aplicado a este associado.")
+
+        return redirect('app_associados:single_associado', pk=associado.pk)
+
 
 
 # Editar Associado

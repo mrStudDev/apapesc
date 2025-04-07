@@ -1,0 +1,404 @@
+{% extends "base.html" %}
+
+{% block title %}Controle de Benefícios{% endblock %}
+
+{% block single_ControleBeneficio %}
+
+{% include 'components/navbar_associacao.html' %}
+<main class="max-w-6xl mx-auto py-6 px-4">
+    <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200 space-y-6">
+        <!-- Hero Controle Compacto -->
+        <div class="bg-green-50 border border-green-100 rounded-lg p-4 mb-4">
+            <div class="flex flex-col md:flex-row md:items-center md:space-x-6 space-y-4 md:space-y-0">
+                <!-- Informações principais -->
+                <div class="flex-1 space-y-2">
+                    <span class="text-xs text-gray-500 uppercase tracking-wide font-medium">Controle de Benefício</span>
+                    <h1 class="text-2xl md:text-3xl font-bold text-green-800">
+                        {{ controle.beneficio.get_nome_display }} ({{ controle.beneficio.ano_concessao }}/{{ controle.beneficio.estado }})
+                    </h1>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                        <!-- Período de vigência -->
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                            <span>Vigência: {{ controle.beneficio.data_inicio|date:"d/m/Y" }} a {{ controle.beneficio.data_fim|date:"d/m/Y" }}</span>
+                        </div>
+                        
+                        <!-- Base legal -->
+                        {% if controle.beneficio.lei_federal %}
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span>Lei: {{ controle.beneficio.lei_federal }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Instrução normativa -->
+                        {% if controle.beneficio.instrucao_normativa %}
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span>Inst. Normativa: {{ controle.beneficio.instrucao_normativa }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Portaria -->
+                        {% if controle.beneficio.portaria %}
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            <span>Portaria: {{ controle.beneficio.portaria }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Status e atualização -->
+                <div class="space-y-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="px-3 py-1 rounded-full text-xs font-medium 
+                            {% if controle.status_pedido == 'DEFERIDO' %}bg-green-100 text-green-800
+                            {% elif controle.status_pedido == 'INDEFERIDO' %}bg-red-100 text-red-800
+                            {% else %}bg-blue-100 text-blue-800{% endif %}">
+                            {{ controle.get_status_pedido_display }}
+                        </span>
+                    </div>
+                    
+                    <p class="text-xs text-gray-500">
+                        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Atualizado em {{ controle.atualizado_em|date:"d/m/Y H:i" }}
+                        {% if controle.alterado_por %}
+                        por <strong>{{ controle.alterado_por.get_full_name }}</strong>
+                        {% endif %}
+                    </p>
+                    
+                    {% if controle.numero_protocolo %}
+                    <p class="text-xs text-gray-500">
+                        <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                        Protocolo: <strong>{{ controle.numero_protocolo }}</strong>
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Anotações gerais (se existirem) -->
+            {% if controle.beneficio.anotacoes %}
+            <div class="mt-4 pt-4 border-t border-green-100">
+                <p class="text-sm text-gray-600">
+                    <span class="font-medium">Observações:</span> {{ controle.beneficio.anotacoes }}
+                </p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="flex justify-end gap-4 mb-6 ">
+            <a href="{% url 'app_beneficios:lista_beneficios' %}"
+            class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md shadow transition">
+                📄 Ver Lista de Benefícios
+            </a>
+        
+            <a href="{% url 'app_beneficios:painel_beneficios' %}"
+            class="inline-block bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md shadow transition">
+                📊 Painel de Benefícios
+            </a>        
+        </div>
+        <h2 class="text-2xl font-bold text-gray-700 mb-6">📄 Beneficiário</h2>
+
+        <!-- Info de cabeçalho -->
+        <!-- Painel Detalhado do Associado -->
+        <div class="bg-gray-100 p-6 rounded-md shadow mb-6">
+            <h3 class="text-lg font-semibold text-gray-800 mb-4">📌 Detalhes do Associado</h3>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-gray-700">
+
+                <div class="flex items-center space-x-1">
+                    <strong>Nome:</strong>
+                    <a href="{% url 'app_associados:single_associado' controle.associado.id %}" 
+                       class="text-blue-600 hover:underline flex items-center space-x-1 group">
+                      <span>{{ controle.associado.user.get_full_name }}</span>
+                      <span class="material-icons text-sm text-blue-400 group-hover:text-blue-600">open_in_new</span>
+                    </a>
+                </div>
+                  
+                <div><strong>Associação:</strong> {{ controle.associado.associacao.nome_fantasia }}</div>
+                <div><strong>Repartição:</strong> {{ controle.associado.reparticao.nome_reparticao }}</div>
+                <div><strong>Município:</strong> {{ controle.associado.municipio_circunscricao.municipio }}</div>
+                <div><strong>1º Registro:</strong> {{ controle.associado.primeiro_registro|default:"-" }}</div>
+            </div>
+            <hr class="my-4">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-gray-700">
+                <div class="relative">
+                    <strong>CPF:</strong> {{ controle.associado.cpf }}
+                    <button onclick="copiarTexto('{{ controle.associado.cpf }}', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <div class="relative">
+                    <strong>Celular:</strong> {{ controle.associado.celular_correspondencia }}
+                    <button onclick="copiarTexto('{{ controle.associado.celular_correspondencia }}', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <div class="relative">
+                    <strong>Senha Gov:</strong> {{ controle.associado.senha_gov|default:"-" }}
+                    <button onclick="copiarTexto('{{ controle.associado.senha_gov|default:"" }}', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <div class="relative">
+                    <strong>CEI:</strong> {{ controle.associado.cei|default:"-" }}
+                    <button onclick="copiarTexto('{{ controle.associado.cei|default:"" }}', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <div class="relative">
+                    <strong>CAEPF:</strong> {{ controle.associado.caepef|default:"-" }}
+                    <button onclick="copiarTexto('{{ controle.associado.caepef|default:"" }}', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-gray-700">
+                <div class="relative">
+                    <strong>RGP:</strong> {{ controle.associado.rgp|default:"-" }}
+                    <button onclick="copiarTexto('{{ controle.associado.rgp|default:"" }}', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <div class="relative">
+                    <strong>CEP:</strong> {{ controle.associado.cep }}
+                    <button onclick="copiarTexto('{{ controle.associado.cep }}', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <hr class="my-4">
+                <div class="relative">
+                    <strong>RG DOC:</strong> Documento de Identidade
+                    <button onclick="copiarTexto('Documento de Identidade', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <div class="relative">
+                    <strong>RGP DOC:</strong> Carteira de Pescador Artesanal
+                    <button onclick="copiarTexto('Carteira de Pescador Artesanal', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <div class="relative">
+                    <strong>CAEPF/CEI:</strong> Documento CAEPF CEI
+                    <button onclick="copiarTexto('Documento CAEPF CEI', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <div class="relative">
+                    <strong>CNH DOC:</strong> Carteira Nacional de Habilitação
+                    <button onclick="copiarTexto('Carteira Nacional de Habilitação', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+
+                <div class="relative">
+                    <strong>TÍTULO DOC:</strong> Título Eleitor
+                    <button onclick="copiarTexto('Título Eleitor', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <div class="relative">
+                    <strong>INSS DOC:</strong> Comprovante Pagamento INSS
+                    <button onclick="copiarTexto('Comprovante Pagamento INSS', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <div class="relative">
+                    <strong>RESIDENCIA DOC:</strong> Comprovante Residência
+                    <button onclick="copiarTexto('Comprovante Residência', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+                
+                <div class="relative">
+                    <strong>EMAIL:</strong> apaescpescadores@gmail.com
+                    <button onclick="copiarTexto('apaescpescadores@gmail.com', this)" class="ml-2 text-blue-600 hover:text-blue-800 text-xs">📋</button>
+                    <span class="ml-1 text-green-600 text-xs hidden">✅!</span>
+                </div>
+            </div>
+
+            <hr class="my-4">
+            <div>
+                <p><strong>Benefício:</strong> {{ controle.beneficio.get_nome_display }} 
+                ({{ controle.beneficio.ano_concessao }}/{{ controle.beneficio.estado }})</p>
+            </div>
+        </div>
+
+
+        <form method="post" enctype="multipart/form-data"  class="bg-white p-6 rounded shadow-md">
+            {% csrf_token %}
+
+            <!-- Exibe erros gerais -->
+            {% if form.non_field_errors %}
+                <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- Status -->
+                <div>
+                    <label for="{{ form.status_pedido.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.status_pedido.label }}
+                    </label>
+                    {{ form.status_pedido }}
+                    {% for error in form.status_pedido.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <!--Data Entrada-->
+                <div class="mb-4">
+                    <label for="{{ form.data_entrada.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.data_entrada.label }}
+                    </label>
+                    <input type="date" 
+                        name="{{ form.data_entrada.name }}"
+                        id="{{ form.data_entrada.id_for_label }}"
+                        value="{{ form.data_entrada.value|date:'Y-m-d' }}"
+                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    {% for error in form.data_entrada.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <!-- Protocolo -->
+                <div class="md:col-span-2">
+                    <label for="{{ form.numero_protocolo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.numero_protocolo.label }}
+                    </label>
+                    {{ form.numero_protocolo }}
+                    {% for error in form.numero_protocolo.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.comprovante_protocolo.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.comprovante_protocolo.label }}
+                    </label>
+                    {{ form.comprovante_protocolo }}
+                    {% if controle.comprovante_protocolo %}
+                        <p class="mt-2 text-sm text-green-600">
+                            📄 <a href="{{ controle.comprovante_protocolo.url }}" target="_blank" class="hover:underline">Visualizar Comprovante Atual</a>
+                        </p>
+                    {% endif %}
+                </div>
+                
+            </div>
+
+            <hr class="my-6 border-t-2">
+
+            <!-- TextAreas -->
+            <div class="mb-4">
+                <label for="{{ form.anotacoes_exigencias.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    {{ form.anotacoes_exigencias.label }}
+                </label>
+                {{ form.anotacoes_exigencias }}
+            </div>
+
+            <div class="mb-4">
+                <label for="{{ form.anotacoes_gerais.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    {{ form.anotacoes_gerais.label }}
+                </label>
+                {{ form.anotacoes_gerais }}
+            </div>
+
+            <div class="mb-4">
+                <label for="{{ form.resultado_final.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    {{ form.resultado_final.label }}
+                </label>
+                {{ form.resultado_final }}
+            </div>
+
+            <div class="mt-6">
+                <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
+                    💾 Salvar Alterações
+                </button>
+            </div>
+        </form>
+        <div class="mt-6">
+            <a href="{% url 'app_beneficios:lista_beneficios' %}" class="text-blue-600 hover:underline">
+                Voltar para a lista de Controle de Benefícios
+            </a>
+        </div>
+        <!-- Seção do Histórico -->
+        <div class="mt-8">
+            <h3 class="text-lg font-medium text-gray-900 mb-4">Histórico de Alterações</h3>
+            <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+                <ul class="divide-y divide-gray-200">
+                    {% for registro in historico %}
+                    <li class="px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-medium text-gray-900">
+                                {{ registro.campo_alterado }}
+                            </p>
+                            <p class="text-sm text-gray-500">
+                                {{ registro.alterado_em|date:"d/m/Y H:i" }}
+                                {% if registro.alterado_por %}
+                                    por {{ registro.alterado_por.get_full_name|default:registro.alterado_por.username }}
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="mt-2 text-sm text-gray-500">
+                            <span class="line-through text-red-500">{{ registro.valor_anterior|default:"-" }}</span>
+                            →
+                            <span class="text-green-600">{{ registro.valor_novo|default:"-" }}</span>
+                        </div>
+                    </li>
+                    {% empty %}
+                    <li class="px-4 py-4 sm:px-6">
+                        <p class="text-sm text-gray-500">Nenhuma alteração registrada</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="flex justify-end gap-4 mb-6 py-4">
+                <a href="{% url 'app_beneficios:lista_beneficios' %}"
+                class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md shadow transition">
+                    📄 Ver Lista de Benefícios
+                </a>
+            
+                <a href="{% url 'app_beneficios:painel_beneficios' %}"
+                class="inline-block bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md shadow transition">
+                    📊 Painel de Benefícios
+                </a>        
+            </div>
+        </div>
+
+    </div>
+    
+    </div>
+</main>
+
+<script>
+    function copiarTexto(texto, botao) {
+        if (!texto) return;
+
+        navigator.clipboard.writeText(texto).then(function() {
+            const span = botao.nextElementSibling;
+            span.classList.remove('hidden');
+            setTimeout(() => {
+                span.classList.add('hidden');
+            }, 2000); // Esconde a mensagem após 2s
+        });
+    }
+</script>
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock single_ControleBeneficio %}

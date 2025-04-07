@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load beneficios_extras %}
 
 {% block title %}Detalhes do Associado(a){% endblock title %}
 
@@ -146,29 +147,86 @@
                     </div>
                 </div>
             </div>
-            {% if associado.status == "Candidato(a)" %}
-                    <p class="text-yellow-500 font-semibold">Anuidade ainda não computada</p>
-
+            <div class="mb-6">
+                {% if associado.status == "Candidato(a)" %}
+                    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow">
+                        <p class="text-yellow-700 font-semibold">📌 Anuidade ainda não computada para candidatos.</p>
+                    </div>
+            
                 {% elif associado.status == "Cliente Especial" %}
-                    <p class="text-gray-500 font-semibold">Anuidade não aplicável</p>
-
+                    <div class="bg-gray-100 border-l-4 border-gray-400 p-4 rounded shadow">
+                        <p class="text-gray-600 font-semibold">💼 Anuidade não aplicável para cliente especial.</p>
+                    </div>
+            
                 {% elif associado.status == "Desassociado(a)" %}
-                    <p class="text-red-500 font-semibold">Anuidade não aplicável</p>
-
+                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow">
+                        <p class="text-red-600 font-semibold">🚫 Associado desassociado — anuidade não aplicável.</p>
+                    </div>
+            
                 {% elif associado.status in "Associado Lista Ativo(a)" or associado.status == "Associado Lista Aposentado(a)" %}
                     {% if not associado.anuidades_associados.exists %}
-                        <form action="{% url 'app_finances:aplicar_anuidade' associado.id %}" method="post">
-                            {% csrf_token %}
-                            <button type="submit" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-md shadow hover:bg-green-500 transition-colors">
-                                Aplicar Anuidade
-                            </button>
-                        </form>
+                        <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow flex items-center justify-between">
+                            <p class="text-green-800 font-medium">✅ Associado apto a receber anuidade.</p>
+                            <form action="{% url 'app_finances:aplicar_anuidade' associado.id %}" method="post" class="ml-4">
+                                {% csrf_token %}
+                                <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm shadow">
+                                    Aplicar Anuidade
+                                </button>
+                            </form>
+                        </div>
                     {% else %}
-                        <p class="text-green-600 font-semibold">Anuidade já aplicada!</p>
+                        <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
+                            <p class="text-green-700 font-semibold">🎉 Anuidade já aplicada com sucesso!</p>
+                        </div>
                     {% endif %}
                 {% endif %}
+            </div>
+            
 
+            {% if beneficios_disponiveis %}
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow mb-6">
+                    <h3 class="text-lg font-semibold mb-2 text-yellow-700">🎯 Benefícios disponíveis para aplicar</h3>
+                
+                    {% for beneficio in beneficios_disponiveis %}
+                    <form method="post" class="flex items-center justify-between mb-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="aplicar_beneficio_id" value="{{ beneficio.id }}">
+                        
+                        <div>
+                            <p class="text-gray-800 font-medium">
+                                {{ beneficio.get_nome_display }} ({{ beneficio.ano_concessao }}/{{ beneficio.estado }})
+                            </p>
+                            <p class="text-xs text-gray-500">
+                                Disponível até <strong>{{ beneficio.data_fim|date:"d/m/Y" }}</strong>
+                            </p>
+                        </div>
+                
+                        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm">
+                            ➕ Aplicar
+                        </button>
+                    </form>
+                    {% endfor %}
+                
+                    <p class="mt-3 text-xs text-gray-500">
+                        ⚠️ Após o vencimento, o benefício deixará de aparecer automaticamente.
+                    </p>
+                </div>
+            {% endif %}
+                
+            {% if beneficios_aplicados %}
+                <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow mb-6">
+                    <h3 class="text-lg font-semibold mb-2 text-green-700">✅ Benefícios já aplicados</h3>
 
+                    <ul class="list-disc pl-5 text-sm text-gray-800">
+                        {% for beneficio in beneficios_aplicados %}
+                            <li>
+                                {{ beneficio.get_nome_display }} ({{ beneficio.ano_concessao }}/{{ beneficio.estado }}) —
+                                aplicado e válido até {{ beneficio.data_fim|date:"d/m/Y" }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
         </div>
         <br>
         {% if associado.drive_folder_id %}
@@ -183,8 +241,48 @@
     {% else %}
         <p><em>Nenhuma pasta associada.</em></p>
     {% endif %}
-    
     </div>
+
+    {% if beneficios_aplicados %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow mb-6">
+      <h3 class="text-lg font-semibold text-yellow-700 mb-3">✅ Benefícios já aplicados</h3>
+  
+      <ul class="divide-y divide-green-100 text-sm text-gray-800">
+        {% for beneficio in beneficios_aplicados %}
+          {% get_controle beneficio associado as controle %}
+          <li class="flex justify-between items-center py-2">
+            <!-- Info do benefício -->
+            <div>
+              <div class="font-medium">
+                {{ beneficio.get_nome_display }} ({{ beneficio.ano_concessao }}/{{ beneficio.estado }})
+              </div>
+              <div class="text-xs text-gray-500">
+                Aplicado até {{ beneficio.data_fim|date:"d/m/Y" }}
+              </div>
+  
+              {% if controle %}
+                <div class="mt-1">
+                  <p class="inline-block text-yellow-800 font-bold px-2 py-0.5 rounded">
+                    {{ controle.get_status_pedido_display }}
+                  </p>
+                </div>
+              {% endif %}
+            </div>
+  
+            <!-- Botão de Ação -->
+            {% if controle %}
+              <a href="{% url 'app_beneficios:controle_detalhe' controle.id %}"
+                 class="inline-flex items-center px-3 py-1 text-xs text-blue-700 hover:text-blue-900 bg-yellow-100 border border-blue-200 rounded-lg hover:bg-blue-50 transition ml-2">
+                <i class="material-icons text-sm mr-1">visibility</i>
+                Ver
+              </a>
+            {% endif %}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+  
 
     <!-- Seção: Informações Pessoais -->
     <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
@@ -298,6 +396,7 @@
             </div>
         </div>
     </div>
+
     <!-- Seção: Logins e Senhas -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Conta Gov do Associado</h2>
@@ -332,6 +431,40 @@
             </div>
         </div>
     </div> 
+  
+    <!-- 💳 Painel Financeiro -->
+    <div class="mt-8 bg-white rounded-xl shadow p-6 border border-gray-200">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold text-gray-800">💰 Resumo Financeiro</h2>
+            <a href="{% url 'app_finances:financeiro_associado' associado.id %}"
+            class="inline-flex items-center bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded hover:bg-blue-700 transition">
+            <i class="material-icons text-base mr-1">account_balance</i>
+            Ver Financeiro
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-sm">
+            <div class="bg-gray-50 rounded-lg p-4 border">
+            <p class="text-gray-500">Total de Anuidades</p>
+            <p class="text-lg font-semibold text-blue-700">R$ {{ total_aplicado|floatformat:2 }}</p>
+            </div>
+
+            <div class="bg-green-50 rounded-lg p-4 border">
+            <p class="text-gray-500">Total Pago</p>
+            <p class="text-lg font-semibold text-green-700">R$ {{ total_pago|floatformat:2 }}</p>
+            </div>
+
+            <div class="bg-yellow-50 rounded-lg p-4 border">
+                <p class="text-gray-500">Descontos Aplicados</p>
+                <p class="text-lg font-semibold text-yellow-700">R$ {{ total_desconto|floatformat:2 }}</p>
+            </div>
+
+            <div class="bg-red-50 rounded-lg p-4 border">
+            <p class="text-gray-500">Saldo Devedor</p>
+            <p class="text-lg font-semibold text-red-700">R$ {{ total_debito|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
     <br>
 
     <section class="mb-10">
@@ -392,8 +525,6 @@
         </div>
     </section>
     
-    
-    <br>
     <section class="mb-10">
         <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-purple-600 mb-6">
             <div class="flex items-center justify-between mb-3">
@@ -485,7 +616,7 @@
             {% endif %}
         </div>
     </section>
-    <br>
+
     <section class="mb-10">
         <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-orange-600">
             <div class="flex items-center justify-between mb-3">

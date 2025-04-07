@@ -1,0 +1,172 @@
+{% extends 'base.html' %}
+
+{% block title %}Controle de Benefícios{% endblock title %}
+
+{% block list_beneficios %}
+
+{% include 'components/navbar_associacao.html' %}
+<main class="flex-grow">
+    <div class="container mx-auto px-4 py-6">
+
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <h2>📋 Controle de Benefícios Lançados (lista)</h2>
+
+        <form method="get" class="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-8 shadow-sm">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Campo: Nome do Associado (Novo campo) -->
+                <div>
+                    <label for="nome_associado" class="block text-sm font-medium text-gray-700 mb-1">👤 Nome do Associado</label>
+                    <input 
+                        type="text" 
+                        name="nome_associado" 
+                        id="nome_associado" 
+                        value="{{ nome_associado }}"
+                        placeholder="Digite o nome do associado"
+                        class="w-full rounded-lg border-gray-300 shadow-sm text-sm"
+                    >
+                </div>
+                
+                <!-- Campo: Benefício -->
+                <div>
+                    <label for="beneficio" class="block text-sm font-medium text-gray-700 mb-1">🎯 Benefício</label>
+                    <select name="beneficio" id="beneficio" class="w-full rounded-lg border-gray-300 shadow-sm text-sm">
+                        <option value="">Todos os benefícios</option>
+                        {% for nome, beneficios in beneficios_agrupados.items %}
+                        <optgroup label="{{ beneficios.0.get_nome_display }}">
+                            {% for beneficio in beneficios %}
+                            <option value="{{ beneficio.nome }}__{{ beneficio.ano_concessao }}__{{ beneficio.estado }}"
+                                {% if request.GET.beneficio == beneficio.nome|add:"__"|add:beneficio.ano_concessao|stringformat:"s"|add:"__"|add:beneficio.estado %}
+                                selected
+                                {% endif %}>
+                                {{ beneficio.ano_concessao }} - {{ beneficio.get_estado_display }}
+                            </option>
+                            {% endfor %}
+                        </optgroup>
+                        {% endfor %}
+                    </select>
+                </div>
+            
+                <!-- Campo: Status -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">📌 Status</label>
+                    <select name="status" id="status" class="w-full rounded-lg border-gray-300 shadow-sm text-sm">
+                        <option value="">Todos os status</option>
+                        {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if request.GET.status == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Ações -->
+            <div class="mt-6 flex items-center justify-end gap-4">
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition">
+                🔍 Filtrar
+                </button>
+                <a href="?" class="text-sm text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-100 transition">
+                Limpar
+                </a>
+                <a href="{% url 'app_beneficios:painel_beneficios' %}" 
+                    class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-blue-50 hover:bg-gray-50">
+                    📊 Ver Painel de Status
+                </a>
+            </div>
+        </form>
+          
+        
+        <h2 class="text-xl font-semibold text-gray-700 mb-4 text-center border-b pb-2">
+            📋 Lista de Benefícios Lançados
+        </h2>
+        
+        <table class="w-full border border-gray-200 text-sm rounded-lg overflow-hidden shadow-sm">
+            <thead class="bg-gray-100 text-gray-700">
+            <tr>
+                <th class="p-3 text-left">Associado</th>
+                <th class="p-3 text-left">Benefício</th>
+                <th class="p-3 text-left">Ano</th>
+                <th class="p-3 text-left">UF</th>
+                <th class="p-3 text-left">Status</th>
+                <th class="p-3 text-left">Data Entrada</th>
+                <th class="p-3 text-center">Ações</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 bg-white">
+            {% for c in controles %}
+            <tr class="hover:bg-gray-50 transition">
+                <td class="p-3">
+                <a href="{% url 'app_beneficios:controle_detalhe' c.id %}" class="text-blue-600 hover:underline">
+                    {{ c.associado.user.get_full_name }}
+                </a>
+                </td>
+                <td class="p-3">{{ c.beneficio.get_nome_display }}</td>
+                <td class="p-3">{{ c.beneficio.ano_concessao }}</td>
+                <td class="p-3">{{ c.beneficio.estado }}</td>
+                <td class="p-3">
+                {% with status=c.get_status_pedido_display %}
+                    {% if status == "Em Preparo" %}
+                    <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">{{ status }}</span>
+                    {% elif status == "Protocolado" %}
+                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">{{ status }}</span>
+                    {% elif status == "Exigência" %}
+                    <span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">{{ status }}</span>
+                    {% elif status == "Em Análise" %}
+                    <span class="px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-full">{{ status }}</span>
+                    {% elif status == "Recurso" %}
+                    <span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">{{ status }}</span>
+                    {% elif status == "Indeferido" %}
+                    <span class="px-2 py-1 text-xs font-medium bg-black text-red-300 rounded-full">{{ status }}</span>
+                    {% elif status == "Deferido" %}
+                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">{{ status }}</span>
+                    {% elif status == "Arquivado" %}
+                    <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">{{ status }}</span>
+                    {% else %}
+                    <span class="text-gray-400 italic">Não informado</span>
+                    {% endif %}
+                {% endwith %}
+                </td>
+                <td class="p-3">
+                {% if c.data_entrada %}
+                    {{ c.data_entrada }}
+                {% else %}
+                    <span class="text-gray-400 italic">Não protocolado</span>
+                {% endif %}
+                </td>
+                <td class="p-3 text-center">
+                <a href="{% url 'app_beneficios:controle_detalhe' c.id %}" class="text-gray-600 hover:text-blue-600" title="Editar">
+                    <span class="material-symbols-outlined align-middle">edit</span>
+                </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="text-center py-6 text-gray-500 italic">Nenhum benefício encontrado.</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</main>
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock list_beneficios %}

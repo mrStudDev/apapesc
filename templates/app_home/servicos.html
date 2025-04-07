@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Serviços Institucionais - APAPESC{% endblock title %}
+{% block meta_title %}Serviços Institucionais - APAPESC{% endblock meta_title %}
+{% block meta_description %}Conheça os serviços disponíveis para pescadores, maricultores e agricultores familiares. {% endblock meta_description %}
+{% block meta_keywords %}serviços, apapesc, assistência técnica, regularização, previdência, benefícios{% endblock meta_keywords %}
+
+{% block Pageservicos %}
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LPC03RR5H2"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-LPC03RR5H2');
+</script>
+<!-- Navbar -->
+{% include "components/navbar_home.html" %}
+
+<main class="flex-grow w-full">
+    <div class="conntainer mx-auto my-8 max-w-3xl bg-white p-6 rounded-lg shadow-lg text-justify">
+        <!-- Título -->
+
+        
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <h1 class="text-4xl font-extrabold text-gray-800 text-center mb-4">🌊 Serviços Institucionais - APAPESC</h1>
+        <p class="text-gray-600 mb-4">A APAPESC oferece uma variedade de serviços para apoiar pescadores, maricultores e agricultores familiares. Conheça nossas áreas de atuação:</p>
+        <p class="text-center text-gray-600 mb-12">Conheça os  nossos serviços.</p>
+
+
+        <!-- Grupo 1: Documentação de Embarcações -->
+        <section class="mb-12">
+            <h2 class="text-2xl font-bold text-blue-700 mb-4">🛥️ Regularização e Documentos</h2>
+            <ul class="space-y-4 text-sm text-gray-700">
+                <li><strong>RGP:</strong> Suporte no cadastro e recadastro no Registro Geral da Atividade Pesqueira.</li>
+                <li><strong>TIE:</strong> Auxílio na emissão do Título de Inscrição de Embarcação pela Marinha do Brasil.</li>
+                <li><strong>Licenças:</strong> Orientação na obtenção de licenças de pescador profissional e renovação.</li>
+                <li><strong>Regularização de Embarcações:</strong> Apoio na documentação, alterações e baixa de inscrição.</li>
+                <li><strong>Certificados de Segurança:</strong> Suporte na emissão de CSN e preparação para inspeções.</li>
+            </ul>
+            <!-- 🔗 Link para contratar -->
+            <div class="mt-6 text-left">
+                <a href="{% url 'app_home:contact-us' %}" class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition">
+                <i class="material-icons text-base mr-1">send</i> Solicitar este serviço
+                </a>
+            </div>            
+        </section>        
+        
+        <!-- Grupo 2: Assistência Técnica -->
+        <section class="mb-12">
+        <h2 class="text-2xl font-bold text-green-700 mb-4">👨‍🌾 Assistência Técnica e Extensão</h2>
+        <ul class="space-y-4 text-sm text-gray-700">
+            <li><strong>ATER/ATEPA:</strong> Orientação especializada para aprimorar técnicas produtivas e manejo sustentável.</li>
+            <li><strong>Capacitação:</strong> Cursos e workshops sobre boas práticas pesqueiras e inovações no setor.</li>
+            <li><strong>Consultoria para Tecnologias Sustentáveis:</strong> Apoio na adoção de soluções sustentáveis e eficientes.</li>
+            <li><strong>Monitoramento de Pragas:</strong> Diagnóstico e controle de doenças em cultivos e criações aquícolas.</li>
+        </ul>
+        <!-- 🔗 Link para contratar -->
+        <div class="mt-6 text-left">
+            <a href="{% url 'app_home:contact-us' %}" class="inline-flex items-center text-sm text-green-600 hover:text-green-800 transition">
+            <i class="material-icons text-base mr-1">send</i> Solicitar este serviço
+            </a>
+        </div>         
+        </section>
+    
+    
+        <!-- Grupo 3: Previdência e Seguros -->
+        <section class="mb-12">
+        <h2 class="text-2xl font-bold text-red-700 mb-4">🛡️ Previdência e Seguros</h2>
+        <ul class="space-y-4 text-sm text-gray-700">
+            <li><strong>Seguro DPEM:</strong> Assistência na contratação do seguro obrigatório para embarcações.</li>
+            <li><strong>Seguro-Defeso:</strong> Suporte na solicitação do benefício durante o período de defeso.</li>
+            <li><strong>Cadastro CAEPF:</strong> Ajuda no registro de atividades econômicas como pescador ou produtor.</li>
+            <li><strong>Guia do INSS:</strong> Apoio na geração e pagamento das guias previdenciárias (GPS).</li>
+            <li><strong>Regularização no eSocial:</strong> Orientação sobre obrigações trabalhistas e fiscais.</li>
+            <li><strong>Benefícios Previdenciários:</strong> Aposentadoria, auxílio-doença, salário-maternidade e mais.</li>
+            <li><strong>Imposto de Renda:</strong> Suporte no preenchimento e envio da declaração anual.</li>
+        </ul>
+        <!-- 🔗 Link para contratar -->
+        <div class="mt-6 text-left">
+            <a href="{% url 'app_home:contact-us' %}" class="inline-flex items-center text-sm text-red-600 hover:text-red-800 transition">
+            <i class="material-icons text-base mr-1">send</i> Solicitar este serviço
+            </a>
+        </div>         
+        </section>
+    
+        <!-- Grupo 4: Benefícios e Projetos -->
+        <section class="mb-12">
+        <h2 class="text-2xl font-bold text-indigo-700 mb-4">📈 Benefícios, Financiamentos e Projetos</h2>
+        <ul class="space-y-4 text-sm text-gray-700">
+            <li><strong>Linhas de Crédito:</strong> Consultoria sobre financiamentos para equipamentos e melhorias.</li>
+            <li><strong>Kits de Apoio:</strong> Auxílio na solicitação de materiais fornecidos por prefeituras.</li>
+            <li><strong>Projetos Técnicos:</strong> Elaboração para captação de recursos e expansão de atividades.</li>
+            <li><strong>Recuperação de Equipamentos:</strong> Apoio em financiamentos para consertos e trocas.</li>
+            <li><strong>Serviços Ambientais:</strong> Informação sobre programas de pagamento por práticas sustentáveis.</li>
+        </ul>
+        <!-- 🔗 Link para contratar -->
+        <div class="mt-6 text-left">
+            <a href="{% url 'app_home:contact-us' %}" class="inline-flex items-center text-sm text-blue-700 hover:text-blue-800 transition">
+            <i class="material-icons text-base mr-1">send</i> Solicitar este serviço
+            </a>
+        </div>         
+        </section>
+    
+        <!-- Grupo 5: Jurídico, Comercial e Governamental -->
+        <section class="mb-12">
+        <h2 class="text-2xl font-bold text-purple-700 mb-4">⚖️ Comercial e Administrativa</h2>
+        <ul class="space-y-4 text-sm text-gray-700">
+            <li><strong>Assessoria Administrativa:</strong> Consultoria sobre direitos, terras e licenças.</li>
+            <li><strong>Comercialização:</strong> Estratégias para venda, cooperativas e acesso ao mercado.</li>
+            <li><strong>Intermediação Governamental:</strong> Suporte junto ao INSS, IBAMA, MAPA e Secretarias.</li>
+            <li><strong>Normas Marítimas:</strong> Informações atualizadas sobre regulamentações e exigências.</li>
+        </ul>
+        <!-- 🔗 Link para contratar -->
+        <div class="mt-6 text-left">
+            <a href="{% url 'app_home:contact-us' %}" class="inline-flex items-center text-sm text-purple-600 hover:text-purple-800 transition">
+            <i class="material-icons text-base mr-1">send</i> Solicitar este serviço
+            </a>
+        </div> 
+        </section>
+    </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock Pageservicos %}  
