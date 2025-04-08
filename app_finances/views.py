@@ -1001,8 +1001,12 @@ class ResumoFinanceiroView(TemplateView):
         
         # Totais financeiros gerais
         receita_total = AnuidadeAssociado.objects.aggregate(total_pago=Sum('valor_pago'))['total_pago'] or Decimal('0.00')
+        # Descontos
+        total_descontos = DescontoAnuidade.objects.aggregate(total=Sum('valor_desconto'))['total'] or Decimal('0.00')
+        # ✅ Receita apurada real = valor pago - descontos
+        realmente_apuradas = receita_total - total_descontos
         saldo_pendente = AnuidadeAssociado.objects.aggregate(
-            saldo_devedor=Sum(F('anuidade__valor_anuidade')) - Sum('valor_pago')
+            saldo_devedor=Sum(F('anuidade__valor_anuidade') - F('valor_pago'))
         )['saldo_devedor'] or Decimal('0.00')
 
         # Total de pagantes = Associados Ativos + Associados Aposentados
@@ -1154,6 +1158,7 @@ class ResumoFinanceiroView(TemplateView):
                     "total_receita": entrada["total_receita"],
                     "total_recebido": entrada["total_recebido"]
                 })
+                
         # 🔹 Total de Despesas Pagas
         total_despesas_pagas = DespesaAssociacaoModel.objects.filter(pago=True).aggregate(
             total=Sum('valor'))['total'] or Decimal('0.00')
@@ -1162,7 +1167,7 @@ class ResumoFinanceiroView(TemplateView):
         total_despesas_pendentes = total_despesas - total_despesas_pagas
 
         # 🔹 Saldo Atual (Total Recebido - Despesas Pagas)
-        saldo_atual = total_recebido + receita_total- total_despesas_pagas
+        saldo_atual = total_recebido + realmente_apuradas- total_despesas_pagas
 
         # 🔹 Saldo Projetado (Se todas as receitas e despesas forem quitadas)
         saldo_projetado = (saldo_pendente + total_a_receber) - total_despesas
@@ -1184,6 +1189,16 @@ class ResumoFinanceiroView(TemplateView):
         total_desassociados = AssociadoModel.objects.filter(status="Desassociado(a)").count()
 
         # 🔹 Graficos
+        # ✅ Novo: entradas = receita_real_anuidades + receitas de entradas extras
+        entrada_real_total = float(realmente_apuradas + total_recebido)  # <- soma das duas origens
+
+        despesa_total = float(total_pagas)
+
+        context["grafico_comparativo_financeiro"] = json.dumps({
+            "entrada_real": round(entrada_real_total, 2),
+            "despesa": round(despesa_total, 2)
+        })
+        
         entradas_por_mes = (
             EntradaFinanceira.objects
             .annotate(mes=TruncMonth('data_criacao'))
@@ -1200,8 +1215,8 @@ class ResumoFinanceiroView(TemplateView):
         context["grafico_associacoes_saldos"] = json.dumps([float(a["saldo_pendente"]) for a in associacoes_data])
         # Total sem desconto (para o gráfico de comparação)
         
-        total_sem_desconto = total_anuidades_apuradas - total_descontos
-
+        #total_sem_desconto = total_anuidades_apuradas - total_descontos
+        total_sem_desconto = total_anuidades_apuradas - receita_total
         # 🔹 Gráfico: Pagas x Em Atraso
         context["grafico_anuidades_pagamento"] = json.dumps([
             associados_em_dia,
@@ -1221,6 +1236,19 @@ class ResumoFinanceiroView(TemplateView):
             total_sem_desconto
         ])
         
+        # 🔹 Receita total = tudo que entrou via anuidades (valor já pago)
+        receita_total = AnuidadeAssociado.objects.aggregate(
+            total_pago=Sum('valor_pago')
+        )['total_pago'] or Decimal('0.00')
+
+        # 🔹 Total de descontos concedidos (somente registros oficiais)
+        total_descontos = DescontoAnuidade.objects.aggregate(
+            total=Sum('valor_desconto')
+        )['total'] or Decimal('0.00')
+
+        # 🔹 Receita realmente apurada = o que entrou de fato após descontos
+        realmente_apuradas = receita_total - total_descontos
+
         
         # Adicionar informações ao contexto
         context.update({
@@ -1241,7 +1269,8 @@ class ResumoFinanceiroView(TemplateView):
             'data_atual': data_atual,
             'associacoes_data': associacoes_data,
             'total_pagantes': total_pagantes,
-            'total_anuidades_apuradas': total_anuidades_apuradas,
+            'total_anuidades_apuradas': total_anuidades_apuradas, # Total Global Lançamentos de Anuidades
+            "realmente_apuradas": realmente_apuradas,
 
             
             # Despesas
