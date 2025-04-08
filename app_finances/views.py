@@ -752,8 +752,18 @@ class TipoServicoCreateView(SuccessMessageMixin, CreateView):
         context["tipos_servicos"] = TipoServicoModel.objects.all().order_by('nome')
         return context
     
+class EditTipoServicoView(SuccessMessageMixin, UpdateView):
+    model = TipoServicoModel
+    form_class = TipoServicoForm
+    template_name = 'app_finances/edit_tipo_servico.html'
+    success_url = reverse_lazy('app_finances:create_tipo_servico')  # Redireciona para o listagem/cadastro
+    success_message = "Tipo de Serviço atualizado com sucesso!"
 
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["tipos_servicos"] = TipoServicoModel.objects.all().order_by('nome')
+        return context
+    
 class ListEntradasView(ListView):
     model = EntradaFinanceira
     template_name = 'app_finances/list_entradas.html'

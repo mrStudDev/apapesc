@@ -3,8 +3,8 @@
 {% block title %}Cadastrar Tipo de Serviço{% endblock title %}
 
 {% block create_TipoServico %}
-        <!-- Navbar -->
-        {% if is_superuser %}
+    <!-- Navbar -->
+    {% if is_superuser %}
         {% include "components/navbar_associacao.html" %}
 
     {% elif is_admin_associacao %}
@@ -41,7 +41,7 @@
 
         <!-- Formulário -->
         <div class="bg-white shadow-lg rounded-lg p-6 mb-6">
-            <h2 class="text-2xl font-bold mb-4 text-gray-800">Cadastrar Tipo de Serviço</h2>
+            <h2 class="text-2xl font-bold mb-4 text-gray-800">Editar Tipo de Serviço</h2>
             <form method="post" class="space-y-4">
                 {% csrf_token %}
                 {{ form.as_p }}
@@ -68,12 +68,9 @@
                     <td class="py-3 px-4">{{ tipo.nome }}</td>
                     <td class="py-3 px-4">{{ tipo.descricao }}</td>
                     <td class="py-3 px-4 text-center">
-                        <a href="{% url 'app_finances:edit_tipo_servico' tipo.pk %}" 
-                            class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition">
-                            <i class="material-icons text-base align-middle">edit</i>
-                            Editar
+                        <a href="{% url 'app_finances:edit_tipo_servico' tipo.pk %}" class="text-blue-500 hover:text-blue-700">
+                            <i class="material-icons align-middle">edit</i>
                         </a>
-
                     </td>
                 </tr>
                 {% empty %}
