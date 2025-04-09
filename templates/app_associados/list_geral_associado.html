@@ -76,11 +76,17 @@
         <div class="bg-white p-4 rounded-md shadow-md">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-lg font-semibold">Associados</h3>
+
                 <a href="{% url 'app_associacao:list_users' %}" class="bg-green-500 hover:bg-green-700 text-white py-2 px-4 rounded">
                     Adicionar Associado
                 </a>
             </div>
-
+            <span class="text-xs text-gray-500 font-semibold">Total: {{ total_associados }}</span>
+            | <span class="text-xs text-green-400 font-semibold">Ativos: {{ associados_ativos }}</span>
+            | <span class="text-xs text-blue-400 font-semibold">Canditatos: {{ total_candidatos }}</span>
+            | <span class="text-xs text-purple-400 font-semibold">Aposentados: {{ associados_aposentados }}</span>
+            | <span class="text-xs text-yellow-400 font-semibold">Especiais: {{ associados_especiais }}</span>
+            | <span class="text-xs text-red-400 font-semibold">Desassociados: {{ total_desassociados }}</span>
             <table class="table-auto w-full border border-gray-200 text-sm rounded-md overflow-hidden">
                 <thead class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
                     <tr>

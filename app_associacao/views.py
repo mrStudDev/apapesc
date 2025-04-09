@@ -541,7 +541,21 @@ class MunicipiosListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListV
         'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
-        ]    
+    ]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Mapeia os municípios com as repartições que os incluem
+        reparticoes_por_municipio = {}
+
+        for municipio in context['municipios_list']:
+            reparticoes = ReparticoesModel.objects.filter(municipios_circunscricao=municipio)
+            reparticoes_por_municipio[municipio.id] = reparticoes
+
+        context['reparticoes_por_municipio'] = reparticoes_por_municipio
+        return context
+   
 
 class MunicipiosDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
     model = MunicipiosModel

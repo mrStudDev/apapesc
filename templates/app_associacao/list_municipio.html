@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load associacao_filters %}
+
 {% block title %}Lista Municípios{% endblock title %}
 {% block list_municipio %}
     <!-- Navbar -->
@@ -25,61 +27,102 @@
         {% include "components/navbar_aux_reparticao.html" %} 
     {% endif %}
     
-<main class="flex-grow">
-    <div class="container mx-auto py-6">
-        <h1 class="text-2xl font-bold mb-4 text-gray-800">Lista de Municípios</h1>
-        {% if messages %}
-        <div class="mb-4">
-            {% for message in messages %}
-                <div class="p-4 rounded-md text-white 
-                    {% if message.tags == 'success' %}
-                        bg-green-500
-                    {% elif message.tags == 'error' %}
-                        bg-red-500
-                    {% elif message.tags == 'info' %}
-                        bg-blue-500
-                    {% else %}
-                        bg-gray-500
-                    {% endif %}
-                ">
-                    {{ message }}
+    <main class="flex-grow bg-gray-50 min-h-screen">
+        <div class="max-w-4xl mx-auto py-6 px-4">
+      
+          <h1 class="text-2xl font-semibold text-gray-800 mb-6">🏙️ Lista de Municípios</h1>
+          <div class="mb-6 p-4 bg-yellow-100 border border-yellow-300 rounded-md text-sm text-yellow-800 flex items-start gap-3">
+            <i class="material-icons text-yellow-600 mt-0.5">info</i>
+            <div>
+              <strong>Atenção:</strong> Para o bom funcionamento do sistema, é necessário que cada município esteja vinculado a uma repartição.
+              <br>
+              Para isso, clique em <span class="font-semibold text-yellow-900">"Vincular a uma Repartição"</span>, localize o campo 
+              <span class="italic">"Selecionar Municípios de Circunscrição"</span>, selecione o município desejado, salve e volte para esta página para conferir.
+            </div>
+          </div>
+          
+          {% if messages %}
+            <div class="mb-4 space-y-2">
+              {% for message in messages %}
+                <div class="p-4 rounded-md text-white shadow-sm transition
+                  {% if message.tags == 'success' %} bg-green-500
+                  {% elif message.tags == 'error' %} bg-red-500
+                  {% elif message.tags == 'info' %} bg-blue-500
+                  {% else %} bg-gray-500
+                  {% endif %}">
+                  {{ message }}
                 </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        <div class="bg-white shadow rounded-lg p-6">
-            <table class="min-w-full border-collapse border border-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="border px-4 py-2 text-left text-sm font-medium text-gray-700">Nome do Município</th>
-                        <th class="border px-4 py-2 text-left text-sm font-medium text-gray-700">Estado</th>
-                        <th class="border px-4 py-2 text-center text-sm font-medium text-gray-700">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for municipio in municipios_list %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="border px-4 py-2 text-gray-700">{{ municipio.municipio }}</td>
-                        <td class="border px-4 py-2 text-gray-700">{{ municipio.uf }}</td>
-                        <td class="border px-4 py-2 text-center">
-                            <a href="{% url 'app_associacao:single_municipio' municipio.id %}" class="text-blue-500 hover:underline">Detalhesr</a>
-                            <a href="{% url 'app_associacao:edit_municipio' municipio.id %}" class="text-yellow-500 hover:underline ml-2">Editar</a>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
+              {% endfor %}
+            </div>
+          {% endif %}
+      
+          <div class="overflow-x-auto bg-white rounded-lg shadow border border-gray-200">
+            <table class="min-w-full text-sm text-gray-700">
+              <thead class="bg-gray-100 text-xs text-gray-600 uppercase tracking-wide">
+                <tr>
+                  <th class="px-4 py-3 text-left">Município</th>
+                  <th class="px-4 py-3 text-left">Vinculado?</th>
+                  <th class="px-4 py-3 text-left">Estado</th>
+                  <th class="px-4 py-3 text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for municipio in municipios_list %}
+                <tr class="border-t hover:bg-gray-50 transition">
+                  <td class="px-4 py-2">{{ municipio.municipio }}</td>
+                  <td class="px-4 py-2">
+                    {% with reparticoes=reparticoes_por_municipio|dict_get:municipio.id %}
+                      {% if reparticoes %}
+                        <ul class="list-disc list-inside text-sm text-gray-700">
+                          {% for reparticao in reparticoes %}
+                            <li>{{ reparticao.nome_reparticao }}</li>
+                          {% endfor %}
+                        </ul>
+                      {% else %}
+                        <a href="{% url 'app_associacao:list_reparticao' %}" class="text-indigo-500 hover:underline text-sm">
+                          * Vincular à uma Repartição
+                        </a>
+                      {% endif %}
+                    {% endwith %}
+                  </td>
+                  
+                  
+                  
+                  
+                  <td class="px-4 py-2">{{ municipio.uf }}</td>
+                  <td class="px-4 py-2 text-center space-x-2">
+                    <a href="{% url 'app_associacao:single_municipio' municipio.id %}" 
+                       class="text-blue-500 hover:text-blue-700" title="Detalhes">
+                      <i class="material-icons align-middle text-base">visibility</i>
+                    </a>
+                    <a href="{% url 'app_associacao:edit_municipio' municipio.id %}" 
+                       class="text-yellow-500 hover:text-yellow-600" title="Editar">
+                      <i class="material-icons align-middle text-base">edit</i>
+                    </a>
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="3" class="text-center px-4 py-6 text-gray-500">
+                    Nenhum município encontrado.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
             </table>
-            {% if not municipio_list %}
-            <p class="text-gray-500 mt-4 text-center">Nenhum município encontrado.</p>
-            {% endif %}
-        </div>
-        <div class="mt-4">
-            <a href="{% url 'app_associacao:create_municipio' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                Adicionar Novo Município
+          </div>
+      
+          <div class="mt-6">
+            <a href="{% url 'app_associacao:create_municipio' %}" 
+               class="inline-flex items-center gap-2 bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition">
+              <i class="material-icons text-base">add_circle</i>
+              Novo Município
             </a>
+          </div>
+      
         </div>
-    </div>
-</main>
+      </main>
+      
 
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}   

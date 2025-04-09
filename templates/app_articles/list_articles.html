@@ -50,13 +50,22 @@
 
 <main class="flex-grow">
     <div class="container mx-auto my-6 max-w-5xl">
-        <!-- Título -->
-        <h1 class="text-3xl font-bold text-gray-500 mb-6 text-center">Lista de Artigos</h1>
-
-        <!-- Contagem de Publicações -->
-        <p class="text-sm text-gray-600 mb-4 text-center">
-            Total de Artigos: <span class="font-semibold">{{ publicacoes_count }}</span>
-        </p>
+<!-- Título -->
+<h1 class="text-3xl font-bold text-gray-700 mb-2 text-center flex items-center justify-center gap-2">
+    <i class="material-icons text-green-500 text-4xl align-middle">article</i>
+    Artigos Publicados
+  </h1>
+  
+  <!-- Subtítulo -->
+  <p class="text-sm text-gray-500 mb-6 text-center italic">
+    Acompanhe abaixo a lista completa de publicações
+  </p>
+  
+  <!-- Contagem de Publicações -->
+  <p class="text-sm text-gray-600 mb-4 text-center">
+    Total de Artigos: <span class="font-semibold text-gray-800">{{ publicacoes_count }}</span>
+  </p>
+  
 
         <!-- Grid de Artigos -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

@@ -145,9 +145,25 @@ class CreateServicoAssociadoView(LoginRequiredMixin, CreateView):
         self.associado = get_object_or_404(AssociadoModel, id=kwargs.get('associado_id'))
         return super().dispatch(request, *args, **kwargs)
 
+    def get_initial(self):
+        initial = super().get_initial()
+
+        associacao = self.associado.associacao  # 💡 define aqui antes de usar
+        reparticao = self.associado.reparticao
+
+        print("🔍 Initial associacao ID:", associacao.id if associacao else None)
+        print("📦 Queryset associacoes:", list(AssociacaoModel.objects.all()))
+
+        initial['associacao'] = associacao.id if associacao else None
+        initial['reparticao'] = reparticao.id if reparticao else None
+
+        return initial
+
+
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs['associacao'] = self.associado.associacao  # ✅ Filtro da repartição
+        kwargs['associacao'] = self.associado.associacao # ✅ Filtro da repartição
         return kwargs
 
     def form_valid(self, form):
@@ -170,6 +186,7 @@ class CreateServicoAssociadoView(LoginRequiredMixin, CreateView):
         context['reparticoes'] = ReparticoesModel.objects.all()
 
         return context
+
 
 # views.py
 class EditServicoAssociadoView(LoginRequiredMixin, UpdateView):

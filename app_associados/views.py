@@ -262,6 +262,14 @@ class ListAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListV
         context['guias_por_associado'] = guias_por_associado
         context['meses_validos'] = meses_validos
 
+        # Filtrando categorias específicas
+        context['total_associados'] = AssociadoModel.objects.count()
+        context['associados_ativos'] = AssociadoModel.objects.filter(status="Associado Lista Ativo(a)").count()
+        context['associados_aposentados'] = AssociadoModel.objects.filter(status="Associado Lista Aposentado(a)").count()
+        context['associados_especiais'] = AssociadoModel.objects.filter(status="Cliente Especial").count()
+        context['total_candidatos'] = AssociadoModel.objects.filter(status="Candidato(a)").count()
+        context['total_desassociados'] = AssociadoModel.objects.filter(status="Desassociado(a)").count()
+
 
         return context
 

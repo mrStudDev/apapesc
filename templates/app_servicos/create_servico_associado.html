@@ -76,20 +76,21 @@
                         <!-- Associação -->
                         <div>
                             <label for="{{ form.associacao.id_for_label }}">Associação</label>
-                            <select name="associacao" id="id_associacao_servico" 
+                            <select name="associacao" id="id_associacao_servico"
                                     class="appearance-none block w-full border border-gray-300 rounded-lg bg-white py-3 px-4 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
-                                <option value="">--- Selecione ---</option>
                                 {% for associacao in form.fields.associacao.queryset %}
                                     <option value="{{ associacao.id }}"
-                                        {% if form.data.associacao|stringformat:"s" == associacao.id|stringformat:"s" %}selected{% endif %}>
-                                        {{ associacao.nome_fantasia }}
-                                    </option>
+                                        {% if form.initial.associacao == associacao.id or form.data.associacao == associacao.id|stringformat:"s" %}
+                                            selected
+                                        {% endif %}
+                                    >{{ associacao.nome_fantasia }}</option>
                                 {% endfor %}
                             </select>
                             {% for error in form.associacao.errors %}
                                 <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                             {% endfor %}
                         </div>
+                        
                     
                         <!-- Repartição (Filtrada dinamicamente via JS) -->
                         <!-- Repartição -->

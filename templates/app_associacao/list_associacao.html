@@ -27,68 +27,77 @@
         {% include "components/navbar_aux_reparticao.html" %}         
     {% endif %}
 
-<main class="flex-grow">
-    <div class="container mx-auto py-6">
-        {% if messages %}
-        <div class="mb-4">
+    <main class="flex-grow bg-gray-50 min-h-screen">
+        <div class="container mx-auto py-6 px-4">
+          
+          {% if messages %}
+          <div class="mb-4">
             {% for message in messages %}
-                <div class="p-4 rounded-md text-white 
-                    {% if message.tags == 'success' %}
-                        bg-green-500
-                    {% elif message.tags == 'error' %}
-                        bg-red-500
-                    {% elif message.tags == 'info' %}
-                        bg-blue-500
-                    {% else %}
-                        bg-gray-500
-                    {% endif %}
-                ">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-        {% endif %}
-        <h1 class="text-2xl font-bold mb-4">Lista de Associação</h1>
-        <div class="bg-white shadow rounded-lg p-6">
-            <table class="min-w-full border-collapse border border-gray-200">
-                <thead>
-                    <tr class="bg-gray-100">
-                        <th class="border px-4 py-2 text-left">Nome Fantasia</th>
-                        <th class="border px-4 py-2 text-left">CNPJ</th>
-                        <th class="border px-4 py-2 text-left">Email</th>
-                        <th class="border px-4 py-2 text-center">Ações</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for associacao in associacao_list %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="border px-4 py-2">{{ associacao.nome_fantasia }}</td>
-                        <td class="border px-4 py-2">{{ associacao.cnpj }}</td>
-                        <td class="border px-4 py-2">{{ associacao.email }}</td>
-                        <td class="border px-4 py-2 text-center">
-                            <a href="{% url 'app_associacao:single_associacao' associacao.id %}" class="text-blue-500 hover:underline">Detalhes</a> |
-                            <a href="{% url 'app_associacao:edit_associacao' associacao.id %}" class="text-yellow-500 hover:underline">Editar</a>
-                            <a href="#" class="text-red-500 hover:underline"></a>
-                        </td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="4" class="border px-4 py-2 text-center text-gray-500">
-                            Nenhuma Associação cadastrada.
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <div class="mt-4">
-                <a href="{% url 'app_associacao:create_associacao' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
-                    Adicionar Nova Associação
-                </a>
+            <div class="p-4 rounded-md text-white 
+                {% if message.tags == 'success' %} bg-green-500 
+                {% elif message.tags == 'error' %} bg-red-500 
+                {% elif message.tags == 'info' %} bg-blue-500 
+                {% else %} bg-gray-500 {% endif %}">
+              {{ message }}
             </div>
+            {% endfor %}
+          </div>
+          {% endif %}
+      
+          <h1 class="text-3xl font-bold text-gray-800 mb-6">📋 Lista de Associações</h1>
+      
+          <div class="overflow-x-auto bg-white shadow-lg rounded-lg">
+            <table class="min-w-full text-sm text-gray-700">
+              <thead class="bg-gray-100 text-xs text-gray-600 uppercase tracking-wide">
+                <tr>
+                  <th class="px-4 py-3 text-left">Nome Fantasia</th>
+                  <th class="px-4 py-3 text-left">CNPJ</th>
+                  <th class="px-4 py-3 text-left">Email</th>
+                  <th class="px-4 py-3 text-left">Presidente</th>
+                  <th class="px-4 py-3 text-left">Município</th>
+                  <th class="px-4 py-3 text-left">Abertura</th>
+                  <th class="px-4 py-3 text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for associacao in associacao_list %}
+                <tr class="border-b hover:bg-gray-50 transition">
+                  <td class="px-4 py-2 font-medium text-gray-900">{{ associacao.nome_fantasia }}</td>
+                  <td class="px-4 py-2">{{ associacao.cnpj }}</td>
+                  <td class="px-4 py-2">{{ associacao.email }}</td>
+                  <td class="px-4 py-2">{{ associacao.presidente}}</td>
+                  <td class="px-4 py-2">{{ associacao.municipio }}</td>
+                  <td class="px-4 py-2">{{ associacao.data_abertura|date:"d/m/Y" }}</td>
+                  <td class="px-4 py-2 text-center space-x-2">
+                    <a href="{% url 'app_associacao:single_associacao' associacao.id %}" 
+                       class="text-indigo-600 hover:text-indigo-800 font-medium">Detalhes</a>
+                    <a href="{% url 'app_associacao:edit_associacao' associacao.id %}" 
+                       class="text-yellow-500 hover:text-yellow-600 font-medium">Editar</a>
+                    <!-- Se quiser ação de deletar depois, adicione aqui -->
+                  </td>
+                </tr>
+                {% empty %}
+                <tr>
+                  <td colspan="7" class="text-center px-4 py-6 text-gray-500">
+                    Nenhuma Associação cadastrada.
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+      
+          <div class="mt-6">
+            <a href="{% url 'app_associacao:create_associacao' %}" 
+               class="inline-block bg-green-600 text-white px-5 py-2 rounded hover:bg-green-700 transition font-medium">
+              ➕ Nova Associação
+            </a>
+          </div>
         </div>
-    </div>
-</main>
- <!-- Footer -->
- {% include "components/footer_associacao.html" %}
+      </main>
+      
+      <!-- Footer -->
+      {% include "components/footer_associacao.html" %}
+      
 
 {% endblock list_associacao %}

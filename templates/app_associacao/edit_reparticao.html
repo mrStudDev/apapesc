@@ -222,31 +222,29 @@
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-            </div>            
-            <div class="w-full">
-                <label for="{{ form.diretores.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-2">
-                    {{ form.diretores.label }}
+            </div>  
+
+            <h1 class="text-sm font-semibold text-gray-700 mb-2">Selecione um ou Múltiplos Municípios de Circunscrição</h1>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-2 gap-x-4 max-h-[400px] overflow-y-auto border border-gray-300 p-3 rounded-md bg-white">
+              {% for choice in form.municipios_circunscricao.field.queryset %}
+                <label class="flex items-center space-x-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    name="{{ form.municipios_circunscricao.name }}"
+                    value="{{ choice.id }}"
+                    {% if choice.id|stringformat:"s" in form.municipios_circunscricao.value|stringformat:"s" %}checked{% endif %}
+                    class="form-checkbox text-blue-600 rounded focus:ring-blue-500"
+                  >
+                  <span>{{ choice }}</span>
                 </label>
-                <div class="mt-1">
-                    <select
-                        name="{{ form.municipios_circunscricao.name }}"
-                        id="{{ form.municipios_circunscricao.id_for_label }}"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        multiple
-                        size="20"  <!-- Aumente o número para ajustar a altura -->
-                    >
-                        {% for choice in form.municipios_circunscricao.field.queryset %}
-                            <option value="{{ choice.id }}" 
-                                {% if choice.id|stringformat:"s" in form.municipios_circunscricao.value|stringformat:"s" %}selected{% endif %}>
-                                {{ choice }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                {% for error in form.municipios_circunscricao.errors %}
-                    <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
-                {% endfor %}
+              {% endfor %}
             </div>
+            
+            {% for error in form.municipios_circunscricao.errors %}
+              <p class="text-red-500 text-xs mt-1 italic">{{ error }}</p>
+            {% endfor %}
+            
 
                 <!-- Botão de ação -->
                 <div class="mt-6">
