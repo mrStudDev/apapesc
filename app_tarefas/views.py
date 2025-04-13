@@ -575,6 +575,13 @@ class CriarGuiaView(LoginRequiredMixin, View):
                     <button type="button" data-copy-target="nome-{associado.id}" 
                             class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
                 </div>
+                <div class="flex justify-between items-center">
+                    <span id="texto-guia-{associado.id}" class="text-gray-800 font-mono text-[11px]">
+                        Guia INSS - ♥ Apapesc
+                    </span>
+                    <button type="button" data-copy-target="texto-guia-{associado.id}" 
+                            class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
+                </div>                
             </div>
 
             <!-- Formulário separado -->
