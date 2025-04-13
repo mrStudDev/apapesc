@@ -112,6 +112,14 @@
                                             <button type="button" data-copy-target="senha-{{ associado_id }}" 
                                                   class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
                                         </div>
+                                        <!-- Associado Nome -->
+                                        <div class="flex justify-between items-center">
+                                            <span id="nome-{{ associado_info.dados.id }}" class="text-gray-800 font-mono text-[11px]">
+                                                {{ associado_info.dados.user__first_name }}
+                                            </span>
+                                            <button type="button" data-copy-target="nome-{{ associado_info.dados.id }}" 
+                                                    class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
+                                        </div>                                       
                                       </div>
                             
                                       <div class="mt-2 space-y-1">
@@ -135,47 +143,48 @@
                                           </button>
                                         </form>
                                       </div>
-                                  </div>
-                            
-                                <!-- Estado: Emitido (Etapa 2) -->
-                                {% elif guia.status == "emitido" %}
+                                  </div> 
 
-                                <div class="guia-emitida">
-                                  <div class="dados-celular mt-2 bg-green-50 p-2 rounded-md shadow-inner text-left">
-                                    <div class="flex justify-between items-center">
-                                      <span id="celular-{{ associado_id }}" class="text-gray-800 font-mono text-[11px]">{{ associado_info.dados.celular_correspondencia }}</span>
-                                      <button type="button" data-copy-target="celular-{{ associado_id }}" 
-                                              class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
-                                    </div>
-                                  </div>
-                            
-                                  <div class="mt-2 space-y-1">
-                                    <!-- Botão Continuar -->
-                                    <form method="post" class="form-avancar-status" 
-                                          action="{% url 'app_tarefas:atualizar_status_guia' guia.id %}">
-                                      {% csrf_token %}
-                                      <button type="submit" 
-                                              class="w-full bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded shadow transition">
-                                        Confirmar Envio (Etapa 2)
-                                      </button>
-                                    </form>
-                                    
-                                    <!-- Botão Reiniciar -->
-                                    <form method="post" class="form-reiniciar-guia"
-                                          action="{% url 'app_tarefas:zerar_status_guia' guia.id %}">
-                                      {% csrf_token %}
-                                      <button type="submit" 
-                                              class="w-full text-xs text-red-500 hover:text-red-700 underline">
-                                        🔄 Reiniciar Processo
-                                      </button>
-                                    </form>
-                                  </div>
-                                </div>
-                            
-                                <!-- Estado: Enviado (Etapa 3) -->
+                                  {% elif guia.status == "emitido" %}
+                                  <div class="guia-emitida">
+                                      <div class="dados-celular mt-2 bg-green-50 p-2 rounded-md shadow-inner text-left">
+                                          <div class="flex justify-between items-center">
+                                              <span id="celular-{{ associado_id }}" class="text-gray-800 font-mono text-[11px]">{{ associado_info.dados.celular_correspondencia }}</span>
+                                              <button type="button" data-copy-target="celular-{{ associado_id }}" 
+                                                      class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
+                                          </div>
+                                      </div>
+                                  
+                                      <div class="mt-2 space-y-1">
+                                          <!-- Botão Continuar -->
+                                          <form method="post" class="form-avancar-status" 
+                                                action="{% url 'app_tarefas:atualizar_status_guia' guia.id %}">
+                                              {% csrf_token %}
+                                              <div class="relative inline-block w-full">
+                                                <button type="submit" 
+                                                        class="w-full bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded shadow transition relative overflow-visible">
+                                                    Confirmar Envio (Etapa 12)
+                                                    <span class="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-red-500 border-2 border-white shadow-sm animate-pulse"></span>
+                                                </button>
+                                            </div>
+                                          </form>
+                                          
+                                          <!-- Botão Reiniciar -->
+                                          <form method="post" class="form-reiniciar-guia"
+                                                action="{% url 'app_tarefas:zerar_status_guia' guia.id %}">
+                                              {% csrf_token %}
+                                              <button type="submit" 
+                                                      class="w-full text-xs text-red-500 hover:text-red-700 underline">
+                                                  🔄 Reiniciar Processo
+                                              </button>
+                                          </form>
+                                      </div>
+                                  </div>                                  
+
+                                <!-- Estado:Enviado Confirmar pgto (Etapa 3) -->
                                 {% elif guia.status == "enviado" %}
                                 <div class="guia-enviada">
-                                  <p class="text-green-600 text-xs mb-2">Guia enviada ao associado!</p>
+                                  <p class="text-green-600 text-xs mb-2">Marcado como enviada!</p>
                                   
                                   <div class="space-y-1">
                                     <!-- Botão Continuar -->
@@ -204,7 +213,7 @@
                                   </div>
                                 </div>
                             
-                                <!-- Estado: Pago (Processo Finalizado) -->
+                                <!-- Estado: Pago (Processo Finalizado) Etapa - 4-->
                                 {% elif guia.status == "pago" %}
                                 <div class="guia-paga">
                                     <div class="flex items-center justify-center">

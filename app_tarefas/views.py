@@ -552,7 +552,7 @@ class CriarGuiaView(LoginRequiredMixin, View):
             mes_referencia=mes,
             ano=ano,
             emitido_por=request.user,
-            status="pendente"
+            status="pendente"  # Inicia como pendente
         )
 
         # HTML para o estado pendente
@@ -571,8 +571,8 @@ class CriarGuiaView(LoginRequiredMixin, View):
                             class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
                 </div>
                 <div class="flex justify-between items-center">
-                    <span id="link-{associado.id}" class="text-gray-700 text-[10px] truncate">https://login.esocial.gov.br/login.aspx</span>
-                    <button type="button" data-copy-target="link-{associado.id}" 
+                    <span id="nome-{associado.id}" class="text-gray-800 font-mono text-[11px]">{associado.user.first_name}</span>
+                    <button type="button" data-copy-target="nome-{associado.id}" 
                             class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
                 </div>
             </div>
@@ -599,7 +599,8 @@ class CriarGuiaView(LoginRequiredMixin, View):
         return JsonResponse({
             'success': True,
             'html': html,
-            'guia_id': guia.id
+            'guia_id': guia.id,
+            'reload': True 
         })
 
 # Atualização do Status - parte da Lógica
@@ -607,14 +608,21 @@ class AtualizarStatusGuiaView(LoginRequiredMixin, View):
     def post(self, request, guia_id):
         try:
             guia = get_object_or_404(GuiaINSSModel, id=guia_id)
+            associado = guia.associado
             
-            # Lógica de transição de status
+            # Lógica de transição de status corrigida
             if guia.status == "pendente":
                 guia.status = "emitido"
+                html = self._html_emitido(guia, associado, request)
+                message = "Emissão confirmada! Proceda com o envio."
             elif guia.status == "emitido":
                 guia.status = "enviado"
+                html = self._html_enviado(guia, associado, request)
+                message = "Envio confirmado! Aguarde confirmação de pagamento."
             elif guia.status == "enviado":
                 guia.status = "pago"
+                html = self._html_pago(guia, associado, request)
+                message = "Pagamento confirmado! Processo finalizado."
             else:
                 return JsonResponse({
                     'success': False,
@@ -625,8 +633,9 @@ class AtualizarStatusGuiaView(LoginRequiredMixin, View):
             
             return JsonResponse({
                 'success': True,
-                'reload': True,  # Indica que a página deve ser recarregada
-                'message': 'Status atualizado com sucesso'
+                'html': html,
+                'message': message,
+                'reload': True 
             })
 
         except Exception as e:
@@ -634,56 +643,54 @@ class AtualizarStatusGuiaView(LoginRequiredMixin, View):
                 'success': False,
                 'message': f'Erro ao atualizar: {str(e)}'
             }, status=400)
-        
-        guia.save()
-        return JsonResponse({'success': True, 'html': html})
-    
 
     def _html_emitido(self, guia, associado, request):
         return f"""
         <div class="guia-emitida">
-            <form method="post" class="form-avancar-status" 
+            <div class="dados-celular mt-2 bg-green-50 p-2 rounded-md shadow-inner text-left">
+                <div class="flex justify-between items-center">
+                    <span id="celular-{associado.id}" class="text-gray-800 font-mono text-[11px]">{associado.celular_correspondencia}</span>
+                    <button type="button" data-copy-target="celular-{associado.id}" 
+                            class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
+                </div>
+            </div>
+
+            <form method="post" class="form-avancar-status mt-2" 
                   action="{reverse('app_tarefas:atualizar_status_guia', args=[guia.id])}">
                 <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
-                <button type="submit" class="bg-gray-900 hover:bg-green-600 text-white text-xs px-3 py-1 rounded shadow transition">
-                    Guia Enviada
+                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded shadow transition">
+                    Confirmar Envio (Etapa 2)
                 </button>
             </form>
             
             <form method="post" class="form-reiniciar-guia mt-1" 
                   action="{reverse('app_tarefas:zerar_status_guia', args=[guia.id])}">
                 <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
-                <button type="submit" class="text-xs text-red-500 hover:text-red-700 underline">
-                    🔄 Reiniciar
+                <button type="submit" class="w-full text-xs text-red-500 hover:text-red-700 underline">
+                    🔄 Reiniciar Processo
                 </button>
             </form>
-            
-            <div class="dados-celular mt-2 bg-green-50 p-2 rounded-md shadow-inner text-left">
-                <div class="flex justify-between items-center">
-                    <span id="celular-{associado.id}" class="text-gray-800 font-mono text-[11px]">{associado.celular_correspondencia}</span>
-                    <button onclick="copyToClipboard('celular-{associado.id}')" class="text-blue-600 hover:text-blue-800 text-xs">📋</button>
-                </div>
-            </div>
         </div>
         """
 
     def _html_enviado(self, guia, associado, request):
         return f"""
         <div class="guia-enviada">
+            <p class="text-green-600 text-xs mb-2">Guia enviada ao associado!</p>
+            
             <form method="post" class="form-avancar-status" 
                   action="{reverse('app_tarefas:atualizar_status_guia', args=[guia.id])}">
                 <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
-                <p class="text-green-600">Guia Enviada!</p>
-                <button type="submit" class="bg-yellow-200 hover:bg-yellow-200 text-xs px-3 py-1 rounded shadow transition mt-1">
-                    Marcar Pg
+                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1 rounded shadow transition">
+                    Confirmar Pagamento (Etapa 3)
                 </button>
             </form>
             
             <form method="post" class="form-reiniciar-guia mt-1" 
                   action="{reverse('app_tarefas:zerar_status_guia', args=[guia.id])}">
                 <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
-                <button type="submit" class="text-xs text-red-500 hover:text-red-700 underline">
-                    🔄 Reiniciar
+                <button type="submit" class="w-full text-xs text-red-500 hover:text-red-700 underline">
+                    🔄 Reiniciar Processo
                 </button>
             </form>
         </div>
@@ -692,15 +699,18 @@ class AtualizarStatusGuiaView(LoginRequiredMixin, View):
     def _html_pago(self, guia, associado, request):
         return f"""
         <div class="guia-paga">
-            <span class="inline-block bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
-                💸 Guia Paga
-            </span>
+            <div class="flex items-center justify-center">
+                <span class="inline-flex items-center bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-semibold shadow-sm ring-1 ring-green-100">
+                    <span class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                    ✅ Guia Paga!
+                </span>
+            </div>
             
-            <form method="post" class="form-reiniciar-guia mt-1" 
+            <form method="post" class="form-reiniciar-guia mt-2 text-center"
                   action="{reverse('app_tarefas:zerar_status_guia', args=[guia.id])}">
                 <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
                 <button type="submit" class="text-xs text-red-500 hover:text-red-700 underline">
-                    🔄 Reiniciar
+                    🔄 Reiniciar Processo
                 </button>
             </form>
         </div>
