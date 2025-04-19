@@ -87,7 +87,7 @@
             | <span class="text-xs text-purple-400 font-semibold">Aposentados: {{ associados_aposentados }}</span>
             | <span class="text-xs text-yellow-400 font-semibold">Especiais: {{ associados_especiais }}</span>
             | <span class="text-xs text-red-400 font-semibold">Desassociados: {{ total_desassociados }}</span>
-            <table class="table-auto w-full border border-gray-200 text-sm rounded-md overflow-hidden">
+            <table class="table-auto w-full border border-gray-200 text-xs rounded-md overflow-hidden">
                 <thead class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
                     <tr>
                         <th class="px-4 py-2 border">Nome</th>
@@ -96,13 +96,13 @@
                         <th class="px-4 py-2 border">Celular</th>
 
                         <th class="px-4 py-2 border">S</th>
-                        <th class="px-4 py-2 border">NVS</th>
+                        <th class="px-4 py-2 border">NS</th>
 
                         <th class="px-4 py-2 border">T</th>
-                        <th class="px-4 py-2 border">NVT</th>
+                        <th class="px-4 py-2 border">NT</th>
 
                         <th class="px-4 py-2 border">E</th>
-                        <th class="px-4 py-2 border">NVE</th>
+                        <th class="px-4 py-2 border">NE</th>
 
                         <th class="px-4 py-2 border">Guias</th>
                         <th class="px-4 py-2 border">Benefico</th>
@@ -114,10 +114,11 @@
                         <tr class="hover:bg-gray-50 transition">
                             <td class="px-4 py-2 border">
                                 <a href="{% url 'app_associados:single_associado' associado.id %}" 
-                                   class="text-blue-600 hover:text-blue-800 hover:underline">
+                                   class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">
                                   {{ associado.user.get_full_name }}
                                 </a>
-                            </td>
+                              </td>
+                              
                               
                             <td class="px-4 py-2 border"><span id="cpf-{{ associado.pk }}" class="text-gray-800">{{ associado.cpf }}</span>
                                 <button onclick="copyToClipboard('cpf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-orange-500">
@@ -144,13 +145,14 @@
                                     </span>
                                   </div>
                                 {% else %}
-                                  <span class="inline-block w-4 h-4 bg-gray-300 rounded-full" title="Sem Serviços"></span>
+                                <span class="inline-block w-2 h-2 bg-gray-300 rounded-full" title="Sem Serviços Ativos"></span>
+
                                 {% endif %}
                             </td>
                             <td class="px-4 py-2 border text-center">        
                                 <a href="{% url 'app_servicos:create_servico_associado' associado.id %}"
                                     class="text-green-600 hover:text-green-800" title="Novo serviço p/ este Associado">
-                                    <i class="material-icons text-base">handyman</i>
+                                    <i class="material-icons text-base"  style="font-size: 16px;">handyman</i>
                                 </a>   
 
                             </td>                                          
@@ -163,19 +165,19 @@
                                     </span>
                                   </div>
                                 {% else %}
-                                  <span class="inline-block w-4 h-4 bg-gray-300 rounded-full" title="Sem Tarefas"></span>
+                                <span class="inline-block w-2 h-2 bg-gray-300 rounded-full" title="Sem Tarefas"></span>
+
                                 {% endif %}
                             </td>
                             <td class="px-4 py-2 border text-center">        
-
                                 <a href="{% url 'app_tarefas:create_tarefa_associado' associado.id %}"
                                     class="text-purple-600 hover:text-purple-800 ml-2"
                                     title="Nova Tarefa p/ este Associado">
-                                    <i class="material-icons text-base">add_task</i>
+                                    <i class="material-icons text-base" style="font-size: 17px;">add_task</i>
                                 </a>
-                            </td>                                                                                                              
-                            <!--Novo STE -->
+                            </td> 
 
+                            <!--Novo STE -->
                             <td class="px-4 py-2 border text-center">
                                 {% if associado.qtd_embarcacoes > 0 %}
                                   <div class="relative inline-block w-4 h-4 bg-orange-400 rounded-full">
@@ -184,46 +186,47 @@
                                     </span>
                                   </div>
                                 {% else %}
-                                  <span class="inline-block w-4 h-4 bg-gray-300 rounded-full" title="Sem Embarcação"></span>
+                                <span class="inline-block w-2 h-2 bg-gray-300 rounded-full" title="Sem Embarcações Cadastradas"></span>
+
                                 {% endif %}
                             </td> 
                                                    
                             <!--Novo Embarcaão -->
-                            <td class="px-4 py-2 border text-center">        
+                            <td class="px-4 py-2 border text-center">
                                 <a href="{% url 'app_embarcacoes:create_embarcacao' associado.id %}"
-                                    class="text-orange-600 hover:text-orange-800 ml-2"
-                                    title="Nova Embarcação p/ este Associado">
-                                    <i class="material-icons text-base">sailing</i>
+                                   class="text-orange-600 hover:text-orange-800 ml-2"
+                                   title="Nova Embarcação p/ este Associado">
+                                   <i class="material-icons" style="font-size: 17px;">sailing</i>
+                                   <!-- ↓ menor que text-base -->
                                 </a>
                             </td>
-                            <td class="px-4 py-2 border text-center">
-                                <!-- Bolinhas por mês -->
-                                <div class="flex justify-center flex-wrap gap-1 mt-1">
-                                    {% with guias=guias_por_associado|get_item:associado.id %}
-                                    {% with recolhe=recolhe_inss_map|get_item:associado.id %}
-                                      {% if guias %}
-                                        {% for mes in meses_validos %}
-                                          {% with status=guias|get_item:mes %}
-                                            {% if recolhe != "Sim" %}
-                                              <span class="inline-block w-3 h-3 rounded-full bg-gray-200" title="❎ Não Recolhe - Mês {{ mes }}"></span>
-                                            {% elif status == "paga" %}
-                                              <span class="inline-block w-3 h-3 rounded-full bg-green-500" title="💸 Paga - Mês {{ mes }}"></span>
-                                            {% elif status == "emitida" %}
-                                              <span class="inline-block w-3 h-3 rounded-full bg-yellow-300" title="📤 Emitida - Mês {{ mes }}"></span>
-                                            {% elif status == "atrasada" %}
-                                              <span class="inline-block w-3 h-3 rounded-full bg-red-500" title="⚠️ Atrasada - Mês {{ mes }}"></span>
-                                            {% else %}
-                                              <span class="inline-block w-3 h-3 rounded-full bg-blue-700" title="⛔ Pendente - Mês {{ mes }}"></span>
-                                            {% endif %}
-                                          {% endwith %}
-                                        {% endfor %}
-                                      {% endif %}
-                                    {% endwith %}
+                              
+                            <td class="px-4 py-2 border text-center text-xs">
+                                <div class="flex justify-center text-xs flex-wrap gap-[3px] mt-1">
+                                  {% with guias=guias_por_associado|get_item:associado.id %}
+                                  {% with recolhe=recolhe_inss_map|get_item:associado.id %}
+                                    {% if guias %}
+                                      {% for mes in meses_validos %}
+                                        {% with status=guias|get_item:mes %}
+                                          {% if recolhe != "Sim" %}
+                                            <span class="inline-block w-2 h-2 rounded-full bg-gray-300" title="❎ Não Recolhe - Mês {{ mes }}"></span>
+                                          {% elif status == "paga" %}
+                                            <span class="inline-block w-2 h-2 rounded-full bg-green-500" title="💸 Paga - Mês {{ mes }}"></span>
+                                          {% elif status == "emitida" %}
+                                            <span class="inline-block w-2 h-2 rounded-full bg-yellow-300" title="📤 Emitida - Mês {{ mes }}"></span>
+                                          {% elif status == "atrasada" %}
+                                            <span class="inline-block w-2 h-2 rounded-full bg-red-500" title="⚠️ Atrasada - Mês {{ mes }}"></span>
+                                          {% else %}
+                                            <span class="inline-block w-2 h-2 rounded-full bg-blue-700" title="⛔ Pendente - Mês {{ mes }}"></span>
+                                          {% endif %}
+                                        {% endwith %}
+                                      {% endfor %}
+                                    {% endif %}
                                   {% endwith %}
-                                  
-
+                                  {% endwith %}
                                 </div>
-                            </td>
+                              </td>
+                              
                             
 
                             <td class="px-4 py-2 border text-center">
