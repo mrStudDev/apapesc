@@ -200,22 +200,31 @@
                                 <!-- Bolinhas por mês -->
                                 <div class="flex justify-center flex-wrap gap-1 mt-1">
                                     {% with guias=guias_por_associado|get_item:associado.id %}
-                                        {% if guias %}
-                                            {% for mes in meses_validos %}
-                                                {% with status=guias|get_item:mes %}
-                                                    {% if status == "pago" %}
-                                                        <span class="inline-block w-3 h-3 rounded-full bg-green-500" title="💸 Pago - Mês {{ mes }}"></span>
-                                                    {% elif status == "enviado" %}
-                                                        <span class="inline-block w-3 h-3 rounded-full bg-yellow-300" title="📤 Enviado - Mês {{ mes }}"></span>
-                                                    {% else %}
-                                                        <span class="inline-block w-3 h-3 rounded-full bg-red-500" title="⛔ Não enviado - Mês {{ mes }}"></span>
-                                                    {% endif %}
-                                                {% endwith %}
-                                            {% endfor %}
-                                        {% endif %}
+                                    {% with recolhe=recolhe_inss_map|get_item:associado.id %}
+                                      {% if guias %}
+                                        {% for mes in meses_validos %}
+                                          {% with status=guias|get_item:mes %}
+                                            {% if recolhe != "Sim" %}
+                                              <span class="inline-block w-3 h-3 rounded-full bg-gray-200" title="❎ Não Recolhe - Mês {{ mes }}"></span>
+                                            {% elif status == "paga" %}
+                                              <span class="inline-block w-3 h-3 rounded-full bg-green-500" title="💸 Paga - Mês {{ mes }}"></span>
+                                            {% elif status == "emitida" %}
+                                              <span class="inline-block w-3 h-3 rounded-full bg-yellow-300" title="📤 Emitida - Mês {{ mes }}"></span>
+                                            {% elif status == "atrasada" %}
+                                              <span class="inline-block w-3 h-3 rounded-full bg-red-500" title="⚠️ Atrasada - Mês {{ mes }}"></span>
+                                            {% else %}
+                                              <span class="inline-block w-3 h-3 rounded-full bg-blue-700" title="⛔ Pendente - Mês {{ mes }}"></span>
+                                            {% endif %}
+                                          {% endwith %}
+                                        {% endfor %}
+                                      {% endif %}
                                     {% endwith %}
+                                  {% endwith %}
+                                  
+
                                 </div>
                             </td>
+                            
 
                             <td class="px-4 py-2 border text-center">
                             {% get_beneficio_aplicado associado as c %}

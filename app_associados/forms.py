@@ -28,10 +28,14 @@ class AssociadoForm(forms.ModelForm):
             'status': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             }),
-            'data_desfilicao': forms.DateInput(attrs={
-                'type': 'date',
-                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
-            }, format='%Y-%m-%d'),
+            'data_desfiliacao': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                    'id': 'id_data_desfiliacao',
+                },
+                format='%Y-%m-%d'
+            ),
             
             #Informações de Contato - Documentos e informações de Principais
             'celular': forms.TextInput(attrs={

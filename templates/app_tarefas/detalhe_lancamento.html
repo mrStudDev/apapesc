@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Controle Mês: {{lancamento.mes}}{% endblock title %}
+
+{% load custom_filters %}
+
+{% block detalhamento %}
+
+    {% include "components/navbar_associacao.html" %}
+
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="p-4 rounded-md text-white 
+                {% if message.tags == 'success' %}
+                    bg-green-500
+                {% elif message.tags == 'error' %}
+                    bg-red-500
+                {% elif message.tags == 'info' %}
+                    bg-blue-500
+                {% else %}
+                    bg-gray-500
+                {% endif %}
+            ">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="flex-grow bg-gray-50 min-h-screen py-8">
+        <div class="max-w-6xl mx-auto px-4">
+          
+        <!-- Cabeçalho -->
+        <div class="mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+              📄 Controle de Emissão de Guias INSS
+            </h1>
+            <p class="text-sm text-gray-600">Guias INSS por Associado</p>
+            <p class="text-sm text-gray-600">Lançamento: <strong>{{ lancamento.mes }}/{{ lancamento.ano }}</strong></p>
+        </div>
+        <a href="{% url 'app_tarefas:processar_guia' lancamento.id %}"
+            class="inline-block mb-4 bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700">
+            ▶ Iniciar/Retomar Processo
+        </a>
+       
+         <!-- Tabela -->
+        <div class="overflow-x-auto bg-white rounded-lg shadow border border-gray-200">
+            <table class="min-w-full text-xs text-gray-700">
+            <thead class="bg-gray-100 text-gray-600 uppercase text-[11px]">
+                <tr>
+                <th class="px-4 py-3 text-left">Associado</th>
+                <th class="px-6 py-3 text-left w-52">Status</th> <!-- 🔹 largura aumentada -->
+                <th class="px-4 py-3 text-left">Emissão</th>
+                <th class="px-4 py-3 text-left">CPF</th>
+                <th class="px-4 py-3 text-left">Senha Gov</th>
+                <th class="px-4 py-3 text-left">Observações</th>
+                <th class="px-4 py-3 text-center">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for guia in guias %}
+                <form method="post" action="{% url 'app_tarefas:atualizar_guia' guia.id %}">
+                {% csrf_token %}
+                <tr class="border-t hover:bg-gray-50 transition">
+                    <td class="px-4 py-2">{{ guia.associado.user.get_full_name }}</td>
+        
+                    <!-- Status -->
+                    <td class="px-6 py-2">
+                    <select name="status" class="w-full border border-gray-300 rounded px-2 py-1 text-xs">
+                        {% for key, label in status_choices %}
+                        <option value="{{ key }}" {% if guia.status == key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    </td>
+        
+                    <!-- Data -->
+                    <td class="px-4 py-2">{{ guia.data_emissao|date:"d/m/Y H:i" }}</td>
+        
+                    <!-- CPF com Copy -->
+                    <td class="px-4 py-2">
+                    <div class="flex items-center gap-1">
+                        <span id="cpf-{{ guia.id }}">{{ guia.associado.cpf }}</span>
+                        <button type="button" onclick="copyToClipboard('cpf-{{ guia.id }}')" title="Copiar CPF"
+                        class="text-blue-500 hover:text-blue-700 transition">
+                        <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                    </td>
+        
+                    <!-- Senha Gov com Copy -->
+                    <td class="px-4 py-2">
+                    <div class="flex items-center gap-1">
+                        <span id="senha-{{ guia.id }}">{{ guia.associado.senha_gov }}</span>
+                        <button type="button" onclick="copyToClipboard('senha-{{ guia.id }}')" title="Copiar Senha"
+                        class="text-blue-500 hover:text-blue-700 transition">
+                        <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                        </button>
+                    </div>
+                    </td>
+        
+                    <!-- Observações -->
+                    <td class="px-4 py-2">
+                    <select name="observacoes" class="w-full border border-gray-300 rounded px-2 py-1 text-xs">
+                        {% for key, label in observacoes_choices %}
+                        <option value="{{ key }}" {% if guia.observacoes == key %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                    </td>
+        
+                    <!-- Salvar -->
+                    <td class="px-4 py-2 text-center">
+                    <button type="submit" class="bg-blue-600 text-white text-[11px] px-3 py-1 rounded hover:bg-blue-700 transition">
+                        Salvar
+                    </button>
+                    </td>
+                </tr>
+                </form>
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+        
+        </div>
+      </main>
+      
+
+      <script src="{% static 'js/copy_to_clipboard.js' %}"></script>
+{% endblock detalhamento %}        

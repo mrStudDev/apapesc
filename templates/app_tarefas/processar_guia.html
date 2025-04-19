@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Processamento Mês {{lancamento.mes}} {% endblock title %}
+
+{% load custom_filters %}
+
+{% block processamento %}
+
+    {% include "components/navbar_associacao.html" %}
+
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="p-4 rounded-md text-white 
+                {% if message.tags == 'success' %}
+                    bg-green-500
+                {% elif message.tags == 'error' %}
+                    bg-red-500
+                {% elif message.tags == 'info' %}
+                    bg-blue-500
+                {% else %}
+                    bg-gray-500
+                {% endif %}
+            ">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="flex-grow bg-gray-50 min-h-screen py-8">
+      <div class="max-w-4xl mx-auto px-4">
+        <form method="post">
+          {% csrf_token %}
+          <input type="hidden" name="guia_id" value="{{ guia.id }}">
+          <input type="hidden" name="next_guia_id" value="{{ next_guia_id }}">
+
+
+
+        {% if fim_processo %}
+          <div class="p-6 text-center bg-white rounded-lg shadow border border-gray-200">
+            <h2 class="text-xl font-bold text-green-700 mb-4">🎉 Todos os associados foram processados!</h2>
+            <a href="{% url 'detalhe_lancamento_inss' lancamento.id %}"
+              class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
+              Voltar para lista
+            </a>
+          </div>
+    
+        {% else %}
+          <div class="mt-6 bg-white shadow rounded-lg p-6 border border-gray-200">
+            <h2 class="text-lg font-semibold mb-6 text-gray-800">
+               Processando & Emissão de Guis do INSS
+            </h2>
+            <h2 class="text-lg font-semibold mb-6 text-gray-800">
+              Associado(a) | 👤<span class="text-blue-600">{{ guia.associado.user.get_full_name }}</span>
+           </h2>            
+            <p class="text-lg text-gray-600 mb-2">
+              <strong>Mês/Ano:</strong> {{ lancamento.mes|stringformat:"02d" }}/{{ lancamento.ano }} &nbsp; | &nbsp;
+              <strong>Guia:</strong> {{ contador }} de {{ total_guias }}
+            </p>
+
+
+            <hr>
+            <div class="mt-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h3 class="text-sm font-semibold text-gray-700 mb-6 flex items-center gap-2">
+                <span class="material-icons text-blue-500">assignment_ind</span>
+                Dados para processamento
+              </h3>
+            
+              <!-- Grid 2 colunas -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+            
+                <!-- CPF -->
+                <div class="flex items-center gap-2">
+                  <label class="font-medium">CPF:</label>
+                  <span id="cpf" class="font-mono">{{ guia.associado.cpf }}</span>
+                  <button type="button" onclick="copyToClipboard('cpf')" title="Copiar CPF"
+                    class="text-blue-500 hover:text-blue-700">
+                    <span class="material-icons text-sm">content_copy</span>
+                  </button>
+                </div>
+            
+                <!-- Senha Gov -->
+                <div class="flex items-center gap-2">
+                  <label class="font-medium">Senha Gov:</label>
+                  <span id="senha" class="font-mono">{{ guia.associado.senha_gov }}</span>
+                  <button type="button" onclick="copyToClipboard('senha')" title="Copiar Senha"
+                    class="text-blue-500 hover:text-blue-700">
+                    <span class="material-icons text-sm">content_copy</span>
+                  </button>
+                </div>
+            
+                <!-- Primeiro Nome -->
+                <div class="flex items-center gap-2">
+                  <label class="font-medium">Primeiro Nome:</label>
+                  <span id="primeiro_nome" class="font-mono">{{ guia.associado.user.first_name }}</span>
+                  <button type="button" onclick="copyToClipboard('primeiro_nome')" title="Copiar Nome"
+                    class="text-blue-500 hover:text-blue-700">
+                    <span class="material-icons text-sm">content_copy</span>
+                  </button>
+                </div>
+            
+                <!-- Celular Correspondência -->
+                <div class="flex items-center gap-2">
+                  <label class="font-medium">Celular Correspondência:</label>
+                  <span id="celular" class="font-mono">{{ guia.associado.celular_correspondencia }}</span>
+                  <button type="button" onclick="copyToClipboard('celular')" title="Copiar Celular"
+                    class="text-blue-500 hover:text-blue-700">
+                    <span class="material-icons text-sm">content_copy</span>
+                  </button>
+                </div>
+            
+                <!-- Mensagem 1 -->
+                <div class="flex items-center gap-2 sm:col-span-2">
+                  <label class="font-medium">Mensagem 1:</label>
+                  <span id="mensagem1" class="font-mono">Guia do mês - Apapesc<span class="text-red-500 ml-1">❤️</span></span>
+                  <button type="button" onclick="copyToClipboard('mensagem1')" title="Copiar Mensagem"
+                    class="text-blue-500 hover:text-blue-700">
+                    <span class="material-icons text-sm">content_copy</span>
+                  </button>
+                </div>
+            
+              </div>
+            
+              <!-- Status - Separado -->
+              <div class="mt-6 pt-4 border-t border-gray-100">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {% for value, label in status_choices %}
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-600">
+                      <input type="radio" name="status" value="{{ value }}" {% if guia.status == value %}checked{% endif %}
+                        class="form-radio text-blue-600 rounded focus:ring-blue-500">
+                      {{ label }}
+                    </label>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            
+            <div class="mt-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+              <h3 class="text-sm font-semibold text-gray-700 mb-6 flex items-center gap-2">
+                <span class="material-icons text-yellow-500">report_problem</span>
+                Falhas no Processamento?
+              </h3>
+              <!-- Checkbox Observações -->
+              <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Observações</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {% for value, label in observacoes_choices %}
+                    <label class="inline-flex items-center gap-2 text-sm text-gray-600">
+                      <input type="radio" name="observacoes" value="{{ value }}" {% if guia.observacoes == value %}checked{% endif %}
+                        class="form-checkbox text-blue-600 rounded focus:ring-blue-500">
+                      <span>{{ label }}</span>
+                    </label>
+                  {% endfor %}
+                </div>
+                <!-- Mensagens de falhas personalizadas -->
+                <br>
+                <div class="space-y-4 text-xs text-gray-700">
+
+                  <!-- Validação de acesso -->
+                  <div class="flex items-start gap-2 bg-yellow-50 border border-yellow-300 p-3 rounded">
+                    <span class="material-icons text-yellow-500 mt-0.5">info</span>
+                    <div class="flex-1">
+                      <p id="mensagem-validacao" class="whitespace-pre-line">
+                Querido(a) Associado(a),
+
+                ❗ Não foi possível emitir a guia deste mês. O sistema solicitou uma *validação de acesso* com *código adicional de segurança*.
+
+                Contamos com sua compreensão. Qualquer dúvida, estamos à disposição. 💙
+                      </p>
+                    </div>
+                    <button type="button" onclick="copyToClipboard('mensagem-validacao')" title="Copiar mensagem"
+                      class="text-blue-500 hover:text-blue-700">
+                      <span class="material-icons text-sm">content_copy</span>
+                    </button>
+                  </div>
+
+                  <!-- Senha inválida -->
+                  <div class="flex items-start gap-2 bg-red-50 border border-red-300 p-3 rounded">
+                    <span class="material-icons text-red-500 mt-0.5">error_outline</span>
+                    <div class="flex-1">
+                      <p id="mensagem-senha" class="whitespace-pre-line">
+                Querido(a) Associado(a),
+
+                ❗ Não conseguimos emitir sua guia porque a *senha GOV* informada está *inválida*.
+
+                Por favor, verifique suas credenciais.
+
+                Agradecemos pela atenção e estamos à disposição para ajudar. 💙
+                      </p>
+                    </div>
+                    <button type="button" onclick="copyToClipboard('mensagem-senha')" title="Copiar mensagem"
+                      class="text-blue-500 hover:text-blue-700">
+                      <span class="material-icons text-sm">content_copy</span>
+                    </button>
+                  </div>
+
+                  <!-- Nível de conta -->
+                  <div class="flex items-start gap-2 bg-blue-50 border border-blue-300 p-3 rounded">
+                    <span class="material-icons text-blue-500 mt-0.5">security</span>
+                    <div class="flex-1">
+                      <p id="mensagem-nivel" class="whitespace-pre-line">
+                Querido(a) Associado(a),
+
+                🔐 Sua guia não pôde ser emitida porque sua conta GOV está com nível *Bronze*.
+
+                Para usar os serviços da Receita Federal, é necessário atualizar para nível *Prata ou Ouro*.
+
+                Obrigado por sua atenção. A equipe da *Apapesc* ❤️ está à disposição!
+                      </p>
+                    </div>
+                    <button type="button" onclick="copyToClipboard('mensagem-nivel')" title="Copiar mensagem"
+                      class="text-blue-500 hover:text-blue-700">
+                      <span class="material-icons text-sm">content_copy</span>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            {% if guias_anteriores %}
+            <div class="mt-8 bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+              <h3 class="text-sm font-semibold text-gray-700 mb-4">📅 Status de meses anteriores</h3>
+          
+              <div class="overflow-x-auto">
+                <table class="min-w-full text-xs border border-gray-100">
+                  <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                      <th class="px-2 py-2 border border-gray-100 text-left">Mês/Ano</th>
+                      <th class="px-2 py-2 border border-gray-100 text-left">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody class="text-gray-700">
+                    {% for g in guias_anteriores %}
+                    <tr class="border-t border-gray-100">
+                      <!-- Mês/Ano -->
+                      <td class="px-2 py-2 border border-gray-100">
+                        {{ g.lancamento.mes|stringformat:"02d" }}/{{ g.lancamento.ano }}
+                      </td>
+          
+                      <!-- Status (radios) -->
+                      <td class="px-2 py-2 border border-gray-100">
+                        <div class="flex flex-wrap gap-2">
+                          {% for key, label in status_choices %}
+                            <label class="inline-flex items-center gap-1">
+                              <input type="radio" name="status_anterior_{{ g.id }}" value="{{ key }}"
+                                {% if g.status == key %}checked{% endif %}
+                                class="form-radio text-blue-600 h-4 w-4">
+                              <span class="text-[11px]">{{ label }}</span>
+                            </label>
+                          {% endfor %}
+                        </div>
+                      </td>
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          {% endif %}
+          
+                          
+              <!-- Ações -->
+              <div class="flex justify-end gap-3 py-4">
+                <button type="submit" name="acao" value="salvar"
+                  class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition text-sm">
+                  Salvar e Próximo
+                </button>
+    
+                <button type="submit" name="acao" value="pausar"
+                  class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600 transition text-sm">
+                  Pausar
+                </button>
+              </div>
+            </form>
+          </div>
+        {% endif %}
+      </div>
+    </main>
+    
+      
+
+<script src="{% static 'js/copy_to_clipboard.js' %}"></script>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock processamento %}

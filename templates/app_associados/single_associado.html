@@ -159,9 +159,21 @@
                     </div>
             
                 {% elif associado.status == "Desassociado(a)" %}
-                    <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow">
-                        <p class="text-red-600 font-semibold">🚫 Associado desassociado — anuidade não aplicável.</p>
+                <div class="bg-red-50 border border-red-200 rounded-lg shadow-sm p-4 mb-4">
+                    <div class="flex items-start gap-3">
+                      <span class="text-red-500 text-xl">🚫</span>
+                      <div>
+                        <p class="text-sm text-red-700 font-semibold mb-1">
+                          Associado desassociado — anuidade não aplicável.
+                        </p>
+                        <p class="text-sm text-gray-700">
+                          Desfiliado em: 
+                          <span class="text-red-600 font-medium">{{ associado.data_desfiliacao|date:"d/m/Y" }}</span>
+                        </p>
+                      </div>
                     </div>
+                  </div>
+                  
             
                 {% elif associado.status in "Associado Lista Ativo(a)" or associado.status == "Associado Lista Aposentado(a)" %}
                     {% if not associado.anuidades_associados.exists %}
@@ -245,7 +257,7 @@
 
     {% if beneficios_aplicados %}
     <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow mb-6">
-      <h3 class="text-lg font-semibold text-yellow-700 mb-3">✅ Benefícios já aplicados</h3>
+      <h3 class="text-lg font-semibold text-yellow-700 mb-3">✅ Benefício aplicado</h3>
   
       <ul class="divide-y divide-green-100 text-sm text-gray-800">
         {% for beneficio in beneficios_aplicados %}
@@ -642,9 +654,9 @@
                             <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Nome</th>
                             <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Inscrição</th>
                             <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Tipo</th>
-                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Validade Licença</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Seg. DPEM</th>
                             <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Status Licença</th>
-                            <th class="text-center py-3 px-4 text-sm font-medium text-gray-600">Validade TIE</th>
+                            <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Validade TIE</th>
                             <th class="text-left py-3 px-4 text-sm font-medium text-gray-600">Ações</th>
                         </tr>
                     </thead>
@@ -654,49 +666,66 @@
                             <td class="py-3 px-4 text-gray-800 text-sm">{{ embarcacao.nome_embarcacao }}</td>
                             <td class="py-3 px-4 text-gray-800 text-sm">{{ embarcacao.inscricao_embarcacao }}</td>
                             <td class="py-3 px-4 text-gray-800 text-sm">{{ embarcacao.tipo_embarcacao.nome }}</td>
-                            
-                            <td class="py-3 px-4 text-gray-800 text-sm">
-                                {% if embarcacao.licenca_vigente %}
-                                  {{ embarcacao.licenca_vigente.validade_final|date:"d/m/Y" }}
+                            <td class="py-3 px-4 text-sm text-center">
+                                {% if embarcacao.status_dpem == 'vencida' %}
+                                  <span class="inline-block bg-red-100 text-red-800 px-2 py-1 text-xs font-semibold rounded">
+                                    ❌ Vencida
+                                  </span>
+                                {% elif embarcacao.status_dpem == 'alerta' %}
+                                  <span class="inline-block bg-yellow-100 text-yellow-800 px-2 py-1 text-xs font-semibold rounded">
+                                    ⚠️ Vence logo
+                                  </span>
+                                {% elif embarcacao.status_dpem == 'ok' %}
+                                  <span class="inline-block bg-green-100 text-green-800 px-2 py-1 text-xs font-semibold rounded">
+                                    ✅ Em dia
+                                  </span>
                                 {% else %}
-                                  <span class="text-gray-400 italic">Sem licença</span>
+                                  <span class="inline-block bg-gray-100 text-gray-500 px-2 py-1 text-xs font-semibold rounded">
+                                    S/D
+                                  </span>
                                 {% endif %}
                             </td>
+                            
                               
                             <td class="py-3 px-4 text-sm">
                                 {% if embarcacao.status_licenca == 'vencida' %}
-                                  <span class="inline-block px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded">❌ Vencida</span>
+                                <span class="inline-block px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded">❌ Vencida</span>
                                 {% elif embarcacao.status_licenca == 'alerta' %}
-                                  <span class="inline-block px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded">⚠️ Vence logo</span>
+                                <span class="inline-block px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded">⚠️ Vence logo</span>
                                 {% elif embarcacao.status_licenca == 'ok' %}
-                                  <span class="inline-block px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded">✅ Em dia</span>
+                                <span class="inline-block px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded">✅ Em dia</span>
                                 {% else %}
-                                  <span class="inline-block px-2 py-1 text-xs font-semibold bg-gray-200 text-gray-500 rounded">S/L</span>
+                                <span class="inline-block px-2 py-1 text-xs font-semibold bg-gray-200 text-gray-500 rounded">S/L</span>
                                 {% endif %}
                             </td>
-
+                            
                             <td class="py-3 px-4 text-sm">
                                 {% if embarcacao.validade_tie %}
-                                        {{ embarcacao.validade_tie|date:"d/m/Y" }}
+                                    
+                                {% else %}
+                                    <span class="text-gray-400 italic">Sem validade</span>
+                                {% endif %}
+                                {% if embarcacao.validade_tie %}
+
                                 {% if embarcacao.status_tie == 'vencida' %}
                                     <span class="inline-block mt-1 bg-red-100 text-red-800 px-2 py-0.5 text-xs font-semibold rounded">
-                                      ❌ Vencida ({{ embarcacao.dias_para_vencimento_tie_abs }}
-                                      dias atrás)
+                                    ❌ Vencida ({{ embarcacao.dias_para_vencimento_tie_abs }}
+                                    dias atrás)
                                     </span>
                                 {% elif embarcacao.status_tie == 'alerta' %}
                                     <span class="inline-block mt-1 bg-yellow-100 text-yellow-800 px-2 py-0.5 text-xs font-semibold rounded">
-                                      ⚠️ Vence em {{ embarcacao.dias_para_vencimento_tie }} dias
+                                    ⚠️ Vence em {{ embarcacao.dias_para_vencimento_tie }} dias
                                     </span>
                                 {% elif embarcacao.status_tie == 'ok' %}
                                     <span class="inline-block mt-1 bg-green-100 text-green-800 px-2 py-0.5 text-xs font-semibold rounded">
-                                      ✅ Em dia ({{ embarcacao.dias_para_vencimento_tie }} dias restantes)
+                                    ✅ Em dia ({{ embarcacao.dias_para_vencimento_tie }} dias restantes)
                                     </span>
                                 {% endif %}
                                 {% else %}
                                     <span class="text-gray-400 italic">Sem validade</span>
                                 {% endif %}
                             </td>
-                              
+                            
                             <td class="py-3 px-4 text-blue-500 text-sm">
                                 <a href="{% url 'app_embarcacoes:single_embarcacao' embarcacao.pk %}" 
                                     class="text-blue-500 hover:text-blue-700" 

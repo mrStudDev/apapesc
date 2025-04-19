@@ -74,4 +74,6 @@ urlpatterns = [
 
     path('users/', UserListView.as_view(), name='list_users'),
     path('reintegrate-integrante/', views.reintegrate_integrante, name='reintegration_integrante'),
+    path('reassociar/', views.reassociar_associado, name='reassociar_associado'),
+
 ]

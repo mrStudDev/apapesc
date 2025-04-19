@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
 from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+from datetime import date
 from .models import EmbarcacoesModel
 from .forms import EmbarcacaoForm
 from app_associados.models import AssociadoModel
@@ -69,6 +69,29 @@ class SingleEmbarcacaoView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         embarcacao = self.get_object()
+        
+        # Exemplo de cálculo
+        if embarcacao.seguro_dpem_data_vencimento:
+            dias_restantes = (embarcacao.seguro_dpem_data_vencimento - date.today()).days
+
+            if dias_restantes < 0:
+                status_cor = 'bg-red-100 text-red-700 border-red-300'
+                status_msg = f'Vencido há {abs(dias_restantes)} dia(s)'
+            elif dias_restantes <= 30:
+                status_cor = 'bg-yellow-100 text-yellow-700 border-yellow-300'
+                status_msg = f'Faltam {dias_restantes} dia(s) para o vencimento'
+            else:
+                status_cor = 'bg-green-100 text-green-700 border-green-300'
+                status_msg = f'Em dia — vence em {dias_restantes} dia(s)'
+        else:
+            status_cor = 'bg-gray-100 text-gray-500 border-gray-200'
+            status_msg = 'Data de vencimento não informada'
+
+        context.update({
+            "seguro_status_cor": status_cor,
+            "seguro_status_msg": status_msg,
+        })
+
         context['titulo'] = "Detalhes da Embarcação"
         context['licencas'] = embarcacao.licencas.order_by('-validade_final')
         return context

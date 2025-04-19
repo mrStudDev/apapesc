@@ -9,10 +9,11 @@ from .views import (
     TarefaBoardView,
     TarefaArquivadaListView,
     TarefaDeleteView,
-    EmissaoGuiasView,
-    AtualizarStatusGuiaView,
-    CriarGuiaView,
-    ZerarStatusGuiaView
+    LancamentoINSSListView,
+    GerarLancamentoINSSView,    
+    DetalheLancamentoINSSView,
+    ProcessarGuiaView,
+    CriarLancamentoINSSView,
     )
 
 
@@ -25,10 +26,13 @@ urlpatterns = [
     path('editar-tarefa/<int:pk>/', TarefaEditView.as_view(), name='edit_tarefa'),
     path('single/<int:pk>/', TarefaDetailView.as_view(), name='single_tarefa'),
     
-    path("emissao-guias/", EmissaoGuiasView.as_view(), name="emissao_guias"),
-    path("atualizar-status-guia/<int:guia_id>/", AtualizarStatusGuiaView.as_view(), name="atualizar_status_guia"),
-    path("criar-guia/<int:associado_id>/<int:mes>/<int:ano>/", CriarGuiaView.as_view(), name="criar_guia"),
-    path('tarefas/zerar-status-guia/<int:guia_id>/', ZerarStatusGuiaView.as_view(), name='zerar_status_guia'),
+    # Guias INSS
+    path('lancamento/', LancamentoINSSListView.as_view(), name='list_lancamentos'),
+    path('tarefas/lancamento/gerar/', GerarLancamentoINSSView.as_view(), name='gerar_lancamento_inss'),
+    path('inss/lancamento/<int:pk>/', DetalheLancamentoINSSView.as_view(), name='detalhe_lancamento_inss'),
+    path('inss/guias/<int:guia_id>/atualizar/', views.atualizar_guia, name='atualizar_guia'),
+    path('inss/lancamento/<int:lancamento_id>/processar/', ProcessarGuiaView.as_view(), name='processar_guia'),
+    path('lancamento/novo/', CriarLancamentoINSSView.as_view(), name='create_lancamentoInss'),
 
 
 

@@ -12,9 +12,11 @@ from collections import OrderedDict
 from django.db.models import Count
 import json
 from app_home.models import LeadInformacoes, ContactMessagesModel
-from app_tarefas.models import TarefaModel
+from app_tarefas.models import TarefaModel, GuiaINSSModel, LancamentoINSSModel
 from app_articles.models import ArticlesModel
 from django.shortcuts import get_object_or_404
+from django.utils.timezone import now
+from app_beneficios.models import ControleBeneficioModel, BeneficioModel
 
 
 # Superususers dashboard.html
@@ -204,6 +206,55 @@ class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateVi
         # Espécies Marinhas
         context['total_especies'] = EspecieMarinhaModel.objects.count()
         context['ultimas_especies'] = EspecieMarinhaModel.objects.order_by('-id')[:5]
+
+        # 1. Último lançamento INSS
+        ultimo_lancamento = LancamentoINSSModel.objects.order_by('-ano', '-mes').first()
+
+        # Default para exibição segura no template
+        context['ultimo_lancamento'] = ultimo_lancamento
+
+        # 2. Total associados que recolhem INSS
+        recolhe_inss_qs = AssociadoModel.objects.filter(recolhe_inss='Sim')
+        context['total_associados_inss'] = recolhe_inss_qs.count()
+
+        # 3. Contagem de observações apenas no último lançamento (caso exista)
+        if ultimo_lancamento:
+            guias_ultimas = GuiaINSSModel.objects.filter(lancamento=ultimo_lancamento)
+            
+            observacoes_counts = guias_ultimas.values('observacoes').annotate(total=Count('id'))
+            observacoes_map = {obs['observacoes']: obs['total'] for obs in observacoes_counts}
+
+            context['inss_observacoes'] = observacoes_map
+        else:
+            context['inss_observacoes'] = {}
+
+        # 🔹 Lista de status possíveis
+        status_labels = dict(ControleBeneficioModel.STATUS_CHOICES)
+
+        # 🔹 Lista de benefícios
+        beneficios = BeneficioModel.objects.all().order_by('nome')
+
+        beneficio_status_data = []
+
+        for beneficio in beneficios:
+            controles = ControleBeneficioModel.objects.filter(beneficio=beneficio)
+            total_por_status = controles.values('status_pedido').annotate(total=Count('id'))
+            total_por_status = controles.values('status_pedido').annotate(total=Count('id'))
+            
+            # Mapeia os resultados
+            status_dict = {s['status_pedido']: s['total'] for s in total_por_status}
+            total_geral = sum(status_dict.values()) 
+            
+            beneficio_status_data.append({
+                'nome': dict(BeneficioModel.BENEFICIO_CHOICES).get(beneficio.nome, beneficio.nome),
+                'estado': beneficio.estado,
+                'ano': beneficio.ano_concessao,
+                'status': status_dict,
+                'total': total_geral  # 👈 aqui
+            })
+
+        context['beneficio_status_labels'] = status_labels
+        context['beneficio_status_data'] = beneficio_status_data
 
         return context
 

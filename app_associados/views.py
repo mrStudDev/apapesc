@@ -7,11 +7,11 @@ from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q, Count, Sum
-
+from datetime import datetime
 from app_associacao.models import AssociacaoModel, ReparticoesModel, MunicipiosModel, IntegrantesModel
 from app_associados.models import STATUS_CHOICES
 from app_associados.models import AssociadoModel, ProfissoesModel
-from app_tarefas.models import TarefaModel, GuiaINSSModel
+from app_tarefas.models import TarefaModel, GuiaINSSModel, LancamentoINSSModel
 from app_servicos.models import ServicoAssociadoModel, StatusEtapaChoices
 from app_embarcacoes.models import EmbarcacoesModel
 from app_licencas.models import LicencasModel  # Import LicencasModel
@@ -182,18 +182,27 @@ class ListAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListV
 
         ano_selecionado = now().year
         meses_validos = list(range(4, 12))  # Abril a Novembro
-        associados_inss = AssociadoModel.objects.filter(recolhe_inss="Sim").values("id")
 
-        guias_por_associado = {}
-        for associado in associados_inss:
-            associado_id = associado["id"]
-            guias = {mes: None for mes in meses_validos}
-            guias_existentes = GuiaINSSModel.objects.filter(associado_id=associado_id, ano=ano_selecionado)
+        associados_filtrados = self.get_queryset()
+        recolhe_inss_map = {
+            a.id: a.recolhe_inss for a in associados_filtrados
+        }
 
-            for guia in guias_existentes:
-                guias[guia.mes_referencia] = guia.status
+        associados_ids = [a.id for a in associados_filtrados]
 
-            guias_por_associado[associado_id] = guias
+        # Dicionário: associado_id -> {mes: status}
+        guias_por_associado = {aid: {mes: None for mes in meses_validos} for aid in associados_ids}
+
+        guias_existentes = GuiaINSSModel.objects.filter(
+            associado_id__in=associados_ids,
+            lancamento__ano=ano_selecionado,
+            lancamento__mes__in=meses_validos
+        ).select_related('lancamento')
+
+        for guia in guias_existentes:
+            aid = guia.associado_id
+            mes = guia.lancamento.mes
+            guias_por_associado[aid][mes] = guia.status
 
         # Obtem os associados já filtrados
         associados = list(self.get_queryset())
@@ -258,9 +267,12 @@ class ListAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListV
         context['selected_associacao'] = selected_associacao_id
         context['selected_reparticao'] = self.request.GET.get('reparticao', '')
         context['selected_status'] = self.request.GET.get('status', '')
-
+        
         context['guias_por_associado'] = guias_por_associado
         context['meses_validos'] = meses_validos
+        context['ano_selecionado'] = ano_selecionado
+        context['associados'] = associados_filtrados
+        context['recolhe_inss_map'] = recolhe_inss_map
 
         # Filtrando categorias específicas
         context['total_associados'] = AssociadoModel.objects.count()
@@ -472,7 +484,10 @@ class EditAssociadoView(GroupPermissionRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        # Não altere o campo `user` se ele já existir
+        associado_original = self.get_object()
+        recolhe_inss_anterior = associado_original.recolhe_inss  # 👈 status antes do save
+
+        # Vincular usuário se ainda não houver
         if not form.instance.user:
             user_id = self.request.GET.get('user_id')
             if user_id:
@@ -484,7 +499,34 @@ class EditAssociadoView(GroupPermissionRequiredMixin, UpdateView):
         self.object = form.save()
         messages.success(self.request, "Associado atualizado com sucesso!")
 
-        # Redireciona com base no botão clicado
+        # ✅ NOVA LÓGICA: se mudou de "Não" ou "Não declarado" para "Sim"
+        if recolhe_inss_anterior != "Sim" and self.object.recolhe_inss == "Sim":
+            ano_atual = datetime.now().year
+            lancamentos = LancamentoINSSModel.objects.filter(ano=ano_atual)
+
+            guias_criadas = 0
+
+            for lancamento in lancamentos:
+                exists = GuiaINSSModel.objects.filter(
+                    lancamento=lancamento,
+                    associado=self.object
+                ).exists()
+
+                if not exists:
+                    GuiaINSSModel.objects.create(
+                        lancamento=lancamento,
+                        associado=self.object,
+                        status='pendente',
+                        observacoes='certo'  # 👈 evita erro de null
+                    )
+                    guias_criadas += 1
+
+            if guias_criadas:
+                messages.success(
+                    self.request, f"{guias_criadas} guias INSS criadas para o ano de {ano_atual}."
+                )
+
+        # Redirecionamentos
         if "save_and_continue" in self.request.POST:
             return redirect(reverse('app_associados:edit_associado', kwargs={'pk': self.object.pk}))
         elif "save_and_view" in self.request.POST:

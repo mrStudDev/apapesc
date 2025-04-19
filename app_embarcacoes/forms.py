@@ -162,6 +162,20 @@ class EmbarcacaoForm(forms.ModelForm):
                 },
                 format='%Y-%m-%d'
             ),
+            'seguro_dpen': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700'
+            }), 
+            'seguro_dpem_numero': forms.TextInput(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700',
+                'placeholder': 'Processo SUSEP 1232456789 /'
+            }),                        
+            'seguro_dpem_data_vencimento': forms.DateInput(
+                attrs={
+                    'type': 'date',
+                    'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700'
+                },
+                format='%Y-%m-%d'
+            ),            
             'content': forms.Textarea(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700',
                 'rows': 4,

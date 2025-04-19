@@ -38,6 +38,7 @@
                             <th class="px-4 py-2 border text-left">Proprietário</th>
                             <th class="px-4 py-2 border text-left">Validade TIE</th>
                             <th class="px-6 py-3 border-b text-center">🧭 Licença</th>
+                            <th class="px-6 py-3 border-b text-center">🧭 Seguro</th>
                             <th class="px-4 py-2 border text-center">Ações</th>
                             <th class="px-4 py-2 border text-center">Nova</th>
                         </tr>
@@ -102,7 +103,33 @@
                                       <span class="text-gray-400 italic">S/L</span>
                                     {% endif %}
                                   </td>
-                                  
+                                  <td class="px-4 py-2 border text-center text-sm">
+                                    {% if embarcacao.status_dpem == 'vencida' %}
+                                      <span class="inline-block bg-red-100 text-red-800 px-2 py-1 rounded font-semibold">
+                                        ❌ Vencida
+                                      </span><br>
+                                      <span class="text-red-600 italic">
+                                        venceu em {{ embarcacao.dpem_data_vencimento|date:"d/m/Y" }}
+                                      </span>
+                                    {% elif embarcacao.status_dpem == 'alerta' %}
+                                      <span class="inline-block bg-yellow-100 text-yellow-800 px-2 py-1 rounded font-semibold">
+                                        ⚠️ Vence logo
+                                      </span><br>
+                                      <span class="text-yellow-700 italic">
+                                        {{ embarcacao.dpem_dias_para_vencimento }} dias restantes (vence em {{ embarcacao.dpem_data_vencimento|date:"d/m/Y" }})
+                                      </span>
+                                    {% elif embarcacao.status_dpem == 'ok' %}
+                                      <span class="inline-block bg-green-100 text-green-800 px-2 py-1 rounded font-semibold">
+                                        ✅ Em dia
+                                      </span><br>
+                                      <span class="text-green-700 italic">
+                                        {{ embarcacao.dpem_dias_para_vencimento }} dias restantes (vence em {{ embarcacao.dpem_data_vencimento|date:"d/m/Y" }})
+                                      </span>
+                                    {% else %}
+                                      <span class="text-gray-400 italic">Sem DPEM</span>
+                                    {% endif %}
+                                  </td>
+                                                                    
                                 <td class="px-4 py-2 border text-center">
                                     <a href="{% url 'app_embarcacoes:single_embarcacao' embarcacao.id %}" class="text-blue-600 hover:text-blue-800" title="Ver detalhes">
                                         <i class="material-icons">visibility</i>

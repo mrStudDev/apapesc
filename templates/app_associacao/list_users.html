@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load extras %}
+
 
 {% block title %}Lista de Usuários Global{% endblock title %}
 
@@ -133,14 +135,23 @@
                         <!-- Coluna para Associados -->
                         <td class="border border-gray-400 px-2 py-1 text-center">
                             {% if user.id in associados_ids %}
-                                <span class="text-green-500">Já é um associado</span>
+                                {% if user.id in associados_desassociados_ids %}
+                                    <a href="{% url 'app_associacao:reassociar_associado' %}?user_id={{ user.id }}"
+                                    class="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-1 px-2 rounded text-xs">
+                                    Reassociar
+                                    </a>
+                                {% else %}
+                                    <span class="text-green-500">Já é um associado</span>
+                                {% endif %}
                             {% else %}
-                                <a href="{% url 'app_associados:create_associado' %}?user_id={{ user.id }}" 
-                                    class="bg-blue-500 hover:bg-green-500 text-white font-semibold py-1 px-2 rounded text-xs">
-                                    Tornar Associado
+                                <a href="{% url 'app_associados:create_associado' %}?user_id={{ user.id }}"
+                                class="bg-blue-500 hover:bg-green-500 text-white font-semibold py-1 px-2 rounded text-xs">
+                                Tornar Associado
                                 </a>
                             {% endif %}
+
                         </td>
+                        
                     </tr>
                 {% empty %}
                     <tr>

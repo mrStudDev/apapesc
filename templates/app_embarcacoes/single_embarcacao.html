@@ -128,7 +128,7 @@
         <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-8">
             <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
             <i class="material-icons text-blue-500 mr-2">assignment</i>
-            Informações Técnicas da Embarcação
+            Informações Principais da Embarcação
             </h2>
         
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-800">
@@ -174,9 +174,73 @@
                     {% endif %}
                 </div>
             </div>
-        </div>
 
-    
+            <!-- Licenças vinculadas -->
+            <div class="mt-4 bg-white border border-indigo-200 rounded-lg shadow-sm p-5">
+        
+            <!-- Título -->
+            <h2 class="text-indigo-700 font-semibold text-lg flex items-center gap-2 mb-2">
+                <span class="material-icons text-indigo-500">description</span>
+                Licença(s) vinculada(s)
+            </h2>
+        
+            {% if licencas %}
+                <ul class="divide-y divide-gray-100 text-sm text-gray-700">
+                {% for licenca in licencas %}
+                    <li class="py-2 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <a href="{% url 'app_licencas:single_licenca' licenca.id %}" class="text-blue-600 hover:underline font-medium">
+                        {{ licenca.get_licenca_nome_display }}
+                        </a>
+                        <span class="text-gray-500 ml-2">({{ licenca.validade_final|date:"d/m/Y" }})</span>
+                    </div>
+        
+                    <!-- Badge de status -->
+                    {% if licenca.status_validade == 'vencida' %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-red-100 text-red-800 mt-1 sm:mt-0">
+                        ⛔ Vencida
+                        </span>
+                    {% elif licenca.status_validade == 'alerta' %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-yellow-100 text-yellow-800 mt-1 sm:mt-0">
+                        🕒 Vence logo
+                        </span>
+                    {% elif licenca.status_validade == 'ok' %}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-green-100 text-green-800 mt-1 sm:mt-0">
+                        ✅ Em dia
+                        </span>
+                    {% endif %}
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-gray-500 mt-2 italic">Nenhuma licença foi vinculada a esta embarcação.</p>
+            {% endif %}
+            </div>
+
+            <div class="mt-6 bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2 flex items-center gap-2">
+                <span class="material-icons text-blue-500">shield</span>
+                Seguro DPEM
+                </h3>
+            
+                <ul class="text-sm text-gray-700 space-y-1">
+                <li><strong>Possui Seguro? </strong> {{ embarcacao.seguro_dpen|title }}</li>
+                <li><strong>Número da Apólice:</strong> {{ embarcacao.seguro_dpem_numero|default:"—" }}</li>
+                <li><strong>Data de Vencimento:</strong> 
+                    {% if embarcacao.seguro_dpem_data_vencimento %}
+                    {{ embarcacao.seguro_dpem_data_vencimento|date:"d/m/Y" }}
+                    {% else %}
+                    <span class="text-gray-500">Não informada</span>
+                    {% endif %}
+                </li>
+                
+                </ul>
+            
+                <div class="mt-4 border rounded-md px-4 py-2 text-sm font-medium {{ seguro_status_cor }}">
+                {{ seguro_status_msg }}
+                </div>
+            </div>
+        </div>    
 
         <!-- ⛵ Informações Operacionais -->
         <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
@@ -208,7 +272,7 @@
                 </div>
             </div>
         </div>
-    
+          
         <!-- 📐 Especificações Técnicas -->
         <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-6 mb-6">
             <h2 class="text-lg font-semibold text-gray-700 mb-4 flex items-center">
@@ -402,46 +466,6 @@
         </div>
         <br>
 
-        <!-- Licenças vinculadas -->
-        <div class="md:col-span-3 px-6 pb-6">
-            <div class="mt-4 bg-yellow-50 border border-indigo-200 rounded p-4">
-            <h2 class="text-indigo-800 font-semibold text-lg flex items-center gap-2">
-                <span class="material-icons">description</span>
-                Licença(s) vinculada(s)
-            </h2>
-        
-            {% if licencas %}
-                <ul class="mt-2 list-disc list-inside text-sm text-indigo-900 space-y-2">
-                {% for licenca in licencas %}
-                    {% with licenca.validade_final as validade %}
-                    {% with hoje=now|date:"Y-m-d" %}
-                    <li>
-                    <a href="{% url 'app_licencas:single_licenca' licenca.id %}" class="text-blue-600 hover:underline font-medium">
-                        {{ licenca.get_licenca_nome_display }}
-                    </a>
-                    –
-                    <span class="text-sm text-gray-700">
-                        {{ validade|date:"d/m/Y" }}
-                    </span>
-        
-                    {% if licenca.status_validade == 'vencida' %}
-                        <span class="ml-2 bg-red-100 text-red-800 px-2 py-0.5 text-xs font-semibold rounded">Vencida</span>
-                        {% elif licenca.status_validade == 'alerta' %}
-                        <span class="ml-2 bg-yellow-100 text-yellow-800 px-2 py-0.5 text-xs font-semibold rounded">Vence logo</span>
-                        {% elif licenca.status_validade == 'ok' %}
-                        <span class="ml-2 bg-green-100 text-green-800 px-2 py-0.5 text-xs font-semibold rounded">Em dia</span>
-                        {% endif %}
-
-                    </li>
-                    {% endwith %}
-                    {% endwith %}
-                {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-gray-600 mt-2 italic">Nenhuma licença foi vinculada a esta embarcação.</p>
-            {% endif %}
-            </div>
-        </div>
 
         {% if embarcacao.content %}
         <div style="margin-left:10px; margin-right: 10px;">

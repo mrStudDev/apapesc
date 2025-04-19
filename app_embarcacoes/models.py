@@ -40,6 +40,11 @@ class EmbarcacoesModel(models.Model):
         ('miuda', 'Miuda'),
         ('maior porte', 'Maior Porte')        
     ]
+    
+    SEGURO_DPEM_CHOICES = [
+        ('sim', 'Sim'),
+        ('nao', 'Não'),
+    ]
 
     proprietario = models.ForeignKey(
         AssociadoModel,
@@ -139,6 +144,12 @@ class EmbarcacoesModel(models.Model):
         null=True,
         verbose_name='Imagem da Popa'
     )
+    seguro_dpen = models.CharField(
+        max_length=5, choices=SEGURO_DPEM_CHOICES, default='nao'
+    )
+    seguro_dpem_numero = models.CharField(max_length=100, blank=True, null=True)
+    seguro_dpem_data_vencimento = models.DateField(blank=True, null=True)
+    
     content = models.TextField(blank=True, null=True)
 
 
@@ -213,3 +224,21 @@ class EmbarcacoesModel(models.Model):
         if self.dias_para_vencimento_tie is not None:
             return abs(self.dias_para_vencimento_tie)
         return None
+
+    @property
+    def dpem_dias_para_vencimento(self):
+        if self.seguro_dpem_data_vencimento:
+            return (self.seguro_dpem_data_vencimento - date.today()).days
+        return None
+
+    @property
+    def status_dpem(self):
+        dias = self.dpem_dias_para_vencimento
+        if dias is None:
+            return None
+        if dias < 0:
+            return 'vencida'
+        elif dias <= 30:
+            return 'alerta'
+        else:
+            return 'ok'

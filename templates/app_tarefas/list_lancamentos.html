@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Lançamentos Guias INSS{% endblock title %}
+
+{% load custom_filters %}
+
+{% block emissao_inss %}
+
+    {% include "components/navbar_associacao.html" %}
+
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="p-4 rounded-md text-white 
+                {% if message.tags == 'success' %}
+                    bg-green-500
+                {% elif message.tags == 'error' %}
+                    bg-red-500
+                {% elif message.tags == 'info' %}
+                    bg-blue-500
+                {% else %}
+                    bg-gray-500
+                {% endif %}
+            ">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="flex-grow bg-gray-50 py-10">
+      <div class="max-w-6xl mx-auto px-4">
+        
+        <!-- Título -->
+        <div class="mb-8">
+          <h1 class="text-3xl font-extrabold text-gray-800">📄 Lançamentos de Guias INSS</h1>
+          <p class="text-sm text-gray-500 mt-1">Acompanhe os lançamentos por mês e acesse as guias emitidas por associado.</p>
+        </div>
+    
+        <!-- Filtros -->
+        <form method="get" class="flex flex-wrap items-end gap-4 bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
+          <div>
+            <label for="ano" class="block text-xs font-semibold text-gray-600">Ano</label>
+            <select name="ano" id="ano" class="border border-gray-300 rounded px-3 py-1 text-sm w-32">
+              <option value="">Todos os anos</option>
+              {% for y in anos_disponiveis %}
+                <option value="{{ y }}" {% if request.GET.ano == y|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+              {% endfor %}
+            </select>
+          </div>
+    
+          <div>
+            <label for="mes" class="block text-xs font-semibold text-gray-600">Mês</label>
+            <select name="mes" id="mes" class="border border-gray-300 rounded px-3 py-1 text-sm w-40">
+              <option value="">Todos os meses</option>
+              {% for m, label in meses_disponiveis %}
+                <option value="{{ m }}" {% if request.GET.mes == m|stringformat:"s" %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+    
+          <div class="self-end">
+            <button type="submit"
+              class="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 transition">
+              Filtrar
+            </button>
+          </div>
+        </form>
+    
+        <!-- Tabela -->
+        <div class="overflow-x-auto bg-white border border-gray-200 rounded-lg shadow-sm">
+          <table class="min-w-full text-sm text-gray-700">
+            <thead class="bg-gray-100 text-xs text-gray-600 uppercase">
+              <tr>
+                <th class="px-4 py-3 text-left">Mês/Ano</th>
+                <th class="px-4 py-3 text-left">Criado por</th>
+                <th class="px-4 py-3 text-left">Criado em</th>
+                <th class="px-4 py-3 text-left">Guias geradas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for lancamento in lancamentos %}
+                <tr class="border-t hover:bg-gray-50">
+                  <td class="px-4 py-2 font-medium">{{ lancamento.mes|stringformat:"02d" }}/{{ lancamento.ano }}</td>
+                  <td class="px-4 py-2">{{ lancamento.criado_por }}</td>
+                  <td class="px-4 py-2">{{ lancamento.criado_em|date:"d/m/Y H:i" }}</td>
+                  <td class="px-4 py-2">
+                    <a href="{% url 'app_tarefas:detalhe_lancamento_inss' lancamento.id %}"
+                      class="text-blue-600 hover:underline">
+                      {{ lancamento.guias.count }} guias
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="px-4 py-3 text-center text-gray-500">Nenhum lançamento encontrado.</td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+             
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+    
+{% endblock emissao_inss %}

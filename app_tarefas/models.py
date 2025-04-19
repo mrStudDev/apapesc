@@ -1,10 +1,13 @@
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import User
 from django.conf import settings
 from django.db import models
 from django.utils.timezone import now, timezone
 from django.utils.text import slugify
-
+from decimal import Decimal
+from django.db import transaction
+    
 from django.contrib.auth import get_user_model
 from app_associados.models import AssociadoModel
 
@@ -172,64 +175,132 @@ class HistoricoResponsaveisModel(models.Model):
 
 
 # ======== INSS ==========
-
-from django.db import models
-from django.utils import timezone
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
-
-MESES_GUIAS = [
-    (4, "Abril"), (5, "Maio"), (6, "Junho"), (7, "Julho"),
-    (8, "Agosto"), (9, "Setembro"), (10, "Outubro"), (11, "Novembro")
-]
-
-class GuiaINSSModel(models.Model):
-    associado = models.ForeignKey(
-        'app_associados.AssociadoModel',
-        on_delete=models.CASCADE, 
-        related_name="guias_inss",
-        verbose_name="Associado"
+# Registro de lote para um mês e ano específicos
+class LancamentoINSSModel(models.Model):
+    ano = models.PositiveIntegerField(verbose_name="Ano de Referência")
+    
+    MESES_VALIDOS = [(i, f'{i:02d}') for i in range(4, 12)]  # abril (4) até novembro (11)
+    mes = models.PositiveIntegerField(
+        choices=MESES_VALIDOS,
+        verbose_name="Mês de Referência"
     )
-    mes_referencia = models.PositiveSmallIntegerField(choices=MESES_GUIAS, verbose_name="Mês de Referência")
-    ano = models.PositiveIntegerField(default=timezone.now().year, verbose_name="Ano")  # Removido o lambda
-    data_emissao = models.DateTimeField(auto_now_add=True, verbose_name="Data de Emissão")
-    emitido_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Emitido por")
+    criado_em = models.DateTimeField(auto_now_add=True)
+    criado_por = models.ForeignKey(
+        User, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        related_name='lancamentos_inss',
+        verbose_name="Criado por"
+    )
+    observacoes = models.TextField(blank=True, null=True)
 
-    STATUS_CHOICES = [
-        ("pendente", "Pendente"),
-        ("emitido", "Emitido"),
-        ("enviado", "Enviado"),
-        ("pago", "Pago")
-    ]
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default="pendente", verbose_name="Status")
-    deleted = models.BooleanField(default=False)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    
-    objects = models.Manager()
-    available_objects = models.Manager()
-    
-    def save(self, *args, **kwargs):
-        """Garante que o ano seja atualizado se não estiver definido"""
-        if not self.ano:
-            self.ano = timezone.now().year
-        super().save(*args, **kwargs)
-    
-    def delete(self, *args, **kwargs):
-        """Implementação do soft delete"""
-        self.deleted = True
-        self.deleted_at = timezone.now()
-        self.save()
-        
-    def hard_delete(self, *args, **kwargs):
-        """Delete permanente"""
-        super().delete(*args, **kwargs)
-        
     class Meta:
-        ordering = ["ano", "mes_referencia"]
-        verbose_name = "Guia INSS"
-        verbose_name_plural = "Guias INSS"
-        default_manager_name = 'objects'
+        unique_together = ('ano', 'mes')
+        ordering = ['-ano', '-mes']
+        verbose_name = "Lançamento INSS"
+        verbose_name_plural = "Lançamentos INSS"
 
     def __str__(self):
-        return f"{self.get_mes_referencia_display()} - {self.ano} | {self.associado}"
+        return f"INSS {self.mes:02d}/{self.ano}"
+
+
+    @classmethod
+    @transaction.atomic
+    def gerar_lancamento(cls, ano, mes, user):
+        print(f"🔁 Gerando lançamento para {mes:02d}/{ano}")
+        
+        lancamento, created = cls.objects.get_or_create(
+            ano=ano,
+            mes=mes,
+            defaults={'criado_por': user}
+        )
+
+        # 🔍 Somente associados com recolhe_inss="Sim" E que estão ativos
+        associados = AssociadoModel.objects.filter(
+            recolhe_inss="Sim",
+            status="Associado Lista Ativo(a)"
+        )
+        print(f"🔎 Associados ativos que recolhem INSS: {associados.count()}")
+
+        guias_criadas = 0
+        for associado in associados:
+            exists = GuiaINSSModel.objects.filter(
+                lancamento=lancamento,
+                associado=associado
+            ).exists()
+            print(f"➡️ Associado {associado.id} | Guia existe? {exists}")
+            
+            if not exists:
+                GuiaINSSModel.objects.create(
+                    lancamento=lancamento,
+                    associado=associado,
+                    status='pendente'
+                )
+                guias_criadas += 1
+                print(f"✅ Criada guia para {associado}")
+
+        print(f"📦 Total guias criadas: {guias_criadas}")
+        return lancamento, created, guias_criadas
+
+
+    
+# Registro individual para cada associado no lançamento
+class GuiaINSSModel(models.Model):
+    STATUS_CHOICES = [
+        ('pendente', 'Pendente'),
+        ('emitida', 'Emitida'),
+        ('paga', 'Paga'),
+        ('atrasada', 'Atrasada'),
+    ]
+
+    OBSERVACOES_CHOICES = [
+        ('validar_acesso', 'Validar Acesso'),
+        ('senha_invalida', 'Senha Inválida'),
+        ('nivel_conta', 'Nível Conta'),
+        ('certo', 'Certo')
+    ]
+
+    lancamento = models.ForeignKey(
+        LancamentoINSSModel, 
+        on_delete=models.CASCADE,
+        related_name='guias',
+        verbose_name="Lançamento",
+        null=True
+    )
+    associado = models.ForeignKey(
+        'app_associados.AssociadoModel',
+        on_delete=models.CASCADE,
+        related_name='guias_inss',
+        verbose_name="Associado"
+    )
+    status = models.CharField(
+        max_length=50,
+        choices=STATUS_CHOICES,
+        default='pendente'
+    )
+    observacoes = models.CharField(
+        max_length=50,
+        choices=OBSERVACOES_CHOICES,  # ✅ agora usa o atributo correto
+        default='certo',
+        null=True,
+        blank=True
+    )
+
+    data_emissao = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('lancamento', 'associado')
+        verbose_name = "Guia de INSS"
+        verbose_name_plural = "Guias de INSS"
+
+    def __str__(self):
+        return f"{self.associado} - {self.lancamento}"
+
+    @staticmethod
+    def get_status_choices():
+        return GuiaINSSModel.STATUS_CHOICES
+
+    @staticmethod
+    def get_observacoes_choices():
+        return GuiaINSSModel.OBSERVACOES_CHOICES
+

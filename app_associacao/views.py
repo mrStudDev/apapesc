@@ -1,5 +1,5 @@
 from django.urls import reverse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth import get_user_model
@@ -71,9 +71,39 @@ class UserListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
             associados.values_list('user_id', flat=True)
         )
 
+        # Todos associados
+        associados = AssociadoModel.objects.all()
+        context['associados_ids'] = set(associados.values_list('user_id', flat=True))
+
+        # Associados desassociados
+        context['associados_desassociados_ids'] = set(
+            associados.filter(status='Desassociado(a)').values_list('user_id', flat=True)
+        )
+        # Mapa user_id -> associado_id
+        context['associado_id_map'] = {
+            a.user_id: a.id for a in associados
+        }
+
         context['total_users'] = self.get_queryset().count()
         
         return context
+
+def reassociar_associado(request):
+    user_id = request.GET.get('user_id')
+    
+    associado = get_object_or_404(AssociadoModel, user_id=user_id)
+
+    if associado.status == 'Desassociado(a)':
+        associado.status = 'Candidato(a)'  # ou outro status desejado
+        associado.data_filiacao = now().date()
+        associado.data_desfiliacao = None
+        associado.save()
+
+        messages.success(request, f"{associado.user.get_full_name()} foi reassociado com sucesso!")
+        return redirect(reverse('app_associados:edit_associado', kwargs={'pk': associado.id}))
+    
+    messages.warning(request, "Este usuário não está marcado como desassociado.")
+    return redirect('app_associacao:list_users')
 
 
 def reintegrate_integrante(request):

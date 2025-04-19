@@ -256,8 +256,22 @@
                         <label for="id_data_emissao" class="block text-sm font-medium text-gray-700 mb-1">Data de Emissão</label>
                         {{ form.data_emissao }}
                     </div>
-        
-                </div>
+                    <!-- DPEM Possui ou Não? -->
+                    <div>
+                        <label for="id_seguro_dpen" class="block text-sm font-medium text-gray-700 mb-1">Possui Seguro?</label>
+                        {{ form.seguro_dpen }}
+                    </div>
+                    <!-- Número Seguro Processo DPEM -->
+                    <div>
+                        <label for="id_seguro_dpem_numero" class="block text-sm font-medium text-gray-700 mb-1">Processo SUSEP N:</label>
+                        {{ form.seguro_dpem_numero }}
+                    </div>
+                    <!-- Data Vencimento Seguro -->
+                    <div>
+                        <label for="id_dseguro_dpem_data_vencimento" class="block text-sm font-medium text-gray-700 mb-1">Data de Vencimento Seguro DPEM</label>
+                        {{ form.seguro_dpem_data_vencimento }}
+                    </div>                    
+                </div><br>
         
 
                 <!-- Descrição -->

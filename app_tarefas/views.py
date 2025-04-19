@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.mixins import GroupPermissionRequiredMixin
 from django.contrib.auth.models import Group
 from .models import TarefaModel, HistoricoStatusModel, HistoricoResponsaveisModel
-from .forms import TarefaForm
+from .forms import TarefaForm, LancamentoINSSForm
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.db.models import Q, F
@@ -23,10 +23,12 @@ from app_associados.models import AssociadoModel
 from app_associacao.models import IntegrantesModel, AssociacaoModel, ReparticoesModel
 from app_documentos.models import Documento
 from django.db.models import Count
-from .models import GuiaINSSModel
+from .models import LancamentoINSSModel, GuiaINSSModel
 from django.template.loader import render_to_string
 from django.utils import timezone
-
+from decimal import Decimal
+from django.views.decorators.http import require_POST
+from django.db import IntegrityError
 
 
 class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
@@ -458,291 +460,280 @@ class TarefaDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteV
 
 
 
-# ========= INSS =========
+# ========= INSS =====Viwes====
 # Lista com os associados que recolhem o inss
-class EmissaoGuiasView(LoginRequiredMixin, TemplateView):
-    template_name = "app_tarefas/emissao_guias.html"
+from django.views.generic import ListView
+from .models import LancamentoINSSModel
+from datetime import datetime
+
+from django.db.utils import IntegrityError
+
+class CriarLancamentoINSSView(CreateView):
+    model = LancamentoINSSModel
+    form_class = LancamentoINSSForm
+    template_name = 'app_tarefas/create_lancamentoInss.html'
+    success_url = reverse_lazy('app_tarefas:list_lancamentos')
+
+    def get_initial(self):
+        return {
+            'ano': now().year,
+            'mes': now().month,
+            'criado_por': self.request.user  # <-- Aqui!            
+        }
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['meses_nomes'] = [
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        ]
+        return context
+    
+    def form_valid(self, form):
+        form.instance.criado_por = self.request.user
+
+        try:
+            lancamento, created, guias_criadas = LancamentoINSSModel.gerar_lancamento(
+                ano=form.instance.ano,
+                mes=form.instance.mes,
+                user=self.request.user
+            )
+
+            if created:
+                messages.success(
+                    self.request,
+                    f"Lançamento {form.instance.mes:02d}/{form.instance.ano} criado com sucesso com {guias_criadas} guias."
+                )
+                return redirect(self.success_url)  # ✅ Evita super().form_valid()
+
+            elif guias_criadas > 0:
+                messages.info(
+                    self.request,
+                    f"Lançamento já existia. {guias_criadas} guias foram adicionadas."
+                )
+            else:
+                messages.warning(
+                    self.request,
+                    "Este lançamento já existia e nenhuma nova guia foi adicionada."
+                )
+
+            return self.render_to_response(self.get_context_data(form=form))
+
+        except ValueError as e:
+            messages.error(self.request, str(e))
+            return self.render_to_response(self.get_context_data(form=form))
+
+        except IntegrityError:
+            messages.error(
+                self.request,
+                f"⚠️ Já existe um lançamento para {form.instance.mes:02d}/{form.instance.ano}."
+            )
+            return self.render_to_response(self.get_context_data(form=form))
+
+
+
+
+
+class LancamentoINSSListView(ListView):
+    model = LancamentoINSSModel
+    template_name = 'app_tarefas/list_lancamentos.html'
+    context_object_name = 'lancamentos'
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        ano = self.request.GET.get('ano')
+        mes = self.request.GET.get('mes')
+
+        if ano:
+            queryset = queryset.filter(ano=ano)
+        if mes:
+            queryset = queryset.filter(mes=mes)
+
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        ano_selecionado = int(self.request.GET.get("ano", now().year))
-        ano_atual = now().year
-        meses_validos = list(range(4, 12))  # Abril a Novembro
-        termo_busca = self.request.GET.get("busca", "")
+        ano_atual = datetime.now().year
 
-        # Query base já ordenada por sobrenome e nome
-        associados_query = AssociadoModel.objects.filter(
-            recolhe_inss="Sim"
-        ).select_related('user').order_by(
-           'user__first_name',            
-            'user__last_name'
-        )
+        # Anos: do atual até 2020, decrescente
+        context['anos_disponiveis'] = list(range(ano_atual, 2023, -1))
 
-        # Aplica filtro de busca se existir
-        if termo_busca:
-            associados_query = associados_query.filter(
-                Q(user__first_name__icontains=termo_busca) |
-                Q(user__last_name__icontains=termo_busca)
-            )
+        # Meses válidos (04 a 11)
+        context['meses_disponiveis'] = [(i, f'{i:02d}') for i in range(4, 12)]
 
-        # Lista ordenada de associados
-        associados_ordenados = list(associados_query)
-        
-        # Prepara a estrutura de dados mantendo a ordenação original
-        guias_por_associado = {}
-        for associado in associados_ordenados:
-            # Verifica se o associado pode ter guias no ano selecionado
-            ano_filiacao = associado.data_filiacao.year if associado.data_filiacao else ano_atual
-            if ano_selecionado < ano_filiacao:
-                continue  # Pula associados filiados após o ano selecionado
-
-            guias = {mes: None for mes in meses_validos}
-            guias_existentes = GuiaINSSModel.objects.filter(
-                associado=associado, 
-                ano=ano_selecionado
-            )
-
-            for guia in guias_existentes:
-                guias[guia.mes_referencia] = guia
-
-            guias_por_associado[associado.id] = {
-                "dados": {
-                    "id": associado.id,
-                    "user__first_name": associado.user.first_name,
-                    "user__last_name": associado.user.last_name,
-                    "cpf": associado.cpf,
-                    "senha_gov": associado.senha_gov,
-                    "celular_correspondencia": associado.celular_correspondencia,
-                    "nome_completo": f"{associado.user.last_name} {associado.user.first_name}",
-                    "ano_filiacao": ano_filiacao  # Adicionado para referência
-                },
-                "guias": guias
-            }
-
-        # Calcula anos disponíveis considerando a filiação mais antiga
-        anos_disponiveis = range(2022, ano_atual + 1)
-        if associados_ordenados:
-            primeiro_ano = min(assoc.data_filiacao.year if assoc.data_filiacao else ano_atual 
-                             for assoc in associados_ordenados)
-            anos_disponiveis = range(max(2022, primeiro_ano), ano_atual + 1)
-
-        context.update({
-            "ano_selecionado": ano_selecionado,
-            "anos_disponiveis": anos_disponiveis,
-            "meses_validos": meses_validos,
-            "guias_por_associado": guias_por_associado,
-            "termo_busca": termo_busca,
-        })
         return context
 
-# Lógica para processo de emissão
-class CriarGuiaView(LoginRequiredMixin, View):
-    def post(self, request, associado_id, mes, ano):
-        associado = get_object_or_404(AssociadoModel, id=associado_id)
-        
-        if GuiaINSSModel.objects.filter(associado=associado, mes_referencia=mes, ano=ano).exists():
-            return JsonResponse({
-                'success': False,
-                'message': 'Já existe uma guia para este período'
-            }, status=400)
 
-        guia = GuiaINSSModel.objects.create(
-            associado=associado,
-            mes_referencia=mes,
-            ano=ano,
-            emitido_por=request.user,
-            status="pendente"  # Inicia como pendente
-        )
-
-        # HTML para o estado pendente
-        html = f"""
-        <div class="guia-pendente">
-            <!-- DIV de dados separada do formulário -->
-            <div class="dados-associado mt-2 space-y-1 bg-yellow-50 p-2 rounded-md shadow-inner text-left">
-                <div class="flex justify-between items-center">
-                    <span id="cpf-{associado.id}" class="text-gray-800 font-mono text-[11px]">{associado.cpf}</span>
-                    <button type="button" data-copy-target="cpf-{associado.id}" 
-                            class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span id="senha-{associado.id}" class="text-gray-800 font-mono text-[11px]">{associado.senha_gov}</span>
-                    <button type="button" data-copy-target="senha-{associado.id}" 
-                            class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span id="nome-{associado.id}" class="text-gray-800 font-mono text-[11px]">{associado.user.first_name}</span>
-                    <button type="button" data-copy-target="nome-{associado.id}" 
-                            class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
-                </div>
-                <div class="flex justify-between items-center">
-                    <span id="texto-guia-{associado.id}" class="text-gray-800 font-mono text-[11px]">
-                        Guia INSS - ♥ Apapesc
-                    </span>
-                    <button type="button" data-copy-target="texto-guia-{associado.id}" 
-                            class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
-                </div>                
-            </div>
-
-            <!-- Formulário separado -->
-            <form method="post" class="form-avancar-status mt-2" 
-                  action="{reverse('app_tarefas:atualizar_status_guia', args=[guia.id])}">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
-                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs px-3 py-1 rounded shadow transition">
-                    Confirmar Emissão (Etapa 1)
-                </button>
-            </form>
+# Views
+class GerarLancamentoINSSView(View):
+    def post(self, request, *args, **kwargs):
+        try:
+            ano = int(request.POST.get('ano'))
+            mes = int(request.POST.get('mes'))
             
-            <form method="post" class="form-reiniciar-guia mt-1" 
-                  action="{reverse('app_tarefas:zerar_status_guia', args=[guia.id])}">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
-                <button type="submit" class="w-full text-xs text-red-500 hover:text-red-700 underline">
-                    🔄 Reiniciar Processo
-                </button>
-            </form>
-        </div>
-        """
+            lancamento, created, total_guias = LancamentoINSSModel.gerar_lancamento(
+                ano, mes, request.user
+            )
 
-        return JsonResponse({
-            'success': True,
-            'html': html,
-            'guia_id': guia.id,
-            'reload': True 
+            if created:
+                msg = f"Lançamento {mes:02d}/{ano} criado com sucesso. {total_guias} guias geradas."
+                messages.success(request, msg)
+            elif total_guias > 0:
+                msg = f"Lançamento {mes:02d}/{ano} já existia. {total_guias} novas guias adicionadas."
+                messages.info(request, msg)
+            else:
+                msg = f"Lançamento {mes:02d}/{ano} já existia com todas guias."
+                messages.warning(request, msg)
+                
+        except ValueError as e:
+            messages.error(request, str(e))
+        except Exception as e:
+            messages.error(request, f"Erro ao gerar lançamento: {str(e)}")
+
+
+        return redirect('app_tarefas:list_lancamentos')
+    
+    
+    
+
+class DetalheLancamentoINSSView(DetailView):
+    model = LancamentoINSSModel
+    template_name = 'app_tarefas/detalhe_lancamento.html'
+    context_object_name = 'lancamento'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['guias'] = self.object.guias.select_related('associado')
+        context['status_choices'] = GuiaINSSModel.get_status_choices()
+        context['observacoes_choices'] = GuiaINSSModel.get_observacoes_choices()
+        return context
+
+
+from django.contrib import messages
+from django.shortcuts import redirect
+
+@require_POST
+def atualizar_guia(request, guia_id):
+    guia = get_object_or_404(GuiaINSSModel, id=guia_id)
+
+    status = request.POST.get('status')
+    observacoes = request.POST.get('observacoes')
+
+    if status:
+        guia.status = status
+
+    if observacoes:
+        guia.observacoes = observacoes
+
+    guia.save()
+
+    messages.success(request, f"Guia de {guia.associado} atualizada com sucesso!")
+
+    return redirect(request.META.get('HTTP_REFERER', '/'))
+
+
+from django.views import View
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import GuiaINSSModel, LancamentoINSSModel
+
+class ProcessarGuiaView(View):
+    template_name = 'app_tarefas/processar_guia.html'
+
+    def get(self, request, lancamento_id):
+        lancamento = get_object_or_404(LancamentoINSSModel, id=lancamento_id)
+        guias = lancamento.guias.select_related('associado').order_by('id')
+
+        current_guia_id = request.GET.get('guia')
+        guia = None
+
+        if current_guia_id:
+            guia = guias.filter(id=current_guia_id).first()
+        else:
+            ultima_id = request.session.get(f'ultima_guia_{lancamento_id}')
+            if ultima_id:
+                guia = guias.filter(id=ultima_id).first()
+            else:
+                guia = guias.first()
+
+        if not guia:
+            request.session.pop(f'ultima_guia_{lancamento_id}', None)
+            return render(request, self.template_name, {
+                'guia': None,
+                'lancamento': lancamento,
+                'fim_processo': True,
+            })
+
+        # ✅ Agora que `guia` existe, podemos montar guia_ids e index
+        guia_ids = list(g.id for g in guias)
+
+        try:
+            current_index = guia_ids.index(guia.id)
+            next_guia_id = guia_ids[current_index + 1] if current_index + 1 < len(guia_ids) else None
+        except ValueError:
+            current_index = 0
+            next_guia_id = None
+
+        total_guias = len(guia_ids)
+        contador = current_index + 1
+
+        # 👇 Guias anteriores
+        guias_anteriores = GuiaINSSModel.objects.filter(
+            associado=guia.associado,
+            lancamento__ano=lancamento.ano,
+            lancamento__mes__lt=lancamento.mes
+        ).select_related('lancamento').order_by('-lancamento__ano', '-lancamento__mes')
+
+        return render(request, self.template_name, {
+            'guia': guia,
+            'lancamento': lancamento,
+            'status_choices': GuiaINSSModel.get_status_choices(),
+            'observacoes_choices': GuiaINSSModel.get_observacoes_choices(),
+            'next_guia_id': next_guia_id,
+            'guias_anteriores': guias_anteriores,
+            'contador': contador,
+            'total_guias': total_guias,
         })
 
-# Atualização do Status - parte da Lógica
-class AtualizarStatusGuiaView(LoginRequiredMixin, View):
-    def post(self, request, guia_id):
-        try:
-            guia = get_object_or_404(GuiaINSSModel, id=guia_id)
-            associado = guia.associado
-            
-            # Lógica de transição de status corrigida
-            if guia.status == "pendente":
-                guia.status = "emitido"
-                html = self._html_emitido(guia, associado, request)
-                message = "Emissão confirmada! Proceda com o envio."
-            elif guia.status == "emitido":
-                guia.status = "enviado"
-                html = self._html_enviado(guia, associado, request)
-                message = "Envio confirmado! Aguarde confirmação de pagamento."
-            elif guia.status == "enviado":
-                guia.status = "pago"
-                html = self._html_pago(guia, associado, request)
-                message = "Pagamento confirmado! Processo finalizado."
-            else:
-                return JsonResponse({
-                    'success': False,
-                    'message': 'Status inválido para transição'
-                }, status=400)
-            
-            guia.save()
-            
-            return JsonResponse({
-                'success': True,
-                'html': html,
-                'message': message,
-                'reload': True 
-            })
 
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'Erro ao atualizar: {str(e)}'
-            }, status=400)
+    def post(self, request, lancamento_id):
+        guia_id = request.POST.get('guia_id')
+        guia = get_object_or_404(GuiaINSSModel, id=guia_id)
 
-    def _html_emitido(self, guia, associado, request):
-        return f"""
-        <div class="guia-emitida">
-            <div class="dados-celular mt-2 bg-green-50 p-2 rounded-md shadow-inner text-left">
-                <div class="flex justify-between items-center">
-                    <span id="celular-{associado.id}" class="text-gray-800 font-mono text-[11px]">{associado.celular_correspondencia}</span>
-                    <button type="button" data-copy-target="celular-{associado.id}" 
-                            class="btn-copiar text-blue-600 hover:text-blue-800 text-xs focus:outline-none">📋</button>
-                </div>
-            </div>
+        # Salva a guia atual
+        guia.status = request.POST.get('status')
+        guia.observacoes = request.POST.get('observacoes') or 'certo'
 
-            <form method="post" class="form-avancar-status mt-2" 
-                  action="{reverse('app_tarefas:atualizar_status_guia', args=[guia.id])}">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
-                <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded shadow transition">
-                    Confirmar Envio (Etapa 2)
-                </button>
-            </form>
-            
-            <form method="post" class="form-reiniciar-guia mt-1" 
-                  action="{reverse('app_tarefas:zerar_status_guia', args=[guia.id])}">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
-                <button type="submit" class="w-full text-xs text-red-500 hover:text-red-700 underline">
-                    🔄 Reiniciar Processo
-                </button>
-            </form>
-        </div>
-        """
+        guia.save()
 
-    def _html_enviado(self, guia, associado, request):
-        return f"""
-        <div class="guia-enviada">
-            <p class="text-green-600 text-xs mb-2">Guia enviada ao associado!</p>
-            
-            <form method="post" class="form-avancar-status" 
-                  action="{reverse('app_tarefas:atualizar_status_guia', args=[guia.id])}">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
-                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white text-xs px-3 py-1 rounded shadow transition">
-                    Confirmar Pagamento (Etapa 3)
-                </button>
-            </form>
-            
-            <form method="post" class="form-reiniciar-guia mt-1" 
-                  action="{reverse('app_tarefas:zerar_status_guia', args=[guia.id])}">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
-                <button type="submit" class="w-full text-xs text-red-500 hover:text-red-700 underline">
-                    🔄 Reiniciar Processo
-                </button>
-            </form>
-        </div>
-        """
+        # 🔁 Atualiza guias anteriores, se vieram no form
+        for key in request.POST:
+            if key.startswith("status_anterior_"):
+                guia_anterior_id = key.replace("status_anterior_", "")
+                status_val = request.POST.get(key)
+                observacoes_val = request.POST.get(f"obs_anterior_{guia_anterior_id}")
 
-    def _html_pago(self, guia, associado, request):
-        return f"""
-        <div class="guia-paga">
-            <div class="flex items-center justify-center">
-                <span class="inline-flex items-center bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-semibold shadow-sm ring-1 ring-green-100">
-                    <span class="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                    ✅ Guia Paga!
-                </span>
-            </div>
-            
-            <form method="post" class="form-reiniciar-guia mt-2 text-center"
-                  action="{reverse('app_tarefas:zerar_status_guia', args=[guia.id])}">
-                <input type="hidden" name="csrfmiddlewaretoken" value="{request.META['CSRF_COOKIE']}">
-                <button type="submit" class="text-xs text-red-500 hover:text-red-700 underline">
-                    🔄 Reiniciar Processo
-                </button>
-            </form>
-        </div>
-        """
+                try:
+                    g = GuiaINSSModel.objects.get(id=guia_anterior_id)
+                    g.status = status_val
+                    g.observacoes = observacoes_val or 'certo'
+                    g.save()
+                except GuiaINSSModel.DoesNotExist:
+                    continue
 
-# Reiniciar - Parte da Lógica
-class ZerarStatusGuiaView(LoginRequiredMixin, View):
-    def post(self, request, guia_id):
-        try:
-            guia = get_object_or_404(GuiaINSSModel, id=guia_id)
-            associado_id = guia.associado.id
-            mes = guia.mes_referencia
-            ano = guia.ano
-            
-            # Deletar permanentemente
-            guia.hard_delete()
-            
-            return JsonResponse({
-                'success': True,
-                'redirect_url': reverse('app_tarefas:emissao_guias'),  # Atualize com sua URL
-                'message': 'Processo reiniciado com sucesso'
-            })
+        # Salva ponto de parada
+        request.session[f'ultima_guia_{lancamento_id}'] = guia.id
 
-        except Exception as e:
-            return JsonResponse({
-                'success': False,
-                'message': f'Erro ao reiniciar: {str(e)}'
-            }, status=400)
+        if request.POST.get('acao') == 'pausar':
+            messages.info(request, "Processamento pausado.")
+            return redirect('app_tarefas:list_lancamentos')
+
+        next_guia_id = request.POST.get('next_guia_id')
+        if next_guia_id and next_guia_id != "None":
+            return redirect(f"{request.path}?guia={next_guia_id}")
+        else:
+            request.session.pop(f'ultima_guia_{lancamento_id}', None)
+            messages.success(request, "Processo de emissão finalizado com sucesso!")
+            return redirect('app_tarefas:list_lancamentos')
+
+
+
+

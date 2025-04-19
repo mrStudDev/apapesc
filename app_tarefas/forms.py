@@ -6,7 +6,8 @@ from app_associacao.models import IntegrantesModel
 from app_tarefas.models import TarefaModel
 from django.contrib.auth.models import User
 from app_associados.models import AssociadoModel
-
+from .models import LancamentoINSSModel
+from datetime import datetime
 
 class TarefaForm(forms.ModelForm):
     associado = forms.ModelChoiceField(
@@ -83,3 +84,33 @@ class TarefaForm(forms.ModelForm):
                 # Caso o associado já esteja definido, tornar o campo readonly
         if self.initial.get('associado'):
             self.fields['associado'].widget.attrs['readonly'] = True
+
+
+from django import forms
+from .models import LancamentoINSSModel
+from datetime import datetime
+
+class LancamentoINSSForm(forms.ModelForm):
+    class Meta:
+        model = LancamentoINSSModel
+        fields = ['ano', 'mes', 'observacoes']
+        widgets = {
+            'ano': forms.NumberInput(attrs={
+                'class': 'border border-gray-300 rounded-md px-3 py-2 w-full',
+                'placeholder': 'Digite o ano',
+            }),
+            'mes': forms.Select(attrs={
+                'class': 'border border-gray-300 rounded-md px-3 py-2 w-full',
+            }),
+            'observacoes': forms.Textarea(attrs={
+                'class': 'border border-gray-300 rounded-md px-3 py-2 w-full',
+                'rows': 3,
+                'placeholder': 'Observações adicionais (opcional)'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        agora = datetime.now()
+        self.fields['ano'].initial = agora.year
+        self.fields['mes'].initial = agora.month if 4 <= agora.month <= 11 else 4  # defaulta para abril se fora do range

@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from datetime import datetime
 from django.utils.text import slugify
+import random
 
 
 
@@ -157,11 +158,28 @@ class EspecieMarinhaModel(models.Model):
     data_cadastro = models.DateField(auto_now_add=True)
     data_ultima_alteracao = models.DateTimeField(auto_now=True)
     slug = models.SlugField(unique=True, blank=True)
-       
+
+    code = models.PositiveIntegerField(unique=True, blank=True, null=True)
+
+    
+    def generate_unique_code(self):
+        code = random.randint(100000, 999999)
+        while EspecieMarinhaModel.objects.filter(code=code).exists():
+            code = random.randint(100000, 999999)
+        return code
+
     def save(self, *args, **kwargs):
+        # Gera o código único se ainda não houver
+        if not self.code:
+            self.code = self.generate_unique_code()
+
+        # Gera o slug a partir do nome (ou title se quiser usar outro campo)
         if not self.slug:
-            self.slug = slugify(self.nome)
+            self.slug = slugify(self.nome_comum)
+
+        # Chama o save original do Django
         super().save(*args, **kwargs)
+
         
             
     class Meta:
