@@ -271,7 +271,7 @@ class ListAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListV
         context['guias_por_associado'] = guias_por_associado
         context['meses_validos'] = meses_validos
         context['ano_selecionado'] = ano_selecionado
-        context['associados'] = associados_filtrados
+        #context['associados'] = associados_filtrados
         context['recolhe_inss_map'] = recolhe_inss_map
 
         # Filtrando categorias específicas

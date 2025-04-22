@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import ServicoAssociadoModel, ServicoExtraAssociadoModel, ServicoHistoricoModel
+from .models import ServicoAssociadoModel, ServicoExtraAssociadoModel, ServicoHistoricoModel, ExtraAssociadoModel
 
 @admin.register(ServicoAssociadoModel)
 class ServicoAssociadoAdmin(admin.ModelAdmin):
@@ -17,3 +17,10 @@ class ServicoExtraAdmin(admin.ModelAdmin):
 class ServicoHistoricoAdmin(admin.ModelAdmin):
     list_display = ['campo', 'valor_antigo', 'valor_novo', 'alterado_por', 'data_alteracao']
     search_fields = ['campo', 'valor_antigo', 'valor_novo']
+
+@admin.register(ExtraAssociadoModel)
+class ExtraAssociadoAdmin(admin.ModelAdmin):
+    list_display = ['id', 'nome_completo', 'cpf', 'celular','senha_gov']
+    search_fields = ['nome_completo', 'cpf']
+    list_filter = ['nome_completo']
+    ordering = ['nome_completo']

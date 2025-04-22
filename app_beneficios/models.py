@@ -126,6 +126,7 @@ def protocolo_upload_path(instance, filename):
     # Retorna caminho relativo para o FileField
     return os.path.join('comprovantes_beneficio', nome_arquivo)
 
+
 class ControleBeneficioModel(models.Model):
     STATUS_CHOICES = [
         ('EM_PREPARO', 'Em Preparo'),
