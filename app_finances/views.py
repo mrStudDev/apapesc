@@ -1000,7 +1000,7 @@ class ResumoFinanceiroView(TemplateView):
         
         # 🔹 Total Geral das Anuidades Apuradas (Somente associados ativos e aposentados)
         total_anuidades_apuradas = AnuidadeAssociado.objects.filter(
-            associado__status__in=["Associado Lista Ativo(a)", "Associado Lista Aposentado(a)"]
+            associado__status__in=["Associado Lista Ativo(a)", "Associado Lista Aposentado(a)", "Desassociado(a)"]
         ).aggregate(total=Sum('anuidade__valor_anuidade'))['total'] or Decimal('0.00')
 
         # Resumo geral de despesas

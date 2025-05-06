@@ -284,10 +284,16 @@ def alterar_responsaveis_tarefa(request, pk):
         if not adicionados and not removidos:
             return JsonResponse({'success': False, 'message': 'Nenhuma alteração feita.'})
 
+        # ✅ Recupera o integrante logado
+        try:
+            integrante = request.user.integrante
+        except IntegrantesModel.DoesNotExist:
+            return JsonResponse({'success': False, 'message': 'Usuário não está vinculado a um integrante.'}, status=400)
+
         # Criar o histórico
         historico = HistoricoResponsaveisModel.objects.create(
             tarefa=tarefa,
-            alterado_por=request.user.integrante  # Assumindo que o usuário está vinculado a um IntegrantesModel
+            alterado_por=integrante
         )
         historico.responsaveis_anteriores.set(tarefa.responsaveis.all())
         historico.responsaveis_novos.set(IntegrantesModel.objects.filter(id__in=novos_responsaveis))
@@ -305,7 +311,6 @@ def alterar_responsaveis_tarefa(request, pk):
         })
 
     return JsonResponse({'success': False, 'message': 'Método não permitido.'}, status=405)
-
 
 
 class TarefaBoardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
