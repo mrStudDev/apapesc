@@ -2,7 +2,7 @@ from django.urls import path
 from .views import upload_pdf_base, ListaTodosArquivosView
 from . import views
 
-
+# Gerar declarações e carteirinha list documentos uploads app_automaçoes Templates
 app_name = 'app_automacoes'
 
 urlpatterns = [
@@ -14,6 +14,7 @@ urlpatterns = [
      path('upload/procuracao-juridica/', upload_pdf_base, {'automacao': 'procuracao_juridica'}, name='upload_pdf_procuracao_juridica'),
      path('upload/recibo-anuidade/', upload_pdf_base, {'automacao': 'recibos_anuidades'}, name='upload_pdf_recibo_anuidade'),
      path('upload/recibo-servico-extra/', upload_pdf_base, {'automacao': 'recibos_servicos_extra'}, name='upload_pdf_recibo_servico_extra'),
+     path('upload/carteirinha/', upload_pdf_base, {'automacao': 'carteirinha_apapesc'}, name='upload_pdf_carteirinha_apapesc'),
     
 
      path('lista/todos-arquivos/', ListaTodosArquivosView.as_view(), name='lista_automacoes'),
@@ -45,7 +46,11 @@ urlpatterns = [
      
      path('gerar-recibo-anuidade/<int:anuidade_assoc_id>/', views.gerar_recibo_anuidade, 
           name='gerar_recibo_anuidade'),
+     
      path('gerar-recibo-servico-extra/<int:entrada_id>/', views.gerar_recibo_entrada_extra, 
           name='gerar_recibo_servico_extra'),
+     
+     path('gerar-carteirinha/<int:associado_id>/', views.gerar_carteirinha_apapesc,
+          name='gerar_carteirinha_apapesc'), 
 
 ]

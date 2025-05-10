@@ -124,13 +124,13 @@ class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateVi
         context['servicos_associados_recentes'] = (
             ServicoAssociadoModel.objects
             .select_related('associado', 'tipo_servico')
-            .order_by('-data_inicio')[:2]
+            .order_by('-data_inicio')[:5]
         )
         # Serviços para extra-associados (limite 2)
         context['servicos_extras_recentes'] = (
             ServicoExtraAssociadoModel.objects
             .select_related('extra_associado', 'tipo_servico')
-            .order_by('-data_inicio')[:2]
+            .order_by('-data_inicio')[:5]
         )
         # Serviços para Extra-associados (limite 2)
         context['total_extra_associados'] = ExtraAssociadoModel.objects.count()

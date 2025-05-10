@@ -49,9 +49,11 @@ from django.apps import apps
 from django.contrib.messages.views import SuccessMessageMixin
 
 
+# Lista de Anuidades
 def lista_anuidades(request):
     ano_selecionado = request.GET.get('ano')
     associacao_selecionada = request.GET.get('associacao')
+    status_pagamento = request.GET.get('status') 
 
     anos_disponiveis = AnuidadeModel.objects.values_list('ano', flat=True).distinct().order_by('ano')
     associacoes = AssociacaoModel.objects.order_by('nome_fantasia')
@@ -70,6 +72,11 @@ def lista_anuidades(request):
 
         if associacao_selecionada:
             filtro['associado__associacao_id'] = associacao_selecionada
+
+        if status_pagamento == "pago":
+            filtro['pago'] = True
+        elif status_pagamento == "pendente":
+            filtro['pago'] = False
 
         anuidades_associados = (
             AnuidadeAssociado.objects.filter(**filtro)
@@ -105,6 +112,7 @@ def lista_anuidades(request):
         'anos_disponiveis': anos_disponiveis,
         'ano_selecionado': ano_selecionado,
         'associacao_selecionada': associacao_selecionada,
+        'status_selecionado': status_pagamento,
         'associacoes': associacoes,
         'anuidades_associados': anuidades_associados,
     }
@@ -241,6 +249,7 @@ def associados_triangulo_view(request):
             anuidades_associados__anuidade__ano=ano_atual
         )
         .distinct()
+        .order_by('user__first_name', 'user__last_name')  # 👈 ordenação alfabética
     )
 
     # Associados com anuidades do ano vigente em aberto
@@ -252,6 +261,7 @@ def associados_triangulo_view(request):
         .annotate(
             valor_anuidade=Sum(F('anuidades_associados__anuidade__valor_anuidade'))  # ✅ Corrigido
         )
+        .order_by('user__first_name', 'user__last_name')  # 👈 ordenação alfabética
     )
 
     # Associados com anuidades de anos anteriores em atraso
@@ -263,6 +273,7 @@ def associados_triangulo_view(request):
         .annotate(
             valor_debito=Sum(F('anuidades_associados__anuidade__valor_anuidade')) - Sum('anuidades_associados__valor_pago')  # ✅ Corrigido
         )
+        .order_by('user__first_name', 'user__last_name')  # 👈 ordenação alfabética
     )
 
     context = {
@@ -941,6 +952,7 @@ class ListDespesasView(ListView):
         # 🔥 Filtros opcionais
         associacao_id = self.request.GET.get('associacao')
         reparticao_id = self.request.GET.get('reparticao')
+        tipo_despesa_id = self.request.GET.get('tipo_despesa')
         mes = self.request.GET.get('mes')
         ano = self.request.GET.get('ano')
 
@@ -951,6 +963,10 @@ class ListDespesasView(ListView):
         # Filtro por Repartição (se houver)
         if reparticao_id:
             queryset = queryset.filter(reparticao_id=reparticao_id)
+            
+        # Filtro por Tipo de Despesa (se houver)
+        if tipo_despesa_id:
+            queryset = queryset.filter(tipo_despesa_id=tipo_despesa_id)  # 👈 Filtro adicionado aqui
 
         # Filtro por Ano
         if ano:
@@ -972,6 +988,7 @@ class ListDespesasView(ListView):
         context = super().get_context_data(**kwargs)
         context['associacoes'] = AssociacaoModel.objects.all()
         context['reparticoes'] = ReparticoesModel.objects.all()
+        context['tipos_despesa'] = TipoDespesaModel.objects.all() 
         context['anos'] = DespesaAssociacaoModel.objects.dates('data_lancamento', 'year', order='DESC')
         context['meses'] = range(1, 13)  # Lista de meses de 1 a 12
 

@@ -124,29 +124,52 @@
                         <td class="px-4 py-2 text-center">R$ {{ anuidade.saldo|floatformat:2 }}</td>
                         <td class="px-4 py-2 text-center">
                             {% if anuidade.saldo > 0 %}
-                                <div class="flex flex-col gap-2">
-                                    <!-- Formulário de Dar Baixa -->
-                                    <form method="post" action="{% url 'app_finances:dar_baixa_anuidade' anuidade.anuidade.id %}" class="flex items-center gap-2">
-                                        {% csrf_token %}
-                                        <input type="number" step="0.01" min="0.01" name="valor_baixa" class="w-24 p-1 border border-gray-300 rounded-md text-center" required>
-                                        <button type="submit" class="bg-blue-500 text-white py-1 px-3 rounded hover:bg-blue-700">
-                                            Dar Baixa
-                                        </button>
-                                    </form>
-            
-                                    <!-- Formulário de Desconto -->
-                                    <form method="post" action="{% url 'app_finances:conceder_desconto' anuidade.anuidade.id %}" class="flex items-center gap-2">
-                                        {% csrf_token %}
-                                        <input type="number" name="valor_desconto" step="0.01" min="0.01"
-                                               class="w-24 p-1 border text-yellow-500 border-gray-300 rounded-md text-center" required
-                                               placeholder="0.00">
-                                        <input type="text" name="motivo"
-                                               class="w-40 p-1 border text-yellow-600 border-gray-300 rounded-md"
-                                               placeholder="Descrição desconto" required>
-                                        <button type="submit" class="bg-yellow-500 text-white py-1 px-3 rounded hover:bg-yellow-600">
-                                            Aplicar Desconto
-                                        </button>
-                                    </form>
+                            <!-- ✅ Formulário de Dar Baixa com destaque -->
+                            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded shadow-sm mt-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                <span class="material-icons text-green-500 text-base">check_circle</span>
+                                <h4 class="text-sm font-semibold text-green-800">Registrar pagamento desta anuidade</h4>
+                                </div>
+                            
+                                <form method="post" action="{% url 'app_finances:dar_baixa_anuidade' anuidade.anuidade.id %}" class="flex flex-wrap items-center gap-3">
+                                {% csrf_token %}
+                            
+                                <input type="number" step="0.01" min="0.01" name="valor_baixa"
+                                        class="w-24 p-1 border border-gray-300 rounded-md text-center text-green-700 focus:ring-green-500 focus:border-green-500"
+                                        required placeholder="0.00">
+                            
+                                <button type="submit"
+                                        class="bg-green-600 text-white px-4 py-1 rounded hover:bg-green-700 transition text-sm">
+                                    Dar Baixa
+                                </button>
+                                </form>
+                            </div>
+                            
+                            <!-- 🔶 Formulário de Desconto com destaque -->
+                            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded shadow-sm mt-4">
+                                <div class="flex items-center gap-2 mb-3">
+                                <span class="material-icons text-yellow-500 text-base">warning</span>
+                                <h4 class="text-sm font-semibold text-yellow-800">Atenção: Aplicar desconto nesta anuidade?</h4>
+                                </div>
+                            
+                                <form method="post" action="{% url 'app_finances:conceder_desconto' anuidade.anuidade.id %}" class="flex flex-wrap items-center gap-3">
+                                {% csrf_token %}
+                            
+                                <input type="number" name="valor_desconto" step="0.01" min="0.01"
+                                        class="w-24 p-1 border border-gray-300 rounded-md text-center text-yellow-700 focus:ring-yellow-500 focus:border-yellow-500"
+                                        required placeholder="0.00">
+                            
+                                <input type="text" name="motivo"
+                                        class="w-40 p-1 border border-gray-300 rounded-md text-yellow-800 focus:ring-yellow-500 focus:border-yellow-500"
+                                        required placeholder="Descrição desconto">
+                            
+                                <button type="submit"
+                                        class="bg-yellow-500 text-white px-4 py-1 rounded hover:bg-yellow-600 transition text-sm">
+                                    Aplicar Desconto
+                                </button>
+                                </form>
+                            </div>
+  
                                 </div>
                             {% else %}
                             <div class="flex flex-col items-center gap-2">

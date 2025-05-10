@@ -1,4 +1,8 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Serviço Extra Associado{% endblock title %}
+
 
 {% block single_ServicoExtra %}
     <!-- Navbar -->
@@ -83,49 +87,61 @@
   
             
                 <!-- Dados principais -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700 text-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800">
 
-                <div>
-                    <strong class="block text-gray-600 mb-1">Proprietário:</strong>
-                  
-                    {% if servico.extra_associado %}
-                      <!-- Destaque para Associado -->
-                      <div class="bg-gray-50 border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between shadow-sm mt-4">
-                        <div>
-                          <p class="text-sm gray-blue-700">
+                    <!-- Proprietário Extra Associado -->
+                    <div>
+                      <h3 class="text-sm font-semibold text-gray-700 mb-1">Proprietário:</h3>
+                      {% if servico.extra_associado %}
+                        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4 shadow-sm flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                          <p class="text-gray-700">
                             <strong>Associado:</strong> {{ servico.extra_associado.nome_completo }}
                           </p>
+                          <a href="{% url 'app_servicos:detail_extraassociado' extra_associado.id %}" 
+                             class="text-gray-600 hover:text-gray-800 flex items-center gap-1 text-sm"
+                             title="Ver detalhes do extra">
+                            <span class="material-icons text-base">visibility</span> Ver
+                          </a>
                         </div>
-                        <a href="{% url 'app_servicos:detail_extraassociado' extra_associado.id %}" 
-                          class="text-gray-600 hover:text-gray-800 flex items-center gap-1 text-sm"
-                          title="Ver detalhes do extra">
-                          <i class="material-icons text-base">visibility</i> Ver
-                        </a>
+                      {% else %}
+                        <span class="text-gray-400 italic">Não informado</span>
+                      {% endif %}
+                    </div>
+                  
+                    <!-- Associação e Dados Gerais -->
+                    <div class="space-y-2">
+                      <p><strong class="text-gray-600">Associação:</strong> {{ servico.associacao.nome_fantasia }}</p>
+                      {% if servico.reparticao %}
+                        <p><strong class="text-gray-600">Repartição:</strong> {{ servico.reparticao.nome_reparticao }}</p>
+                      {% endif %}
+                      <p><strong class="text-gray-600">Etapa:</strong> {{ servico.get_status_etapa_display }}</p>
+                      <p><strong class="text-gray-600">Data de Criação:</strong> {{ servico.data_inicio|date:"d/m/Y H:i" }}</p>
+                      <p><strong class="text-gray-600">Última Alteração:</strong> {{ servico.ultima_alteracao|date:"d/m/Y H:i" }}</p>
+                    </div>
+                  
+                    <!-- Tipo de Serviço - Destaque visual -->
+                    <div class="md:col-span-2">
+                      <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 shadow-sm">
+                        <p class="text-sm text-gray-800 flex items-center gap-2">
+                          <span class="material-icons text-blue-500 text-base">work_outline</span>
+                          <strong class="text-blue-800">Tipo de Serviço:</strong> {{ servico.tipo_servico }}
+                        </p>
                       </div>
-                    {% else %}
-                      <span class="text-gray-400">Não informado</span>
+                    </div>
+                  
+                    <!-- Anotações -->
+                    {% if servico.content %}
+                    <div class="md:col-span-2">
+                      <hr class="my-4">
+                      <h3 class="text-sm font-semibold text-gray-700 mb-2">📝 Anotações do Serviço:</h3>
+                      <div class="prose prose-sm max-w-full text-gray-800">
+                        {{ servico.content|safe }}
+                      </div>
+                    </div>
                     {% endif %}
                   </div>
-                  <p><strong class="text-gray-500">Associação:</strong> {{ servico.associacao.nome_fantasia }}</p>
-
-
-                {% if servico.reparticao %}
-                    <p><strong class="text-gray-500">Repartição:</strong> {{ servico.reparticao.nome_reparticao }}</p>
-                {% endif %}
-            
-                <p><strong class="text-gray-500">Tipo de Serviço:</strong> {{ servico.tipo_servico }}</p>
-                <p><strong class="text-gray-500">Etapa:</strong> {{ servico.get_status_etapa_display }}</p>
-                <p><strong class="text-gray-500">Data de Criação:</strong> {{ servico.data_inicio|date:"d/m/Y H:i" }}</p>
-                <p><strong class="text-gray-500">Última Alteração:</strong> {{ servico.ultima_alteracao|date:"d/m/Y H:i" }}</p>
-                </div>            
-                
-                {% if servico.content %}
-                    <p class="md:col-span-2">
-                    <hr> <p><strong class="text-gray-500">Anotações do Serviço:</strong></p>
-                    {{ servico.content | safe}}
-                    </p>
-                {% endif %}
-            </div>
+                </div>
+                  
             <div class="max-w-5xl mx-auto bg-gray-100 p-8 rounded-lg shadow-md space-y-8">
                 <!-- Entrada Vinculada -->
                 {% if servico.entrada_relacionada %}

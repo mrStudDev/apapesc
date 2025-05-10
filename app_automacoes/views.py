@@ -18,7 +18,11 @@ from urllib.parse import urlencode
 from django.contrib.staticfiles import finders
 from reportlab.lib.colors import lightgrey, grey
 from reportlab.platypus import Table, TableStyle
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+from reportlab.lib.colors import Color
 from pdfrw.buildxobj import pagexobj
 
 from app_finances.models import AnuidadeAssociado
@@ -35,6 +39,7 @@ from .models import (
     ProcuracaoJuridicaModel,
     ReciboAnuidadeModel,
     ReciboServicoExtraModel,
+    CarteirinhaAssociadoModel,
     )
 
 # Deletes
@@ -47,6 +52,8 @@ MODELO_MAP = {
     'procuracao_juridica': ProcuracaoJuridicaModel,
     'recibos_anuidades': ReciboAnuidadeModel,
     'recibos_servicos_extra': ReciboServicoExtraModel,
+    'carteirinha_apapesc': CarteirinhaAssociadoModel,
+
 }
 
 def delete_pdf(request, automacao, declaracao_id):
@@ -82,6 +89,7 @@ def upload_pdf_base(request, automacao):
         'procuracao_juridica': ProcuracaoJuridicaModel,
         'recibos_anuidades': ReciboAnuidadeModel,
         'recibos_servicos_extra': ReciboServicoExtraModel,
+        'carteirinha_apapesc': CarteirinhaAssociadoModel,
     }
     
     modelo = modelo_map.get(automacao)
@@ -125,6 +133,7 @@ class ListaTodosArquivosView(LoginRequiredMixin, GroupPermissionRequiredMixin, T
         context['procuracoes_procuracao_juridica'] = ProcuracaoJuridicaModel.objects.all()
         context['recibos_anuidades'] = ReciboAnuidadeModel.objects.all()
         context['recibos_servicos_extra'] = ReciboServicoExtraModel.objects.all()
+        context['carteirinha_apapesc'] = CarteirinhaAssociadoModel.objects.all()
         
         return context
 
@@ -941,8 +950,8 @@ def gerar_recibo_anuidade(request, anuidade_assoc_id):
         f"Recebemos de <strong>{associado.user.get_full_name()}</strong>, "
         f"inscrito no CPF sob o nº <strong>{associado.cpf}</strong>, "
         f"a importância de <strong>R$ {anuidade_assoc.valor_pago:.2f}</strong> "
-        f"(referente à anuidade do exercício de <strong>{anuidade_assoc.anuidade.ano}</strong>), "
-        f"quitada na data de <strong>{data_pagamento}</strong>. "
+        f"(referente ao pagamento da anuidade - exercício de <strong>{anuidade_assoc.anuidade.ano}</strong>), "
+        f"pelo qual, registramos a confirmação de pagamento em nosso sistema na data de <strong>{data_pagamento}</strong>. "
         f"<br/><br/>Este pagamento foi efetuado à <strong>{associacao.razao_social}</strong>, "
         f"inscrita no CNPJ sob o nº {associacao.cnpj}, com sede na {associacao.logradouro}, nº {associacao.numero}, "
         f"{associacao.bairro}, {associacao.municipio or 'Município não informado'}/{associacao.uf}. "
@@ -953,7 +962,8 @@ def gerar_recibo_anuidade(request, anuidade_assoc_id):
 
     assinatura = (
         f"{associacao.presidente.user.get_full_name()}<br/>"
-        f"Presidente da Associação"
+        f"Presidente da Associação<br/>"
+        f"Forte Abraço!"
     )
 
     municipio = associacao.municipio.upper() if associacao.municipio else "CIDADE NÃO DEFINIDA"
@@ -1141,3 +1151,82 @@ def gerar_recibo_entrada_extra(request, entrada_id):
 
 
 
+# =======================================================================================================
+# GERAR CARTEIRINHA APAPESC ASSOCIADO
+# app_automacoes/views.py
+
+def gerar_carteirinha_apapesc(request, associado_id):
+    associado = AssociadoModel.objects.get(id=associado_id)
+    associacao = associado.associacao
+
+    # Caminho para o PDF de template
+    # Busca o modelo de carteirinha
+    template_instance = CarteirinhaAssociadoModel.objects.first()
+    if not template_instance or not template_instance.pdf_base:
+        return HttpResponse("Modelo de carteirinha não disponível.", status=404)
+
+    template_path = template_instance.pdf_base.path
+    template_pdf = PdfReader(template_path)
+
+    # Carrega o template
+
+    buffer = BytesIO()
+
+
+    # Inicia o canvas sobre buffer
+    c = canvas.Canvas(buffer, pagesize=A4)
+    c.setFont("Helvetica", 8)
+
+    # Cor dourada clara
+    dourado_claro = Color(218/255, 165/255, 32/255)
+    c.setFillColor(dourado_claro)
+
+    # Dados do associado
+    nome = associado.user.get_full_name()
+    profissao = associado.profissao or ''
+    data_filiacao = associado.data_filiacao.strftime('%d/%m/%Y') if associado.data_filiacao else ''
+    cpf = associado.cpf or ''
+    rgp = associado.rgp or ''
+    primeiro_registro = associado.primeiro_registro.strftime('%d/%m/%Y') if associado.primeiro_registro else ''
+    municipio = associado.municipio_circunscricao or ''
+    estado = associado.uf or ''
+
+    # Deslocamento e posições ajustadas
+    x_base = 25     # 2.5cm da esquerda
+    y = 758         # Subiu 70 pontos
+
+    # Renderiza as linhas
+    c.drawString(x_base, y, f"{nome}")
+    y -= 22
+    c.drawString(x_base, y, f"{profissao}")
+    c.drawString(x_base + 180, y, f"{data_filiacao}")
+    y -= 23
+    c.drawString(x_base, y, f"{cpf}")
+    c.drawString(x_base + 80, y, f"{rgp}")
+    c.drawString(x_base + 180, y, f"{primeiro_registro}")
+    y -= 25
+    c.drawString(x_base, y, f"{municipio}")
+    c.drawString(x_base + 200, y, f"{estado}")
+    y -= 20
+        
+    c.showPage()
+    c.save()
+
+    buffer.seek(0)
+    overlay_pdf = PdfReader(buffer)
+
+    # Mescla o conteúdo gerado com o template
+    for i, page in enumerate(template_pdf.pages):
+        if i < len(overlay_pdf.pages):
+            PageMerge(page).add(overlay_pdf.pages[i]).render()
+
+    # Salvar arquivo final
+    output_path = os.path.join(settings.MEDIA_ROOT, f'documentos/carteirinha_{associado.id}.pdf')
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    PdfWriter(output_path, trailer=template_pdf).write()
+
+    # URL para acesso
+    pdf_url = f"{settings.MEDIA_URL}documentos/carteirinha_{associado.id}.pdf"
+    return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")
+    
+    
