@@ -306,3 +306,12 @@ class GuiaINSSModel(models.Model):
     def get_observacoes_choices():
         return GuiaINSSModel.OBSERVACOES_CHOICES
 
+# models.py
+class ProgressoGuiaINSSModel(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    lancamento = models.ForeignKey(LancamentoINSSModel, on_delete=models.CASCADE)
+    ultima_guia = models.ForeignKey(GuiaINSSModel, on_delete=models.CASCADE)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'lancamento')

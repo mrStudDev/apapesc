@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.mixins import GroupPermissionRequiredMixin
 from django.contrib.auth.models import Group
-from .models import TarefaModel, HistoricoStatusModel, HistoricoResponsaveisModel
+from .models import TarefaModel, HistoricoStatusModel, HistoricoResponsaveisModel, ProgressoGuiaINSSModel
 from .forms import TarefaForm, LancamentoINSSForm
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -680,13 +680,16 @@ class ProcessarGuiaView(View):
 
         current_guia_id = request.GET.get('guia')
         guia = None
-
         if current_guia_id:
             guia = guias.filter(id=current_guia_id).first()
         else:
-            ultima_id = request.session.get(f'ultima_guia_{lancamento_id}')
-            if ultima_id:
-                guia = guias.filter(id=ultima_id).first()
+            progresso = ProgressoGuiaINSSModel.objects.filter(
+                user=request.user,
+                lancamento=lancamento
+            ).first()
+
+            if progresso:
+                guia = guias.filter(id=progresso.ultima_guia_id).first()
             else:
                 guia = guias.first()
 
@@ -765,7 +768,11 @@ class ProcessarGuiaView(View):
                     continue
 
         # Salva ponto de parada
-        request.session[f'ultima_guia_{lancamento_id}'] = guia.id
+        ProgressoGuiaINSSModel.objects.update_or_create(
+            user=request.user,
+            lancamento_id=lancamento_id,
+            defaults={'ultima_guia': guia}
+        )
 
         if request.POST.get('acao') == 'pausar':
             messages.info(request, "Processamento pausado.")
