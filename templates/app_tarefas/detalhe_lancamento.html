@@ -39,7 +39,55 @@
             </h1>
             <p class="text-sm text-gray-600">Guias INSS por Associado</p>
             <p class="text-sm text-gray-600">Lançamento: <strong>{{ lancamento.mes }}/{{ lancamento.ano }}</strong></p>
+            <br>
+            <a href="{% url 'app_tarefas:list_lancamentos' %}?status=aguardando" class="text-sm text-blue-600 hover:underline">
+                Voltar para lista de lançamentos
         </div>
+
+
+        <form method="get" class="mb-6 flex flex-wrap gap-3 items-end bg-gray-50 p-4 rounded-md border border-gray-200 shadow-sm">
+            <!-- Campo de busca -->
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Buscar por nome</label>
+              <input type="text" name="q" value="{{ nome_query }}" placeholder="Digite o nome"
+                     class="w-56 border px-3 py-2 rounded-md text-sm text-gray-700 focus:ring-2 focus:ring-blue-400" />
+            </div>
+          
+            <!-- Filtro Status -->
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Status</label>
+              <select name="status"
+                      class="w-48 border px-3 py-2 rounded-md text-sm text-gray-700 focus:ring-2 focus:ring-blue-400">
+                <option value="">Todos os Status</option>
+                {% for code, label in status_choices %}
+                  <option value="{{ code }}" {% if code == status_filtro %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          
+            <!-- Filtro Observações -->
+            <div>
+              <label class="block text-xs font-medium text-gray-600 mb-1">Observações</label>
+              <select name="obs"
+                      class="w-56 border px-3 py-2 rounded-md text-sm text-gray-700 focus:ring-2 focus:ring-blue-400">
+                <option value="">Todas Observações</option>
+                {% for code, label in observacoes_choices %}
+                  <option value="{{ code }}" {% if code == observacao_filtro %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          
+            <!-- Botão -->
+            <div class="self-end">
+              <button type="submit"
+                      class="bg-blue-600 text-white px-5 py-2 rounded-md text-sm hover:bg-blue-700 transition">
+                Filtrar
+              </button>
+            </div>
+          </form>
+          
+
+          
         <a href="{% url 'app_tarefas:processar_guia' lancamento.id %}"
             class="inline-block mb-4 bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700">
             ▶ Iniciar/Retomar Processo

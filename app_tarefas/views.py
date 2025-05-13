@@ -607,11 +607,42 @@ class DetalheLancamentoINSSView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['guias'] = self.object.guias.select_related('associado')
+        lancamento = self.object
+
+        # 🔎 Recupera os filtros da URL
+        nome_query = self.request.GET.get('q', '').strip()
+        status_filtro = self.request.GET.get('status', '')
+        observacao_filtro = self.request.GET.get('obs', '')
+
+        # 🔁 Queryset base com o select_related
+        guias = lancamento.guias.select_related('associado', 'associado__user')
+
+        # 🔤 Filtrar por nome
+        if nome_query:
+            guias = guias.filter(
+                Q(associado__user__first_name__icontains=nome_query) |
+                Q(associado__user__last_name__icontains=nome_query)
+            )
+
+        # ✅ Filtrar por status
+        if status_filtro:
+            guias = guias.filter(status=status_filtro)
+
+        # ✅ Filtrar por observação
+        if observacao_filtro:
+            guias = guias.filter(observacoes=observacao_filtro)
+
+        # 🔠 Ordena por nome completo
+        guias = guias.order_by('associado__user__first_name', 'associado__user__last_name')
+
+        context['guias'] = guias
         context['status_choices'] = GuiaINSSModel.get_status_choices()
         context['observacoes_choices'] = GuiaINSSModel.get_observacoes_choices()
-        return context
+        context['nome_query'] = nome_query
+        context['status_filtro'] = status_filtro
+        context['observacao_filtro'] = observacao_filtro
 
+        return context
 
 from django.contrib import messages
 from django.shortcuts import redirect

@@ -257,6 +257,8 @@ class GuiaINSSModel(models.Model):
         ('validar_acesso', 'Validar Acesso'),
         ('senha_invalida', 'Senha Inválida'),
         ('nivel_conta', 'Nível Conta'),
+        ('sem_login', 'Sem Login'),
+        ('sem_caepf', 'Sem CAEPF'),
         ('certo', 'Certo')
     ]
 

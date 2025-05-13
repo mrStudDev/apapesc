@@ -17,7 +17,7 @@ from app_articles.models import ArticlesModel
 from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from app_beneficios.models import ControleBeneficioModel, BeneficioModel
-
+from datetime import datetime
 
 # Superususers dashboard.html
 class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
@@ -220,13 +220,23 @@ class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateVi
         # 3. Contagem de observações apenas no último lançamento (caso exista)
         if ultimo_lancamento:
             guias_ultimas = GuiaINSSModel.objects.filter(lancamento=ultimo_lancamento)
-            
+
+            # 🔁 Observações (já existente)
             observacoes_counts = guias_ultimas.values('observacoes').annotate(total=Count('id'))
             observacoes_map = {obs['observacoes']: obs['total'] for obs in observacoes_counts}
-
             context['inss_observacoes'] = observacoes_map
         else:
             context['inss_observacoes'] = {}
+
+        # 4. Contagem de status de todos os lançamentos do ano atual
+        ano_atual = datetime.now().year
+
+        guias_ano_atual = GuiaINSSModel.objects.filter(lancamento__ano=ano_atual)
+
+        status_counts_ano = guias_ano_atual.values('status').annotate(total=Count('id'))
+        status_map_ano = {item['status']: item['total'] for item in status_counts_ano}
+
+        context['inss_status_ano'] = status_map_ano
 
         # 🔹 Lista de status possíveis
         status_labels = dict(ControleBeneficioModel.STATUS_CHOICES)
