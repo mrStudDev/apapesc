@@ -29,7 +29,7 @@ from django.utils import timezone
 from decimal import Decimal
 from django.views.decorators.http import require_POST
 from django.db import IntegrityError
-
+import calendar
 
 class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = TarefaModel
@@ -718,6 +718,13 @@ class ProcessarGuiaView(View):
             lancamento__mes__lt=lancamento.mes
         ).select_related('lancamento').order_by('-lancamento__ano', '-lancamento__mes')
 
+        MESES_PT = {
+            1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
+            5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
+            9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
+        }
+        mes_nome = MESES_PT.get(lancamento.mes, '')
+
         return render(request, self.template_name, {
             'guia': guia,
             'lancamento': lancamento,
@@ -727,6 +734,8 @@ class ProcessarGuiaView(View):
             'guias_anteriores': guias_anteriores,
             'contador': contador,
             'total_guias': total_guias,
+            'mes_nome': mes_nome,  # 👈 Aqui o que faltava
+            
         })
 
 
