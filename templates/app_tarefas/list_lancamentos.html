@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Lançamentos Guias INSS{% endblock title %}
+{% block title %}Lista Lançamentos Guias INSS{% endblock title %}
 
 {% load custom_filters %}
 
@@ -69,7 +69,14 @@
             </button>
           </div>
         </form>
-    
+        <div class="flex justify-end mb-6">
+          <a href="{% url 'app_tarefas:create_lancamentoInss' %}"
+             class="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-md shadow hover:bg-blue-700 transition">
+            <span class="material-icons text-base">add_circle</span>
+            Novo Lançamento INSS
+          </a>
+        </div>
+        
         <!-- Tabela -->
         <div class="overflow-x-auto bg-white border border-gray-200 rounded-lg shadow-sm">
           <table class="min-w-full text-sm text-gray-700">
