@@ -42,10 +42,14 @@
             <br>
             <a href="{% url 'app_tarefas:list_lancamentos' %}?status=aguardando" class="text-sm text-blue-600 hover:underline">
                 Voltar para lista de lançamentos
+            </a>
         </div>
 
 
-        <form method="get" class="mb-6 flex flex-wrap gap-3 items-end bg-gray-50 p-4 rounded-md border border-gray-200 shadow-sm">
+        <form method="get" 
+            action="{% url 'app_tarefas:detalhe_lancamento_inss' lancamento.pk %}" 
+            class="mb-6 flex flex-wrap gap-3 items-end bg-gray-50 p-4 rounded-md border border-gray-200 shadow-sm">
+
             <!-- Campo de busca -->
             <div>
               <label class="block text-xs font-medium text-gray-600 mb-1">Buscar por nome</label>
@@ -85,6 +89,7 @@
               </button>
             </div>
           </form>
+
           
 
           
