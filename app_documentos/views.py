@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Documento, TipoDocumentoModel
 from app_associados.models import AssociadoModel
 from app_associacao.models import IntegrantesModel, AssociacaoModel, ReparticoesModel
+from app_servicos.models import ServicoExtraAssociadoModel, ExtraAssociadoModel
 from app_tarefas.models import TarefaModel
 from .forms import DocumentoForm, TipoDocumentoForm
 from django.urls import reverse_lazy
@@ -25,6 +26,7 @@ from PIL import Image
 from django.contrib import messages
 from django.utils import timezone
 import datetime
+from django.utils.translation import gettext_lazy as _
 
 
 # Create your views here.
@@ -57,6 +59,8 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
             self.owner = get_object_or_404(ReparticoesModel, id=obj_id)
         elif tipo == 'tarefa':
             self.owner = get_object_or_404(TarefaModel, id=obj_id)
+        elif tipo == 'extraassociado':
+            self.owner = get_object_or_404(ExtraAssociadoModel, id=obj_id)
         else:
             raise Http404("Tipo de proprietário inválido.")
 
@@ -80,6 +84,8 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
             form.instance.reparticao = self.owner
         elif isinstance(self.owner, TarefaModel):
             form.instance.tarefa = self.owner
+        elif isinstance(self.owner, ExtraAssociadoModel):
+            form.instance.extra_associado = self.owner  
 
         # Validação extra: Garante que pelo menos o tipo ou o nome seja fornecido
         if not form.instance.tipo_doc and not form.instance.nome:
@@ -107,6 +113,9 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
             return reverse('app_associacao:single_reparticao', kwargs={'pk': self.owner.pk})
         elif isinstance(self.owner, TarefaModel):
             return reverse('app_tarefas:single_tarefa', kwargs={'pk': self.owner.pk})
+        elif isinstance(self.owner, ExtraAssociadoModel):
+            return reverse('app_servicos:detail_extraassociado', kwargs={'pk': self.owner.pk})
+        
 
 
 class TipoDocumentoCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
@@ -193,6 +202,7 @@ class DocumentoDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, View
         associcao = documento.associacao
         reparticao = documento.reparticao
         tarefa = documento.tarefa
+        extraassociado = documento.extraassociado
 
         try:
             documento.delete()
@@ -206,6 +216,8 @@ class DocumentoDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, View
                 return redirect(reverse('app_associacao:single_reparticao', kwargs={'pk': reparticao.pk}))
             elif tarefa:
                 return redirect(reverse('app_tarefas:single_tarefa', kwargs={'pk': tarefa.pk}))
+            elif extraassociado:
+                return redirect(reverse('app_servicos:single_servico_extra', kwargs={'pk': extraassociado.pk}))
             else:
                 return redirect('app_home:home')  # Fallback para a página inicial
         except Exception as e:
@@ -223,8 +235,9 @@ def criar_copia_pdf(request, pk):
         associacao = getattr(documento, 'associacao', None)
         reparticao = getattr(documento, 'reparticao', None)
         tarefa = getattr(documento, 'tarefa', None)
+        extraassociado = getattr(documento, 'extraassociado', None)
 
-        if not associado and not integrante and not associacao and not reparticao and not tarefa:
+        if not associado and not integrante and not associacao and not reparticao and not tarefa and not extraassociado:
             messages.error(request, 'Documento não associado a nenhum proprietário válido.')
             return redirect(request.META.get('HTTP_REFERER', '/'))
         
@@ -239,6 +252,8 @@ def criar_copia_pdf(request, pk):
             owner_name = reparticao.nome_reparticao
         elif tarefa:
             owner_name = tarefa.titulo
+        elif extraassociado:
+            owner_name = f"{extraassociado.extra_associado.nome_completo}"
 
         # Verifica se o tipo está definido, caso contrário, usa o nome do documento
         tipo_nome = documento.tipo_doc.tipo if documento.tipo_doc else documento.nome
@@ -338,6 +353,7 @@ def criar_copia_pdf(request, pk):
             associacao=associacao if associacao else None,
             reparticao=reparticao if reparticao else None,
             tarefa=tarefa if tarefa else None,
+            extraassociado=extraassociado if extraassociado else None,
             tipo_doc=documento.tipo_doc,
             nome=documento.nome,
             arquivo=f"documentos/{pdf_name}",
@@ -359,6 +375,8 @@ def criar_copia_pdf(request, pk):
             return redirect(reverse('app_associacao:single_reparticao', kwargs={'pk': reparticao.pk}))
         elif tarefa:
             return redirect(reverse('app_tarefas:single_tarefa', kwargs={'pk': tarefa.pk}))
+        elif extraassociado:
+            return redirect(reverse('app_servicos:single_servico_extra', kwargs={'pk': extraassociado.pk}))
 
     except Documento.DoesNotExist:
         messages.error(request, 'Documento não encontrado.')

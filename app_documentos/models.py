@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from app_associados.models import AssociadoModel
 from app_tarefas.models import TarefaModel
-
+from app_servicos.models import ExtraAssociadoModel
 
 class TipoDocumentoModel(models.Model):
     tipo = models.CharField(max_length=1500, verbose_name="Nome do Tipo de Documento")
@@ -42,6 +42,13 @@ class Documento(models.Model):
         null=True, blank=True,
         related_name='tarefa_documentos'        
     )
+    extra_associado = models.ForeignKey(
+        'app_servicos.ExtraAssociadoModel',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='documentos'
+    )
     tipo_doc = models.ForeignKey(
         'TipoDocumentoModel',
         on_delete=models.SET_NULL,
@@ -69,8 +76,10 @@ class Documento(models.Model):
             nome_proprietario = self.reparticao.nome_reparticao
         elif self.tarefa:
             nome_proprietario = self.tarefa.titulo
+        elif self.extra_associado:
+            nome_proprietario = f"{self.extra_associado.nome_completo}"
         else:
-            raise ValueError("Documento deve estar associado a um Associado, Integrante ou Associação.")
+            raise ValueError("Documento deve estar associado a um Associado, Tarefa, ExtraAssociado, Integrante ou Associação.")
 
         # Define o nome do documento
         if self.tipo_doc:
@@ -98,6 +107,8 @@ class Documento(models.Model):
             return f"{self.nome} - Repartição: {self.reparticao.nome_reparticao}"
         elif self.tarefa:
             return f"{self.nome} - Tarefa: {self.tarefa.titulo}"
+        elif self.extra_associado:
+            return f"{self.nome} - Extra Associado: {self.extra_associado.nome_completo}"
         else:
             return f"{self.nome} - Sem proprietário definido"
 

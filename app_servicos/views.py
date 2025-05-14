@@ -25,6 +25,8 @@ logger = logging.getLogger(__name__)
 
 # SEVIÇOS
 # Single Serviço - ASSOCIADO
+from app_documentos.models import Documento, TipoDocumentoModel
+
 class SingleServicoView(LoginRequiredMixin, DetailView):
     model = ServicoAssociadoModel
     template_name = 'app_servicos/single_servico_associado.html'
@@ -32,15 +34,27 @@ class SingleServicoView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
         servico = self.get_object()
+        associado = servico.associado
 
-        # Se tiver histórico, adiciona ao contexto
-        context['historico'] = servico.historico.all().order_by('-data_alteracao') if hasattr(servico, 'historico') else []
         context.update({
-            "historico": servico.historico.select_related("alterado_por").order_by("-data_alteracao")
+            "historico": servico.historico.select_related("alterado_por").order_by("-data_alteracao") if hasattr(servico, 'historico') else [],
         })
+
+        # Tipos relevantes: RG, RGP, NIT
+        tipos_desejados = ['RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI', 'TIE', 'Licença Embarcação(Pesca)', 'Comprovante Residência', 'Declaração Residência - MAPA', 'Foto3x4', 'CAEPF']
+        tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
+
+        # Busca documentos do associado com esses tipos
+        documentos_relevantes = Documento.objects.filter(
+            associado=associado,
+            tipo_doc__in=tipos
+        ).order_by('-data_upload')
+
+        context["documentos_relevantes"] = documentos_relevantes
+
         return context
+
 
 
 # Single Serviço - EXTRAASSOCIADO
@@ -52,6 +66,7 @@ class ServicoExtraDetailView(LoginRequiredMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         servico = self.get_object()
+        extraassociado = servico.extra_associado
 
         entrada = servico.entrada_relacionada
         alteracoes_entrada = entrada.alteracoes.all() if entrada else []
@@ -70,6 +85,18 @@ class ServicoExtraDetailView(LoginRequiredMixin, DetailView):
             'historico_servico': servico.historico_extra.all(),
             'extra_associado': servico.extra_associado
         })
+        # Tipos relevantes: RG, RGP, NIT
+        tipos_desejados = ['RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI', 'Comprovante Residência', 'Declaração Residência - MAPA', 'Foto3x4', 'CAEPF']
+        tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
+
+        # Busca documentos do associado com esses tipos
+        documentos_relevantes = Documento.objects.filter(
+            extra_associado=extraassociado,
+            tipo_doc__in=tipos
+        ).order_by('-data_upload')
+
+        context["documentos_relevantes"] = documentos_relevantes
+        
         return context
 
 
@@ -430,7 +457,15 @@ class DetailExtraAssociadoView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['servicos'] = ServicoExtraAssociadoModel.objects.filter(extra_associado=self.object)
+
+        extra = self.object
+
+        # Documentos vinculados ao ExtraAssociado
+        context['documentos'] = Documento.objects.filter(extra_associado=extra).order_by('-data_upload')
+
+        # Serviços relacionados
+        context['servicos'] = ServicoExtraAssociadoModel.objects.filter(extra_associado=extra)
+
         return context
 
 # Painel Fluxo Etapas

@@ -121,6 +121,7 @@ class ServicoExtraAssociadoModel(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+        related_name='servicos_extra_associado',
         verbose_name="Extra Associado"
     )
 

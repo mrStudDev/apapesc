@@ -147,7 +147,60 @@
     </section>
     {% endif %}
 
+    <!-- Seção: Documentos do Associado -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+      <div class="flex items-center justify-between mb-4">
+          <h2 class="text-base font-semibold text-gray-700">📎 Documentos do Associado</h2>
+          <!-- Botão Upload -->
+          <a href="{% url 'app_documentos:upload_documento' 'extraassociado' extra.pk %}"
+          class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400"
+          title="Upload de Documento">
+          <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
+          <span class="sr-only">Upload</span> Upload Doc
+      </a>
+      
+      </div>
+
+      {% if documentos %}
+          <ul class="space-y-4">
+              {% for documento in documentos %}
+                  <li class="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+                      <div class="flex items-center">
+                          <i class="material-icons text-gray-500 mr-2">insert_drive_file</i>
+                          <div>
+                              <a href="{{ documento.arquivo.url }}" target="_blank"
+                                class="text-blue-500 font-semibold hover:underline">{{ documento.nome }}</a>
+                              <p class="text-xs text-gray-500 mt-1">
+                                  Enviado em <strong>{{ documento.data_upload|date:"d/m/Y H:i" }}</strong> •
+                                  Ext: <span class="bg-gray-200 text-gray-700 px-2 py-0.5 rounded text-xs">
+                                      {{ documento.arquivo.url|slice:"-3:"|upper }}
+                                  </span>
+                              </p>
+                              <p class="text-sm text-gray-600 mt-1">* {{ documento.descricao|truncatechars:71 }}</p>
+                          </div>
+                      </div>
+                      <div class="flex items-center space-x-2">
+                          <a href="{{ documento.arquivo.url }}" download title="Baixar">
+                              <i class="material-icons text-green-600 hover:text-green-800">cloud_download</i>
+                          </a>
+                          <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="WhatsApp" target="#">
+                              <i class="material-icons text-green-500 hover:text-green-700">phone_android</i>
+                          </a>
+                          <a href="{% url 'app_documentos:criar_copia_pdf' documento.pk %}" title="Cópia PDF">
+                              <i class="material-icons text-orange-500 hover:text-orange-700">picture_as_pdf</i>
+                          </a>
+                          <a href="{% url 'app_documentos:delete_documento' documento.pk %}" title="Excluir">
+                              <i class="material-icons text-red-500 hover:text-red-700">delete</i>
+                          </a>
+                      </div>
+                  </li>
+              {% endfor %}
+          </ul>
+      {% else %}
+          <p class="text-gray-500 italic">Nenhum documento foi enviado ainda.</p>
+      {% endif %}
     </div>
+  </div>
   </main>
   
 {% include "components/footer_associacao.html" %}
