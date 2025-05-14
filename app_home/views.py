@@ -45,7 +45,7 @@ class SobreNosView(TemplateView):
     template_name = 'app_home/sobre.html'
 
 class ServicosView(TemplateView):
-    template_name = 'app_home/servicos.html'
+    template_name = 'app_home/servicos_apapesc.html'
     
 
 class LeadMessagesListView(ListView):
