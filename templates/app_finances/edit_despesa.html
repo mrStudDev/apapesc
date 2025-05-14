@@ -131,7 +131,7 @@
         <div class="container mx-auto max-w-6xl bg-white shadow-lg rounded-lg p-8 mb-8">
             <h1 class="text-2xl font-bold text-gray-800 mb-6">Editar Despesa</h1>
     
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <!-- Associação -->
@@ -232,13 +232,48 @@
                         {% endfor %}
                     </div>
                 </div>
-    
-                <!-- Checkbox "Pago" -->
-                <div class="mb-4 flex items-center">
-                    <input type="checkbox" name="pago" id="id_pago" class="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded" {% if form.instance.pago %}checked{% endif %}>
-                    <label for="id_pago" class="ml-2 text-gray-700">Marque se a despesa foi paga</label>
-                </div>
-                </div>
+
+                <div class="mb-4 bg-blue-50">
+                    <div class="p-2 px-2">
+                        <small class="text-blue-600">Faça o Upload do comprovante, se necessário</small>
+                        <label for="{{ form.comprovante_nota.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.comprovante_nota.label }}
+                        </label>
+                        <div class="mt-1">
+                            {{ form.comprovante_nota }}
+                        </div>
+                        {% for error in form.comprovante_nota.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                    <div class="p-2 px-2">
+                        <small class="text-red-800">Data Automática do Comprovante / Nota Fiscal</small>
+                        <label for="{{ form.data_upload_comprovante.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                            {{ form.data_upload_comprovante.label }}
+                        </label>
+                        <div class="mt-1">
+                            {{ form.data_upload_comprovante }}
+                        </div>
+                        {% for error in form.data_upload_comprovante.errors %}
+                            <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                
+                {% if despesa.comprovante_nota %}
+                    <a href="{{ despesa.comprovante_nota.url }}" target="_blank">📎 Ver Comprovante</a>
+                    <p class="text-xs text-gray-500">Enviado em {{ despesa.data_upload_comprovante|date:"d/m/Y H:i" }}</p>
+                {% else %}
+                    <p class="text-md text-gray-500">Nenhum comprovante enviado.</p>
+                {% endif %}
+              </div>
+            </div>
+            <br><hr><br>    
+            <!-- Checkbox "Pago" -->
+            <div class="mb-4 flex items-center">
+                <input type="checkbox" name="pago" id="id_pago" class="h-5 w-5 text-green-600 focus:ring-green-500 border-gray-300 rounded" {% if form.instance.pago %}checked{% endif %}>
+                <label for="id_pago" class="ml-2 text-gray-700">Marque se a despesa foi paga</label>
+            </div>
+
                 <!-- Botões -->
                 <div class="flex justify-between mt-6">
                     <button type="submit" class="bg-yellow-500 text-white px-6 py-3 rounded-lg hover:bg-green-600 shadow">

@@ -866,6 +866,13 @@ class DespesaCreateView(SuccessMessageMixin, CreateView):
         self.object.registrado_por = self.request.user  
         self.object.save()  
 
+        form.save_m2m()  # Se houver m2m (padrão)
+
+        # Garante que o comprovante seja salvo
+        if 'comprovante_nota' in form.cleaned_data:
+            self.object.comprovante_nota = form.cleaned_data['comprovante_nota']
+            self.object.save()
+
         # 🔥 Captura a ação desejada pelo usuário
         acao = self.request.POST.get("acao")
 

@@ -19,6 +19,7 @@ from collections import OrderedDict
 from app_associados.models import AssociadoModel
 from django.db import transaction
 from django.contrib.auth.decorators import login_required, permission_required
+from app_documentos.models import Documento, TipoDocumentoModel  # certifique-se de importar corretamente
 
 
 
@@ -72,22 +73,31 @@ def lista_beneficios(request):
 
 def controle_beneficio_detail(request, pk):
     controle = get_object_or_404(ControleBeneficioModel, pk=pk)
-    
+
     if request.method == 'POST':
         form = ControleBeneficioForm(request.POST, request.FILES, instance=controle)
         if form.is_valid():
-            # Associa o usuário atual antes de salvar
             controle._current_user = request.user
             controle.save()
             messages.success(request, 'Registro atualizado com sucesso!')
             return redirect('app_beneficios:lista_beneficios')
     else:
         form = ControleBeneficioForm(instance=controle)
-    
+
+    # 🔍 Documentos relevantes por tipo
+    tipos_desejados = ['RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI', 'Comprovante Residência', 'Declaração Residência - MAPA', 'Foto3x4', 'CAEPF']
+    tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
+
+    documentos_relevantes = Documento.objects.filter(
+        associado=controle.associado,
+        tipo_doc__in=tipos
+    ).order_by('-data_upload')
+
     return render(request, 'app_beneficios/controle_detail.html', {
         'form': form,
         'controle': controle,
-        'historico': controle.historico.all().order_by('-alterado_em')
+        'historico': controle.historico.all().order_by('-alterado_em'),
+        'documentos_relevantes': documentos_relevantes,
     })
 
 

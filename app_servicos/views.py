@@ -42,7 +42,7 @@ class SingleServicoView(LoginRequiredMixin, DetailView):
         })
 
         # Tipos relevantes: RG, RGP, NIT
-        tipos_desejados = ['RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI', 'TIE', 'Licença Embarcação(Pesca)', 'Comprovante Residência', 'Declaração Residência - MAPA', 'Foto3x4', 'CAEPF']
+        tipos_desejados = ['RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI', 'TIE', 'Licença Embarcação(Pesca)', 'Título Eleitor', 'Comprovante Residência', 'Declaração Residência - MAPA', 'Foto3x4', 'CAEPF']
         tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
 
         # Busca documentos do associado com esses tipos

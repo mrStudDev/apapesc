@@ -12,6 +12,8 @@ from django.conf import settings
 from django.db.models.functions import Lower
 from django.forms.models import model_to_dict
 from datetime import datetime
+from django.core.validators import FileExtensionValidator
+
 
 class AnuidadeModel(models.Model):
     ano = models.PositiveIntegerField(unique=True, verbose_name="Ano da Anuidade")
@@ -199,6 +201,21 @@ class DespesaAssociacaoModel(models.Model):
     )
     pago = models.BooleanField(default=False, verbose_name="Despesa Paga")  # ✅ Adicionado!
 
+    # ✅ Novos campos
+    comprovante_nota = models.FileField(
+        upload_to='comprovantes_despesas/',
+        blank=True,
+        null=True,
+        verbose_name="Comprovante / Nota Fiscal",
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png'])],
+        help_text="Upload do comprovante em PDF, JPG ou PNG."
+    )
+    data_upload_comprovante = models.DateTimeField(
+        blank=True,
+        null=True,
+        editable=False,
+        verbose_name="Data do Upload do Comprovante"
+    )
     class Meta:
         ordering = ['-data_vencimento']
         verbose_name = "Despesa da Associação"
@@ -235,7 +252,10 @@ class DespesaAssociacaoModel(models.Model):
                         valor_novo=str(valor_novo),
                         alterado_por=usuario_atualizacao  # ✅ Agora pega corretamente o usuário logado!
                     )
-
+                    
+        if self.comprovante_nota and not self.data_upload_comprovante:
+            self.data_upload_comprovante = now()
+            
         super().save(*args, **kwargs) # Continua o processo normal de salvar
             
     def esta_vencida(self):

@@ -336,6 +336,37 @@
                 Voltar para a lista de Controle de Benefícios
             </a>
         </div>
+
+        {% if documentos_relevantes %}
+        <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+          <h2 class="text-base font-semibold text-gray-700 mb-4">📎 Documentos Relevantes do Associado</h2>
+          <ul class="space-y-4">
+            {% for doc in documentos_relevantes %}
+            <li class="flex items-center justify-between bg-gray-50 border p-3 rounded-md">
+              <div>
+                <p class="text-sm font-medium text-gray-800">
+                  <i class="material-icons text-sm text-blue-400 align-middle">insert_drive_file</i>
+                  {{ doc.tipo_doc.tipo }} –
+                  <a href="{{ doc.arquivo.url }}" class="text-blue-600 hover:underline" target="_blank">Visualizar</a>
+      
+                  <span class="inline-block text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full ml-2">
+                    {{ doc.arquivo.url|slice:"-3:"|upper }}
+                  </span>
+                </p>
+                <p class="text-xs text-gray-500">Enviado em {{ doc.data_upload|date:"d/m/Y H:i" }}</p>
+              </div>
+              <a href="{{ doc.arquivo.url }}" download class="text-green-600 hover:text-green-800" title="Baixar Documento">
+                <i class="material-icons">cloud_download</i>
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% else %}
+        <p class="text-gray-500 text-sm italic mt-4">Nenhum documento relevante foi encontrado para o associado.</p>
+      {% endif %}
+      
+        
         <!-- Seção do Histórico -->
         <div class="mt-8">
             <h3 class="text-lg font-medium text-gray-900 mb-4">Histórico de Alterações</h3>
