@@ -20,7 +20,7 @@ SECRET_KEY = env("SECRET_KEY", default="chave-padrao-insegura")
 
 DEBUG = env.bool("DEBUG", default=False)
 # REAL 34.55.106.64
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS_PROD", default=["apapesc.com", "www.apapesc.com", "127.0.0.1", "localhost", "35.226.35.185",])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS_PROD", default=["apapesc.com", "www.apapesc.com", "127.0.0.1", "localhost", "34.60.6.181",])
 
 
 # Application definition
