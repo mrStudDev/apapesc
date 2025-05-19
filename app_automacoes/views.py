@@ -25,7 +25,7 @@ from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 from reportlab.lib.colors import Color
 from pdfrw.buildxobj import pagexobj
 
-from app_finances.models import AnuidadeAssociado
+from app_finances.models import AnuidadeAssociado, AnuidadeModel
 from app_associados.models import AssociadoModel
 from app_associacao.models import AssociacaoModel
 from django.contrib import messages
@@ -40,6 +40,7 @@ from .models import (
     ReciboAnuidadeModel,
     ReciboServicoExtraModel,
     CarteirinhaAssociadoModel,
+    CobrancaAnuidadeModel,
     )
 
 # Deletes
@@ -53,6 +54,7 @@ MODELO_MAP = {
     'recibos_anuidades': ReciboAnuidadeModel,
     'recibos_servicos_extra': ReciboServicoExtraModel,
     'carteirinha_apapesc': CarteirinhaAssociadoModel,
+    'cobranca_anuidades': CobrancaAnuidadeModel,
 
 }
 
@@ -90,6 +92,7 @@ def upload_pdf_base(request, automacao):
         'recibos_anuidades': ReciboAnuidadeModel,
         'recibos_servicos_extra': ReciboServicoExtraModel,
         'carteirinha_apapesc': CarteirinhaAssociadoModel,
+        'cobranca_anuidades': CobrancaAnuidadeModel,
     }
     
     modelo = modelo_map.get(automacao)
@@ -134,6 +137,7 @@ class ListaTodosArquivosView(LoginRequiredMixin, GroupPermissionRequiredMixin, T
         context['recibos_anuidades'] = ReciboAnuidadeModel.objects.all()
         context['recibos_servicos_extra'] = ReciboServicoExtraModel.objects.all()
         context['carteirinha_apapesc'] = CarteirinhaAssociadoModel.objects.all()
+        context['cobranca_anuidades'] = CobrancaAnuidadeModel.objects.all()
         
         return context
 
@@ -1015,6 +1019,330 @@ def gerar_recibo_anuidade(request, anuidade_assoc_id):
     #return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?{query_string}")
     return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?{query_string}&tipo=anuidade")
 
+
+
+    # =======================================================================================================
+# GERAR COBRANÇA NUIDADE APAPESC ASSOCIADO
+# app_automacoes/views.py
+from decimal import Decimal
+
+def gerar_cobranca_anuidade(request, anuidade_assoc_id):
+    anuidade_assoc = get_object_or_404(AnuidadeAssociado, id=anuidade_assoc_id)
+    associado = anuidade_assoc.associado
+    associacao = associado.associacao
+
+    # Caminho para o PDF base
+    template_path = os.path.join(settings.MEDIA_ROOT, 'pdf/cobranca_anuidades.pdf')
+    if not os.path.exists(template_path):
+        return HttpResponse("O PDF base para a Cobrança de Anuidade não foi encontrado.", status=404)
+
+    template_pdf = PdfReader(template_path)
+    buffer = BytesIO()
+
+    hoje = datetime.now()
+    data_hoje = hoje.strftime('%d/%m/%Y')
+
+    # 🔎 Pega todas as anuidades não pagas de anos anteriores ao atual
+    anuidades_em_aberto = AnuidadeAssociado.objects.filter(
+        associado=associado,
+        pago=False,
+        anuidade__ano__lt=hoje.year
+    ).select_related('anuidade')
+
+    if not anuidades_em_aberto.exists():
+        return HttpResponse("Não há anuidades em aberto para este associado.", status=404)
+
+    # 🔢 Conta de quantas anuidades estão em aberto
+    total_anuidades_em_aberto = anuidades_em_aberto.count()
+
+    # 💰 Valor atual da anuidade (do ano corrente)
+    try:
+        anuidade_atual = AnuidadeModel.objects.get(ano=hoje.year)
+    except AnuidadeModel.DoesNotExist:
+        return HttpResponse("Valor da anuidade atual não encontrado.", status=404)
+
+    valor_anuidade_atual = anuidade_atual.valor_anuidade
+    valor_total_cobrado = valor_anuidade_atual * total_anuidades_em_aberto
+
+    # 🧾 Lista das anuidades em aberto com seus valores originais
+    lista_anuidades = " - ".join([
+        f"<strong>{a.anuidade.ano}</strong>: R$ {a.anuidade.valor_anuidade:.2f}"
+        for a in anuidades_em_aberto
+    ])
+
+
+    # 📝 Texto da carta
+    texto = f"""
+    <br/><br/>
+    Prezado(a) <strong>{associado.user.get_full_name()}</strong>,<br/><br/>
+
+    Realizamos uma análise em nosso sistema e identificamos que, até o momento, não localizamos o seu nome nas listagens de pagamentos das seguintes anuidades:
+
+    {lista_anuidades}. Também não identificamos o envio de comprovantes de pagamento para os anos mencionados. Se os pagamentos já foram realizados, por gentileza, envie os comprovantes para que possamos atualizar sua situação.<br/><br/>
+
+    Caso ainda não tenha efetuado os pagamentos, o valor a ser considerado é com base na anuidade vigente(atual) ({hoje.year}), que é no valor de <strong>R$ {valor_anuidade_atual:.2f}</strong> por ano em aberto.
+
+    Sendo assim, o valor total das anuidade(es) em aberto é de: <strong>R$ {valor_total_cobrado:.2f}</strong>.<br/><br/>
+    
+    <strong>OBS:</strong> As anuidades computadas nesse documento são de anos <font color='red'><strong>anteriores</strong></font> ao ano vigente (atual).<br/><br/>
+
+    Entre em contato para verificar as formas de pagamento. <strong>Facilitamos para voçê!</strong> <br/><br/>
+
+    <em>Agradecemos por sua atenção. A sua contribuição fortalece a associação e nos permite seguir prestando apoio e serviços aos associados.</em>
+    """
+
+    assinatura = (
+        f"{associacao.presidente.user.get_full_name()}<br/>"
+        f"Presidente da Associação<br/>"
+        f"APAPESC"
+    )
+
+    municipio = associacao.municipio.upper() if associacao.municipio else "CIDADE NÃO DEFINIDA"
+    local_data = f"{municipio}, {data_hoje}."
+
+    # Estilos PDF
+    styles = getSampleStyleSheet()
+    style_title = ParagraphStyle(
+        'Title',
+        parent=styles['Title'],
+        fontName='Times-Bold',
+        fontSize=14,
+        alignment=TA_CENTER,
+        leading=20,
+        spaceBefore=27,
+        textColor=colors.black,
+    )
+    style_normal = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=17,
+        alignment=TA_JUSTIFY,
+        spaceBefore=0,
+    )
+    style_assinatura = ParagraphStyle(
+        'Assinatura',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=18,
+        alignment=TA_CENTER,
+        spaceBefore=10,
+    )
+    style_presidente = ParagraphStyle(
+        'Presidente',
+        parent=styles['Normal'],
+        fontName='Times-Bold',
+        fontSize=12,
+        alignment=2,
+        leading=16,
+        spaceBefore=10,  # 🔼 Menos espaço acima
+        textColor=colors.grey,
+    )
+    nome_presidente = ( f"{associacao.presidente.user.get_full_name()}")
+    # Gera conteúdo do PDF
+    elements = [
+        Spacer(1, 61),
+        Paragraph(nome_presidente, style_presidente),
+        Spacer(1, 35),
+        Paragraph("ANUIDADES EM ABERTO", style_title),
+        Spacer(1, 1),
+        Paragraph(texto, style_normal),
+        Spacer(1, 7),
+        Paragraph(local_data, style_normal),
+        Spacer(1, 7),
+        Paragraph(assinatura, style_assinatura),
+    ]
+
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=50,
+        leftMargin=50,
+        topMargin=100,
+        bottomMargin=50,
+    )
+    doc.build(elements)
+    buffer.seek(0)
+
+    # Mescla com PDF base
+    overlay_pdf = PdfReader(buffer)
+    for i, page in enumerate(template_pdf.pages):
+        if i < len(overlay_pdf.pages):
+            PageMerge(page).add(overlay_pdf.pages[i]).render()
+
+    # Salva PDF final
+    pdf_name = f"cobranca_anuidades_{associado.id}_{hoje.year}.pdf"
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+    PdfWriter(pdf_path, trailer=template_pdf).write()
+
+    pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
+    query = urlencode({'pdf_url': pdf_url})
+    return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?{query}&tipo=cobranca")
+# -----------------------------------------------------------------------------------------------------------
+
+# =======================================================================================================
+# GERAR COBRANÇA/NOTIFICAÇÃO EM LOTE
+import zipfile
+import re
+
+def slugify_filename(nome):
+    return re.sub(r'\W+', '_', nome.strip().lower())
+
+def gerar_cobrancas_em_lote(request):
+    hoje = datetime.now()
+    ano_atual = hoje.year
+    data_hoje = hoje.strftime('%d/%m/%Y')
+
+    # Caminho do template base
+    template_path = os.path.join(settings.MEDIA_ROOT, 'pdf/cobranca_anuidades.pdf')
+    if not os.path.exists(template_path):
+        return HttpResponse("Modelo base da cobrança não foi encontrado.", status=404)
+    template_pdf = PdfReader(template_path)
+
+    # Verifica se tem anuidade do ano atual
+    try:
+        anuidade_atual = AnuidadeModel.objects.get(ano=ano_atual)
+    except AnuidadeModel.DoesNotExist:
+        return HttpResponse("Valor da anuidade atual não foi configurado.", status=404)
+
+    valor_anuidade_atual = anuidade_atual.valor_anuidade
+
+    # Diretório de saída
+    output_dir = os.path.join(settings.MEDIA_ROOT, 'documentos', 'cobrancas_em_lote')
+    os.makedirs(output_dir, exist_ok=True)
+
+    arquivos_gerados = []
+
+    for associado in AssociadoModel.objects.all():
+        anuidades_em_aberto = AnuidadeAssociado.objects.filter(
+            associado=associado,
+            pago=False,
+            anuidade__ano__lt=ano_atual
+        ).select_related('anuidade')
+
+        if not anuidades_em_aberto.exists():
+            continue
+
+        total_anuidades_em_aberto = anuidades_em_aberto.count()
+        valor_total_cobrado = valor_anuidade_atual * total_anuidades_em_aberto
+
+        lista_anuidades = " - ".join([
+            f"<strong>{a.anuidade.ano}</strong>: R$ {a.anuidade.valor_anuidade:.2f}"
+            for a in anuidades_em_aberto
+        ])
+
+        associacao = associado.associacao
+        municipio = associacao.municipio.upper() if associacao.municipio else "CIDADE NÃO DEFINIDA"
+        local_data = f"{municipio}, {data_hoje}."
+        nome_presidente = associacao.presidente.user.get_full_name()
+        assinatura = f"{nome_presidente}<br/>Presidente da Associação<br/>APAPESC"
+
+        texto = f"""
+        <br/><br/>
+        Prezado(a) <strong>{associado.user.get_full_name()}</strong>,<br/><br/>
+
+        Realizamos uma análise em nosso sistema e identificamos que, até o momento, não localizamos o seu nome nas listagens de pagamentos das seguintes anuidades:
+
+        {lista_anuidades}. Também não identificamos o envio de comprovantes de pagamento para os anos mencionados. Se os pagamentos já foram realizados, por gentileza, envie os comprovantes para que possamos atualizar sua situação.<br/><br/>
+
+        Caso ainda não tenha efetuado os pagamentos, o valor a ser considerado é com base na anuidade vigente(atual) ({ano_atual}), que é no valor de <strong>R$ {valor_anuidade_atual:.2f}</strong> por ano em aberto.
+
+        Sendo assim, o valor total das anuidade(es) em aberto é de: <strong>R$ {valor_total_cobrado:.2f}</strong>.<br/><br/>
+
+        <strong>OBS:</strong> As anuidades computadas nesse documento são de anos <font color='red'><strong>anteriores</strong></font> ao ano vigente (atual).<br/><br/>
+
+        Entre em contato para verificar as formas de pagamento. <strong>Facilitamos para voçê!</strong> <br/><br/>
+
+        <em>Agradecemos por sua atenção. A sua contribuição fortalece a associação e nos permite seguir prestando apoio e serviços aos associados.</em>
+        """
+
+
+        # Estilos PDF
+        styles = getSampleStyleSheet()
+        style_title = ParagraphStyle(
+            'Title',
+            parent=styles['Title'],
+            fontName='Times-Bold',
+            fontSize=14,
+            alignment=TA_CENTER,
+            leading=20,
+            spaceBefore=27,
+            textColor=colors.black,
+        )
+        style_normal = ParagraphStyle(
+            'Normal',
+            parent=styles['Normal'],
+            fontName='Times-Roman',
+            fontSize=12,
+            leading=17,
+            alignment=TA_JUSTIFY,
+            spaceBefore=0,
+        )
+        style_assinatura = ParagraphStyle(
+            'Assinatura',
+            parent=styles['Normal'],
+            fontName='Times-Roman',
+            fontSize=12,
+            leading=18,
+            alignment=TA_CENTER,
+            spaceBefore=10,
+        )
+        style_presidente = ParagraphStyle(
+            'Presidente',
+            parent=styles['Normal'],
+            fontName='Times-Bold',
+            fontSize=12,
+            alignment=2,
+            leading=16,
+            spaceBefore=10,
+            textColor=colors.grey,
+        )
+
+        # Cria PDF
+        buffer = BytesIO()
+        doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=100, bottomMargin=50)
+        elements = [
+            Spacer(1, 61),
+            Paragraph(nome_presidente, style_presidente),
+            Spacer(1, 35),
+            Paragraph("ANUIDADES EM ABERTO", style_title),
+            Spacer(1, 1),
+            Paragraph(texto, style_normal),
+            Spacer(1, 7),
+            Paragraph(local_data, style_normal),
+            Spacer(1, 7),
+            Paragraph(assinatura, style_assinatura),
+        ]
+        doc.build(elements)
+        buffer.seek(0)
+
+        overlay_pdf = PdfReader(buffer)
+        template_pdf = PdfReader(template_path)
+        for i, page in enumerate(template_pdf.pages):
+            if i < len(overlay_pdf.pages):
+                PageMerge(page).add(overlay_pdf.pages[i]).render()
+
+        nome_formatado = slugify_filename(associado.user.get_full_name())
+        pdf_name = f"cobranca_{nome_formatado}_{ano_atual}.pdf"
+        pdf_path = os.path.join(output_dir, pdf_name)
+        PdfWriter(pdf_path, trailer=template_pdf).write()
+        arquivos_gerados.append(pdf_path)
+
+    # Cria o zip
+    zip_path = os.path.join(settings.MEDIA_ROOT, 'documentos', f"cobrancas_anuidades_{ano_atual}.zip")
+    with zipfile.ZipFile(zip_path, 'w') as zipf:
+        for file in arquivos_gerados:
+            zipf.write(file, os.path.basename(file))
+
+    # Redireciona para download
+    zip_url = f"{settings.MEDIA_URL}documentos/cobrancas_anuidades_{ano_atual}.zip"
+    return redirect(zip_url)
+
+
+
 # =======================================================================================================
 # GERAR RECIBO DE ENTRADA EXTRA ASSOCIADO
 # app_automacoes/views.py
@@ -1228,5 +1556,4 @@ def gerar_carteirinha_apapesc(request, associado_id):
     # URL para acesso
     pdf_url = f"{settings.MEDIA_URL}documentos/carteirinha_{associado.id}.pdf"
     return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")
-    
     

@@ -56,7 +56,6 @@ class SingleServicoView(LoginRequiredMixin, DetailView):
         return context
 
 
-
 # Single Serviço - EXTRAASSOCIADO
 class ServicoExtraDetailView(LoginRequiredMixin, DetailView):
     model = ServicoExtraAssociadoModel

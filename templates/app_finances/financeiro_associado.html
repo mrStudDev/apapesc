@@ -60,6 +60,19 @@
                         <i class="material-icons text-sm">content_copy</i>
                     </button>
                 </div>
+                <!-- botão cobranca -->
+                {% if exibir_botao_cobranca %}
+                    <div class="my-6 p-4 border border-yellow-300 bg-yellow-50 rounded shadow-sm">
+                    <h3 class="text-sm text-gray-700 font-semibold mb-2">Cobrança de Anuidades em Aberto</h3>
+                    <p class="text-sm text-gray-600 mb-3">Identificamos anuidades de anos anteriores ainda em aberto.</p>
+                    <a href="{% url 'app_automacoes:gerar_cobranca_anuidade' anuidades_em_aberto.0.anuidade.id %}"
+                        class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded shadow">
+                        <span class="material-icons mr-2">warning</span>
+                        Gerar Cobrança de Anuidade
+                    </a>
+                    </div>
+                {% endif %}
+              
 
                 <!-- Resumo Financeiro (Discretamente destacado) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">

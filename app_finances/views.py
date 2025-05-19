@@ -199,6 +199,15 @@ class FinanceiroAssociadoDetailView(DetailView):
             'descontos': descontos,
             'eventos_financeiros': eventos_financeiros
         })
+        
+        # Anuidades em aberto (saldo > 0) e de anos anteriores ao atual
+        anuidades_em_aberto = [
+            d for d in detalhes_anuidades
+            if d['saldo'] > 0 and d['ano'] < datetime.now().year
+        ]
+        context['anuidades_em_aberto'] = anuidades_em_aberto
+        context['exibir_botao_cobranca'] = bool(anuidades_em_aberto)  # True se houver
+        
         return context
 
 
