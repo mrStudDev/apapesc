@@ -31,6 +31,8 @@ from app_associacao.models import AssociacaoModel
 from django.contrib import messages
 from app_finances.models import EntradaFinanceira
 
+from slugify import slugify
+
 from .models import (
     DeclaracaoResidenciaModel,
     DeclaracaoFiliacaoModel,
@@ -1008,7 +1010,8 @@ def gerar_recibo_anuidade(request, anuidade_assoc_id):
             PageMerge(template_page).add(overlay_page).render()
 
     # Salvando o PDF final
-    pdf_name = f"recibo_anuidade_{associado.id}_{anuidade_assoc.anuidade.ano}.pdf"
+    nome_associado = slugify(associado.user.get_full_name())
+    pdf_name = f"recibo_anuidade_{associado.id}_{nome_associado}_{anuidade_assoc.anuidade.ano}.pdf"
     pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
     os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
     PdfWriter(pdf_path, trailer=template_pdf).write()
@@ -1173,7 +1176,13 @@ def gerar_cobranca_anuidade(request, anuidade_assoc_id):
             PageMerge(page).add(overlay_pdf.pages[i]).render()
 
     # Salva PDF final
-    pdf_name = f"cobranca_anuidades_{associado.id}_{hoje.year}.pdf"
+    nome_associado = slugify(associado.user.get_full_name())
+    # 🔥 Lista de anos em atraso
+    anos_em_atraso = "-".join(
+        str(a.anuidade.ano) for a in anuidades_em_aberto
+    )
+    # ✅ Nome do PDF
+    pdf_name = f"Notificacao_anuidades_{associado.id}_{nome_associado}_{anos_em_atraso}.pdf"
     pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
     os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
     PdfWriter(pdf_path, trailer=template_pdf).write()

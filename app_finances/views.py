@@ -1351,3 +1351,82 @@ class ResumoFinanceiroView(TemplateView):
 
         return context
     
+# Relatórios ===============================
+
+# Pagamentos Anuidades ===
+class RelatorioAnuidadesView(TemplateView):
+    template_name = 'app_finances/relatorio_anuidades.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 🔎 Captura os filtros
+        nome_query = self.request.GET.get('q', '').strip()
+        associacao_filtro = self.request.GET.get('associacao', '')
+        reparticao_filtro = self.request.GET.get('reparticao', '')
+        ano_filtro = self.request.GET.get('ano', '')
+
+        pagamentos = Pagamento.objects.select_related(
+            'anuidade_associado__associado__associacao',
+            'anuidade_associado__associado__reparticao',
+            'anuidade_associado__anuidade',
+            'registrado_por'
+        )
+
+        # 🔤 Filtro por nome
+        if nome_query:
+            pagamentos = pagamentos.filter(
+                Q(anuidade_associado__associado__user__first_name__icontains=nome_query) |
+                Q(anuidade_associado__associado__user__last_name__icontains=nome_query)
+            )
+
+        # 🏢 Filtro por associação
+        if associacao_filtro:
+            pagamentos = pagamentos.filter(anuidade_associado__associado__associacao__id=associacao_filtro)
+
+        # 🏬 Filtro por repartição
+        if reparticao_filtro:
+            pagamentos = pagamentos.filter(anuidade_associado__associado__reparticao__id=reparticao_filtro)
+
+        # 📅 Filtro por ano
+        if ano_filtro:
+            pagamentos = pagamentos.filter(anuidade_associado__anuidade__ano=ano_filtro)
+
+        pagamentos = pagamentos.order_by(
+            'anuidade_associado__associado__associacao__nome_fantasia',
+            'anuidade_associado__associado__reparticao__nome_reparticao',
+            'anuidade_associado__associado__user__first_name',
+            'anuidade_associado__anuidade__ano'
+        )
+
+        relatorio = []
+        for pagamento in pagamentos:
+            associado = pagamento.anuidade_associado.associado
+            associacao = associado.associacao
+            reparticao = associado.reparticao
+
+            relatorio.append({
+                'associacao': associacao.nome_fantasia if associacao else "Sem Associação",
+                'reparticao': reparticao.nome_reparticao if reparticao else "Sem Repartição",
+                'associado_nome': associado.user.get_full_name(),
+                'associado_id': associado.id,  # 👈 ESSENCIAL
+                'associado_cpf': associado.cpf,
+                'ano_anuidade': pagamento.anuidade_associado.anuidade.ano,
+                'valor_pago': pagamento.valor,
+                'data_pagamento': pagamento.data_pagamento,
+                'registrado_por': pagamento.registrado_por.get_full_name() if pagamento.registrado_por else "N/A"
+            })
+
+        context.update({
+            'relatorio': relatorio,
+            'data_hoje': now().strftime('%d/%m/%Y'),
+            'associacoes': AssociacaoModel.objects.all(),
+            'reparticoes': ReparticoesModel.objects.all(),
+            'anos': AnuidadeModel.objects.values_list('ano', flat=True).distinct().order_by('-ano'),
+            'nome_query': nome_query,
+            'associacao_filtro': associacao_filtro,
+            'reparticao_filtro': reparticao_filtro,
+            'ano_filtro': ano_filtro,
+        })
+
+        return context

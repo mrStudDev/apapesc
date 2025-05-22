@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Relatório de Anuidades{% endblock title %}
+
+{% block relatorio_anuidades %}
+    <!-- Navbar -->
+    {% include "components/navbar_associacao.html" %}
+
+<main class="flex-grow">
+    
+    <div class="max-w-7xl mx-auto p-6 bg-white rounded shadow">
+    <h1 class="text-2xl font-bold mb-4">📊 Relatório de Pagamentos de Anuidades</h1>
+
+    <!-- 🔍 Formulário de Filtros -->
+    <form method="get" class="mb-6 flex flex-wrap gap-3 items-end">
+        <div>
+            <label class="block text-xs text-gray-600 mb-1">Buscar por nome</label>
+            <input type="text" name="q" value="{{ nome_query }}" placeholder="Digite o nome"
+                class="border px-3 py-2 rounded-md text-sm w-52" />
+        </div>
+
+        <div>
+            <label class="block text-xs text-gray-600 mb-1">Associação</label>
+            <select name="associacao" class="border px-3 py-2 rounded-md text-sm w-48">
+                <option value="">Todas</option>
+                {% for a in associacoes %}
+                    <option value="{{ a.id }}" {% if a.id|stringformat:"s" == associacao_filtro %}selected{% endif %}>
+                        {{ a.nome_fantasia }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs text-gray-600 mb-1">Repartição</label>
+            <select name="reparticao" class="border px-3 py-2 rounded-md text-sm w-48">
+                <option value="">Todas</option>
+                {% for r in reparticoes %}
+                    <option value="{{ r.id }}" {% if r.id|stringformat:"s" == reparticao_filtro %}selected{% endif %}>
+                        {{ r.nome_reparticao }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label class="block text-xs text-gray-600 mb-1">Ano</label>
+            <select name="ano" class="border px-3 py-2 rounded-md text-sm w-24">
+                <option value="">Todos</option>
+                {% for a in anos %}
+                    <option value="{{ a }}" {% if a|stringformat:"s" == ano_filtro %}selected{% endif %}>{{ a }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="self-end">
+            <button type="submit"
+                class="bg-blue-600 text-white px-5 py-2 rounded-md text-sm hover:bg-blue-700">
+                Filtrar
+            </button>
+        </div>
+    </form>
+
+    <!-- 📝 Tabela de Relatório -->
+    <div class="overflow-x-auto bg-white rounded-lg border border-gray-200 shadow-sm">
+        <table class="min-w-full text-sm">
+            <thead class="bg-gray-100 text-gray-700">
+                <tr>
+                    <th class="px-4 py-3 text-left">Associação</th>
+                    <th class="px-4 py-3 text-left">Repartição</th>
+                    <th class="px-4 py-3 text-left">Associado</th>
+                    <th class="px-4 py-3 text-left">CPF</th>
+                    <th class="px-4 py-3 text-center">Anuidade</th>
+                    <th class="px-4 py-3 text-right">Valor Pago</th>
+                    <th class="px-4 py-3 text-center">Data Pagamento</th>
+                    <th class="px-4 py-3 text-left">Registrado Por</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+                {% for item in relatorio %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-4 py-2">{{ item.associacao }}</td>
+                        <td class="px-4 py-2">{{ item.reparticao|default:"—" }}</td>
+                        
+                        <!-- Link no nome do associado -->
+                        <td class="px-4 py-2">
+                            <a href="{% url 'app_finances:financeiro_associado' item.associado_id %}"
+                            class="text-blue-600 hover:text-blue-800 hover:underline">
+                            {{ item.associado_nome }}
+                            </a>
+                        </td>
+
+                        <td class="px-4 py-2">{{ item.associado_cpf }}</td>
+                        <td class="px-4 py-2 text-center">{{ item.ano_anuidade }}</td>
+                        <td class="px-4 py-2 text-right">R$ {{ item.valor_pago|floatformat:2 }}</td>
+                        <td class="px-4 py-2 text-center">{{ item.data_pagamento|date:"d/m/Y" }}</td>
+                        <td class="px-4 py-2">{{ item.registrado_por }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-gray-500">
+                            Nenhum pagamento encontrado com os filtros aplicados.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+        <div class="mt-4">
+            <p class="text-sm text-gray-500">Total de pagamentos: {{ relatorio.count }}</p>
+            <p class="text-sm text-gray-500">Valor total pago: R$ {{ total_pago|floatformat:2 }}</p>
+        </div>
+    </div>
+</main>
+ <!-- Footer -->
+ {% include "components/footer_associacao.html" %}
+{% endblock relatorio_anuidades %}

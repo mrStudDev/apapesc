@@ -19,7 +19,7 @@ from .views import (
     TipoServicoCreateView,
     EditTipoServicoView,
     EntradaUpdateView,
-    
+    RelatorioAnuidadesView,
     )
 
 
@@ -55,6 +55,9 @@ urlpatterns = [
     path('servico/editar/<int:pk>/', EditTipoServicoView.as_view(), name='edit_tipo_servico'),
     path('entradas/editar/<int:pk>/', EntradaUpdateView.as_view(), name='edit_entrada'),
     path('entradas/pagar/<int:entrada_id>/', views.registrar_pagamento, name='registrar_pagamento'),
+    
+    # Relatórios
+    path('relatorio-anuidades/', RelatorioAnuidadesView.as_view(), name='relatorio_anuidades'),
     
 
 ]
