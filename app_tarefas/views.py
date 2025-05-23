@@ -473,11 +473,20 @@ from datetime import datetime
 
 from django.db.utils import IntegrityError
 
-class CriarLancamentoINSSView(CreateView):
+class CriarLancamentoINSSView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = LancamentoINSSModel
     form_class = LancamentoINSSForm
     template_name = 'app_tarefas/create_lancamentoInss.html'
     success_url = reverse_lazy('app_tarefas:list_lancamentos')
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]    
 
     def get_initial(self):
         return {
@@ -538,11 +547,20 @@ class CriarLancamentoINSSView(CreateView):
 
 
 
-class LancamentoINSSListView(ListView):
+class LancamentoINSSListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = LancamentoINSSModel
     template_name = 'app_tarefas/list_lancamentos.html'
     context_object_name = 'lancamentos'
-
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
+    
     def get_queryset(self):
         queryset = super().get_queryset()
         ano = self.request.GET.get('ano')
@@ -569,7 +587,16 @@ class LancamentoINSSListView(ListView):
 
 
 # Views
-class GerarLancamentoINSSView(View):
+class GerarLancamentoINSSView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
     def post(self, request, *args, **kwargs):
         try:
             ano = int(request.POST.get('ano'))
@@ -600,10 +627,19 @@ class GerarLancamentoINSSView(View):
     
     
 
-class DetalheLancamentoINSSView(DetailView):
+class DetalheLancamentoINSSView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
     model = LancamentoINSSModel
     template_name = 'app_tarefas/detalhe_lancamento.html'
     context_object_name = 'lancamento'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -671,8 +707,17 @@ from django.views import View
 from django.shortcuts import get_object_or_404, redirect, render
 from .models import GuiaINSSModel, LancamentoINSSModel
 
-class ProcessarGuiaView(View):
+class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
     template_name = 'app_tarefas/processar_guia.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]    
 
     def get(self, request, lancamento_id):
         lancamento = get_object_or_404(LancamentoINSSModel, id=lancamento_id)

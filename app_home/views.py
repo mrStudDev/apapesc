@@ -48,11 +48,20 @@ class ServicosView(TemplateView):
     template_name = 'app_home/servicos_apapesc.html'
     
 
-class LeadMessagesListView(ListView):
+class LeadMessagesListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = LeadInformacoes
     template_name = 'app_home/list_mensagens.html'
     context_object_name = 'leads'
     ordering = ['-created_at']
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -91,7 +100,6 @@ class ListContactMessagesView(LoginRequiredMixin, GroupPermissionRequiredMixin, 
     template_name = 'app_home/list_contatos.html'
     context_object_name = 'mensagens'
     paginate_by = 10  # Paginação opcional, exibe 10 mensagens por página
-    
     group_required = [
         'Superuser',
         'Admin da Associação',

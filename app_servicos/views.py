@@ -14,6 +14,8 @@ from itertools import chain
 from collections import defaultdict
 from django.db.models import Q, Value, CharField
 from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from accounts.mixins import GroupPermissionRequiredMixin
 
 # Logging
 import logging
@@ -22,15 +24,23 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-
 # SEVIÇOS
 # Single Serviço - ASSOCIADO
 from app_documentos.models import Documento, TipoDocumentoModel
 
-class SingleServicoView(LoginRequiredMixin, DetailView):
+class SingleServicoView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
     model = ServicoAssociadoModel
     template_name = 'app_servicos/single_servico_associado.html'
     context_object_name = 'servico'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -57,10 +67,19 @@ class SingleServicoView(LoginRequiredMixin, DetailView):
 
 
 # Single Serviço - EXTRAASSOCIADO
-class ServicoExtraDetailView(LoginRequiredMixin, DetailView):
+class ServicoExtraDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin,  DetailView):
     model = ServicoExtraAssociadoModel
     template_name = 'app_servicos/single_servico_extra.html'
     context_object_name = 'servico'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -104,10 +123,19 @@ class ServicoExtraDetailView(LoginRequiredMixin, DetailView):
 from django.db.models import Q, Value, CharField
 from itertools import chain
 
-class ListServicosView(LoginRequiredMixin, ListView):
+class ListServicosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     template_name = 'app_servicos/list_servicos.html'
     context_object_name = 'servicos'
     paginate_by = 50
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def get_queryset(self):
         tipo_filtro = self.request.GET.get('tipo')
@@ -162,10 +190,19 @@ class ListServicosView(LoginRequiredMixin, ListView):
 
 
 # Create Serviço - ASSOCIADO
-class CreateServicoAssociadoView(LoginRequiredMixin, CreateView):
+class CreateServicoAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = ServicoAssociadoModel
     form_class = ServicoAssociadoForm
     template_name = 'app_servicos/create_servico_associado.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def dispatch(self, request, *args, **kwargs):
         self.associado = get_object_or_404(AssociadoModel, id=kwargs.get('associado_id'))
@@ -215,11 +252,20 @@ class CreateServicoAssociadoView(LoginRequiredMixin, CreateView):
 
 
 # views.py
-class EditServicoAssociadoView(LoginRequiredMixin, UpdateView):
+class EditServicoAssociadoView(LoginRequiredMixin,GroupPermissionRequiredMixin, UpdateView):
     model = ServicoAssociadoModel
     form_class = ServicoAssociadoForm
     template_name = 'app_servicos/edit_servico_associado.html'
     context_object_name = 'servico'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def get_success_url(self):
         return reverse('app_servicos:single_servico', kwargs={'pk': self.object.pk})
@@ -276,10 +322,19 @@ class EditServicoAssociadoView(LoginRequiredMixin, UpdateView):
 
 
 # Criar Serviço - EXTRAASSOCIADO
-class CreateServicoExtraAssociadoView(LoginRequiredMixin, CreateView):
+class CreateServicoExtraAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = ServicoExtraAssociadoModel
     form_class = ServicoExtraAssociadoForm
     template_name = 'app_servicos/create_servico_extra.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def dispatch(self, request, *args, **kwargs):
         self.extra_associado = get_object_or_404(ExtraAssociadoModel, id=kwargs.get('extra_id'))
@@ -326,11 +381,20 @@ class CreateServicoExtraAssociadoView(LoginRequiredMixin, CreateView):
 
 
 # Editar Serviço Extra Associado
-class EditServicoExtraAssociadoView(LoginRequiredMixin, UpdateView):
+class EditServicoExtraAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
     model = ServicoExtraAssociadoModel
     form_class = ServicoExtraAssociadoForm
     template_name = 'app_servicos/edit_servico_extra.html'
     context_object_name = 'servico'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def get_success_url(self):
         return reverse('app_servicos:single_servico_extra', kwargs={'pk': self.object.pk})
@@ -412,11 +476,21 @@ def registrar_historico(servico, usuario):
 
 # EXTRA-ASSOCIADOS
 # Create Extra-associado
-class CreateExtraAssociadoView(LoginRequiredMixin, CreateView):
+class CreateExtraAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = ExtraAssociadoModel
     form_class = ExtraAssociadoForm
     template_name = 'app_servicos/create_extraassociado.html'
     context_object_name = 'extra_associado'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
+    
     def get_success_url(self):
         messages.success(self.request, "Extra-associado cadastrado com sucesso!")
         return reverse_lazy('app_servicos:list_extraassociados')  # ou outra view
@@ -426,11 +500,20 @@ class CreateExtraAssociadoView(LoginRequiredMixin, CreateView):
         context['titulo'] = "Novo Extra-associado"
         return context
 
-class EditExtraAssociadoView(LoginRequiredMixin, UpdateView):
+class EditExtraAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
     model = ExtraAssociadoModel
     form_class = ExtraAssociadoForm
     template_name = 'app_servicos/edit_extraassociado.html'
     context_object_name = 'extra_associado'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def get_success_url(self):
         messages.success(self.request, "Extra-associado atualizado com sucesso!")
@@ -442,17 +525,35 @@ class EditExtraAssociadoView(LoginRequiredMixin, UpdateView):
         return context
 
 # Lista de Extra-associados
-class ListExtraAssociadosView(LoginRequiredMixin, ListView):
+class ListExtraAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = ExtraAssociadoModel
     template_name = 'app_servicos/list_extraassociados.html'
     context_object_name = 'extra_associados'
     paginate_by = 50  # Ou qualquer valor ideal pra sua tela
-
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
+    
 # Single Extra-associado
-class DetailExtraAssociadoView(LoginRequiredMixin, DetailView):
+class DetailExtraAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
     model = ExtraAssociadoModel
     template_name = 'app_servicos/single_extra_associado.html'
     context_object_name = 'extra'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -478,9 +579,18 @@ from django.db.models import Value, CharField
 from itertools import chain
 from collections import OrderedDict
 
-class PainelServicosEtapasView(LoginRequiredMixin, TemplateView):
+class PainelServicosEtapasView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
     template_name = 'app_servicos/painel_servicos_etapas.html'
-
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 

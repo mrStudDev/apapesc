@@ -11,11 +11,22 @@ from app_associados.models import AssociadoModel
 from django.contrib import messages
 from app_licencas.models import LicencasModel  # Adjust the import path as needed
 from datetime import date, timedelta
+from accounts.mixins import GroupPermissionRequiredMixin
 
-class CreateEmbarcacaoView(LoginRequiredMixin, CreateView):
+
+class CreateEmbarcacaoView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = EmbarcacoesModel
     form_class = EmbarcacaoForm
     template_name = 'app_embarcacoes/create_embarcacao.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]  
 
     def dispatch(self, request, *args, **kwargs):
         self.associado = get_object_or_404(AssociadoModel, id=kwargs.get('associado_id'))
@@ -45,10 +56,19 @@ class CreateEmbarcacaoView(LoginRequiredMixin, CreateView):
         return context
     
 
-class ListEmbarcacoesView(LoginRequiredMixin, ListView):
+class ListEmbarcacoesView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = EmbarcacoesModel
     template_name = 'app_embarcacoes/list_embarcacoes.html'
     context_object_name = 'embarcacoes'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def get_queryset(self):
         return EmbarcacoesModel.objects.select_related('proprietario__user').prefetch_related('licencas')
@@ -61,10 +81,19 @@ class ListEmbarcacoesView(LoginRequiredMixin, ListView):
         return context
 
 
-class SingleEmbarcacaoView(LoginRequiredMixin, DetailView):
+class SingleEmbarcacaoView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
     model = EmbarcacoesModel
     template_name = 'app_embarcacoes/single_embarcacao.html'
     context_object_name = 'embarcacao'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -97,12 +126,20 @@ class SingleEmbarcacaoView(LoginRequiredMixin, DetailView):
         return context
    
     
-    
-class EditEmbarcacaoView(UpdateView):
+class EditEmbarcacaoView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
     model = EmbarcacoesModel
     form_class = EmbarcacaoForm
     template_name = 'app_embarcacoes/edit_embarcacao.html'
     context_object_name = 'embarcacao'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def get_success_url(self):
         messages.success(self.request, "Embarcação atualizada com sucesso! ⚓")

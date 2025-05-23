@@ -14,6 +14,8 @@ from django.views import View
 from django.db.models import Value, F
 from django.db.models.functions import Concat, Lower, ExtractYear, ExtractMonth, TruncMonth
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.messages.views import SuccessMessageMixin
+from accounts.mixins import GroupPermissionRequiredMixin
 
 # App Finances
 from .models import (
@@ -122,10 +124,19 @@ def lista_anuidades(request):
     return render(request, 'app_finances/list_anuidades.html', context)
 
 
-class FinanceiroAssociadoDetailView(LoginRequiredMixin ,DetailView):
+class FinanceiroAssociadoDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
     model = AssociadoModel
     template_name = 'app_finances/financeiro_associado.html'
     context_object_name = 'associado'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -342,11 +353,18 @@ def aplicar_anuidade(request, associado_id):
 
 
 
-class CreateAnuidadeView(LoginRequiredMixin ,CreateView):
+class CreateAnuidadeView(LoginRequiredMixin, GroupPermissionRequiredMixin ,CreateView):
     model = AnuidadeModel
     form_class = AnuidadeForm
     template_name = 'app_finances/create_anuidade.html'
     success_url = reverse_lazy('app_finances:create_anuidade')
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]    
 
     def form_valid(self, form):
         anuidade = form.save(commit=False)  # Ainda não salva no banco
@@ -446,8 +464,15 @@ def conceder_desconto(request, anuidade_associado_id):
 
 
 # Lista de descontos - Página
-class DescontosAnuidadesView(LoginRequiredMixin, TemplateView):
+class DescontosAnuidadesView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
     template_name = 'app_finances/descontos_anuidades.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -499,11 +524,18 @@ class DescontosAnuidadesView(LoginRequiredMixin, TemplateView):
 
 
 # View para editar anuidade
-class EditAnuidadeView(LoginRequiredMixin, UpdateView):
+class EditAnuidadeView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
     model = AnuidadeModel
     form_class = AnuidadeForm
     template_name = 'app_finances/edit_anuidade.html'
     success_url = reverse_lazy('app_finances:create_anuidade')
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
 #======================================================================================
 
 
@@ -511,12 +543,19 @@ class EditAnuidadeView(LoginRequiredMixin, UpdateView):
 # ENTRADAS ==================================================================================
 
 # ✅ View para criar uma nova entrada
-class EntradaCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class EntradaCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, SuccessMessageMixin, CreateView):
     model = EntradaFinanceira
     form_class = EntradaFinanceiraForm
     template_name = 'app_finances/create_entradas.html'
     success_url = reverse_lazy('app_finances:edit_entrada')
     success_message = "Entrada registrada com sucesso!"
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
 
     def get_form_kwargs(self):
         """
@@ -606,11 +645,18 @@ class EntradaCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
 
 # Editar Entrada
-class EntradaUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class EntradaUpdateView(LoginRequiredMixin, GroupPermissionRequiredMixin, SuccessMessageMixin, UpdateView):
     model = EntradaFinanceira
     form_class = EntradaFinanceiraForm
     template_name = 'app_finances/edit_entrada.html'
     success_message = "Entrada atualizada com sucesso!"
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
 
     def get_success_url(self):
         return reverse_lazy('app_finances:edit_entrada', kwargs={'pk': self.object.pk})
@@ -764,35 +810,56 @@ def registrar_pagamento(request, entrada_id):
 
 
 # Tipo de Servições - Entradas
-class TipoServicoCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class TipoServicoCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, SuccessMessageMixin, CreateView):
     model = TipoServicoModel
     form_class = TipoServicoForm
     template_name = 'app_finances/create_tipo_servico.html'
     success_url = reverse_lazy('app_finances:create_tipo_servico')  # Redireciona para lista de entradas
     success_message = "Tipo de Serviço cadastrado com sucesso!"
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["tipos_servicos"] = TipoServicoModel.objects.all().order_by('nome')
         return context
     
-class EditTipoServicoView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class EditTipoServicoView(LoginRequiredMixin, GroupPermissionRequiredMixin, SuccessMessageMixin, UpdateView):
     model = TipoServicoModel
     form_class = TipoServicoForm
     template_name = 'app_finances/edit_tipo_servico.html'
     success_url = reverse_lazy('app_finances:create_tipo_servico')  # Redireciona para o listagem/cadastro
     success_message = "Tipo de Serviço atualizado com sucesso!"
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["tipos_servicos"] = TipoServicoModel.objects.all().order_by('nome')
         return context
     
-class ListEntradasView(LoginRequiredMixin, ListView):
+class ListEntradasView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = EntradaFinanceira
     template_name = 'app_finances/list_entradas.html'
     context_object_name = 'entradas'
     paginate_by = 1000  # 🔹 Paginação com 1000 registros por página
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
 
     def get_queryset(self):
         """
@@ -842,12 +909,19 @@ class ListEntradasView(LoginRequiredMixin, ListView):
 
 
 # DESPESAS
-class DespesaCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class DespesaCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, SuccessMessageMixin, CreateView):
     model = DespesaAssociacaoModel
     form_class = DespesaAssociacaoForm
     template_name = 'app_finances/create_despesa.html'
     success_url = reverse_lazy('app_finances:list_despesas')
     success_message = "Despesa lançada com sucesso!"
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
 
     def get_form_kwargs(self):
         """
@@ -899,12 +973,19 @@ class DespesaCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
 
 
 # Editar Despesa
-class DespesaUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+class DespesaUpdateView(LoginRequiredMixin, GroupPermissionRequiredMixin, SuccessMessageMixin, UpdateView):
     model = DespesaAssociacaoModel
     form_class = DespesaAssociacaoForm
     template_name = 'app_finances/edit_despesa.html'
     success_url = reverse_lazy('app_finances:list_despesas')
     success_message = "Despesa atualizada com sucesso!"
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
 
     def get_form_kwargs(self):
         """
@@ -943,12 +1024,19 @@ def carregar_reparticoes(request):
 
 
 # Tipo Despesa
-class TipoDespesaCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+class TipoDespesaCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, SuccessMessageMixin, CreateView):
     model = TipoDespesaModel
     form_class = TipoDespesaForm
     template_name = 'app_finances/create_tipo_despesa.html'
     success_url = reverse_lazy('app_finances:create_tipo_despesa')
     success_message = "Tipo de Despesa criado com sucesso!"
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -957,11 +1045,18 @@ class TipoDespesaCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView)
 
 
 # Despesas - LISTAS
-class ListDespesasView(LoginRequiredMixin, ListView):
+class ListDespesasView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = DespesaAssociacaoModel
     template_name = 'app_finances/list_despesas.html'
     context_object_name = 'despesas'
     paginate_by = 1000  # Exibe 1000 egistros por página
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
 
     def get_queryset(self):
         """
@@ -1023,8 +1118,12 @@ class ListDespesasView(LoginRequiredMixin, ListView):
 
 # SUPER FIANCEIRO
 # Financeiro Outras entradas e Despesas
-class ResumoFinanceiroView(LoginRequiredMixin, TemplateView):
+class ResumoFinanceiroView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
     template_name = 'app_finances/finances_super.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+    ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1358,8 +1457,15 @@ class ResumoFinanceiroView(LoginRequiredMixin, TemplateView):
 # Relatórios ===============================
 
 # Pagamentos Anuidades ===
-class RelatorioAnuidadesView(LoginRequiredMixin, TemplateView):
+class RelatorioAnuidadesView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
     template_name = 'app_finances/relatorio_anuidades.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+    ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

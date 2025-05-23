@@ -7,11 +7,24 @@ from app_embarcacoes.models import EmbarcacoesModel
 from .models import LicencasModel
 from .forms import LicencaForm
 from datetime import date, timedelta
+from accounts.mixins import GroupPermissionRequiredMixin 
+from django.contrib.auth.mixins import LoginRequiredMixin
 
-class CreateLicencaView(CreateView):
+
+class CreateLicencaView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = LicencasModel
     form_class = LicencaForm
     template_name = 'app_licencas/create_licenca.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+        'Associados da Associação',
+    ]
 
 
     def dispatch(self, request, *args, **kwargs):
@@ -48,10 +61,20 @@ class CreateLicencaView(CreateView):
         return context
 
 
-class SingleLicencaView(DetailView):
+class SingleLicencaView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
     model = LicencasModel
     template_name = 'app_licencas/single_licenca.html'
     context_object_name = 'licenca'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+        'Associados da Associação',
+    ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -63,11 +86,20 @@ class SingleLicencaView(DetailView):
 
 
 
-class EditLicencaView(UpdateView):
+class EditLicencaView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
     model = LicencasModel
     form_class = LicencaForm
     template_name = 'app_licencas/edit_licenca.html'
     context_object_name = 'licenca'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def form_valid(self, form):
         messages.success(self.request, "Licença atualizada com sucesso! ✅")
@@ -90,10 +122,19 @@ class EditLicencaView(UpdateView):
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
 
-class ListLicencasView(ListView):
+class ListLicencasView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = LicencasModel
     template_name = 'app_licencas/list_licencas.html'
     context_object_name = 'licencas'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def get_queryset(self):
         queryset = LicencasModel.objects.select_related(
@@ -129,12 +170,20 @@ class ListLicencasView(ListView):
 
 
 
-
-class DeleteLicencaView(DeleteView):
+class DeleteLicencaView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteView):
     model = LicencasModel
     template_name = 'app_licencas/delete_licenca.html'
     context_object_name = 'licenca'
     success_url = reverse_lazy('app_licencas:list_licencas')
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

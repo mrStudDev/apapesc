@@ -278,10 +278,19 @@ from django.views.generic import ListView
 from app_associacao.models import AssociacaoModel, ReparticoesModel
 from app_associados.models import AssociadoModel
 
-class QuadroAssociadosView(ListView):
+class QuadroAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     template_name = 'app_manager/quadro_associados.html'
     context_object_name = 'associacoes'
     model = AssociacaoModel
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+        'Delegado(a) da Repartição',
+     ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
