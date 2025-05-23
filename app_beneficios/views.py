@@ -24,6 +24,7 @@ from app_documentos.models import Documento, TipoDocumentoModel  # certifique-se
 
 
 # Lista de Controle de Benefícios
+@login_required
 def lista_beneficios(request):
     controles = ControleBeneficioModel.objects.select_related('beneficio', 'associado__user')
 
@@ -71,6 +72,7 @@ def lista_beneficios(request):
     })
 
 
+@login_required
 def controle_beneficio_detail(request, pk):
     controle = get_object_or_404(ControleBeneficioModel, pk=pk)
 
@@ -101,6 +103,8 @@ def controle_beneficio_detail(request, pk):
     })
 
 
+
+@login_required
 def aplicar_beneficios_para_associado(request, associado_id):
     associado = get_object_or_404(AssociadoModel, id=associado_id)
     beneficios_ativos = BeneficioModel.objects.filter(
@@ -147,6 +151,8 @@ from datetime import date
 from app_associados.models import AssociadoModel
 from .models import BeneficioModel, ControleBeneficioModel
 
+
+@login_required
 def escolher_beneficio_para_associado(request, associado_id):
     associado = get_object_or_404(AssociadoModel, id=associado_id)
 
@@ -252,7 +258,7 @@ class PainelBeneficiosView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class AdicionarBeneficioView(CreateView):
+class AdicionarBeneficioView(LoginRequiredMixin ,CreateView):
     model = BeneficioModel
     form_class = BeneficioModelForm
     template_name = 'app_beneficios/create_beneficio.html'
@@ -267,6 +273,7 @@ class AdicionarBeneficioView(CreateView):
         return super().form_invalid(form)
 
 
+@login_required
 def lista_e_edita_beneficios(request):
     beneficios = BeneficioModel.objects.order_by('-ano_concessao', 'nome')
     beneficio_editando = None  # Inicializa a variável no topo
@@ -300,7 +307,7 @@ def lista_e_edita_beneficios(request):
 
 
 # Benefícios 
-class BeneficioListView(ListView):
+class BeneficioListView(LoginRequiredMixin,ListView):
     model = BeneficioModel
     template_name = 'app_beneficios/beneficios.html'
     context_object_name = 'beneficios'

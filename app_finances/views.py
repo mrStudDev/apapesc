@@ -13,6 +13,7 @@ from django.views.generic import DetailView, TemplateView, ListView, CreateView,
 from django.views import View
 from django.db.models import Value, F
 from django.db.models.functions import Concat, Lower, ExtractYear, ExtractMonth, TruncMonth
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 # App Finances
 from .models import (
@@ -50,6 +51,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 
 
 # Lista de Anuidades
+@login_required
 def lista_anuidades(request):
     ano_selecionado = request.GET.get('ano')
     associacao_selecionada = request.GET.get('associacao')
@@ -120,7 +122,7 @@ def lista_anuidades(request):
     return render(request, 'app_finances/list_anuidades.html', context)
 
 
-class FinanceiroAssociadoDetailView(DetailView):
+class FinanceiroAssociadoDetailView(LoginRequiredMixin ,DetailView):
     model = AssociadoModel
     template_name = 'app_finances/financeiro_associado.html'
     context_object_name = 'associado'
@@ -244,6 +246,7 @@ class DarBaixaAnuidadeView(View):
 
 
 # Lista Triangular de Condições
+@login_required
 def associados_triangulo_view(request):
     ano_atual = now().year
 
@@ -295,7 +298,7 @@ def associados_triangulo_view(request):
 
     return render(request, 'app_finances/tri_condictions.html', context)
 
-
+@login_required
 def aplicar_anuidade(request, associado_id):
     associado = get_object_or_404(AssociadoModel, id=associado_id)
 
@@ -339,7 +342,7 @@ def aplicar_anuidade(request, associado_id):
 
 
 
-class CreateAnuidadeView(CreateView):
+class CreateAnuidadeView(LoginRequiredMixin ,CreateView):
     model = AnuidadeModel
     form_class = AnuidadeForm
     template_name = 'app_finances/create_anuidade.html'
@@ -443,7 +446,7 @@ def conceder_desconto(request, anuidade_associado_id):
 
 
 # Lista de descontos - Página
-class DescontosAnuidadesView(TemplateView):
+class DescontosAnuidadesView(LoginRequiredMixin, TemplateView):
     template_name = 'app_finances/descontos_anuidades.html'
 
     def get_context_data(self, **kwargs):
@@ -496,7 +499,7 @@ class DescontosAnuidadesView(TemplateView):
 
 
 # View para editar anuidade
-class EditAnuidadeView(UpdateView):
+class EditAnuidadeView(LoginRequiredMixin, UpdateView):
     model = AnuidadeModel
     form_class = AnuidadeForm
     template_name = 'app_finances/edit_anuidade.html'
@@ -508,7 +511,7 @@ class EditAnuidadeView(UpdateView):
 # ENTRADAS ==================================================================================
 
 # ✅ View para criar uma nova entrada
-class EntradaCreateView(SuccessMessageMixin, CreateView):
+class EntradaCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = EntradaFinanceira
     form_class = EntradaFinanceiraForm
     template_name = 'app_finances/create_entradas.html'
@@ -603,7 +606,7 @@ class EntradaCreateView(SuccessMessageMixin, CreateView):
 
 
 # Editar Entrada
-class EntradaUpdateView(SuccessMessageMixin, UpdateView):
+class EntradaUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = EntradaFinanceira
     form_class = EntradaFinanceiraForm
     template_name = 'app_finances/edit_entrada.html'
@@ -720,6 +723,7 @@ class EntradaUpdateView(SuccessMessageMixin, UpdateView):
 from decimal import Decimal, InvalidOperation
 import json
 
+@login_required
 def registrar_pagamento(request, entrada_id):
     entrada = get_object_or_404(EntradaFinanceira, id=entrada_id)
 
@@ -760,7 +764,7 @@ def registrar_pagamento(request, entrada_id):
 
 
 # Tipo de Servições - Entradas
-class TipoServicoCreateView(SuccessMessageMixin, CreateView):
+class TipoServicoCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = TipoServicoModel
     form_class = TipoServicoForm
     template_name = 'app_finances/create_tipo_servico.html'
@@ -772,7 +776,7 @@ class TipoServicoCreateView(SuccessMessageMixin, CreateView):
         context["tipos_servicos"] = TipoServicoModel.objects.all().order_by('nome')
         return context
     
-class EditTipoServicoView(SuccessMessageMixin, UpdateView):
+class EditTipoServicoView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = TipoServicoModel
     form_class = TipoServicoForm
     template_name = 'app_finances/edit_tipo_servico.html'
@@ -784,7 +788,7 @@ class EditTipoServicoView(SuccessMessageMixin, UpdateView):
         context["tipos_servicos"] = TipoServicoModel.objects.all().order_by('nome')
         return context
     
-class ListEntradasView(ListView):
+class ListEntradasView(LoginRequiredMixin, ListView):
     model = EntradaFinanceira
     template_name = 'app_finances/list_entradas.html'
     context_object_name = 'entradas'
@@ -838,7 +842,7 @@ class ListEntradasView(ListView):
 
 
 # DESPESAS
-class DespesaCreateView(SuccessMessageMixin, CreateView):
+class DespesaCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = DespesaAssociacaoModel
     form_class = DespesaAssociacaoForm
     template_name = 'app_finances/create_despesa.html'
@@ -895,7 +899,7 @@ class DespesaCreateView(SuccessMessageMixin, CreateView):
 
 
 # Editar Despesa
-class DespesaUpdateView(SuccessMessageMixin, UpdateView):
+class DespesaUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = DespesaAssociacaoModel
     form_class = DespesaAssociacaoForm
     template_name = 'app_finances/edit_despesa.html'
@@ -939,7 +943,7 @@ def carregar_reparticoes(request):
 
 
 # Tipo Despesa
-class TipoDespesaCreateView(SuccessMessageMixin, CreateView):
+class TipoDespesaCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = TipoDespesaModel
     form_class = TipoDespesaForm
     template_name = 'app_finances/create_tipo_despesa.html'
@@ -953,7 +957,7 @@ class TipoDespesaCreateView(SuccessMessageMixin, CreateView):
 
 
 # Despesas - LISTAS
-class ListDespesasView(ListView):
+class ListDespesasView(LoginRequiredMixin, ListView):
     model = DespesaAssociacaoModel
     template_name = 'app_finances/list_despesas.html'
     context_object_name = 'despesas'
@@ -1019,7 +1023,7 @@ class ListDespesasView(ListView):
 
 # SUPER FIANCEIRO
 # Financeiro Outras entradas e Despesas
-class ResumoFinanceiroView(TemplateView):
+class ResumoFinanceiroView(LoginRequiredMixin, TemplateView):
     template_name = 'app_finances/finances_super.html'
 
     def get_context_data(self, **kwargs):
@@ -1354,7 +1358,7 @@ class ResumoFinanceiroView(TemplateView):
 # Relatórios ===============================
 
 # Pagamentos Anuidades ===
-class RelatorioAnuidadesView(TemplateView):
+class RelatorioAnuidadesView(LoginRequiredMixin, TemplateView):
     template_name = 'app_finances/relatorio_anuidades.html'
 
     def get_context_data(self, **kwargs):

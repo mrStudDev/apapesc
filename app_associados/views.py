@@ -690,12 +690,19 @@ class ListAssociadosReparticaoView(LoginRequiredMixin, GroupPermissionRequiredMi
         return context
 
 
-class CreateProfissaoView(CreateView):
+class CreateProfissaoView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = ProfissoesModel
     form_class = ProfissaoForm
     template_name = 'app_associados/create_profissao.html'
     success_url = reverse_lazy('app_associados:create_profissao')
-
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Listar profissões em ordem alfabética
@@ -703,12 +710,19 @@ class CreateProfissaoView(CreateView):
         return context
 
 # View para editar profissão
-class EditProfissaoView(UpdateView):
+class EditProfissaoView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
     model = ProfissoesModel
     form_class = ProfissaoForm
     template_name = 'app_associados/edit_profissao.html'
     success_url = reverse_lazy('app_associados:create_profissao')
-    
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        ]
+        
 
 def filtro_reparticoes(request, associacao_id):
     print(f"Associação ID recebido: {associacao_id}")  # Log para depuração
