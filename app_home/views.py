@@ -1,13 +1,14 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import Group
-from django.contrib import messages  # Para exibir mensagens de sucesso
-from .forms import LeadInformacoesForm  # Importa o formulário
+from django.contrib import messages  
+from .forms import LeadInformacoesForm 
 from django.views.generic import ListView, TemplateView, DetailView 
 from .models import LeadInformacoes, ContactMessagesModel
 from django.shortcuts import get_object_or_404, redirect
 from .forms import ContactForm
 from accounts.mixins import GroupPermissionRequiredMixin 
 from django.contrib.auth.mixins import LoginRequiredMixin
+
 
 def HomeView(request):
     context = {}

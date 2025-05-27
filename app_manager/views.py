@@ -18,6 +18,13 @@ from django.shortcuts import get_object_or_404
 from django.utils.timezone import now
 from app_beneficios.models import ControleBeneficioModel, BeneficioModel
 from datetime import datetime
+from django.db.models import Prefetch
+from django.db.models import Count, Prefetch, Q
+from django.views.generic import ListView
+from app_associacao.models import AssociacaoModel, ReparticoesModel
+from app_associados.models import AssociadoModel
+
+
 
 # Superususers dashboard.html
 class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
@@ -270,13 +277,6 @@ class DashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateVi
 
 
 
-from django.db.models import Prefetch
-
-
-from django.db.models import Count, Prefetch, Q
-from django.views.generic import ListView
-from app_associacao.models import AssociacaoModel, ReparticoesModel
-from app_associados.models import AssociadoModel
 
 class QuadroAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     template_name = 'app_manager/quadro_associados.html'
