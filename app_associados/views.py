@@ -529,24 +529,29 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
         })
         
         # Status do RG - Validade
-        if associado.rg_data_emissao:
-            hoje = date.today()
-            diferenca = relativedelta(hoje, associado.rg_data_emissao)
+        try:
+            if associado.rg_data_emissao:
+                hoje = date.today()
+                diferenca = relativedelta(hoje, associado.rg_data_emissao)
 
-            anos = diferenca.years
-            meses = diferenca.months
-            dias = diferenca.days
+                anos = diferenca.years
+                meses = diferenca.months
+                dias = diferenca.days
 
-            if anos > 10 or (anos == 10 and (meses > 0 or dias > 0)):
-                status_rg = ('vermelho', '❌ RG com mais de 10 anos — Atualizar!')
-            elif anos > 7 or (anos == 7 and (meses > 0 or dias > 0)):
-                status_rg = ('amarelo', '⚠️ RG com mais de 7, 8 ou 9 anos — Recomenda-se atualizar.')
+                if anos > 10 or (anos == 10 and (meses > 0 or dias > 0)):
+                    status_rg = ('vermelho', '❌ RG com mais de 10 anos — Atualizar!')
+                elif anos > 7 or (anos == 7 and (meses > 0 or dias > 0)):
+                    status_rg = ('amarelo', '⚠️ RG com mais de 7, 8 ou 9 anos — Recomenda-se atualizar.')
+                else:
+                    status_rg = ('verde', '✅ RG dentro da validade.')
             else:
-                status_rg = ('verde', '✅ RG dentro da validade.')
-        else:
-            status_rg = ('nao_declarado', 'ℹ️ Data de emissão não declarada.')
+                status_rg = ('nao_declarado', 'ℹ️ Data de emissão não declarada.')
+        except Exception as e:
+            print(f"Erro ao calcular status RG: {e}")
+            status_rg = ('erro', '⚠️ Erro ao calcular validade do RG.')
 
-        context['status_rg'] = status_rg            
+        context['status_rg'] = status_rg    
+                
         return context
 
     def post(self, request, *args, **kwargs):
