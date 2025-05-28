@@ -111,12 +111,18 @@
                 <tbody>
                     {% for associado in associados %}
                         <tr class="hover:bg-gray-50 transition">
-                            <td class="px-4 py-2 border">
-                                <a href="{% url 'app_associados:single_associado' associado.id %}" 
-                                   class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">
-                                  {{ associado.user.get_full_name }}
-                                </a>
-                              </td>
+<td class="px-4 py-2 border">
+  <div class="flex items-center space-x-1">
+    <span class="material-icons {{ associado.status_rg_icon.0 }} text-sm" title="{{ associado.status_rg_icon.1 }}">
+      assignment_ind
+    </span>
+    <a href="{% url 'app_associados:single_associado' associado.id %}" 
+       class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">
+      {{ associado.user.get_full_name }}
+    </a>
+  </div>
+</td>
+
                               
                               
                             <td class="px-4 py-2 border"><span id="cpf-{{ associado.pk }}" class="text-gray-800">{{ associado.cpf }}</span>
@@ -332,10 +338,6 @@
                                 title="Financeiro">
                                     <i class="material-icons text-base leading-tight">attach_money</i>
                                 </a>
-
-                                <span class="material-icons {{ associado.status_rg_icon.0 }}" title="{{ associado.status_rg_icon.1 }}">
-                                    assignment_ind
-                                </span>
 
                                                         
                             </td>
