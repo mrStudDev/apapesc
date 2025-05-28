@@ -28,6 +28,8 @@ from datetime import timedelta, date
 from decimal import Decimal
 from django.contrib.auth.models import Group
 
+from dateutil.relativedelta import relativedelta
+
 from django.http import QueryDict
 from django.http import JsonResponse
 
@@ -506,7 +508,25 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
             'total_desconto': total_desconto,
         })
         
-        
+        # Status do RG - Validade
+        if associado.rg_data_emissao:
+            hoje = date.today()
+            diferenca = relativedelta(hoje, associado.rg_data_emissao)
+
+            anos = diferenca.years
+            meses = diferenca.months
+            dias = diferenca.days
+
+            if anos > 10 or (anos == 10 and (meses > 0 or dias > 0)):
+                status_rg = ('vermelho', '❌ RG com mais de 10 anos — Atualizar!')
+            elif anos > 7 or (anos == 7 and (meses > 0 or dias > 0)):
+                status_rg = ('amarelo', '⚠️ RG com mais de 7, 8 ou 9 anos — Recomenda-se atualizar.')
+            else:
+                status_rg = ('verde', '✅ RG dentro da validade.')
+        else:
+            status_rg = ('nao_declarado', 'ℹ️ Data de emissão não declarada.')
+
+        context['status_rg'] = status_rg            
         return context
 
     def post(self, request, *args, **kwargs):

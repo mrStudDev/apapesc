@@ -995,7 +995,36 @@
       document.getElementById("id_status").addEventListener("change", toggleCampoDesfiliacao);
     });
   </script>
-  
+ <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusSelect = document.getElementById('id_status');
+        const recolheInssSelect = document.getElementById('id_recolhe_inss');
+        const recebeSeguroSelect = document.getElementById('id_recebe_seguro');
+
+        function verificarStatus() {
+            const status = statusSelect.value;
+
+            if (status !== 'Associado Lista Ativo(a)') {
+                // 🔒 Bloqueia e seta como "Não"
+                recolheInssSelect.value = 'Não';
+                recolheInssSelect.disabled = true;
+
+                recebeSeguroSelect.value = 'Não Recebe';
+                recebeSeguroSelect.disabled = true;
+            } else {
+                // 🔓 Libera para edição
+                recolheInssSelect.disabled = false;
+                recebeSeguroSelect.disabled = false;
+            }
+        }
+
+        // Executa no carregamento inicial
+        verificarStatus();
+
+        // Executa quando mudar o status
+        statusSelect.addEventListener('change', verificarStatus);
+    });
+    </script> 
 {% include 'components/footer_associacao.html' %}
 <!-- CSS do Editor -->
 <link rel="stylesheet" href="{% static 'css/editor.css' %}">
