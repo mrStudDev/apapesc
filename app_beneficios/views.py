@@ -1,17 +1,22 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import ControleBeneficioModel, BeneficioModel, ControleBeneficioHistoricoModel
-from django.db.models import Q
+from django.db.models import Q, F
 from django.db import transaction
 from .forms import ControleBeneficioForm, BeneficioModelForm
 from .models import UF_CHOICES  # Import UF_CHOICES from the models
 from django.contrib import messages
-from django.views.generic import CreateView, ListView
+from django.views.generic import CreateView, ListView, DetailView
+from django.views.generic.edit import FormMixin
 from .utils import upload_to_drive
+from .utils import criar_leva # Importa a função criar_leva
 import os
 from django.views.generic import TemplateView
-from django.urls import reverse_lazy
+from django.views import View
+from django.urls import reverse, reverse_lazy
 
+from accounts.mixins import GroupPermissionRequiredMixin
 from django.contrib.auth.mixins import LoginRequiredMixin
+
 from django.utils import timezone
 from collections import OrderedDict
 from datetime import date
@@ -20,90 +25,315 @@ from app_associados.models import AssociadoModel
 from django.db import transaction
 from django.contrib.auth.decorators import login_required, permission_required
 from app_documentos.models import Documento, TipoDocumentoModel  # certifique-se de importar corretamente
+from .models import LevaProcessamentoBeneficio, ControleLevaItem  # Import the required models
+from django.contrib.auth.models import User  # Import User model
+from django.http import Http404  # Import Http404 for raising 404 errors
+from django.db.models import Q
 
 
+# Benefícios Cadastrados - Lista dos benefícios Lançados 
+class BeneficioListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
+    model = BeneficioModel
+    template_name = 'app_beneficios/beneficios.html'
+    context_object_name = 'beneficios'
+    ordering = ['-ano_concessao', 'nome', 'estado']
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
-# Lista de Controle de Benefícios
-@login_required
-def lista_beneficios(request):
-    controles = ControleBeneficioModel.objects.select_related('beneficio', 'associado__user')
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-    beneficio_filtro = request.GET.get('beneficio')
-    status = request.GET.get('status')
-    nome_associado = request.GET.get('nome_associado')  # Novo parâmetro
+        beneficios = self.get_queryset()
+        beneficios_com_leva = []
 
-    if beneficio_filtro:
-        partes = beneficio_filtro.split('__')
-        nome = partes[0]
-        ano = partes[1] if len(partes) > 1 else None
-        estado = partes[2] if len(partes) > 2 else None
-        
-        controles = controles.filter(beneficio__nome=nome)
-        
-        if ano:
-            controles = controles.filter(beneficio__ano_concessao=ano)
-        if estado:
-            controles = controles.filter(beneficio__estado=estado)
+        for beneficio in beneficios:
+            leva = LevaProcessamentoBeneficio.objects.filter(
+                beneficio=beneficio
+            ).order_by('-criado_em').first()
 
-    if status:
-        controles = controles.filter(status_pedido=status)
+            if leva:
+                # Itens livres (qualquer um pode pegar)
+                itens_pendentes = leva.itens.filter(status='PENDENTE')
 
-    if nome_associado:
-        controles = controles.filter(
-            Q(associado__user__first_name__icontains=nome_associado) |
-            Q(associado__user__last_name__icontains=nome_associado)
+                # Itens que foram pausados pelo usuário atual
+                meus_pausados = leva.itens.filter(
+                    status='PENDENTE',
+                    atualizado_por=self.request.user
+                )
+
+                # Itens que estou processando
+                meus_em_processamento = leva.itens.filter(
+                    status='PROCESSANDO',
+                    em_processamento_por=self.request.user
+                )
+
+                if itens_pendentes.exists():
+                    proximo_item = itens_pendentes.order_by(
+                        'controle_beneficio__associado__user__first_name',
+                        'controle_beneficio__associado__user__last_name'
+                    ).first()
+
+                elif meus_em_processamento.exists():
+                    proximo_item = meus_em_processamento.order_by(
+                        'controle_beneficio__associado__user__first_name',
+                        'controle_beneficio__associado__user__last_name'
+                    ).first()
+
+                elif meus_pausados.exists():
+                    proximo_item = meus_pausados.order_by(
+                        'controle_beneficio__associado__user__first_name',
+                        'controle_beneficio__associado__user__last_name'
+                    ).first()
+                else:
+                    proximo_item = None
+
+                usuarios_processando = User.objects.filter(
+                    processando_itens__leva=leva,
+                    processando_itens__status='PROCESSANDO'
+                ).distinct()
+
+                # 🔥 Total para este usuário
+                total_para_este_usuario = itens_pendentes.count()
+
+                if not itens_pendentes.exists() and meus_pausados.exists():
+                    total_para_este_usuario = meus_pausados.count()
+
+                itens_concluidos = leva.itens.filter(status='CONCLUIDO').count()
+                itens_em_processamento = leva.itens.filter(status='PROCESSANDO').count()
+
+                beneficios_com_leva.append({
+                    'beneficio': beneficio,
+                    'leva': leva,
+                    'proximo_item': proximo_item,
+                    'usuarios_processando': usuarios_processando,
+                    'tem_meu_pausado': meus_pausados.exists(),
+                    'tem_pendentes': itens_pendentes.exists(),
+                    'total_para_este_usuario': total_para_este_usuario,
+                    'quantidade_pendentes': itens_pendentes.count(),
+                    'quantidade_concluidos': itens_concluidos,
+                    'quantidade_em_processamento': itens_em_processamento,
+                    'total_itens': itens_pendentes.count() + itens_em_processamento + itens_concluidos,
+                })
+
+            else:
+                # 🔥 Caso não tenha leva
+                beneficios_com_leva.append({
+                    'beneficio': beneficio,
+                    'leva': None,
+                    'proximo_item': None,
+                    'usuarios_processando': [],
+                    'tem_meu_pausado': False,
+                    'tem_pendentes': False,
+                    'total_para_este_usuario': 0,
+                })
+
+        context['beneficios_com_leva'] = beneficios_com_leva
+        return context
+
+    
+# Controle - Listagem controle de benefícios - Associados e Estados
+class ListaBeneficiosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
+    model = ControleBeneficioModel
+    template_name = 'app_beneficios/list_beneficios.html'
+    context_object_name = 'controles'
+
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
+
+    def get_queryset(self):
+        queryset = ControleBeneficioModel.objects.select_related(
+            'beneficio', 'associado__user'
         )
 
-    controles = controles.order_by('associado__user__first_name', 'associado__user__last_name')
+        # 🔎 Filtros
+        beneficio_filtro = self.request.GET.get('beneficio')
+        status = self.request.GET.get('status')
+        nome_associado = self.request.GET.get('nome_associado')
 
-    # Agrupar benefícios disponíveis por nome para o template
-    beneficios_agrupados = {}
-    for beneficio in BeneficioModel.objects.order_by('-ano_concessao', 'nome'):
-        if beneficio.nome not in beneficios_agrupados:
-            beneficios_agrupados[beneficio.nome] = []
-        beneficios_agrupados[beneficio.nome].append(beneficio)
+        if beneficio_filtro:
+            partes = beneficio_filtro.split('__')
+            nome = partes[0]
+            ano = partes[1] if len(partes) > 1 else None
+            estado = partes[2] if len(partes) > 2 else None
 
-    return render(request, 'app_beneficios/list_beneficios.html', {
-        'controles': controles,
-        'beneficios_agrupados': beneficios_agrupados,
-        'status_choices': ControleBeneficioModel._meta.get_field('status_pedido').choices,
-        'uf_choices': UF_CHOICES,
-        'nome_associado': nome_associado or ''  # Passa o valor atual para o template
-    })
+            queryset = queryset.filter(beneficio__nome=nome)
+            if ano:
+                queryset = queryset.filter(beneficio__ano_concessao=ano)
+            if estado:
+                queryset = queryset.filter(beneficio__estado=estado)
+
+        if status:
+            queryset = queryset.filter(status_pedido=status)
+
+        if nome_associado:
+            queryset = queryset.filter(
+                Q(associado__user__first_name__icontains=nome_associado) |
+                Q(associado__user__last_name__icontains=nome_associado)
+            )
+
+        return queryset.order_by(
+            'associado__user__first_name', 'associado__user__last_name'
+        )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # 🔥 Agrupar benefícios disponíveis
+        beneficios_agrupados = {}
+        for beneficio in BeneficioModel.objects.order_by('-ano_concessao', 'nome'):
+            if beneficio.nome not in beneficios_agrupados:
+                beneficios_agrupados[beneficio.nome] = []
+            beneficios_agrupados[beneficio.nome].append(beneficio)
+
+        context.update({
+            'beneficios_agrupados': beneficios_agrupados,
+            'status_choices': ControleBeneficioModel._meta.get_field('status_pedido').choices,
+            'uf_choices': UF_CHOICES,
+            'nome_associado': self.request.GET.get('nome_associado', ''),
+        })
+        return context
 
 
-@login_required
-def controle_beneficio_detail(request, pk):
-    controle = get_object_or_404(ControleBeneficioModel, pk=pk)
+# Controle de Beneficios - Detalhes do benefício e dados do associado / Automação
+class ControleBeneficioDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, FormMixin, DetailView):
+    model = ControleBeneficioModel
+    form_class = ControleBeneficioForm
+    template_name = 'app_beneficios/controle_detail.html'
+    context_object_name = 'controle'
+    success_url = reverse_lazy('app_beneficios:lista_beneficios')
 
-    if request.method == 'POST':
-        form = ControleBeneficioForm(request.POST, request.FILES, instance=controle)
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
+
+    def get_success_url(self):
+        return reverse_lazy('app_beneficios:controle_detalhe', kwargs={'pk': self.object.pk})
+
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
+        return form_class(instance=self.get_object(), **self.get_form_kwargs())
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+
         if form.is_valid():
+            controle = form.save(commit=False)
             controle._current_user = request.user
             controle.save()
-            messages.success(request, 'Registro atualizado com sucesso!')
-            return redirect('app_beneficios:lista_beneficios')
-    else:
-        form = ControleBeneficioForm(instance=controle)
+            messages.success(request, "✅ Registro atualizado com sucesso!")
+            return redirect(self.get_success_url())
+        else:
+            messages.error(request, "⚠️ Erro ao salvar. Verifique os campos.")
+            return self.form_invalid(form)
 
-    # 🔍 Documentos relevantes por tipo
-    tipos_desejados = ['RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI', 'Comprovante Residência', 'Declaração Residência - MAPA', 'Foto3x4', 'CAEPF']
-    tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        controle = self.get_object()
 
-    documentos_relevantes = Documento.objects.filter(
-        associado=controle.associado,
-        tipo_doc__in=tipos
-    ).order_by('-data_upload')
+        # 👇 Aqui é a flag principal
+        veio_da_leva = self.request.GET.get('pela_leva') == '1'
+    
+        tipos_desejados = [
+            'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI',
+            'Comprovante Residência', 'Declaração Residência - MAPA',
+            'Foto3x4', 'CAEPF'
+        ]
 
-    return render(request, 'app_beneficios/controle_detail.html', {
-        'form': form,
-        'controle': controle,
-        'historico': controle.historico.all().order_by('-alterado_em'),
-        'documentos_relevantes': documentos_relevantes,
-    })
+        tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
 
+        documentos_relevantes = Documento.objects.filter(
+            associado=controle.associado,
+            tipo_doc__in=tipos
+        ).order_by('-data_upload')
 
+        # 🔥 Busca se este controle está em alguma leva
+        leva_item = ControleLevaItem.objects.filter(controle_beneficio=controle).first()
 
+        if leva_item:
+            leva = leva_item.leva
+            pertence_a_leva = True
+        else:
+            leva = None
+            pertence_a_leva = False
+
+        if leva:
+            itens_ordenados = leva.itens.order_by(
+                'controle_beneficio__associado__user__first_name',
+                'controle_beneficio__associado__user__last_name',
+                'id'
+            )
+
+            lista_ids = list(itens_ordenados.values_list('id', flat=True))
+
+            indice_atual = (
+                lista_ids.index(leva_item.id) + 1
+                if leva_item and leva_item.id in lista_ids
+                else None
+            )
+
+            itens_pendentes = leva.itens.filter(status='PENDENTE').count()
+            itens_concluidos = leva.itens.filter(status='CONCLUIDO').count()
+
+            usuarios_processando = User.objects.filter(
+                processando_itens__leva=leva,
+                processando_itens__status='PROCESSANDO'
+            ).distinct()
+
+            itens_em_processamento = usuarios_processando.count()
+
+            total_itens = itens_pendentes + itens_em_processamento + itens_concluidos
+
+            context.update({
+                'leva': leva,
+                'indice_atual': indice_atual,
+                'total_itens': total_itens,
+                'itens_concluidos': itens_concluidos,
+                'itens_pendentes': itens_pendentes,
+                'itens_em_processamento': itens_em_processamento,
+                'total_a_fazer': itens_pendentes + itens_em_processamento,
+                'usuarios_processando': usuarios_processando,
+                'pertence_a_leva': pertence_a_leva,
+                'pertence_a_leva': veio_da_leva, 
+            })
+        else:
+            context.update({
+                'leva': None,
+                'pertence_a_leva': False,
+            })
+
+        context.update({
+            'form': self.get_form(),
+            'historico': controle.historico.all().order_by('-alterado_em'),
+            'documentos_relevantes': documentos_relevantes,
+            'associado': controle.associado,
+        })
+
+        return context
+
+            
+
+# Função Aplicar/Distribuir Benefícios - Associados
 @login_required
 def aplicar_beneficios_para_associado(request, associado_id):
     associado = get_object_or_404(AssociadoModel, id=associado_id)
@@ -143,15 +373,7 @@ def aplicar_beneficios_para_associado(request, associado_id):
     return redirect('app_associados:single_associado', associado_id)
 
 
-# app_beneficios/views.py
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from datetime import date
-from app_associados.models import AssociadoModel
-from .models import BeneficioModel, ControleBeneficioModel
-
-
+# Seleciona associados aptos ao lançamento do benefício por estado/associação/repartição/ano
 @login_required
 def escolher_beneficio_para_associado(request, associado_id):
     associado = get_object_or_404(AssociadoModel, id=associado_id)
@@ -186,8 +408,18 @@ def escolher_beneficio_para_associado(request, associado_id):
     })
 
 
-class PainelBeneficiosView(LoginRequiredMixin, TemplateView):
+# Painel de Visualização de Benefícios - Colunas Status
+class PainelBeneficiosView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
     template_name = 'app_beneficios/painel_beneficios.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -257,12 +489,21 @@ class PainelBeneficiosView(LoginRequiredMixin, TemplateView):
         
         return context
 
-
-class AdicionarBeneficioView(LoginRequiredMixin ,CreateView):
+# Create Benefício - Formulário de Cadastro
+class AdicionarBeneficioView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = BeneficioModel
     form_class = BeneficioModelForm
     template_name = 'app_beneficios/create_beneficio.html'
     success_url = reverse_lazy('app_beneficios:lista_beneficios')
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]    
 
     def form_valid(self, form):
         messages.success(self.request, "✅ Benefício cadastrado com sucesso!")
@@ -273,12 +514,38 @@ class AdicionarBeneficioView(LoginRequiredMixin ,CreateView):
         return super().form_invalid(form)
 
 
-@login_required
-def lista_e_edita_beneficios(request):
-    beneficios = BeneficioModel.objects.order_by('-ano_concessao', 'nome')
-    beneficio_editando = None  # Inicializa a variável no topo
+# Lista e Edita Benefícios - Formulário de Edição
+class ListaEditaBeneficiosView(GroupPermissionRequiredMixin, TemplateView):
+    template_name = 'app_beneficios/edit_beneficio.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
 
-    if request.method == 'POST':
+    def get(self, request, *args, **kwargs):
+        beneficio_id = request.GET.get('id')
+        beneficio_editando = None
+
+        if beneficio_id:
+            beneficio_editando = get_object_or_404(BeneficioModel, pk=beneficio_id)
+            form = BeneficioModelForm(instance=beneficio_editando, modo_edicao=True)
+        else:
+            form = BeneficioModelForm()
+
+        context = self.get_context_data(**kwargs)
+        context.update({
+            'beneficios': BeneficioModel.objects.order_by('-ano_concessao', 'nome'),
+            'form': form,
+            'beneficio_editando': beneficio_editando,
+        })
+        return self.render_to_response(context)
+
+    def post(self, request, *args, **kwargs):
         beneficio_id = request.POST.get('beneficio_id')
         beneficio = get_object_or_404(BeneficioModel, pk=beneficio_id)
         form = BeneficioModelForm(request.POST, instance=beneficio, modo_edicao=True)
@@ -286,33 +553,26 @@ def lista_e_edita_beneficios(request):
 
         if form.is_valid():
             form.save()
-            messages.success(request, f"✅ Benefício '{beneficio.get_nome_display()}' atualizado com sucesso!")
-            return redirect('app_beneficios:beneficios')
+            messages.success(
+                request,
+                f"✅ Benefício '{beneficio.get_nome_display()}' atualizado com sucesso!"
+            )
+            return redirect(reverse_lazy('app_beneficios:beneficios'))
         else:
-            messages.error(request, "⚠️ Erro ao salvar os dados. Verifique os campos.")
+            messages.error(
+                request,
+                "⚠️ Erro ao salvar os dados. Verifique os campos."
+            )
 
-    else:
-        beneficio_id = request.GET.get('id')
-        if beneficio_id:
-            beneficio_editando = get_object_or_404(BeneficioModel, pk=beneficio_id)
-            form = BeneficioModelForm(instance=beneficio_editando, modo_edicao=True)
-        else:
-            form = BeneficioModelForm()  # Form vazio para criação
-
-    return render(request, 'app_beneficios/edit_beneficio.html', {
-        'beneficios': beneficios,
-        'form': form,
-        'beneficio_editando': beneficio_editando,
-    })
+        context = self.get_context_data(**kwargs)
+        context.update({
+            'beneficios': BeneficioModel.objects.order_by('-ano_concessao', 'nome'),
+            'form': form,
+            'beneficio_editando': beneficio_editando,
+        })
+        return self.render_to_response(context)
 
 
-# Benefícios 
-class BeneficioListView(LoginRequiredMixin,ListView):
-    model = BeneficioModel
-    template_name = 'app_beneficios/beneficios.html'
-    context_object_name = 'beneficios'
-    ordering = ['-ano_concessao', 'nome', 'estado']
-    
 
 
 @login_required
@@ -328,4 +588,281 @@ def deletar_beneficio(request, pk):
 
     messages.success(request, f"🗑️ Benefício '{nome_display} ({ano}/{estado})' deletado com sucesso!")
     return redirect('app_beneficios:beneficios')
+
+
+# Leva de Processamento de Benefícios - Criação
+@login_required
+def criar_leva_view(request, beneficio_id):
+    beneficio = get_object_or_404(BeneficioModel, pk=beneficio_id)
+
+    # 🔍 Verificar se já existe uma leva EM ANDAMENTO deste benefício
+    leva_existente = LevaProcessamentoBeneficio.objects.filter(
+        beneficio__nome=beneficio.nome,
+        beneficio__ano_concessao=beneficio.ano_concessao,
+        beneficio__estado=beneficio.estado
+    ).order_by('-criado_em').first()
+
+    if leva_existente:
+        # ⚠️ Verifica se essa leva possui itens ainda em PENDENTE ou PROCESSANDO
+        if leva_existente.itens.filter(status__in=['PENDENTE', 'PROCESSANDO']).exists():
+            # 👉 Se sim, redireciona para o próximo item pendente ou em processamento
+            itens_pendentes = leva_existente.itens.filter(status='PENDENTE')
+            itens_em_processamento = leva_existente.itens.filter(
+                status='PROCESSANDO',
+                em_processamento_por=request.user
+            )
+
+            if itens_pendentes.exists():
+                proximo_item = itens_pendentes.order_by(
+                    'controle_beneficio__associado__user__first_name',
+                    'controle_beneficio__associado__user__last_name'
+                ).first()
+                return redirect('app_beneficios:processar_item_leva', item_id=proximo_item.id)
+
+            elif itens_em_processamento.exists():
+                proximo_item = itens_em_processamento.order_by(
+                    'controle_beneficio__associado__user__first_name',
+                    'controle_beneficio__associado__user__last_name'
+                ).first()
+                return redirect('app_beneficios:processar_item_leva', item_id=proximo_item.id)
+
+            else:
+                # Leva existe, mas sem itens pendentes nem em processamento
+                messages.info(request, "⚠️ Esta leva não possui itens pendentes.")
+                return redirect('app_beneficios:lista_beneficios')
+
+    # 🚀 Cria a nova leva caso não exista nenhuma ativa
+    leva = criar_leva(beneficio, request.user)
+
+    primeiro_item = leva.itens.filter(status='PENDENTE').order_by(
+        'controle_beneficio__associado__user__first_name',
+        'controle_beneficio__associado__user__last_name'
+    ).first()
+
+    if primeiro_item:
+        return redirect('app_beneficios:processar_item_leva', item_id=primeiro_item.id)
+
+    # ⚠️ Se não há itens na leva, redireciona e avisa
+    messages.warning(request, "⚠️ Nenhum item encontrado na nova leva.")
+    return redirect('app_beneficios:lista_beneficios')
+
+
+
+
+# Leva de Processamento de Benefícios - Listagem
+class ProcessarLevaItemView(LoginRequiredMixin, GroupPermissionRequiredMixin, FormMixin, DetailView):
+    model = ControleLevaItem
+    form_class = ControleBeneficioForm
+    template_name = 'app_beneficios/controle_detail.html'
+    context_object_name = 'item'
+
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
+
+    # ✅ Garante que o item existe e pertence corretamente à leva
+    def get_object(self, queryset=None):
+        item = get_object_or_404(ControleLevaItem, id=self.kwargs.get('item_id'))
+
+        if not item.leva:
+            raise Http404("❌ Este item não pertence a nenhuma leva ativa.")
+
+        if item.status == 'PENDENTE':
+            item.status = 'PROCESSANDO'
+            item.em_processamento_por = self.request.user
+            item.atualizado_por = self.request.user
+            item.save()
+
+        elif item.status == 'PROCESSANDO':
+            if item.em_processamento_por != self.request.user:
+                messages.error(
+                    self.request,
+                    f"⚠️ Este item está sendo processado por {item.em_processamento_por.get_full_name()}."
+                )
+                raise Http404("Item em processamento por outro usuário.")
+
+        elif item.status == 'CONCLUIDO':
+            messages.info(
+                self.request,
+                "✅ Este item já foi concluído. Indo para o próximo..."
+            )
+            raise Http404("Item já concluído.")
+
+        return item
+
+
+    def get_success_url(self):
+        leva = self.object.leva
+
+        itens_ordenados = leva.itens.order_by(
+            'controle_beneficio__associado__user__first_name',
+            'controle_beneficio__associado__user__last_name',
+            'id'
+        )
+
+        itens_restantes = itens_ordenados.filter(status='PENDENTE')
+
+        if itens_restantes.exists():
+            proximo_item = itens_restantes.first()
+            return reverse('app_beneficios:processar_item_leva', kwargs={'item_id': proximo_item.id})
+
+        itens_em_processamento = itens_ordenados.filter(
+            status='PROCESSANDO',
+            em_processamento_por=self.request.user
+        )
+
+        if itens_em_processamento.exists():
+            return reverse('app_beneficios:processar_item_leva', kwargs={'item_id': itens_em_processamento.first().id})
+
+        messages.info(self.request, "🎉 Todos os itens desta leva foram processados.")
+        return reverse('app_beneficios:lista_beneficios')
     
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            self.object = self.get_object()
+        except Http404:
+            messages.error(request, "❌ Item não encontrado ou já foi concluído.")
+            return redirect('app_beneficios:lista_beneficios')
+        return super().dispatch(request, *args, **kwargs)
+
+
+
+    # ✅ Form padrão
+    def get_form(self, form_class=None):
+        form_class = self.get_form_class()
+        if not self.object:
+            raise Http404("❌ Item não encontrado.")
+        return form_class(
+            instance=self.object.controle_beneficio,
+            **self.get_form_kwargs()
+        )
+
+
+    # ✅ Ações dos botões
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        form = self.get_form()
+
+        if form.is_valid():
+            controle = form.save(commit=False)
+            controle._current_user = request.user
+            controle.save()
+
+            acao = request.POST.get('acao')
+
+            if acao == 'salvar_proximo':
+                self.object.status = 'CONCLUIDO'
+                self.object.em_processamento_por = None
+                self.object.atualizado_por = request.user
+                self.object.save()
+
+                return redirect(self.get_success_url())  # 👉 Aqui pega o próximo item
+
+            elif acao == 'salvar_pausar':
+                self.object.status = 'PENDENTE'
+                self.object.em_processamento_por = None
+                self.object.atualizado_por = request.user
+                self.object.save()
+
+                messages.info(request, "⏸️ Processamento pausado.")
+                return redirect('app_beneficios:lista_beneficios')
+
+            elif acao == 'salvar_continuar':
+                self.object.status = 'PROCESSANDO'
+                self.object.em_processamento_por = request.user
+                self.object.atualizado_por = request.user
+                self.object.save()
+
+                messages.success(request, "✅ Alterações salvas. Continue editando.")
+
+
+            if 'pela_leva' in request.GET:
+                return redirect(
+                    reverse('app_beneficios:controle_detalhe', kwargs={'pk': self.object.controle_beneficio.id})
+                    + '?pela_leva=1'
+                )
+            else:
+                return redirect('app_beneficios:controle_detalhe', kwargs={'pk': self.object.controle_beneficio.id})
+
+                
+        messages.error(request, "⚠️ Erro ao salvar. Verifique os campos.")
+        return self.form_invalid(form)
+
+    # ✅ Dados do contexto para template
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        controle = self.object.controle_beneficio
+        leva = self.object.leva
+
+        itens_ordenados = leva.itens.order_by(
+            'controle_beneficio__associado__user__first_name',
+            'controle_beneficio__associado__user__last_name',
+            'id'
+        )
+
+        lista_ids = list(itens_ordenados.values_list('id', flat=True))
+
+        if self.object.id not in lista_ids:
+            messages.error(self.request, "❌ Este item não pertence à leva atual.")
+            raise Http404("Item não encontrado na leva.")
+
+        indice_atual = lista_ids.index(self.object.id) + 1
+
+        itens_pendentes = leva.itens.filter(status='PENDENTE').count()
+        itens_em_processamento = leva.itens.filter(
+            status='PROCESSANDO',
+            controle_beneficio__isnull=False,
+            em_processamento_por__isnull=False
+        ).count()
+        itens_concluidos = leva.itens.filter(status='CONCLUIDO').count()
+
+        usuarios_processando = User.objects.filter(
+            processando_itens__leva=leva,
+            processando_itens__status='PROCESSANDO'
+        ).distinct()
+
+        total_itens = itens_pendentes + itens_em_processamento + itens_concluidos
+
+        tipos_desejados = [
+            'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI',
+            'Comprovante Residência', 'Declaração Residência - MAPA',
+            'Foto3x4', 'CAEPF'
+        ]
+
+        tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
+
+        documentos_relevantes = Documento.objects.filter(
+            associado=controle.associado,
+            tipo_doc__in=tipos
+        ).order_by('-data_upload')
+
+        leva_item = ControleLevaItem.objects.filter(controle_beneficio=self.object.controle_beneficio).first()
+
+
+        context.update({
+            'form': self.get_form(),
+            'controle': controle,
+            'historico': controle.historico.all().order_by('-alterado_em'),
+            'documentos_relevantes': documentos_relevantes,
+            'associado': controle.associado,
+            'item': self.object,
+            'leva': leva,
+            'indice_atual': indice_atual,
+            'total_itens': total_itens,
+            'itens_concluidos': itens_concluidos,
+            'itens_pendentes': itens_pendentes,
+            'itens_em_processamento': itens_em_processamento,
+            'total_a_fazer': itens_pendentes + itens_em_processamento,
+            'usuarios_processando': usuarios_processando,
+            'pertence_a_leva': leva_item is not None,
+        })
+
+        return context
+
+

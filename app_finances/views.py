@@ -15,6 +15,7 @@ from django.db.models import Value, F
 from django.db.models.functions import Concat, Lower, ExtractYear, ExtractMonth, TruncMonth
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.exceptions import ValidationError
 from accounts.mixins import GroupPermissionRequiredMixin
 
 # App Finances
@@ -225,37 +226,50 @@ class FinanceiroAssociadoDetailView(LoginRequiredMixin, GroupPermissionRequiredM
 
 
 @method_decorator(login_required, name='dispatch')
+
 class DarBaixaAnuidadeView(View):
     def post(self, request, pk):
         anuidade_assoc = get_object_or_404(AnuidadeAssociado, pk=pk)
-        
-        # Obtem o valor enviado no formulário
-        valor_baixa = Decimal(request.POST.get('valor_baixa', '0.00'))
+
+        try:
+            valor_baixa = Decimal(request.POST.get('valor_baixa', '0.00').replace(',', '.'))
+        except Exception:
+            messages.error(request, "⚠️ Valor inválido. Insira um número válido.")
+            return redirect('app_finances:financeiro_associado', anuidade_assoc.associado.id)
 
         if valor_baixa <= 0:
-            messages.error(request, "O valor para dar baixa deve ser maior que zero.")
+            messages.error(request, "⚠️ O valor para dar baixa deve ser maior que zero.")
         else:
-            # Cria o pagamento manualmente antes de chamar o método 'dar_baixa'
-            Pagamento.objects.create(
-                anuidade_associado=anuidade_assoc,
-                valor=valor_baixa,
-                registrado_por=request.user
-            )
+            try:
+                # ✅ Cria o pagamento (já dispara validação no modelo)
+                Pagamento.objects.create(
+                    anuidade_associado=anuidade_assoc,
+                    valor=valor_baixa,
+                    registrado_por=request.user
+                )
 
-            # Aplica a baixa no valor da anuidade
-            anuidade_assoc.dar_baixa(valor_baixa)
+                # ✅ Aplica a baixa no valor da anuidade
+                anuidade_assoc.dar_baixa(valor_baixa)
 
-            # Calcula o saldo restante
-            saldo = anuidade_assoc.calcular_saldo()
+                # 🔍 Verifica saldo restante
+                saldo = anuidade_assoc.calcular_saldo()
 
-            if saldo == 0:
-                messages.success(request, "Pagamento concluído! A anuidade foi quitada.")
-            else:
-                messages.success(request, f"Baixa registrada! Saldo restante: R$ {saldo:.2f}")
+                if saldo == 0:
+                    messages.success(request, "✅ Pagamento concluído! A anuidade foi quitada.")
+                else:
+                    messages.success(request, f"✅ Baixa registrada com sucesso! Saldo restante: R$ {saldo:.2f}")
+
+            except ValidationError as e:
+                # 🔥 Captura o erro do modelo de forma amigável
+                mensagem = e.message if hasattr(e, 'message') else str(e)
+                messages.error(request, f"⚠️ Erro: {mensagem}")
+
+            except Exception as e:
+                messages.error(request, f"⚠️ Erro inesperado: {str(e)}")
 
         return redirect('app_finances:financeiro_associado', anuidade_assoc.associado.id)
-
-
+    
+    
 # Lista Triangular de Condições
 @login_required
 def associados_triangulo_view(request):

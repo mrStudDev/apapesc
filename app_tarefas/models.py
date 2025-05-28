@@ -119,7 +119,22 @@ class TarefaModel(models.Model):
 
         super().save(*args, **kwargs)
 # ===================== End Tarefa
+# Tarefa de Processo de Filiação - Novo Filiado
+class ChecklistItemModel(models.Model):
+    tarefa = models.ForeignKey(
+        'app_tarefas.TarefaModel',
+        on_delete=models.CASCADE,
+        related_name='checklist_itens'
+    )
+    descricao = models.CharField(max_length=255)
+    concluido = models.BooleanField(default=False)
 
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.descricao} ({'✔️' if self.concluido else '❌'})"
+    
+    
 
 # Histórico Status
 class HistoricoStatusModel(models.Model):

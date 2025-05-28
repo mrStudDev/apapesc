@@ -1,12 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Controle de Benefícios{% endblock %}
+{% block title %}Detalhe/Controle Benefícios{% endblock %}
 
 {% block single_ControleBeneficio %}
 
 {% include 'components/navbar_associacao.html' %}
 <main class="max-w-6xl mx-auto py-6 px-4">
     <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200 space-y-6">
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-3 rounded text-white 
+                    {% if message.tags == 'success' %}bg-green-600
+                    {% elif message.tags == 'error' %}bg-red-600
+                    {% else %}bg-gray-600{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         <!-- Hero Controle Compacto -->
         <div class="bg-green-50 border border-green-100 rounded-lg p-4 mb-4">
             <div class="flex flex-col md:flex-row md:items-center md:space-x-6 space-y-4 md:space-y-0">
@@ -99,6 +111,40 @@
             </div>
             {% endif %}
         </div>
+
+        {% if leva %}
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-4">
+                <h2 class="text-xl font-bold text-green-700 flex items-center gap-2">
+                    🔄 Processamento de Benefícios
+                </h2>
+                <p class="text-sm text-gray-700">
+                    📌 <strong>Associado:</strong> {{ associado.user.get_full_name }} | 
+                    🎯 <strong>Benefício:</strong> {{ leva.beneficio.get_nome_display }} — UF: {{ leva.beneficio.estado }} — Ano: {{ leva.beneficio.ano_concessao }}
+                </p>
+                <p class="text-sm text-gray-700">
+                    📊 Processando <strong>{{ indice_atual }}</strong> de <strong>{{ total_itens }}</strong> no total —
+                    ✅ <span class="text-green-600">{{ itens_concluidos }} concluídos</span>,
+                    ⏳ <span class="text-yellow-600">{{ itens_pendentes }} pendentes</span>,
+                    🔄 <span class="text-blue-600"> Guias em processamento por {{ usuarios_processando.count }} usuário(s)</span>
+                </p>
+
+                {% if usuarios_processando %}
+                    <div class="text-sm text-blue-700 mt-2">
+                        👥 <strong>{{ usuarios_processando.count }} usuários processando:</strong>
+                        {% for user in usuarios_processando %}
+                            {{ user.get_full_name }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+        {% if not pertence_a_leva %}
+            <div class="bg-yellow-100 text-yellow-800 p-2 rounded mb-4 text-sm">
+                ⚠️ Este controle está sendo editado fora do processamento da Leva.
+                Aqui você apenas edita ou visualiza individualmente, sem ações da leva.
+            </div>
+        {% endif %}
+
         <div class="flex justify-end gap-4 mb-6 ">
             <a href="{% url 'app_beneficios:lista_beneficios' %}"
             class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded-md shadow transition">
@@ -108,9 +154,11 @@
             <a href="{% url 'app_beneficios:painel_beneficios' %}"
             class="inline-block bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded-md shadow transition">
                 📊 Painel de Benefícios
-            </a>        
+            </a>   
+  
         </div>
         <h2 class="text-2xl font-bold text-gray-700 mb-6">📄 Beneficiário</h2>
+
 
         <!-- Info de cabeçalho -->
         <!-- Painel Detalhado do Associado -->
@@ -239,6 +287,7 @@
         </div>
 
 
+
         <form method="post" enctype="multipart/form-data"  class="bg-white p-6 rounded shadow-md">
             {% csrf_token %}
 
@@ -263,7 +312,7 @@
                 </div>
                 <!--Data Entrada-->
                 <div class="mb-4">
-                    <label for="{{ form.data_entrada.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    <label for="{{ form.data_entrada.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Protocolo:
                         {{ form.data_entrada.label }}
                     </label>
                     <input type="date" 
@@ -293,8 +342,8 @@
                     </label>
                     {{ form.comprovante_protocolo }}
                     {% if controle.comprovante_protocolo %}
-                        <p class="mt-2 text-sm text-green-600">
-                            📄 <a href="{{ controle.comprovante_protocolo.url }}" target="_blank" class="hover:underline">Visualizar Comprovante Atual</a>
+                        <p class="mt-2 text-md text-blue-600">
+                            📄 <a href="{{ controle.comprovante_protocolo.url }}" target="_blank" class="hover:underline">Visualizar Comprovante de Entrada</a>
                         </p>
                     {% endif %}
                 </div>
@@ -325,17 +374,30 @@
                 {{ form.resultado_final }}
             </div>
 
-            <div class="mt-6">
-                <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700">
-                    💾 Salvar Alterações
+            <div class="flex gap-4 mt-6">
+                <button name="acao" value="salvar_continuar"
+                    class="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-800 flex items-center gap-2">
+                    💾 Salvar
                 </button>
+
+                {% if pertence_a_leva %}
+                    <button name="acao" value="salvar_proximo"
+                        class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 flex items-center gap-2">
+                        💾➡️ Salvar e Próximo
+                    </button>
+
+                    <button name="acao" value="salvar_pausar"
+                        class="bg-yellow-500 text-white px-6 py-2 rounded hover:bg-yellow-600 flex items-center gap-2">
+                        ⏸️ Salvar e Pausar
+                    </button>
+                {% endif %}
             </div>
-        </form>
-        <div class="mt-6">
-            <a href="{% url 'app_beneficios:lista_beneficios' %}" class="text-blue-600 hover:underline">
-                Voltar para a lista de Controle de Benefícios
-            </a>
+
+
+
         </div>
+
+        </form>
 
         {% if documentos_relevantes %}
         <div class="bg-white p-6 rounded-lg shadow-md mt-6">
@@ -355,15 +417,23 @@
                 </p>
                 <p class="text-xs text-gray-500">Enviado em {{ doc.data_upload|date:"d/m/Y H:i" }}</p>
               </div>
-              <a href="{{ doc.arquivo.url }}" download class="text-green-600 hover:text-green-800" title="Baixar Documento">
-                <i class="material-icons">cloud_download</i>
-              </a>
+                <a href="{% url 'app_documentos:download_documento' doc.id %}" 
+                class="text-green-600 hover:text-green-800" 
+                title="Baixar Documento">
+                    <i class="material-icons">cloud_download</i>
+                </a>
+
             </li>
             {% endfor %}
           </ul>
         </div>
       {% else %}
         <p class="text-gray-500 text-sm italic mt-4">Nenhum documento relevante foi encontrado para o associado.</p>
+        <br><a href="{% url 'app_associados:single_associado' associado.id %}"
+            class="text-green-600 hover:underline mt-2">
+            📄 Detalhes / Uploads do Associado
+        </a>
+
       {% endif %}
       
         
@@ -410,9 +480,7 @@
                 </a>        
             </div>
         </div>
-
     </div>
-    
     </div>
 </main>
 

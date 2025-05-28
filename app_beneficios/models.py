@@ -6,6 +6,7 @@ from django.core.files.storage import FileSystemStorage
 from django.utils.text import slugify
 import os
 
+from django.contrib.auth.models import User
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaFileUpload
 from google.oauth2 import service_account
@@ -249,3 +250,67 @@ class ControleBeneficioHistoricoModel(models.Model):
 
     def __str__(self):
         return f"{self.controle.associado} - {self.campo_alterado} em {self.alterado_em}"
+
+
+
+# Processamento de Benefícios
+class LevaProcessamentoBeneficio(models.Model):
+    nome = models.CharField(max_length=255, verbose_name="Descrição da Leva")
+    beneficio = models.ForeignKey(
+        BeneficioModel,
+        on_delete=models.CASCADE,
+        related_name="levas_processamento"
+    )
+    criado_em = models.DateTimeField(auto_now_add=True)
+    criado_por = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="levas_criadas"
+    )
+    encerrado = models.BooleanField(default=False, verbose_name="Leva Encerrada")
+
+    def __str__(self):
+        return f"Leva: {self.nome} - {self.beneficio} ({'Encerrada' if self.encerrado else 'Em andamento'})"
+    
+    
+class ControleLevaItem(models.Model):
+    leva = models.ForeignKey(
+        LevaProcessamentoBeneficio,
+        on_delete=models.CASCADE,
+        related_name='itens'
+    )
+    controle_beneficio = models.ForeignKey(
+        ControleBeneficioModel,
+        on_delete=models.CASCADE
+    )
+    status = models.CharField(
+        max_length=20,
+        choices=[('PENDENTE', 'Pendente'), ('PROCESSANDO', 'Processando'), ('CONCLUIDO', 'Concluído')],
+        default='PENDENTE'
+    )
+    em_processamento_por = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='processando_itens'
+    )
+    atualizado_por = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='atualizou_itens'
+    )
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.status != 'PROCESSANDO':
+            self.em_processamento_por = None
+        super().save(*args, **kwargs)
+
+
+    def __str__(self):
+        return f"{self.leva} - {self.controle_beneficio}"

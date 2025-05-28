@@ -26,7 +26,6 @@ class AnuidadeForm(forms.ModelForm):
         }
 
 
-
 # 🔹 Formulário para cadastrar/editar tipos de despesas
 class TipoDespesaForm(forms.ModelForm):
     class Meta:

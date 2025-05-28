@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load beneficio_tags %}
+{% load dict_extras %}
 
 {% load filtrosPainel_servicos %}
 
@@ -101,7 +102,9 @@
                         <th class="px-4 py-2 border">E</th>
                         <th class="px-4 py-2 border">NE</th>
                         <th class="px-4 py-2 border">Guias</th>
+                        <th class="px-4 py-2 border">G</th>
                         <th class="px-4 py-2 border">Benefico</th>
+                        <th class="px-4 py-2 border">B</th>
                         <th class="px-4 py-2 border text-center">Ações</th>
                     </tr>
                 </thead>
@@ -196,7 +199,7 @@
                                    <!-- ↓ menor que text-base -->
                                 </a>
                             </td>
-                              
+                            <!--Guias INSS -->
                             <td class="px-4 py-2 border text-center text-xs">
                                 <div class="flex justify-center text-xs flex-wrap gap-[3px] mt-1">
                                   {% with guias=guias_por_associado|get_item:associado.id %}
@@ -213,7 +216,7 @@
                                           {% elif status == "atrasada" %}
                                             <span class="inline-block w-2 h-2 rounded-full bg-red-500" title="⚠️ Atrasada - Mês {{ mes }}"></span>
                                           {% else %}
-                                            <span class="inline-block w-2 h-2 rounded-full bg-blue-700" title="⛔ Pendente - Mês {{ mes }}"></span>
+                                            <span class="inline-block w-2 h-2 rounded-full bg-blue-600" title="⛔ Pendente - Mês {{ mes }}"></span>
                                           {% endif %}
                                         {% endwith %}
                                       {% endfor %}
@@ -221,40 +224,83 @@
                                   {% endwith %}
                                   {% endwith %}
                                 </div>
-                              </td>
+                            </td>
                               
-                            
-
+                            <!-- 🔥 Coluna G - Link para Lançamento INSS (somente se tem guia) -->
                             <td class="px-4 py-2 border text-center">
-                            {% get_beneficio_aplicado associado as c %}
-
-                            {% if c %}
-                                {% with status=c.get_status_pedido_display %}
-                                {% if status == "Em Preparo" %}
-                                    <span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-700 rounded-full">{{ status }}</span>
-                                {% elif status == "Protocolado" %}
-                                    <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">{{ status }}</span>
-                                {% elif status == "Exigência" %}
-                                    <span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-700 rounded-full">{{ status }}</span>
-                                {% elif status == "Em Análise" %}
-                                    <span class="px-2 py-1 text-xs font-medium bg-indigo-100 text-indigo-700 rounded-full">{{ status }}</span>
-                                {% elif status == "Recurso" %}
-                                    <span class="px-2 py-1 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">{{ status }}</span>
-                                {% elif status == "Indeferido" %}
-                                    <span class="px-2 py-1 text-xs font-medium bg-black text-red-300 rounded-full">{{ status }}</span>
-                                {% elif status == "Deferido" %}
-                                    <span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-700 rounded-full">{{ status }}</span>
-                                {% elif status == "Arquivado" %}
-                                    <span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-700 rounded-full">{{ status }}</span>
-                                {% else %}
-                                    <span class="text-gray-400 italic">Não informado</span>
-                                {% endif %}
+                                {% with guias=guias_por_associado|get_item:associado.id %}
+                                    {% if guias %}
+                                        {% with lancamento=lancamentos_por_associado|dict_get:associado.id %}
+                                            {% if lancamento %}
+                                                <a href="{% url 'app_tarefas:detalhe_lancamento_inss' lancamento.pk %}"
+                                                class="text-blue-400 hover:text-green-800"
+                                                title="Ver Lançamento INSS">
+                                                    <i class="material-icons text-[16px] leading-none">account_balance</i>
+                                                </a>
+                                            {% else %}
+                                                <span class="text-gray-400" title="Sem Lançamento">
+                                                    <i class="material-icons text-[16px] leading-none">account_balance_wallet</i>
+                                                </span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    {% else %}
+                                        <span class="text-gray-400" title="Sem Guia Emitida">
+                                            <i class="material-icons text-[16px] leading-none">block</i>
+                                        </span>
+                                    {% endif %}
                                 {% endwith %}
-                            {% else %}
-                                <span class="text-gray-400 text-xs italic">Não aplicado</span>
-                            {% endif %}
                             </td>
 
+                            <!--Benefícios-->
+                            <td class="px-4 py-2 border text-center align-middle">
+
+                                {% get_beneficio_aplicado associado as c %}
+
+                                <div class="flex items-center justify-center gap-2">
+
+                                    <!-- Badge do status -->
+                                    {% if c %}
+                                        {% with status=c.get_status_pedido_display %}
+                                            <span class="
+                                                px-1.5 py-0.5 
+                                                text-[9px] font-semibold 
+                                                rounded-full leading-none
+                                                {% if status == 'Em Preparo' %} bg-yellow-100 text-yellow-700
+                                                {% elif status == 'Protocolado' %} bg-blue-100 text-blue-700
+                                                {% elif status == 'Exigência' %} bg-orange-100 text-orange-700
+                                                {% elif status == 'Em Análise' %} bg-indigo-100 text-indigo-700
+                                                {% elif status == 'Recurso' %} bg-purple-100 text-purple-700
+                                                {% elif status == 'Indeferido' %} bg-black text-red-300
+                                                {% elif status == 'Deferido' %} bg-green-100 text-green-700
+                                                {% elif status == 'Arquivado' %} bg-gray-100 text-gray-700
+                                                {% else %} text-gray-400 italic
+                                                {% endif %}
+                                            ">
+                                                {{ status }}
+                                            </span>
+                                        {% endwith %}
+                                    {% else %}
+                                        <span class="text-gray-400 text-[9px] italic leading-none">Não aplicado</span>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <!--Benefício Link-->
+                            <td class="px-4 py-2 border text-center">
+                                <!-- 🔗 Ícone de acesso ao controle de benefício -->
+                                {% with controle=controles_por_associado|dict_get:associado.id %}
+                                    {% if controle %}
+                                        <a href="{% url 'app_beneficios:controle_detalhe' controle.pk %}"
+                                            class="text-indigo-600 hover:text-indigo-800 text-sm"
+                                            title="Controle de Benefícios">
+                                            <i class="material-icons text-[16px] leading-none">assignment</i>
+                                        </a>
+                                    {% else %}
+                                        <span class="text-gray-400" title="Sem Controle de Benefício">
+                                            <i class="material-icons text-[16px] leading-none">assignment_late</i>
+                                        </span>
+                                    {% endif %}
+                                {% endwith %}
+                            </td>
 
                             <td class="px-4 py-2 border text-center flex justify-center space-x-2">
                                 <a href="{% url 'app_associados:single_associado' associado.pk %}" 
@@ -279,6 +325,14 @@
                                     title="WhatsApp">
                                     <i class="material-icons">phone</i>
                                 </a>
+
+                                <!-- 🔗 Acesso ao Financeiro do Associado -->
+                                <a href="{% url 'app_finances:financeiro_associado' associado.pk %}"
+                                class="text-green-600 hover:text-green-800 text-sm"
+                                title="Financeiro">
+                                    <i class="material-icons text-base leading-tight">attach_money</i>
+                                </a>
+                             
                             </td>
                         </tr>
                     {% endfor %}

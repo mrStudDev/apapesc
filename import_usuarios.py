@@ -2,14 +2,15 @@ import json
 import os
 import django
 
+
 # 🔹 Configura o ambiente Django
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "apapesc.settings_local")  # ajuste se o nome do seu projeto for diferente
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "app.settings_local")  # ajuste se o nome do seu projeto for diferente
 django.setup()
 
 from django.contrib.auth.models import User
 
 # 🔹 Carrega o arquivo JSON
-with open("usuarios.json", "r", encoding="utf-8") as f:
+with open("user_integrantes.json", "r", encoding="utf-8") as f:
     usuarios = json.load(f)
 
 # 🔹 Contadores

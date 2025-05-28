@@ -789,6 +789,7 @@ class ReparticoesUpdateView(LoginRequiredMixin, GroupPermissionRequiredMixin, Up
             return reverse('app_associacao:single_reparticao', kwargs={'pk': self.object.pk})
         return super().get_success_url()
     
+    
 class ReparticoesDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteView):
     model = ReparticoesModel
     template_name = 'app_associacao/delete_reparticao.html'

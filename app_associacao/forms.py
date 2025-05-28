@@ -154,6 +154,8 @@ class AssociacaoForm(forms.ModelForm):
         celular_formatado = f"({numeros[:2]}){numeros[2:7]}-{numeros[7:]}"
         return celular_formatado
 
+
+
 class ReparticaoForm(forms.ModelForm):
     municipios_circunscricao = forms.ModelMultipleChoiceField(
         queryset=ReparticoesModel.objects.all(),
@@ -236,13 +238,37 @@ class ReparticaoForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             self.fields['municipios_circunscricao'].initial = self.instance.municipios_circunscricao.all()
 
-        # Ajustar o campo associacao para exibir o nome_fantasia
+ # 👉 Inicializa seleção de municípios atuais (quando for edição)
+        if self.instance and self.instance.pk:
+            self.fields['municipios_circunscricao'].initial = self.instance.municipios_circunscricao.all()
+
+        # ⚙️ Lista de todos os municípios já vinculados a alguma repartição
+        municipios_ja_vinculados = MunicipiosModel.objects.filter(
+            municipios_circunscricao__isnull=False
+        ).distinct()
+
+        # 🔥 Remove os da própria repartição (se for edição)
+        if self.instance and self.instance.pk:
+            municipios_na_propria = self.instance.municipios_circunscricao.all()
+            municipios_ocupados = municipios_ja_vinculados.exclude(id__in=municipios_na_propria)
+        else:
+            municipios_ocupados = municipios_ja_vinculados
+
+        # 🏷️ Salva ocupados para template
+        self.municipios_ocupados = municipios_ocupados
+
+        # 🚀 Queryset dos livres: todos - ocupados
+        municipios_livres = MunicipiosModel.objects.exclude(id__in=municipios_ocupados)
+
+        # ✅ Atribui apenas aqui corretamente
+        self.fields['municipios_circunscricao'].queryset = municipios_livres | (self.instance.municipios_circunscricao.all() if self.instance and self.instance.pk else MunicipiosModel.objects.none())
+
+        # 👉 Outros campos seguem configurados normalmente
         self.fields['associacao'].queryset = AssociacaoModel.objects.all()
         self.fields['associacao'].label_from_instance = lambda obj: obj.nome_fantasia
+
         self.fields['municipio_sede'].queryset = MunicipiosModel.objects.all()
         self.fields['delegado'].queryset = IntegrantesModel.objects.all()
-        self.fields['municipios_circunscricao'].queryset = MunicipiosModel.objects.all()
-        self.fields['nome_reparticao'].queryset = ReparticoesModel.objects.all()
 
     def clean_municipios_circunscricao(self):
         municipios_circunscricao = self.cleaned_data.get('municipios_circunscricao')

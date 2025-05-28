@@ -216,6 +216,24 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
     ]
+
+    def post(self, request, pk):
+        tarefa = get_object_or_404(TarefaModel, pk=pk)
+
+        # Atualizar responsáveis se vier do form de responsáveis
+        if 'responsaveis' in request.POST:
+            novos_responsaveis = request.POST.getlist('responsaveis')
+            tarefa.responsaveis.set(novos_responsaveis)
+            messages.success(request, "Responsáveis atualizados com sucesso!")
+
+        # Atualizar checklist
+        for item in tarefa.checklist_itens.all():
+            checkbox_name = f"item_{item.id}"
+            item.concluido = checkbox_name in request.POST
+            item.save()
+
+        messages.success(request, "Checklist atualizado com sucesso.")
+        return redirect('app_tarefas:single_tarefa', pk=tarefa.pk)
     
     def get_object(self, queryset=None):
         """
@@ -238,7 +256,20 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
 
         context['associado'] = self.object.associado
         context['documentos'] = Documento.objects.filter(tarefa=self.object)
-        
+
+
+        # ✔️ Progresso do checklist da tarefa atual
+        checklist = self.object.checklist_itens.all()
+        total = checklist.count()
+        feitos = checklist.filter(concluido=True).count()
+        progresso_percentual = int((feitos / total) * 100) if total > 0 else 0
+
+        context.update({
+            'total_itens': total,
+            'feitos_itens': feitos,
+            'progresso': progresso_percentual,
+        })
+                
         return context
 
 

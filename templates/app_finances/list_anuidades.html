@@ -31,9 +31,42 @@
 
     <main class="flex-grow">
         <div class="container mx-auto mt-8">
-            <h1 class="text-3xl font-extrabold text-gray-900 mb-8">Lista de Anuidades - Ano/Associação</h1>
-            <p>Selecioene o ano e a associação para filtrar os lançamentos de anuidades.</p>
-            <hr><br>
+            
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+
+            <div>
+              <h1 class="text-3xl font-extrabold text-gray-900">
+                Lista de Anuidades - Ano/Associação
+              </h1>
+              <p class="text-sm text-gray-600">
+                Selecione o ano e a associação para filtrar os lançamentos de anuidades.
+              </p>
+            </div>
+
+            <div class="flex gap-3 mt-4 sm:mt-0">
+              <!-- 🔙 Botão Voltar para Resumo Financeiro -->
+              <a href="{% url 'app_finances:resumo_financeiro' %}" 
+                class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm 
+                        text-sm font-medium rounded-md text-gray-700 bg-white 
+                        hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                📄 Resumo Financeiro
+              </a>
+
+              <!-- 🔄 Botão Tri Condições -->
+              <a href="{% url 'app_finances:tri_condictions' %}" 
+                class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm 
+                        text-sm font-medium rounded-md text-white bg-red-600 
+                        hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                🔍 Lista Triangular
+              </a>
+            </div>
+
+          </div>
+          <hr class="mb-6">
+
+
+
+
             <!-- Filtro de anos -->
             <form method="get" class="mb-6 flex flex-wrap items-center gap-4">
             

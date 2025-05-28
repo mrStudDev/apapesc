@@ -1,0 +1,128 @@
+[
+  {
+    "email": "samadmin@apapesc.com",
+    "username": "Samara_Admin_apapesc",
+    "primeiro_nome": "Samara_administradora",
+    "sobrenome": "Administradora",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "crisdiretora@apapesc.com",
+    "username": "Cris_Diretora_apapesc",
+    "primeiro_nome": "Cris",
+    "sobrenome": "Diretora",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "petersonpresidente@apapesc.com",
+    "username": "Peterson_Presidente_apapesc",
+    "primeiro_nome": "Peterson",
+    "sobrenome": "Presidente",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "joaoDelegado1Balneario@apapesc.com",
+    "username": "Joao_Delegado1_Balneario_apapesc",
+    "primeiro_nome": "João",
+    "sobrenome": "Delegado1 Balneário",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "joseDelegado2Garopaba@apapesc.com",
+    "username": "Jose_Delegado2_Garopaba_apapesc",
+    "primeiro_nome": "José",
+    "sobrenome": "Delegado2 Garopaba",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "soniaDelegada3Costa@apapesc.com",
+    "username": "Sonia_Delegada3Costa_apapesc",
+    "primeiro_nome": "Sonia",
+    "sobrenome": "Delegada3 Costa",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "anaadmin@aparapesca.com",
+    "username": "Ana_Admin_aparapesca",
+    "primeiro_nome": "Ana",
+    "sobrenome": "Administradora",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "mariadiretora@aparapesca.com",
+    "username": "Maria_Diretora_aparapesca",
+    "primeiro_nome": "Maria",
+    "sobrenome": "Diretora",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "robertopresidente@aparapesca.com",
+    "username": "Roberto_Presidente_aparapesca",
+    "primeiro_nome": "Roberto",
+    "sobrenome": "Presidente",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "carlosDelegado1Ilhabela@aparapesca.com",
+    "username": "Carlos_Delegado1_Ilhabela_aparapesca",
+    "primeiro_nome": "Carlos",
+    "sobrenome": "Delegado1 Ilhabela",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "marcosDelegado2Santos@aparapesca.com",
+    "username": "Marcos_Delegado2_Santos_aparapesca",
+    "primeiro_nome": "Marcos",
+    "sobrenome": "Delegado2 Santos",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "elaineDelegada3Ubatuba@aparapesca.com",
+    "username": "Elaine_Delegada3_Ubatuba_aparapesca",
+    "primeiro_nome": "Elaine",
+    "sobrenome": "Delegada3 Ubatuba",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "lucasadmin@asminaspesca.com",
+    "username": "Lucas_Admin_asminaspesca",
+    "primeiro_nome": "Lucas",
+    "sobrenome": "Administrador",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "julianadiretora@asminaspesca.com",
+    "username": "Juliana_Diretora_asminaspesca",
+    "primeiro_nome": "Juliana",
+    "sobrenome": "Diretora",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "fernandopresidente@asminaspesca.com",
+    "username": "Fernando_Presidente_asminaspesca",
+    "primeiro_nome": "Fernando",
+    "sobrenome": "Presidente",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "ricardoDelegado1Paraty@asminaspesca.com",
+    "username": "Ricardo_Delegado1_Paraty_asminaspesca",
+    "primeiro_nome": "Ricardo",
+    "sobrenome": "Delegado1 Paraty",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "alineDelegado2Angra@asminaspesca.com",
+    "username": "Aline_Delegado2_Angra_asminaspesca",
+    "primeiro_nome": "Aline",
+    "sobrenome": "Delegado2 Angra",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  },
+  {
+    "email": "silviaDelegada3Itacuruca@asminaspesca.com",
+    "username": "Silvia_Delegada3_Itacuruca_asminaspesca",
+    "primeiro_nome": "Silvia",
+    "sobrenome": "Delegada3 Itacuruçá",
+    "senha": "pbkdf2_sha256$260000$testpassword$hashAqui"
+  }
+]

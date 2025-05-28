@@ -13,6 +13,7 @@ from django.db.models.functions import Lower
 from django.forms.models import model_to_dict
 from datetime import datetime
 from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 
 
 class AnuidadeModel(models.Model):
@@ -127,7 +128,39 @@ class Pagamento(models.Model):
 
     def __str__(self):
         return f"Pagamento de R$ {self.valor} em {self.data_pagamento}"
-    
+
+    def clean(self):
+        super().clean()
+
+        # 🔍 Obtem os valores atuais
+        total_descontos = self.anuidade_associado.descontos.aggregate(
+            total=models.Sum('valor_desconto')
+        )['total'] or Decimal('0.00')
+
+        total_pagamentos = self.anuidade_associado.pagamentos.aggregate(
+            total=models.Sum('valor')
+        )['total'] or Decimal('0.00')
+
+        # 🔥 Se está editando o próprio pagamento, remove ele do total
+        if self.pk:
+            total_pagamentos -= Pagamento.objects.filter(pk=self.pk).values_list('valor', flat=True).first() or Decimal('0.00')
+
+        # ⚠️ Verificar o limite permitido
+        valor_anuidade = self.anuidade_associado.anuidade.valor_anuidade
+        valor_disponivel = valor_anuidade - total_descontos - total_pagamentos
+
+        if self.valor > valor_disponivel:
+            raise ValidationError(
+                f"Valor excede o limite permitido. Anuidade: R$ {valor_anuidade}, "
+                f"Desconto aplicado: R$ {total_descontos}, "
+                f"Já pago: R$ {total_pagamentos}. "
+                f"Disponível para pagamento: R$ {valor_disponivel}."
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()  # ✔️ Executa a validação antes de salvar
+        super().save(*args, **kwargs)
+                            
     
 class DescontoAnuidade(models.Model):
     anuidade_associado = models.ForeignKey(

@@ -31,6 +31,7 @@ from django.contrib.auth.models import Group
 from django.http import QueryDict
 from django.http import JsonResponse
 
+from app_tarefas.models import ChecklistItemModel
 
 logger = logging.getLogger(__name__)
 
@@ -106,38 +107,128 @@ class CreateAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
 
     def form_valid(self, form):
         user_id = self.request.GET.get('user_id')
+        
         if user_id:
             user = User.objects.get(id=user_id)
             form.instance.user = user  # Associa o usuário ao associado
 
-            # Atualiza o e-mail do usuário, se alterado
+            # ✅ Atualiza o e-mail do usuário, se for diferente
             user_email = form.cleaned_data.get('email')
             if user_email and user.email != user_email:
                 user.email = user_email
                 user.save()
-                
-            # Adiciona o usuário ao grupo "Associados da Associação"
-            group, created = Group.objects.get_or_create(name="Associados da Associação")
-            user.groups.add(group)  # Adiciona o usuário ao grupo
-                                    
+
+            # ✅ Adiciona o usuário no grupo padrão de associados
+            grupo_associados, _ = Group.objects.get_or_create(name="Associados da Associação")
+            user.groups.add(grupo_associados)
+
         else:
-            messages.error(self.request, "Erro: Nenhum usuário selecionado para associação.")
+            messages.error(self.request, "⚠️ Erro: Nenhum usuário selecionado para associação.")
             return self.form_invalid(form)
 
-        self.object = form.save()  # Salva o formulário
+        # ✅ Salva o associado
+        self.object = form.save()
 
-        # Adiciona uma mensagem de sucesso
-        messages.success(self.request, "Associado salvo com sucesso!")
+        # ✅ Cria a tarefa automática de filiação
+        criar_tarefa_filiacao(associado=self.object, user=self.request.user)
 
-        # Redireciona com base no botão clicado
+        messages.success(self.request, "✅ Associado salvo com sucesso!")
+        messages.success(self.request, "📋 Tarefa de filiação criada com sucesso!")
+
+        # ✅ Redireciona baseado no botão clicado
         if "save_and_continue" in self.request.POST:
             return redirect(reverse('app_associados:edit_associado', kwargs={'pk': self.object.pk}))
         elif "save_and_view" in self.request.POST:
             return redirect(reverse('app_associados:single_associado', kwargs={'pk': self.object.pk}))
+        
         return super().form_valid(form)
 
     def get_success_url(self):
         return reverse_lazy('app_associados:list_geral_associado')
+
+
+
+def criar_tarefa_filiacao(associado, user):
+    titulo = f"Processo de Filiação - {associado.user.get_full_name()}"
+    descricao = f"Tarefa de filiação do novo associado {associado.user.get_full_name()}."
+    data_limite = date.today() + timedelta(days=7)
+
+    content = (
+        "<br><h1>📋 Tarefa de Filiação - automática</h1>"
+        "<p>🟢 Esta tarefa foi criada automaticamente como parte do processo de filiação do associado.</p>"
+        "<p>Ela tem como objetivo garantir que todas as etapas necessárias para concluir a filiação sejam realizadas corretamente.</p>"
+        "<p>✅ É fundamental:</p>"
+        "<ul>"
+        "<li>Concluir todos os itens do checklist abaixo.</li>"
+        "<li>Baixar e conferir os documentos enviados, garantindo que estejam legíveis e em bom estado.</li>"
+        "<li>Confira se TODOS os documentos essenciais estão disponíneis na página do associado.</li>"
+        "<li>Atualizar e completar o cadastro do associado no sistema, preenchendo todas as informações possívei do formulário.</li>"
+        "</ul>"
+        "<p>Somente após a conclusão de todas essas etapas o cadastro de filiação será considerada completo.</p>"
+        "<p>🟢 Bom trabalho!</p>"
+    )
+
+    tarefa = TarefaModel.objects.create(
+        criado_por=user,
+        titulo=titulo,
+        descricao=descricao,
+        categoria='associado',
+        prioridade='alta',
+        status='pendente',
+        data_limite=data_limite,
+        associado=associado,
+        content=content,
+    )
+
+    # 🔥 Bloco 1 - Documentos Pessoais
+    documentos_pessoais = [
+        "📄 Ficha de Requerimento de Filiação assinada",
+        "📄 Procuração Individual assinada",
+        "⚠️ Assinar também a Procuração Geral para o Defeso",
+        "🖼️ Declaração de Uso de Direitos de Imagem",
+        "🗒️ Declaração de Autorização de Acesso ao GOV",
+        "🪪 RG (legível e atualizado)",
+        "🪪 CPF",
+        "🚗 CNH (se possuir)",
+        "🧾 NIT (emitir pelo INSS, se não tiver)",
+        "🧾 CEI",
+        "🧾 CAEPF (emitir pelo E-social, se não tiver)",
+        "🗳️ Título de Eleitor",
+        "🏠 Comprovante de Residência atualizado",
+        "📝 Declaração de Residência (Modelo MAPA) — obrigatório para RGP",
+        "🖼️ Foto 3x4 recente",
+        "🎣 RGP (Registro Geral da Pesca) — solicitar ao MAPA se não possuir",
+    ]
+
+    # 🚤 Bloco 2 - Documentos da Embarcação (se aplicável)
+    documentos_embarcacao = [
+        "📄 TIE — Título de Inscrição da Embarcação",
+        "📄 Licença de Pesca válida",
+        "📑 Seguro DPEM vigente",
+        "🛠️ Verificar cadastro e documentação da embarcação",
+    ]
+
+    # 💼 Bloco 3 - Processos Administrativos
+    processos_administrativos = [
+        "💬 Adicionar no grupo de WhatsApp da associação",
+        "📝 Verificar e atualizar os campos 'Recolhe INSS' e 'Recebe Seguro'",
+        "🧾 Verificar se já recebeu benefício do Governo (Bolsa Família, seguro defeso, etc.)",
+        "📜 Enviar orientações gerais sobre direitos e deveres do associado",
+        "💰 Orientar sobre o pagamento das anuidades",
+        "🔍 Confirmar dados cadastrais completos no sistema",
+        "📅 Agendar reunião ou orientação inicial, se necessário",
+        "📂 Garantir que todos os uploads estão feitos e legíveis",
+        "✍️ Verificar assinatura presencial, se houver pendência",
+    ]
+
+    # 👉 Cria os itens do checklist
+    for item in documentos_pessoais + documentos_embarcacao + processos_administrativos:
+        ChecklistItemModel.objects.create(
+            tarefa=tarefa,
+            descricao=item
+        )
+
+    return tarefa
 
 
 # List Geral Associados View - Apenas Superuser
@@ -282,6 +373,19 @@ class ListAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListV
         context['total_candidatos'] = AssociadoModel.objects.filter(status="Candidato(a)").count()
         context['total_desassociados'] = AssociadoModel.objects.filter(status="Desassociado(a)").count()
 
+        #INSS - Link
+        # 🔥 Busca o último lançamento que tenha relação com o associado via GuiaINSSModel
+        associados = list(self.get_queryset())
+        lancamentos_por_associado = {}
+
+        for associado in associados:
+            ultimo_lancamento = LancamentoINSSModel.objects.filter(
+                guias__associado=associado
+            ).order_by('-ano', '-mes').first()
+
+            lancamentos_por_associado[associado.id] = ultimo_lancamento
+
+        context['lancamentos_por_associado'] = lancamentos_por_associado
 
         return context
 
