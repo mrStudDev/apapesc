@@ -872,26 +872,22 @@
                     </div>
                 </div>
             </div>
-            <!-- Validade RG _ Single Associado-->
-            <div class="mt-1 text-xs">
-                {% if status_rg.0 == 'vermelho' %}
-                    <span class="px-2 py-1 rounded bg-red-100 text-red-700 font-medium">
-                        {{ status_rg.1 }}
-                    </span>
-                {% elif status_rg.0 == 'amarelo' %}
-                    <span class="px-2 py-1 rounded bg-yellow-100 text-yellow-700 font-medium">
-                        {{ status_rg.1 }}
-                    </span>
-                {% elif status_rg.0 == 'verde' %}
-                    <span class="px-2 py-1 rounded bg-green-100 text-green-700 font-medium">
-                        {{ status_rg.1 }}
-                    </span>
+            {% if status_rg %}
+            {% with cor=status_rg.0 texto=status_rg.1 %}
+                {% if cor == 'vermelho' %}
+                <span class="bg-red-100 text-red-700">{{ texto }}</span>
+                {% elif cor == 'amarelo' %}
+                <span class="bg-yellow-100 text-yellow-700">{{ texto }}</span>
+                {% elif cor == 'verde' %}
+                <span class="bg-green-100 text-green-700">{{ texto }}</span>
                 {% else %}
-                    <span class="px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
-                        {{ status_rg.1 }}
-                    </span>
+                <span class="bg-gray-100 text-gray-700">{{ texto }}</span>
                 {% endif %}
-            </div>
+            {% endwith %}
+            {% else %}
+            <span class="text-gray-400">Sem informação sobre o RG</span>
+            {% endif %}
+
 
 
             <!-- Naturalidade -->
