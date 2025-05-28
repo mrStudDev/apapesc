@@ -339,6 +339,25 @@ class ListAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListV
             if associado.celular:
                 associado.celular_clean = associado.celular.replace('-', '').replace(' ', '')
 
+            # Verificação de status do RG
+            if associado.rg_data_emissao:
+                hoje = date.today()
+                diferenca = relativedelta(hoje, associado.rg_data_emissao)
+                anos = diferenca.years
+                meses = diferenca.months
+                dias = diferenca.days
+
+                if anos > 10 or (anos == 10 and (meses > 0 or dias > 0)):
+                    associado.status_rg_icon = ('text-red-600', '❌ RG vencido (mais de 10 anos)')
+                elif anos > 7 or (anos == 7 and (meses > 0 or dias > 0)):
+                    associado.status_rg_icon = ('text-yellow-500', '⚠️ RG com mais de 7 anos')
+                else:
+                    associado.status_rg_icon = ('text-green-600', '✅ RG válido')
+            else:
+                associado.status_rg_icon = ('text-gray-400', 'ℹ️ Data de emissão não informada')
+
+
+
         # Atualiza a lista tratada
         context['associados'] = associados
 
@@ -389,6 +408,7 @@ class ListAssociadosView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListV
 
         context['lancamentos_por_associado'] = lancamentos_por_associado
 
+            
         return context
 
     
