@@ -36,12 +36,10 @@
           <input type="hidden" name="guia_id" value="{{ guia.id }}">
           <input type="hidden" name="next_guia_id" value="{{ next_guia_id }}">
 
-
-
         {% if fim_processo %}
           <div class="p-6 text-center bg-white rounded-lg shadow border border-gray-200">
-            <h2 class="text-xl font-bold text-green-700 mb-4">🎉 Todos os associados foram processados!</h2>
-            <a href="{% url 'detalhe_lancamento_inss' lancamento.id %}"
+            <h2 class="text-xl font-bold text-green-700 mb-4">🎉 Todos os associados foram processadosx! Ops... ou o navegador ainda não atualizou. Volte para lista ou atualize o navegador!</h2>
+            <a href="{% url 'app_tarefas:detalhe_lancamento_inss' lancamento.id %}"
               class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
               Voltar para lista
             </a>
@@ -69,6 +67,57 @@
                   <span class="material-icons text-sm">content_copy</span>
                 </button>
               </div>
+
+              <!-- Dados do processemnto/rodada/usuários-->
+              <hr class="my-6">
+
+              <!-- 📊 Informações da Rodada -->
+              <div class="bg-gray-50 p-4 rounded border border-gray-200 mt-4">
+                <h2 class="text-sm font-semibold text-gray-700 uppercase mb-2">🌀 Rodada de Processamento</h2>
+
+                <ul class="text-sm text-gray-800 space-y-1">
+                  <li><strong>ID da Rodada:</strong> {{ rodada.id }}</li>
+                  <li><strong>Data de Início:</strong> {{ rodada.criado_em|date:"d/m/Y H:i" }}</li>
+                  <li><strong>Status:</strong> {% if rodada.ativa %} <span class="text-green-600 font-medium">Ativa</span> {% else %} <span class="text-red-600">Finalizada</span> {% endif %}</li>
+                </ul>
+              </div>
+              <h2 class="text-sm font-semibold text-gray-700 uppercase mb-2">👥 Participantes da Rodada</h2>
+              {% if usuarios_participantes %}
+              <ul class="text-sm text-gray-800 space-y-1 list-disc pl-5">
+                {% for u in usuarios_participantes %}
+                  <li>{{ u.get_full_name }} ({{ u.email }})</li>
+                {% endfor %}
+              </ul>
+              {% else %}
+              <p class="text-sm text-gray-500">Nenhum participante ainda.</p>
+              {% endif %}
+
+
+
+
+              <!-- 🔄 Progresso -->
+              <div class="bg-gray-50 p-4 rounded border border-gray-200 mt-4">
+                <h2 class="text-sm font-semibold text-gray-700 uppercase mb-2">📈 Progresso da Rodada</h2>
+                <ul class="text-sm text-gray-800 space-y-1">
+                  <li><strong>Total de Guias:</strong> {{ total }}</li>
+                  <li><strong>Guias Processadas:</strong> {{ processadas }}</li>
+                  <li><strong>Guias em Processamento:</strong> {{ em_processamento }}</li>
+                  <li><strong>Guias Pendentes:</strong> {{ pendentes }}</li>
+                </ul>
+
+                <!-- ✅ Barra de progresso opcional -->
+                
+                <div class="mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
+                  {% if total > 0 %}
+                    {% with percentual=processadas|divisibleby:total %}
+                      <div class="h-2 bg-gray-200 rounded-full overflow-hidden mt-2">
+                        <div class="bg-green-500 h-full" style="width:{{ percentual|floatformat:0 }}%;"></div>
+                      </div>
+                    {% endwith %}
+                  {% endif %}
+                </div>
+            </div>
+
             <hr>
             <div class="mt-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
               <h3 class="text-sm font-semibold text-gray-700 mb-6 flex items-center gap-2">

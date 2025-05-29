@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.mixins import GroupPermissionRequiredMixin
 from django.contrib.auth.models import Group
-from .models import TarefaModel, HistoricoStatusModel, HistoricoResponsaveisModel, ProgressoGuiaINSSModel
+from .models import TarefaModel, HistoricoStatusModel, HistoricoResponsaveisModel, ProgressoGuiaINSSModel, RodadaProcessamentoINSS, GuiaRodadaProcessada
 from .forms import TarefaForm, LancamentoINSSForm
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
@@ -30,6 +30,11 @@ from decimal import Decimal
 from django.views.decorators.http import require_POST
 from django.db import IntegrityError
 import calendar
+from django.views import View
+from django.shortcuts import get_object_or_404, redirect, render
+from .models import GuiaINSSModel, LancamentoINSSModel
+from django.contrib.auth import get_user_model
+
 
 class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = TarefaModel
@@ -500,7 +505,7 @@ class TarefaDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteV
 # Lista com os associados que recolhem o inss
 from django.views.generic import ListView
 from .models import LancamentoINSSModel
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.db.utils import IntegrityError
 
@@ -573,8 +578,6 @@ class CriarLancamentoINSSView(LoginRequiredMixin, GroupPermissionRequiredMixin, 
                 f"⚠️ Já existe um lançamento para {form.instance.mes:02d}/{form.instance.ano}."
             )
             return self.render_to_response(self.get_context_data(form=form))
-
-
 
 
 
@@ -734,10 +737,6 @@ def atualizar_guia(request, guia_id):
     return redirect(request.META.get('HTTP_REFERER', '/'))
 
 
-from django.views import View
-from django.shortcuts import get_object_or_404, redirect, render
-from .models import GuiaINSSModel, LancamentoINSSModel
-
 class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
     template_name = 'app_tarefas/processar_guia.html'
     group_required = [
@@ -751,35 +750,80 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
     ]    
 
     def get(self, request, lancamento_id):
+        User = get_user_model()
         lancamento = get_object_or_404(LancamentoINSSModel, id=lancamento_id)
-        guias = lancamento.guias.select_related('associado').order_by('id')
 
-        current_guia_id = request.GET.get('guia')
+        rodada, created = RodadaProcessamentoINSS.objects.get_or_create(
+            lancamento=lancamento,
+            ativa=True,
+            defaults={'iniciada_em': now()}
+        )
+
+        # 🔓 Limpa guias travadas
+        tempo_expiracao = now() - timedelta(minutes=15)
+        lancamento.guias.filter(
+            em_processamento_por__isnull=False,
+            iniciou_em__lt=tempo_expiracao
+        ).update(em_processamento_por=None, iniciou_em=None)
+
+        # 📌 Guias processadas
+        guias_processadas_ids = GuiaRodadaProcessada.objects.filter(
+            rodada=rodada
+        ).values_list('guia_id', flat=True)
+
+        # 📍 Guias disponíveis
+        guias_disponiveis = GuiaINSSModel.objects.filter(
+            lancamento=lancamento
+        ).exclude(
+            id__in=guias_processadas_ids
+        ).filter(
+            Q(em_processamento_por__isnull=True) | Q(iniciou_em__lt=tempo_expiracao)
+        ).select_related('associado__user').order_by('id')
+
+        # 👥 Participantes (pegando processado_por)
+        usuarios_participantes_ids = GuiaRodadaProcessada.objects.filter(
+            rodada=rodada
+        ).exclude(processado_por__isnull=True).values_list('processado_por', flat=True).distinct()
+
+        usuarios_participantes = User.objects.filter(id__in=usuarios_participantes_ids)
+
         guia = None
+        current_guia_id = request.GET.get('guia')
         if current_guia_id:
-            guia = guias.filter(id=current_guia_id).first()
+            guia = guias_disponiveis.filter(id=current_guia_id).first()
         else:
-            progresso = ProgressoGuiaINSSModel.objects.filter(
-                user=request.user,
-                lancamento=lancamento
-            ).first()
-
+            progresso = ProgressoGuiaINSSModel.objects.filter(user=request.user, lancamento=lancamento).first()
             if progresso:
-                guia = guias.filter(id=progresso.ultima_guia_id).first()
-            else:
-                guia = guias.first()
+                guia = guias_disponiveis.filter(id=progresso.ultima_guia_id).first()
+            if not guia:
+                guia = guias_disponiveis.first()
+
+        if not guia and guias_disponiveis.exists():
+            return render(request, self.template_name, {
+                'aguarde': True,
+                'lancamento': lancamento,
+                'fim_processo': False,
+                'rodada': rodada,
+                
+            })
 
         if not guia:
+            rodada.ativa = False
+            rodada.finalizada_em = now()
+            rodada.save()
             request.session.pop(f'ultima_guia_{lancamento_id}', None)
             return render(request, self.template_name, {
                 'guia': None,
                 'lancamento': lancamento,
                 'fim_processo': True,
+                'rodada': rodada,
             })
 
-        # ✅ Agora que `guia` existe, podemos montar guia_ids e index
-        guia_ids = list(g.id for g in guias)
+        guia.em_processamento_por = request.user
+        guia.iniciou_em = now()
+        guia.save()
 
+        guia_ids = list(guias_disponiveis.values_list('id', flat=True))
         try:
             current_index = guia_ids.index(guia.id)
             next_guia_id = guia_ids[current_index + 1] if current_index + 1 < len(guia_ids) else None
@@ -787,22 +831,27 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
             current_index = 0
             next_guia_id = None
 
-        total_guias = len(guia_ids)
-        contador = current_index + 1
+        contador = GuiaRodadaProcessada.objects.filter(rodada=rodada).count() + 1
+        total_guias = GuiaINSSModel.objects.filter(lancamento=lancamento).count()
 
-        # 👇 Guias anteriores
         guias_anteriores = GuiaINSSModel.objects.filter(
             associado=guia.associado,
             lancamento__ano=lancamento.ano,
             lancamento__mes__lt=lancamento.mes
         ).select_related('lancamento').order_by('-lancamento__ano', '-lancamento__mes')
 
-        MESES_PT = {
+        mes_nome = {
             1: 'Janeiro', 2: 'Fevereiro', 3: 'Março', 4: 'Abril',
             5: 'Maio', 6: 'Junho', 7: 'Julho', 8: 'Agosto',
             9: 'Setembro', 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro'
-        }
-        mes_nome = MESES_PT.get(lancamento.mes, '')
+        }.get(lancamento.mes, '')
+
+        processadas = GuiaRodadaProcessada.objects.filter(rodada=rodada).count()
+        em_processamento = GuiaINSSModel.objects.filter(
+            lancamento=lancamento,
+            em_processamento_por__isnull=False
+        ).exclude(id__in=guias_processadas_ids).count()
+        pendentes = total_guias - processadas - em_processamento
 
         return render(request, self.template_name, {
             'guia': guia,
@@ -813,8 +862,13 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
             'guias_anteriores': guias_anteriores,
             'contador': contador,
             'total_guias': total_guias,
-            'mes_nome': mes_nome,  # 👈 Aqui o que faltava
-            
+            'mes_nome': mes_nome,
+            'total': total_guias,
+            'processadas': processadas,
+            'em_processamento': em_processamento,
+            'pendentes': pendentes,
+            'rodada': rodada,
+            'usuarios_participantes': usuarios_participantes,
         })
 
 
@@ -822,13 +876,36 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
         guia_id = request.POST.get('guia_id')
         guia = get_object_or_404(GuiaINSSModel, id=guia_id)
 
+        # Registrar guia como processada nesta rodada
+        rodada = RodadaProcessamentoINSS.objects.filter(lancamento_id=lancamento_id, ativa=True).first()
+        if rodada:
+            gpp, created = GuiaRodadaProcessada.objects.get_or_create(
+                rodada=rodada,
+                guia=guia,
+                defaults={'user': request.user, 'processado_por': request.user}
+            )
+            if not created:
+                gpp.user = request.user
+                gpp.processado_por = request.user
+                gpp.save()
+
+                
         # Salva a guia atual
         guia.status = request.POST.get('status')
         guia.observacoes = request.POST.get('observacoes') or 'certo'
-
         guia.save()
 
-        # 🔁 Atualiza guias anteriores, se vieram no form
+        # 📌 Registrar guia como processada nesta rodada
+        GuiaRodadaProcessada.objects.get_or_create(
+            rodada=rodada,
+            guia=guia,
+            defaults={
+                'user': guia.associado.user,  # Ou use o user certo conforme a estrutura do seu modelo
+                'processado_por': request.user,
+            }
+        )        
+
+        # Atualiza guias anteriores (se vieram no form)
         for key in request.POST:
             if key.startswith("status_anterior_"):
                 guia_anterior_id = key.replace("status_anterior_", "")
@@ -843,6 +920,11 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
                 except GuiaINSSModel.DoesNotExist:
                     continue
 
+        # ✅ Libera a guia
+        guia.em_processamento_por = None
+        guia.iniciou_em = None
+        guia.save()
+
         # Salva ponto de parada
         ProgressoGuiaINSSModel.objects.update_or_create(
             user=request.user,
@@ -850,18 +932,32 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
             defaults={'ultima_guia': guia}
         )
 
+        # 🔚 Verifica se todas foram processadas
+        total_guias = GuiaINSSModel.objects.filter(lancamento_id=lancamento_id).count()
+        guias_processadas = GuiaRodadaProcessada.objects.filter(rodada=rodada).count()
+
+        if guias_processadas >= total_guias:
+            rodada.ativa = False
+            rodada.finalizada_em = now()
+            rodada.save()
+
         if request.POST.get('acao') == 'pausar':
             messages.info(request, "Processamento pausado.")
             return redirect('app_tarefas:list_lancamentos')
 
-        next_guia_id = request.POST.get('next_guia_id')
-        if next_guia_id and next_guia_id != "None":
-            return redirect(f"{request.path}?guia={next_guia_id}")
+        # 🔄 Buscar próxima guia DISPONÍVEL na rodada
+        tempo_expiracao = now() - timedelta(minutes=15)
+        proxima_guia = GuiaINSSModel.objects.filter(
+            lancamento_id=lancamento_id
+        ).exclude(
+            id__in=GuiaRodadaProcessada.objects.filter(rodada=rodada).values_list('guia_id', flat=True)
+        ).filter(
+            Q(em_processamento_por__isnull=True) | Q(iniciou_em__lt=tempo_expiracao)
+        ).order_by('id').first()
+
+        if proxima_guia:
+            return redirect(f"{request.path}?guia={proxima_guia.id}")
         else:
-            request.session.pop(f'ultima_guia_{lancamento_id}', None)
             messages.success(request, "Processo de emissão finalizado com sucesso!")
+            request.session.pop(f'ultima_guia_{lancamento_id}', None)
             return redirect('app_tarefas:list_lancamentos')
-
-
-
-

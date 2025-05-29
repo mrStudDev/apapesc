@@ -302,6 +302,11 @@ class GuiaINSSModel(models.Model):
         null=True,
         blank=True
     )
+    em_processamento_por = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='guias_em_processamento'
+    )
+    iniciou_em = models.DateTimeField(null=True, blank=True)    
 
     data_emissao = models.DateTimeField(auto_now_add=True)
 
@@ -330,3 +335,49 @@ class ProgressoGuiaINSSModel(models.Model):
 
     class Meta:
         unique_together = ('user', 'lancamento')
+        
+        
+class RodadaProcessamentoINSS(models.Model):
+    lancamento = models.ForeignKey('LancamentoINSSModel', on_delete=models.CASCADE, related_name='rodadas')
+    iniciada_em = models.DateTimeField(auto_now_add=True)
+    finalizada_em = models.DateTimeField(null=True, blank=True)
+    ativa = models.BooleanField(default=True)
+
+    def __str__(self):
+        return f"Rodada {self.id} - {self.lancamento}"
+
+class RodadaProcessamentoINSS(models.Model):
+    lancamento = models.ForeignKey(LancamentoINSSModel, on_delete=models.CASCADE)
+    ativa = models.BooleanField(default=True)
+    finalizada_em = models.DateTimeField(null=True, blank=True)
+    iniciada_em = models.DateTimeField(auto_now_add=True)  # 👈 Adicione isto se quiser controlar o início
+
+
+class GuiaRodadaProcessada(models.Model):
+    rodada = models.ForeignKey(
+        RodadaProcessamentoINSS,
+        on_delete=models.CASCADE,
+        related_name='guias_processadas'
+    )
+    guia = models.ForeignKey(GuiaINSSModel, on_delete=models.CASCADE)
+    processada_em = models.DateTimeField(auto_now_add=True)
+
+    # 🔧 Ambos apontam para User, com related_name único
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='guias_processadas_como_user'
+    )
+    processado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='guias_processadas_como_executor'
+    )
+
+    class Meta:
+        unique_together = ('rodada', 'guia')
+
