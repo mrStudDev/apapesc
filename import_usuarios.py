@@ -10,7 +10,7 @@ django.setup()
 from django.contrib.auth.models import User
 
 # 🔹 Carrega o arquivo JSON
-with open("user_integrantes.json", "r", encoding="utf-8") as f:
+with open("usuarios.json", "r", encoding="utf-8") as f:
     usuarios = json.load(f)
 
 # 🔹 Contadores

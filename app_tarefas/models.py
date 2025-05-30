@@ -103,6 +103,15 @@ class TarefaModel(models.Model):
     )
     arquivada = models.BooleanField(default=False, verbose_name="Arquivada")
 
+    massa = models.ForeignKey(
+        'TarefaMassaModel',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='tarefas_geradas',
+        verbose_name="Lançamento em Massa (opcional)"
+    )
+
     slug = models.SlugField(max_length=255, unique=True, blank=True, null=True)
 
     def save(self, *args, **kwargs):
@@ -118,7 +127,41 @@ class TarefaModel(models.Model):
             self.slug = slug
 
         super().save(*args, **kwargs)
+        
 # ===================== End Tarefa
+# Tarefas em Massa
+# models.py
+TIPOS_TAREFA_MASSA = [
+    ('recadastramento_dados', 'Recadastramento de Dados'),
+    ('abertura_contas', 'Abertura de Contas'),
+    ('inscricoes_cursos', 'Inscrições em Cursos'),
+]
+
+class TarefaMassaModel(models.Model):
+    tipo = models.CharField(max_length=50, choices=TIPOS_TAREFA_MASSA)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    total_geradas = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f"Tarefa em Massa: {self.get_tipo_display()} - {self.criado_em.strftime('%Y-%m-%d')}"
+    
+    class Meta:
+        ordering = ['-criado_em']    
+
+class ChecklistITarefastemModel(models.Model):
+    tarefa = models.ForeignKey('TarefaModel', on_delete=models.CASCADE, related_name='checklist_itens_massas')
+    descricao = models.CharField(max_length=255)
+    concluido = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.descricao
+
+
 # Tarefa de Processo de Filiação - Novo Filiado
 class ChecklistItemModel(models.Model):
     tarefa = models.ForeignKey(
@@ -133,10 +176,62 @@ class ChecklistItemModel(models.Model):
 
     def __str__(self):
         return f"{self.descricao} ({'✔️' if self.concluido else '❌'})"
+
+
+# models.py - Rodada de Processamento de Tarefas em Massa
+class RodadaProcessamentoTarefaMassa(models.Model):
+    tarefa_massa = models.ForeignKey(
+        'TarefaMassaModel',
+        on_delete=models.CASCADE,
+        related_name='rodadas',
+        verbose_name="Lançamento de Tarefas em Massa"
+    )
+    criada_em = models.DateTimeField(auto_now_add=True)
+    criada_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name="Usuário que iniciou a rodada"
+    )
+    encerrada = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Rodada de {self.tarefa_massa.get_tipo_display()} em {self.criada_em.strftime('%d/%m/%Y %H:%M')}"
+
+
+class ProcessamentoTarefaMassa(models.Model):
+    rodada = models.ForeignKey(
+        RodadaProcessamentoTarefaMassa,
+        on_delete=models.CASCADE,
+        related_name='tarefas_processadas'
+    )
+    tarefa = models.ForeignKey(
+        TarefaModel,
+        on_delete=models.CASCADE,
+        related_name='processamentos_em_massa'
+    )
+    STATUS_PROCESSAMENTO = [
+        ('nao_processada', 'Não Processada'),
+        ('em_processamento', 'Em Processamento'),
+        ('processada', 'Processada'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_PROCESSAMENTO, default='nao_processada')
+    processado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='tarefas_processadas_em_massa'
+    )
+    iniciado_em = models.DateTimeField(null=True, blank=True)
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.tarefa} ({self.status})"
     
     
 
-# Histórico Status
+# Histórico Status do Modelo Tarefa
 class HistoricoStatusModel(models.Model):
     tarefa = models.ForeignKey(
         'app_tarefas.TarefaModel',
@@ -345,12 +440,6 @@ class RodadaProcessamentoINSS(models.Model):
 
     def __str__(self):
         return f"Rodada {self.id} - {self.lancamento}"
-
-class RodadaProcessamentoINSS(models.Model):
-    lancamento = models.ForeignKey(LancamentoINSSModel, on_delete=models.CASCADE)
-    ativa = models.BooleanField(default=True)
-    finalizada_em = models.DateTimeField(null=True, blank=True)
-    iniciada_em = models.DateTimeField(auto_now_add=True)  # 👈 Adicione isto se quiser controlar o início
 
 
 class GuiaRodadaProcessada(models.Model):

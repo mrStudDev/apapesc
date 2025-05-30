@@ -3,11 +3,12 @@ from django import forms
 from django.contrib.auth.models import Group
 from django.utils import timezone
 from app_associacao.models import IntegrantesModel
-from app_tarefas.models import TarefaModel
+from app_tarefas.models import TarefaModel, TIPOS_TAREFA_MASSA
 from django.contrib.auth.models import User
 from app_associados.models import AssociadoModel
 from .models import LancamentoINSSModel
 from datetime import datetime
+
 
 class TarefaForm(forms.ModelForm):
     associado = forms.ModelChoiceField(
@@ -67,6 +68,9 @@ class TarefaForm(forms.ModelForm):
             'responsaveis': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
             }),
+            'massa': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500'
+            }),            
             
 
         }
@@ -85,6 +89,24 @@ class TarefaForm(forms.ModelForm):
         if self.initial.get('associado'):
             self.fields['associado'].widget.attrs['readonly'] = True
 
+
+class TarefaMassaForm(forms.Form):
+    TIPO_CHOICES = [("", "Selecione o tipo da tarefa")] + TIPOS_TAREFA_MASSA
+
+    tipo = forms.ChoiceField(
+        choices=TIPO_CHOICES,
+        label="Tipo da Tarefa",
+        required=True,
+        widget=forms.Select(attrs={
+            'class': 'w-full p-2 border border-gray-300 rounded-md'
+        })
+    )
+
+    def clean_tipo(self):
+        tipo = self.cleaned_data.get('tipo')
+        if not tipo:
+            raise forms.ValidationError("Você precisa selecionar um tipo.")
+        return tipo
 
 from django import forms
 from .models import LancamentoINSSModel

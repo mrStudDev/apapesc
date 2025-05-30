@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block delete_tarefaMassa %}
+<!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %}     
+    {% endif %}
+
+<main class="flex-grow">
+    <div class="container mx-auto py-6 px-4 max-w-3xl">
+        <h2 class="text-xl font-semibold mb-4">🗑️ Confirmar Deleção do Lançamento</h2>
+
+        <p><strong>Tipo:</strong> {{ massa.get_tipo_display }}</p>
+        <p><strong>Criado em:</strong> {{ massa.criado_em|date:"d/m/Y H:i" }}</p>
+        <p><strong>Total de Tarefas:</strong> {{ total_tarefas }}</p>
+        <p><strong>✅ Concluídas:</strong> {{ concluidas }}</p>
+        <p><strong>⚠️ Pendentes:</strong> {{ pendentes }}</p>
+
+        {% if not pode_deletar %}
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-4 rounded">
+                <p class="font-semibold">⚠️ Existem tarefas pendentes nesse lançamento. </p>
+                <p class="mb-2">Tem certeza que deseja deletar esse lançamento?</p>
+                <p>Se deseja apagar mesmo assim, clique em <strong>"Deletar mesmo assim"</strong>.</p>
+            </div>
+        {% else %}
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 my-4 rounded">
+                <p class="font-semibold">✅ Todas as tarefas estão concluídas.</p>
+                <p>Você pode deletar este lançamento com segurança.</p>
+            </div>
+        {% endif %}
+
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            {% if not pode_deletar %}
+                <input type="hidden" name="forcar" value="1">
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                    🔥 Deletar mesmo assim
+                </button>
+            {% else %}
+                <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                    🗑️ Confirmar Deleção
+                </button>
+            {% endif %}
+            <a href="{% url 'app_tarefas:gerar_tarefa_massa' %}" class="ml-3 text-blue-600 hover:underline">
+                ⏪ Cancelar e Voltar
+            </a>
+        </form>
+
+    </div>
+</main>
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock delete_tarefaMassa %}

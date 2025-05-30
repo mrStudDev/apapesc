@@ -6,13 +6,13 @@ from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from accounts.mixins import GroupPermissionRequiredMixin
 from django.contrib.auth.models import Group
-from .models import TarefaModel, HistoricoStatusModel, HistoricoResponsaveisModel, ProgressoGuiaINSSModel, RodadaProcessamentoINSS, GuiaRodadaProcessada
-from .forms import TarefaForm, LancamentoINSSForm
+from .forms import TarefaForm, LancamentoINSSForm, TarefaMassaForm
 from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.db.models import Q, F
 from django.shortcuts import get_object_or_404
 from django.http import JsonResponse
+from django.db import transaction
 import json
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
@@ -34,7 +34,21 @@ from django.views import View
 from django.shortcuts import get_object_or_404, redirect, render
 from .models import GuiaINSSModel, LancamentoINSSModel
 from django.contrib.auth import get_user_model
+from app_tarefas.utils import buscar_tarefas_do_lancamento
 
+from .models import (
+    TarefaModel,
+    HistoricoStatusModel,
+    HistoricoResponsaveisModel,
+    ProgressoGuiaINSSModel,
+    RodadaProcessamentoINSS,
+    GuiaRodadaProcessada,
+    TarefaMassaModel,
+    ChecklistITarefastemModel,
+    ProcessamentoTarefaMassa,
+    RodadaProcessamentoTarefaMassa,
+    
+)
 
 class TarefaListView(LoginRequiredMixin, GroupPermissionRequiredMixin, ListView):
     model = TarefaModel
@@ -222,10 +236,40 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
         'Auxiliar da Repartição',
     ]
 
+
+    def get(self, request, *args, **kwargs):
+        rodada_id = request.GET.get("rodada_id")
+        if rodada_id:
+            tarefa = self.get_object()
+            try:
+                with transaction.atomic():
+                    rodada = RodadaProcessamentoTarefaMassa.objects.get(pk=rodada_id)
+                    proc = ProcessamentoTarefaMassa.objects.select_for_update().get(
+                        tarefa=tarefa,
+                        rodada=rodada
+                    )
+
+                    if proc.status == 'em_processamento' and proc.processado_por != request.user:
+                        messages.warning(request, "Essa tarefa já está sendo processada por outro usuário.")
+                        return redirect('app_tarefas:gerar_tarefa_massa')
+
+                    if proc.status == 'nao_processada' and proc.processado_por is None:
+                        proc.status = 'em_processamento'
+                        proc.processado_por = request.user
+                        proc.iniciado_em = timezone.now()  # ✅ Manter!
+                        proc.save()
+
+            except ProcessamentoTarefaMassa.DoesNotExist:
+                messages.error(request, "Erro ao localizar processamento dessa tarefa.")
+                return redirect('app_tarefas:gerar_tarefa_massa')
+
+        return super().get(request, *args, **kwargs)
+
+
     def post(self, request, pk):
         tarefa = get_object_or_404(TarefaModel, pk=pk)
 
-        # Atualizar responsáveis se vier do form de responsáveis
+        # Atualizar responsáveis
         if 'responsaveis' in request.POST:
             novos_responsaveis = request.POST.getlist('responsaveis')
             tarefa.responsaveis.set(novos_responsaveis)
@@ -237,9 +281,49 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
             item.concluido = checkbox_name in request.POST
             item.save()
 
-        messages.success(request, "Checklist atualizado com sucesso.")
-        return redirect('app_tarefas:single_tarefa', pk=tarefa.pk)
-    
+        for item in ChecklistITarefastemModel.objects.filter(tarefa=tarefa):
+            checkbox_name = f"item_mass_{item.id}"
+            item.concluido = checkbox_name in request.POST
+            item.save()
+
+        # ✅ Processamento da rodada
+        rodada_id = request.POST.get("rodada_id")
+        if rodada_id:
+            try:
+                rodada = RodadaProcessamentoTarefaMassa.objects.get(pk=rodada_id)
+                proc = ProcessamentoTarefaMassa.objects.get(tarefa=tarefa, rodada=rodada)
+
+                if proc.status == 'em_processamento' and proc.processado_por != request.user:
+                    messages.error(request, "Esta tarefa já está sendo processada por outro usuário.")
+                    return redirect('app_tarefas:gerar_tarefa_massa')
+
+                proc.status = 'processada'
+                proc.save()
+
+                # 🔍 Busca próxima tarefa disponível
+                proxima_proc = rodada.tarefas_processadas.filter(
+                    status='nao_processada',
+                    tarefa__status__in=['pendente', 'em_andamento']
+                ).exclude(
+                    Q(status='em_processamento') & ~Q(processado_por=request.user)
+                ).order_by('atualizado_em').first()
+
+                if proxima_proc:
+                    return redirect(
+                        f"{reverse('app_tarefas:single_tarefa', kwargs={'pk': proxima_proc.tarefa.pk})}?rodada_id={rodada.pk}"
+                    )
+                else:
+                    # ✅ Encerrando a rodada corretamente
+                    rodada.encerrada = True
+                    rodada.save()
+                    messages.success(request, "Todas as tarefas da rodada foram processadas. Rodada encerrada.")
+                    return redirect('app_tarefas:gerar_tarefa_massa')
+
+            except (RodadaProcessamentoTarefaMassa.DoesNotExist, ProcessamentoTarefaMassa.DoesNotExist):
+                messages.error(request, "Erro ao atualizar o processamento da tarefa.")
+                return redirect('app_tarefas:gerar_tarefa_massa')
+
+        
     def get_object(self, queryset=None):
         """
         Sobrescreve o método get_object para garantir que todos os integrantes possam acessar a tarefa.
@@ -250,33 +334,78 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        tarefa = self.get_object()
 
-        # Lista de status disponíveis para alteraçãos
+        rodada_id = self.request.GET.get("rodada_id") or self.request.POST.get("rodada_id")
+        context["rodada_id"] = rodada_id
+
         context['status_choices'] = self.model._meta.get_field('status').choices
-        # Lista de responsáveis disponíveis
         context['responsaveis_disponiveis'] = IntegrantesModel.objects.all()
-
-        # Responsáveis atribuídos atualmente à tarefa
         context['responsavel_atual'] = self.object.responsaveis.all()
-
         context['associado'] = self.object.associado
         context['documentos'] = Documento.objects.filter(tarefa=self.object)
 
-
-        # ✔️ Progresso do checklist da tarefa atual
+        # Checklist padrão
         checklist = self.object.checklist_itens.all()
         total = checklist.count()
         feitos = checklist.filter(concluido=True).count()
         progresso_percentual = int((feitos / total) * 100) if total > 0 else 0
 
+        # Checklist de massa
+        checklist_massas = ChecklistITarefastemModel.objects.filter(tarefa=tarefa)
+        total_massas = checklist_massas.count()
+        feitos_massas = checklist_massas.filter(concluido=True).count()
+        progresso_massas = int((feitos_massas / total_massas) * 100) if total_massas > 0 else 0
+
+        # Rodada de processamento (se houver)
+        if rodada_id:
+            try:
+                rodada = RodadaProcessamentoTarefaMassa.objects.get(pk=rodada_id)
+
+                # Contagens
+                contagem = rodada.tarefas_processadas.aggregate(
+                    total=Count('id'),
+                    processadas=Count('id', filter=Q(status='processada')),
+                    em_processamento=Count('id', filter=Q(status='em_processamento')),
+                    nao_processadas=Count('id', filter=Q(status='nao_processada')),
+                )
+
+                # 👇 Adiciona manualmente o campo de concluídas
+                contagem["concluidas"] = TarefaModel.objects.filter(
+                    massa=rodada.tarefa_massa,
+                    status='concluida'
+                ).count()
+
+                # Usuários participando
+                usuarios_atuais = rodada.tarefas_processadas.filter(
+                    status='em_processamento',
+                    processado_por__isnull=False
+                ).select_related('processado_por').values_list(
+                    'processado_por__first_name', flat=True
+                ).distinct()
+
+                context.update({
+                    'rodada_em_andamento': True,
+                    'rodada_obj': rodada,
+                    'usuarios_em_processamento': usuarios_atuais,
+                    'contagem_tarefas_rodada': contagem,
+                })
+
+            except RodadaProcessamentoTarefaMassa.DoesNotExist:
+                context['rodada_em_andamento'] = False
+
         context.update({
+            'checklist_itens': checklist,
             'total_itens': total,
             'feitos_itens': feitos,
             'progresso': progresso_percentual,
+            'checklist_massas': checklist_massas,
+            'total_massas': total_massas,
+            'feitos_massas': feitos_massas,
+            'progresso_massas': progresso_massas,
         })
-                
-        return context
 
+        return context
 
 def alterar_status_tarefa(request, pk):
     if request.method == "POST":
@@ -497,10 +626,317 @@ class TarefaDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteV
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
     ]
+    
+# ==============================fim    
+# Tarefas em Massa
+class GerarTarefaMassaView(View):
+    template_name = 'app_tarefas/gerar_tarefa_massa.html'
+    confirm_template = 'app_tarefas/confirmar_tarefa_massa.html'
+    
+    def get(self, request):
+        form = TarefaMassaForm()
+        historico = self._get_historico_completo()
+        return render(request, self.template_name, {
+            'form': form,
+            'historico': historico
+        })
+
+    def post(self, request):
+        if 'confirmado' in request.POST:
+            # Segundo POST — gerar tarefas de fato
+            tipo = request.POST.get('tipo')
+            associados = AssociadoModel.objects.filter(status="Associado Lista Ativo(a)")
+            tarefas_criadas = []
+
+            lancamento = TarefaMassaModel.objects.create(
+                tipo=tipo,
+                criado_por=request.user,
+            )
+
+            for associado in associados:
+                titulo, descricao, content = self._gerar_conteudo(tipo, associado)
+
+                tarefa = TarefaModel.objects.create(
+                    criado_por=request.user,
+                    titulo=titulo,
+                    descricao=descricao,
+                    categoria='associado',
+                    prioridade='media',
+                    status='pendente',
+                    associado=associado,
+                    data_limite=now().date() + timedelta(days=30),
+                    content=content,
+                    massa=lancamento
+                )
+
+                if tipo == 'recadastramento_dados':
+                    self._criar_checklist_recadastramento(tarefa)
+
+                tarefas_criadas.append(tarefa)
+
+            lancamento.total_geradas = len(tarefas_criadas)
+            lancamento.save()
+
+            messages.success(request, f"{len(tarefas_criadas)} tarefas criadas com sucesso.")
+            return redirect('app_tarefas:gerar_tarefa_massa')
+
+        else:
+            form = TarefaMassaForm(request.POST)
+            if form.is_valid():
+                tipo = form.cleaned_data['tipo']
+                associados = AssociadoModel.objects.filter(status="Associado Lista Ativo(a)")
+                return render(request, self.confirm_template, {
+                    'tipo': tipo,
+                    'total': associados.count()
+                })
+
+            historico = self._get_historico_completo()
+            return render(request, self.template_name, {
+                'form': form,
+                'historico': historico
+            })
+
+    def _get_historico_completo(self):
+        historico = TarefaMassaModel.objects.select_related('criado_por').prefetch_related('rodadas').order_by('-criado_em')[:20]
+
+        for massa in historico:
+            ultima_rodada = massa.rodadas.last()
+            massa.ultima_rodada = ultima_rodada
+
+            if ultima_rodada:
+                massa.tem_tarefa_nao_concluida = ultima_rodada.tarefas_processadas.filter(
+                    ~Q(status='processada'),
+                    ~Q(tarefa__status='concluida')
+                ).exists()
+            else:
+                massa.tem_tarefa_nao_concluida = False
+
+            # 🧮 Conta tarefas concluídas e pendentes
+            massa.total_concluidas = massa.tarefas_geradas.filter(status='concluida').count()
+            massa.total_pendentes = massa.tarefas_geradas.exclude(status='concluida').count()
+
+        return historico
 
 
+    def _gerar_conteudo(self, tipo, associado):
+        nome = associado.user.get_full_name() if associado.user else f"Associado #{associado.id}"
+        ano = now().year
+
+        if tipo == 'recadastramento_dados':
+            return (
+                f"Recadastramento de Dados - {nome}",
+                f"Tarefa de recadastramento de dados ({ano})",
+                f"""Tarefa de Recadastramento do associado {nome}.
+
+Lembre-se de:
+- Checar a validade dos documentos;
+- Validar e atualizar o e-mail do associado;
+- Confirmar se todos os dados cadastrais estão atualizados.
+"""
+            )
+
+        elif tipo == 'abertura_contas':
+            return (
+                f"Abertura de Conta para {nome}",
+                f"Abertura de conta bancária ({ano})",
+                f"""Tarefa de abertura de conta para o associado {nome}.
+
+Atenção:
+- Crie uma senha forte e segura;
+- Não compartilhe dados com terceiros;
+- Confirme os dados bancários fornecidos.
+"""
+            )
+
+        elif tipo == 'inscricoes_cursos':
+            return (
+                f"Incrição de {nome} em curso",
+                f"Incrição em cursos internos ({ano})",
+                f"""Tarefa de inscrição em cursos para o associado {nome}.
+
+Instruções:
+- Validar interesse do associado;
+- Confirmar disponibilidade de vagas;
+- Atualizar o sistema com o status da inscrição.
+"""
+            )
+
+        return (
+            f"Tarefa Geral - {nome}",
+            f"Tarefa geral para o associado - {ano}",
+            f"""Conteúdo padrão para tarefa genérica atribuída a {nome}."""
+        )
+
+    def _criar_checklist_recadastramento(self, tarefa):
+        itens = [
+        "📄 RECADASTRAMENTO - Ficha de Requerimento de Filiação assinada? Já possui???",
+        "📄 Procuração Individual assinadaxx",
+        "⚠️ Assinar também a Procuração Geral para o Defeso",
+        "🖼️ Declaração de Uso de Direitos de Imagem",
+        "🗒️ Declaração de Autorização de Acesso ao GOV",
+        "🪪 RG (legível e atualizado)",
+        "🪪 CPF",
+        "🚗 CNH (se possuir)",
+        "🧾 NIT (emitir pelo INSS, se não tiver)",
+        "🧾 CEI",
+        "🧾 CAEPF (emitir pelo E-social, se não tiver)",
+        "🗳️ Título de Eleitor",
+        "🏠 Comprovante de Residência atualizado",
+        "📝 Declaração de Residência (Modelo MAPA) — obrigatório para RGP",
+        "🖼️ Foto 3x4 recente",
+        "🎣 RGP (Registro Geral da Pesca) — solicitar ao MAPA se não possuir",
+        "📄 TIE — Título de Inscrição da Embarcação",
+        "📄 Licença de Pesca válida",
+        "📑 Seguro DPEM vigente",
+        "🛠️ Verificar cadastro e documentação da embarcação",
+        "💬 Adicionar no grupo de WhatsApp da associação",
+        "📝 Verificar e atualizar os campos 'Recolhe INSS' e 'Recebe Seguro'",
+        "🧾 Verificar se já recebeu benefício do Governo (Bolsa Família, seguro defeso, etc.)",
+        "📜 Enviar orientações gerais sobre direitos e deveres do associado",
+        "💰 Orientar sobre o pagamento das anuidades",
+        "🔍 Confirmar dados cadastrais completos no sistema",
+        "📅 Agendar reunião ou orientação inicial, se necessário",
+        "📂 Garantir que todos os uploads estão feitos e legíveis",
+        "✍️ Verificar assinatura presencial, se houver pendência",
+    ]
 
 
+        for item in itens:
+            ChecklistITarefastemModel.objects.create(
+                tarefa=tarefa,
+                descricao=item
+            )
+            
+
+# Processamenro em rodadas de Tarefas em MAssa
+# views.py
+class IniciarRodadaProcessamentoView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        tarefa_massa = get_object_or_404(TarefaMassaModel, pk=pk)
+
+        # 🔒 Impede múltiplas rodadas simultâneas
+        if RodadaProcessamentoTarefaMassa.objects.filter(tarefa_massa=tarefa_massa, encerrada=False).exists():
+            messages.warning(request, "Já existe uma rodada ativa para esse lançamento.")
+            return redirect('app_tarefas:gerar_tarefa_massa')
+
+        # 🧹 Limpa rodadas anteriores
+        RodadaProcessamentoTarefaMassa.objects.filter(tarefa_massa=tarefa_massa).delete()
+
+        # 🎯 Busca tarefas válidas (filtrando concluídas!)
+        tarefas = tarefa_massa.tarefas_geradas.exclude(status='concluida')
+
+        # 🚀 Cria nova rodada
+        rodada = RodadaProcessamentoTarefaMassa.objects.create(
+            tarefa_massa=tarefa_massa,
+            criada_por=request.user
+        )
+
+        # 📋 Cria registros de processamento
+        for tarefa in tarefas:
+            ProcessamentoTarefaMassa.objects.create(
+                rodada=rodada,
+                tarefa=tarefa
+            )
+
+        # 🚦 Marca a primeira tarefa automaticamente
+        primeira_tarefa = rodada.tarefas_processadas.filter(
+            status='nao_processada',
+            tarefa__status__in=['pendente', 'em_andamento']
+        ).first()
+
+        if primeira_tarefa:
+            primeira_tarefa.status = 'em_processamento'
+            primeira_tarefa.processado_por = request.user
+            primeira_tarefa.save()
+
+            return redirect(f"{reverse('app_tarefas:single_tarefa', kwargs={'pk': primeira_tarefa.tarefa.pk})}?rodada_id={rodada.pk}")
+
+        # Caso não haja tarefas válidas
+        messages.info(request, "Nenhuma tarefa disponível para processar.")
+        return redirect('app_tarefas:gerar_tarefa_massa')
+
+
+# views.py
+
+class ProcessarProximaTarefaView(LoginRequiredMixin, View):
+    def get(self, request, rodada_id):
+        rodada = get_object_or_404(RodadaProcessamentoTarefaMassa, pk=rodada_id)
+
+        try:
+            with transaction.atomic():
+                tarefa_proc = rodada.tarefas_processadas.select_for_update(skip_locked=True).filter(
+                    status='nao_processada',
+                    tarefa__status__in=['pendente', 'em_andamento'],
+                    processado_por__isnull=True
+                ).first()
+
+                if not tarefa_proc:
+                    messages.info(request, "Todas as tarefas estão em processamento ou foram concluídas.")
+                    return redirect('app_tarefas:gerar_tarefa_massa')
+
+
+                # ⚠️ CLAIM da tarefa aqui mesmo!
+                tarefa_proc.status = 'em_processamento'
+                tarefa_proc.processado_por = request.user
+                tarefa_proc.save()
+
+                return redirect(
+                    f"{reverse('app_tarefas:single_tarefa', kwargs={'pk': tarefa_proc.tarefa.pk})}?rodada_id={rodada.pk}"
+                )
+
+        except Exception as e:
+            print(f"❌ Erro ao processar tarefa: {str(e)}")
+            messages.error(request, "Erro ao acessar próxima tarefa.")
+            return redirect('app_tarefas:gerar_tarefa_massa')
+
+# Deletar tarefas em massa
+class TarefaMassaDeleteView(LoginRequiredMixin, DeleteView):
+    model = TarefaMassaModel
+    template_name = 'app_tarefas/delete_tarefa_massa.html'
+    context_object_name = 'massa'
+    success_url = reverse_lazy('app_tarefas:gerar_tarefa_massa')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        massa = self.get_object()
+        tarefas = massa.tarefas_geradas.all()
+
+        total = tarefas.count()
+        concluidas = tarefas.filter(status='concluida').count()
+        pendentes = total - concluidas
+
+        context.update({
+            'total_tarefas': total,
+            'concluidas': concluidas,
+            'pendentes': pendentes,
+            'pode_deletar': pendentes == 0 or self.request.GET.get('forcar') == '1'
+        })
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        tarefas = self.object.tarefas_geradas.all()
+
+        total = tarefas.count()
+        concluidas = tarefas.filter(status='concluida').count()
+        pendentes = total - concluidas
+
+        # Bloqueia deletar se houver tarefas pendentes e não forçou
+        if pendentes > 0 and request.POST.get("forcar") != "1":
+            messages.warning(request, "Existem tarefas não concluídas. Confirme a exclusão marcando 'forçar'.")
+            return redirect(f"{self.request.path}?forcar=1")
+
+        # Deleta dependências
+        tarefas.delete()
+        self.object.rodadas.all().delete()
+
+        # Deleta o próprio lançamento
+        self.object.delete()
+        messages.success(request, "Lançamento e tarefas vinculadas deletadas com sucesso.")
+        return redirect(self.success_url)
+        
+        
 # ========= INSS =====Viwes====
 # Lista com os associados que recolhem o inss
 from django.views.generic import ListView

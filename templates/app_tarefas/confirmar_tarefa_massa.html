@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block confirmar_GerarTarefaMassa %}
+<!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %}     
+    {% endif %}
+
+<main class="flex-grow">
+    <div class="container mx-auto py-6 px-4 max-w-3xl">
+        <!-- Título -->
+        <h1 class="text-4xl font-bold text-red-600 mb-6 text-center">Gerar Tarefas em Massa?</h1>
+    
+        <!-- Card Principal -->
+        <div class="bg-white p-8 rounded-xl shadow-lg">
+            <div class="max-w-xl mx-auto bg-white shadow p-6 rounded">
+            <h2 class="text-xl font-bold mb-4">🚀 Confirmar Geração de Tarefas</h2>
+            <p>Você está prestes a gerar <strong>{{ total }}</strong> tarefas do tipo <strong>{{ tipo }}</strong>.</p>
+            <p>Tem certeza que deseja continuar?</p>
+
+            <form method="post" class="mt-6">
+                {% csrf_token %}
+                <input type="hidden" name="tipo" value="{{ tipo }}">
+                <input type="hidden" name="confirmado" value="true">
+
+                <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                ✅ Sim, gerar tarefas
+                </button>
+                <a href="{% url 'app_tarefas:gerar_tarefa_massa' %}" class="ml-4 text-blue-600 hover:underline">
+                🔙 Cancelar
+                </a>
+            </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock confirmar_GerarTarefaMassa %}

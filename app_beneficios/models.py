@@ -82,12 +82,12 @@ class BeneficioModel(models.Model):
         self.criar_controles_para_associados()
 
     def criar_controles_para_associados(self):
-        AssociadoModel = apps.get_model('app_associados', 'AssociadoModel')
-        ControleModel = apps.get_model('app_beneficios', 'ControleBeneficioModel')
+        from app_associados.models import AssociadoModel
+        from app_beneficios.models import ControleBeneficioModel
 
         associados = AssociadoModel.objects.filter(
             status='Associado Lista Ativo(a)',
-            municipio_circunscricao__uf=self.estado  # ✅ só do mesmo estado do benefício
+            municipio_circunscricao__uf=self.estado
         )
 
         campo_por_beneficio = {
@@ -97,19 +97,23 @@ class BeneficioModel(models.Model):
         }
 
         campo_esperado = campo_por_beneficio.get(self.nome)
-
         if not campo_esperado:
             return
 
+        total_criados = 0
+
         for associado in associados:
-            if hasattr(associado, campo_esperado):
-                if getattr(associado, campo_esperado) == 'Recebe':
-                    if not ControleModel.objects.filter(associado=associado, beneficio=self).exists():
-                        ControleModel.objects.create(
-                            associado=associado,
-                            beneficio=self,
-                            status_pedido='EM_PREPARO',
-                        )
+            if getattr(associado, campo_esperado, None) == 'Recebe':
+                if not ControleBeneficioModel.objects.filter(associado=associado, beneficio=self).exists():
+                    ControleBeneficioModel.objects.create(
+                        associado=associado,
+                        beneficio=self,
+                        status_pedido='EM_PREPARO',
+                    )
+                    total_criados += 1
+
+        print(f"✅ {total_criados} controles criados para o benefício {self}")
+
 
 
 

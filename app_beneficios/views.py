@@ -267,17 +267,14 @@ class ControleBeneficioDetailView(LoginRequiredMixin, GroupPermissionRequiredMix
             tipo_doc__in=tipos
         ).order_by('-data_upload')
 
-        # 🔥 Busca se este controle está em alguma leva
+        # 🔍 Pega diretamente o item dessa leva vinculado ao controle
         leva_item = ControleLevaItem.objects.filter(controle_beneficio=controle).first()
+
 
         if leva_item:
             leva = leva_item.leva
             pertence_a_leva = True
-        else:
-            leva = None
-            pertence_a_leva = False
 
-        if leva:
             itens_ordenados = leva.itens.order_by(
                 'controle_beneficio__associado__user__first_name',
                 'controle_beneficio__associado__user__last_name',
@@ -286,21 +283,19 @@ class ControleBeneficioDetailView(LoginRequiredMixin, GroupPermissionRequiredMix
 
             lista_ids = list(itens_ordenados.values_list('id', flat=True))
 
-            indice_atual = (
-                lista_ids.index(leva_item.id) + 1
-                if leva_item and leva_item.id in lista_ids
-                else None
-            )
+            try:
+                indice_atual = lista_ids.index(leva_item.id) + 1
+            except ValueError:
+                indice_atual = None
 
             itens_pendentes = leva.itens.filter(status='PENDENTE').count()
             itens_concluidos = leva.itens.filter(status='CONCLUIDO').count()
 
+            itens_em_processamento = leva.itens.filter(status='PROCESSANDO').count()
             usuarios_processando = User.objects.filter(
                 processando_itens__leva=leva,
                 processando_itens__status='PROCESSANDO'
             ).distinct()
-
-            itens_em_processamento = usuarios_processando.count()
 
             total_itens = itens_pendentes + itens_em_processamento + itens_concluidos
 
@@ -595,17 +590,14 @@ def deletar_beneficio(request, pk):
 def criar_leva_view(request, beneficio_id):
     beneficio = get_object_or_404(BeneficioModel, pk=beneficio_id)
 
-    # 🔍 Verificar se já existe uma leva EM ANDAMENTO deste benefício
+    # 🔍 Busca leva existente com base exata no benefício (não por nome/ano/estado isolados)
     leva_existente = LevaProcessamentoBeneficio.objects.filter(
-        beneficio__nome=beneficio.nome,
-        beneficio__ano_concessao=beneficio.ano_concessao,
-        beneficio__estado=beneficio.estado
+        beneficio=beneficio
     ).order_by('-criado_em').first()
 
     if leva_existente:
-        # ⚠️ Verifica se essa leva possui itens ainda em PENDENTE ou PROCESSANDO
+        # ⚠️ Se houver itens pendentes ou em processamento, redirecionar
         if leva_existente.itens.filter(status__in=['PENDENTE', 'PROCESSANDO']).exists():
-            # 👉 Se sim, redireciona para o próximo item pendente ou em processamento
             itens_pendentes = leva_existente.itens.filter(status='PENDENTE')
             itens_em_processamento = leva_existente.itens.filter(
                 status='PROCESSANDO',
@@ -627,14 +619,17 @@ def criar_leva_view(request, beneficio_id):
                 return redirect('app_beneficios:processar_item_leva', item_id=proximo_item.id)
 
             else:
-                # Leva existe, mas sem itens pendentes nem em processamento
                 messages.info(request, "⚠️ Esta leva não possui itens pendentes.")
                 return redirect('app_beneficios:lista_beneficios')
 
-    # 🚀 Cria a nova leva caso não exista nenhuma ativa
-    leva = criar_leva(beneficio, request.user)
+    # 🚀 Criar nova leva se nenhuma ativa foi encontrada
+    nova_leva = criar_leva(beneficio, request.user)
 
-    primeiro_item = leva.itens.filter(status='PENDENTE').order_by(
+    if not nova_leva.itens.exists():
+        messages.warning(request, "⚠️ Nenhum item foi criado na nova leva.")
+        return redirect('app_beneficios:lista_beneficios')
+
+    primeiro_item = nova_leva.itens.filter(status='PENDENTE').order_by(
         'controle_beneficio__associado__user__first_name',
         'controle_beneficio__associado__user__last_name'
     ).first()
@@ -642,11 +637,9 @@ def criar_leva_view(request, beneficio_id):
     if primeiro_item:
         return redirect('app_beneficios:processar_item_leva', item_id=primeiro_item.id)
 
-    # ⚠️ Se não há itens na leva, redireciona e avisa
-    messages.warning(request, "⚠️ Nenhum item encontrado na nova leva.")
+    # 🔁 Fallback final
+    messages.warning(request, "⚠️ A leva foi criada, mas não há itens prontos para processar.")
     return redirect('app_beneficios:lista_beneficios')
-
-
 
 
 # Leva de Processamento de Benefícios - Listagem
@@ -806,13 +799,14 @@ class ProcessarLevaItemView(LoginRequiredMixin, GroupPermissionRequiredMixin, Fo
             'id'
         )
 
-        lista_ids = list(itens_ordenados.values_list('id', flat=True))
+        lista_ids = list(itens_ordenados.values_list('controle_beneficio_id', flat=True))
 
-        if self.object.id not in lista_ids:
-            messages.error(self.request, "❌ Este item não pertence à leva atual.")
-            raise Http404("Item não encontrado na leva.")
+        if self.object.controle_beneficio_id not in lista_ids:
+            messages.error(self.request, "❌ Este controle não pertence à leva atual.")
+            raise Http404("Controle não encontrado na leva.")
 
-        indice_atual = lista_ids.index(self.object.id) + 1
+        indice_atual = lista_ids.index(self.object.controle_beneficio_id)
+
 
         itens_pendentes = leva.itens.filter(status='PENDENTE').count()
         itens_em_processamento = leva.itens.filter(

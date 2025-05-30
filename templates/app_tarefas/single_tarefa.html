@@ -204,111 +204,103 @@
             
         </div>
 
+
         <form method="post">
-            {% csrf_token %}
-            <div class="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+        {% csrf_token %}
 
-                {% if "Filiação" in tarefa.titulo %}
+        {# ✅ Checklist Padrão (Filiação) #}
+        {% if "Filiação" in tarefa.titulo and checklist_itens %}
+            <div class="mt-6">
+            <h3 class="text-lg font-semibold text-gray-800">{{ tarefa.titulo }}</h3>
+            <h4 class="text-md font-semibold text-gray-700 mt-2">📋 Checklist de Filiação</h4>
+            <ul class="list-disc pl-5 space-y-1 text-gray-700 mt-2">
+                {% for item in checklist_itens %}
+                <li>
+                    <label>
+                    <input type="checkbox" name="item_{{ item.id }}" {% if item.concluido %}checked{% endif %}>
+                    {{ item.descricao }}
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
 
-                    <h2 class="text-sm font-semibold text-gray-700 mb-4">
-                        {{ tarefa.titulo }} — {{ tarefa.associado }}
-                    </h2>
-
-                    <!-- ✔️ Barra de Progresso -->
-                    <div class="mb-4">
-                        <div class="flex justify-between mb-1">
-                            <span class="text-sm font-medium text-blue-700">Progresso</span>
-                            <span class="text-sm font-medium text-blue-700">{{ progresso }}%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3">
-                            <div 
-                                class="bg-blue-600 h-3 rounded-full transition-all duration-500"
-                                style="width: {{ progresso }}%;"
-                            ></div>
-                        </div>
-                    </div>
-
-                    {% if usuarios_processando %}
-                        <div class="bg-green-50 border border-green-200 rounded p-3 mb-4">
-                            <p class="text-sm font-medium text-yellow-800 mb-1">
-                                👥 Usuários processando tarefas neste fluxo:
-                            </p>
-                            <ul class="list-disc pl-5 text-yellow-700 text-sm">
-                                {% for user in usuarios_processando %}
-                                    <li>{{ user.get_full_name }} ({{ user.email }})</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
-
-                    <!-- ✔️ Checklists em blocos -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <ul class="space-y-2">
-                                {% for item in tarefa.checklist_itens.all %}
-                                    {% if forloop.counter == 1 %}
-                                        <h4 class="mt-4 mb-2 text-sm text-gray-600">📑 Documentos</h4>
-                                    {% elif forloop.counter == 17 %}
-                                        </ul></div><div><h4 class="mt-4 mb-2 text-sm text-gray-600">🚤 Documentos da Embarcação</h4><ul class="space-y-2">
-                                    {% elif forloop.counter == 21 %}
-                                        <h4 class="mt-6 mb-2 text-sm text-gray-600">💼 Processos Administrativos</h4>
-                                    {% endif %}
-
-                                    <li class="flex items-center">
-                                        <input 
-                                            type="checkbox" 
-                                            name="item_{{ item.id }}" 
-                                            {% if item.concluido %}checked{% endif %}
-                                            class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                        >
-                                        <span class="{% if item.concluido %}line-through text-gray-500{% endif %}">
-                                            {{ item.descricao }}
-                                        </span>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-
-                {% else %}
-                    <!-- ✔️ Renderização padrão para outras tarefas -->
-                    <h2 class="text-sm font-semibold text-gray-700 mb-4">
-                        {{ tarefa.titulo }}
-                    </h2>
-
-                    <ul class="space-y-2">
-                        {% for item in tarefa.checklist_itens.all %}
-                            <li class="flex items-center">
-                                <input 
-                                    type="checkbox" 
-                                    name="item_{{ item.id }}" 
-                                    {% if item.concluido %}checked{% endif %} 
-                                    class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                >
-                                <span class="{% if item.concluido %}line-through text-gray-500{% endif %}">
-                                    {{ item.descricao }}
-                                </span>
-                            </li>
-                        {% empty %}
-                            <li class="text-gray-400">Nenhum item de checklist.</li>
-                        {% endfor %}
-                    </ul>
-                {% endif %}
-
-                <!-- 🔥 Botão de salvar -->
-                <div class="flex flex-wrap gap-3 mt-6">
-                    <!-- 💾 Salvar -->
-                    <button 
-                        type="submit" 
-                        name="action" 
-                        value="salvar"
-                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >
-                        💾 Salvar Alterações
-                    </button>
-                </div>
+            <div class="w-full bg-gray-200 rounded-full h-3 mt-3">
+                <div class="bg-blue-600 h-3 rounded-full" style="width: {{ progresso }}%;"></div>
             </div>
+            <p class="text-sm text-gray-600 mt-1">Progresso: {{ progresso }}%</p>
+            </div>
+        {% endif %}
+
+        {# ✅ Checklist da Geração em Massa (Recadastramento etc) #}
+        {% if "Recadastramento" in tarefa.titulo and checklist_massas %}
+
+
+            <div class="mt-8">
+            <h3 class="text-lg font-semibold text-gray-800">{{ tarefa.titulo }}</h3>
+            <h4 class="text-md font-semibold text-gray-700 mt-2">🔘 Tarefa de Recadastramento</h4>
+
+{% if rodada_em_andamento %}
+<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+    <p class="font-semibold">Rodada em andamento (ID: {{ rodada_obj.id }})</p>
+    <ul class="text-sm mt-1">
+        <li>👤 Usuários processando: {{ usuarios_em_processamento|join:", " }}</li>
+        <li>✅ Processadas: {{ contagem_tarefas_rodada.processadas }}</li>
+         <li>📁 Concluídas (fora da rodada): {{ contagem_tarefas_rodada.concluidas }}</li>
+        <li>⏳ Em processamento: {{ contagem_tarefas_rodada.em_processamento }}</li>
+        <li>📥 Aguardando processamento: {{ contagem_tarefas_rodada.nao_processadas }}</li>
+    </ul>
+</div>
+{% endif %}
+
+
+
+            <h4 class="text-md font-semibold text-gray-700 mt-2">📋 Checklist de Recadastramento</h4>
+            <ul class="list-disc pl-5 space-y-1 text-gray-700 mt-2">
+                {% for item in checklist_massas %}
+                <li>
+                    <label>
+                    <input type="checkbox" name="item_mass_{{ item.id }}" {% if item.concluido %}checked{% endif %}>
+                    {{ item.descricao }}
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+
+            <div class="w-full bg-gray-200 rounded-full h-3 mt-3">
+                <div class="bg-green-600 h-3 rounded-full" style="width: {{ progresso_massas }}%;"></div>
+            </div>
+            <p class="text-sm text-gray-600 mt-1">Progresso: {{ progresso_massas }}%</p>
+            </div>
+        {% endif %}
+
+        {# 🔘 Botão de salvar #}
+        <input type="hidden" name="rodada_id" value="{{ rodada_id }}">
+
+        {% if checklist_itens or checklist_massas %}
+        <div class="mt-6 flex justify-end space-x-3">
+
+            {% if rodada_id %}
+            {# 👉 Dentro de uma rodada, mostra opções de salvar e avançar ou sair #}
+            <button type="submit" name="acao" value="salvar_avancar"
+                    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                ✅ Salvar e Próxima Tarefa
+            </button>
+
+            <a href="{% url 'app_tarefas:gerar_tarefa_massa' %}"
+                class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
+                ⏹️ Pausar e Voltar
+            </a>
+
+            {% else %}
+            {# Fora de rodada, botão padrão de salvar #}
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                💾 Salvar Alterações
+            </button>
+            {% endif %}
+        </div>
+        {% endif %}            
         </form>
+
 
 
 

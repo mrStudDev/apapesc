@@ -14,6 +14,11 @@ from .views import (
     DetalheLancamentoINSSView,
     ProcessarGuiaView,
     CriarLancamentoINSSView,
+    GerarTarefaMassaView,
+    IniciarRodadaProcessamentoView,
+    ProcessarProximaTarefaView,
+    TarefaMassaDeleteView
+
     )
 
 
@@ -34,9 +39,6 @@ urlpatterns = [
     path('inss/lancamento/<int:lancamento_id>/processar/', ProcessarGuiaView.as_view(), name='processar_guia'),
     path('lancamento/novo/', CriarLancamentoINSSView.as_view(), name='create_lancamentoInss'),
 
-
-
-
     path('starus/<int:pk>/alterar-status/', views.alterar_status_tarefa, name='alterar_status'),
     path('responsaveis/<int:pk>/alterar-responsaveis/', views.alterar_responsaveis_tarefa, name='alterar_responsaveis'),
     
@@ -48,6 +50,13 @@ urlpatterns = [
     path('desarquivar/<int:pk>/', views.desarquivar_tarefa, name='desarquivar_tarefa'),
     path('deletar/<int:pk>/', TarefaDeleteView.as_view(), name='deletar_tarefa'),
     
-]
+    # Tarefas em Massa
+    path('tarefas/gerar-massa/', GerarTarefaMassaView.as_view(), name='gerar_tarefa_massa'),
+    # urls.py
+    path('tarefas/rodada/iniciar/<int:pk>/', IniciarRodadaProcessamentoView.as_view(), name='iniciar_rodada_processamento'),
+    path('rodada/<int:rodada_id>/processar-proxima/', ProcessarProximaTarefaView.as_view(), name='processar_proxima_tarefa'),
+    path('massa/delete/<int:pk>/', TarefaMassaDeleteView.as_view(), name='delete_tarefa_massa'),
 
+
+]
 

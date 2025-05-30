@@ -65,7 +65,7 @@
                                     class="text-green-600 hover:underline text-sm">
                                     🚀 
                                     {% if item.tem_pendentes %}
-                                        Processar Leva
+                                        Entrar e processar
                                     {% elif item.tem_meu_pausado %}
                                         Retomar Meu Trabalho
                                     {% else %}
@@ -78,7 +78,7 @@
                             {% else %}
                                 <a href="{% url 'app_beneficios:criar_leva' item.beneficio.id %}" 
                                     class="text-blue-600 hover:underline text-sm">
-                                    ➕ Criar Leva
+                                    ➕ Iniciar Rodada
                                 </a>
                             {% endif %}
 

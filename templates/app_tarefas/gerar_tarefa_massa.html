@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block tarefas_emMassa %}
+<!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %}     
+    {% endif %}
+
+<main class="flex-grow">
+    <div class="container mx-auto py-6 px-4 max-w-3xl">
+        <!-- Título -->
+        <h2 class="text-xl font-bold mb-4">Gerar Tarefas em Massa</h2>
+    
+        <!-- Card Principal -->
+        <div class="bg-white p-8 rounded-xl shadow-lg">
+            <div class="text-center">
+
+
+            <form method="post">
+              {% csrf_token %}
+            {% if rodada_id %}
+                <input type="hidden" name="rodada_id" value="{{ rodada_id }}">
+            {% endif %}
+            <div class="mb-4">
+                {{ form.tipo.label_tag }}<br>
+                {{ form.tipo }}
+            </div>
+
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                🚀 Gerar Tarefas
+            </button>
+            </form>
+            </div>
+
+        </div>
+        {% if historico %}
+        <div class="mt-8">
+            <h3 class="text-lg font-semibold mb-4">📋 Últimos Lançamentos de Tarefas em Massa</h3>
+            <div class="overflow-x-auto">
+            <table class="min-w-full table-auto border border-gray-200">
+                <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Tipo</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Data</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Criado por</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Tarefas Geradas</th>
+                    <th class="px-4 py-2 text-left text-sm font-semibold text-gray-700">Ação</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+{% for item in historico %}
+<tr>
+    <td class="px-4 py-2 text-sm">{{ item.get_tipo_display }}</td>
+    <td class="px-4 py-2 text-sm">{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+    <td class="px-4 py-2 text-sm">
+        {{ item.criado_por.get_full_name|default:"(Usuário Removido)" }}
+    </td>
+    <td class="px-4 py-2 text-sm">
+        {{ item.total_geradas }}<br>
+        ✅ Concluídas: {{ item.total_concluidas }}<br>
+        🕐 Pendentes: {{ item.total_pendentes }}
+    </td>
+    <td>
+        {% if item.ultima_rodada and not item.tem_tarefa_nao_concluida %}
+            <span class="text-gray-500 text-sm">✅ Rodada Finalizada</span><br>
+            <form method="post" action="{% url 'app_tarefas:iniciar_rodada_processamento' item.id %}">
+                {% csrf_token %}
+                <button type="submit" class="text-blue-600 hover:underline">♻️ Nova Rodada</button>
+            </form>
+        {% elif item.tem_tarefa_nao_concluida %}
+            <a href="{% url 'app_tarefas:processar_proxima_tarefa' item.ultima_rodada.id %}" class="text-green-600 hover:underline">
+                ▶️ Processar Próxima
+            </a>
+        {% else %}
+            <form method="post" action="{% url 'app_tarefas:iniciar_rodada_processamento' item.id %}">
+                {% csrf_token %}
+                <button type="submit" class="text-blue-600 hover:underline">🚀 Iniciar Rodada</button>
+            </form>
+        {% endif %}
+        <a href="{% url 'app_tarefas:delete_tarefa_massa' item.id %}" class="text-red-600 hover:underline">
+            🗑️ Deletar
+        </a>
+
+    </td>
+</tr>
+{% endfor %}
+
+
+
+                </tbody>
+            </table>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock tarefas_emMassa %}

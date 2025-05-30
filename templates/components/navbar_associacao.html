@@ -9,7 +9,7 @@
     <div class="container mx-auto px-4 py-3 flex justify-between items-center">
         <!-- Logo -->
         <a href="/" class="flex items-center">
-            <img src="{% static 'images/Logo_Apapesc_2025.png' %}" alt="Logo APAPESC" class="w-16 h-16 md:w-24 md:h-24 object-contain rounded-md">
+            <img src="{% static 'images/Logo_Apapesc_2025.png' %}" alt="Logo APAPESC" class="w-12 h-12 md:w-16 md:h-16 object-contain rounded-md">
         </a>
 
         <!-- Botão do menu para dispositivos móveis -->
@@ -135,7 +135,8 @@
                     <a href="{% url 'app_tarefas:create_tarefa' %}" class="block px-4 py-2 hover:bg-gray-200">Nova Tarefa</a>
                     <a href="{% url 'app_tarefas:board_tarefas' %}" class="block px-4 py-2 hover:bg-gray-200">Fluxo Tarefas</a>
                     <a href="{% url 'app_tarefas:tarefas_arquivadas' %}" class="block px-4 py-2 hover:bg-gray-200">Tarefas Arquivadas</a>
-                    <a href="#" class="block px-4 py-2 hover:bg-gray-200">Fluxo Recadastramento</a>   
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_tarefas:gerar_tarefa_massa' %}" class="block px-4 py-2 hover:bg-gray-200">Gerar Tarefas em Massa</a> 
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_tarefas:create_lancamentoInss' %}" class="block px-4 py-2 hover:bg-gray-200">Lançar INSS do Mês</a>
                     <a href="{% url 'app_tarefas:list_lancamentos' %}" class="block px-4 py-2 hover:bg-gray-200">Controle/Lançamentos</a>
