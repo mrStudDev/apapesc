@@ -17,7 +17,11 @@ from .views import (
     GerarTarefaMassaView,
     IniciarRodadaProcessamentoView,
     ProcessarProximaTarefaView,
-    TarefaMassaDeleteView
+    TarefaMassaDeleteView,
+    GerarListarReapsView,
+    ReapsAssociadosListView,
+    ReapsProcessarView,
+    ReapsDeleteView
 
     )
 
@@ -52,11 +56,17 @@ urlpatterns = [
     
     # Tarefas em Massa
     path('tarefas/gerar-massa/', GerarTarefaMassaView.as_view(), name='gerar_tarefa_massa'),
-    # urls.py
     path('tarefas/rodada/iniciar/<int:pk>/', IniciarRodadaProcessamentoView.as_view(), name='iniciar_rodada_processamento'),
     path('rodada/<int:rodada_id>/processar-proxima/', ProcessarProximaTarefaView.as_view(), name='processar_proxima_tarefa'),
     path('massa/delete/<int:pk>/', TarefaMassaDeleteView.as_view(), name='delete_tarefa_massa'),
 
+    # Reaps Anual
+    path('', GerarListarReapsView.as_view(), name='lista_reaps'),
+    path('<int:pk>/', ReapsAssociadosListView.as_view(), name='reaps_detalhe'),
+    path('processar/<int:pk>/', ReapsProcessarView.as_view(), name='processar_reaps'),
+    # Rodadas de Processamento REAPS
+    path('reaps/<int:pk>/iniciar/', views.iniciar_reaps_rodada_view, name='iniciar_reaps_rodada'),
+    path('reaps/<int:pk>/deletar/', ReapsDeleteView.as_view(), name='reaps_deletar'),
 
 ]
 

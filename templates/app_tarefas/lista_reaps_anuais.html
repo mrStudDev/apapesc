@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}REAPS - Lançamentos Anuais{% endblock title %}
+
+{% block Lista_GerarReaps %}
+<!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %}     
+    {% endif %}
+
+<main class="flex-grow">
+  <div class="container mx-auto py-8 px-4 max-w-3xl">
+    <h2 class="text-2xl font-semibold text-gray-800 mb-6">📅 Lançamentos Anuais do REAPS</h2>
+
+    {% if messages %}
+      <div class="mb-6 space-y-2">
+        {% for message in messages %}
+          <div class="p-4 rounded-md text-white shadow-md
+              {% if message.tags == 'success' %}
+                  bg-green-500
+              {% elif message.tags == 'error' %}
+                  bg-red-500
+              {% elif message.tags == 'info' %}
+                  bg-blue-500
+              {% else %}
+                  bg-gray-500
+              {% endif %}
+          ">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="mb-8">
+      {% csrf_token %}
+      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">
+        ➕ Criar Lançamento de {{ now.year }}
+      </button>
+    </form>
+
+    <div class="space-y-4">
+      {% if reaps_lancamentos %}
+        {% for reaps in reaps_lancamentos %}
+<div class="flex items-center justify-between">
+  <a href="{% url 'app_tarefas:reaps_detalhe' reaps.pk %}" class="text-blue-600 hover:underline font-medium text-lg">
+    REAPS {{ reaps.ano }}
+  </a>
+  <a href="{% url 'app_tarefas:reaps_deletar' reaps.pk %}" class="text-red-500 hover:text-red-700 text-sm font-medium">
+    🗑️ Deletar
+  </a>
+</div>
+<p class="text-sm text-gray-600">Criado em: {{ reaps.criado_em|date:"d/m/Y" }}</p>
+
+        {% endfor %}
+      {% else %}
+        <div class="p-4 bg-yellow-100 text-yellow-800 rounded">
+          Nenhum lançamento encontrado.
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}        
+{% endblock Lista_GerarReaps %}

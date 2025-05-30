@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}{{ item.associado.user.get_full_name }} | REAPS {{ item.reaps.ano }}{% endblock title %}
+
+{% block processar_reapsIndividual %}
+<!-- Navbar -->
+{% if is_superuser %}
+    {% include "components/navbar_associacao.html" %}
+{% elif is_admin_associacao %}
+    {% include "components/navbar_administradores.html" %}
+{% elif is_diretor_associacao %}
+    {% include "components/navbar_diretores.html" %}
+{% elif is_presidente_associacao %}
+    {% include "components/navbar_presidente.html" %}
+{% elif is_delegado_reparticao %}
+    {% include "components/navbar_delegados.html" %}
+{% elif is_auxiliar_associacao %}
+    {% include "components/navbar_aux_associacao.html" %}
+{% else %}
+    {% include "components/navbar_aux_reparticao.html" %}
+{% endif %}
+
+<main class="flex-grow bg-gray-50 min-h-screen">
+    <div class="container mx-auto py-10 px-4 max-w-2xl">
+
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+            <h2 class="text-2xl font-semibold mb-4 text-gray-800">
+                👤 Processando REAPS — <span class="text-blue-700">{{ item.associado.user.get_full_name }}</span>
+            </h2>
+
+            <div class="space-y-2 text-gray-700 text-base">
+                <p>
+                    <strong>Status atual:</strong> 
+                    <span class="inline-block px-2 py-1 bg-gray-100 rounded">
+                        {{ item.get_status_display }}
+                    </span>
+                </p>
+
+                <p>
+                    <strong>Processado por:</strong>
+                    {% if item.processado_por %}
+                        {{ item.processado_por.get_full_name }}
+                    {% else %}
+                        <span class="text-gray-400 italic">Não iniciado</span>
+                    {% endif %}
+                </p>
+
+                <p>
+                    <strong>Data de realização:</strong>
+                    {% if item.data_realizado %}
+                        {{ item.data_realizado|date:"d/m/Y" }}
+                    {% else %}
+                        <span class="text-gray-400 italic">Não registrada</span>
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="mt-6 bg-white border rounded-lg p-4 shadow">
+                <h3 class="text-lg font-semibold mb-3 text-gray-800">📋 Informações do Associado</h3>
+
+                <ul class="space-y-2 text-gray-700 text-sm">
+                    <li>
+                        <strong>CPF:</strong>
+                        <span id="cpf-text">{{ cpf }}</span>
+                        <button onclick="copyToClipboard('cpf-text')" class="ml-2 text-blue-600 text-xs">📋 Copiar</button>
+                    </li>
+                    <li>
+                        <strong>Senha Gov:</strong>
+                        <span id="senha-gov-text">{{ senha_gov }}</span>
+                        <button onclick="copyToClipboard('senha-gov-text')" class="ml-2 text-blue-600 text-xs">📋 Copiar</button>
+                    </li>
+                    <li><strong>Relação de Trabalho:</strong> {{ relacao_trabalho }}</li>
+                    <li><strong>Comercializa Produtos:</strong> {{ comercializa_produtos }}</li>
+                    <li><strong>Bolsa Família:</strong> {{ bolsa_familia }}</li>
+                </ul>
+            </div>
+
+
+            <!-- Banner de contexto -->
+            <div class="mb-6 p-4 border-l-4 rounded-md {% if pela_rodada %}border-blue-500 bg-blue-50{% else %}border-gray-500 bg-gray-100{% endif %}">
+            <p class="text-sm">
+                {% if pela_rodada %}
+                🔄 <strong>Você está processando pela rodada de REAPS.</strong> Isso permite avançar automaticamente para o próximo item.
+                {% else %}
+                👤 <strong>Você está acessando individualmente este REAPS.</strong>
+                {% endif %}
+            </p>
+
+            {% if pela_rodada %}
+                <div class="mt-2 text-xs text-gray-700">
+                <strong>Usuários processando:</strong>
+                    {% if usuarios_processando %}
+                        {% for user in usuarios_processando %}
+                            <li>{{ user.get_full_name }}</li>
+                        {% endfor %}
+                    {% else %}
+                        Nenhum usuário em procesamento.
+                    {% endif %}
+                    </p>
+                </div>
+            {% endif %}
+            </div>
+
+            {% if pela_rodada %}
+            <form method="post" class="mt-6 space-y-3">
+                {% csrf_token %}
+                {% if item.status != 'CONCLUIDO' %}
+                <button type="submit" name="acao" value="concluir_proximo"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded">
+                    ✅ Concluir e Ir para Próximo
+                </button>                
+                <button type="submit" name="acao" value="concluir"
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
+                    ✅ Marcar como Concluído
+                </button>
+                {% endif %}
+                {% if item.status == 'PROCESSANDO' %}
+                <button type="submit" name="acao" value="pausar"
+                        class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded">
+                    ⏸️ Pausar
+                </button>
+                {% elif item.status == 'PENDENTE' %}
+                <button type="submit" name="acao" value="iniciar"
+                        class="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded">
+                    ▶️ Iniciar
+                </button>
+                {% endif %}
+            </form>
+            {% else %}
+            <form method="post" class="mt-6 space-y-3">
+                {% csrf_token %}
+                {% if item.status != 'CONCLUIDO' %}
+                <button type="submit" name="acao" value="concluir"
+                        class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded">
+                    ✅ Marcar como Concluído
+                </button>
+                {% endif %}
+                {% if item.status == 'PROCESSANDO' %}
+                <button type="submit" name="acao" value="pausar"
+                        class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded">
+                    ⏸️ Pausar
+                </button>
+                {% elif item.status == 'PENDENTE' %}
+                <span>
+                    Marque como concluido ou volte para lista
+                </span>
+                {% endif %}
+            </form>
+            {% endif %}
+
+            <div class="mt-6 text-center">
+                <a href="{% url 'app_tarefas:reaps_detalhe' item.reaps.pk %}"
+                   class="inline-block text-gray-600 hover:text-blue-600 underline">
+                    ⬅️ Voltar para a lista
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="{% static 'js/copy_to_clipboard.js' %}"></script>
+
+
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+
+
+{% endblock processar_reapsIndividual %}

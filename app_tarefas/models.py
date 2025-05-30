@@ -7,7 +7,8 @@ from django.utils.timezone import now, timezone
 from django.utils.text import slugify
 from decimal import Decimal
 from django.db import transaction
-    
+from datetime import date
+
 from django.contrib.auth import get_user_model
 from app_associados.models import AssociadoModel
 
@@ -470,3 +471,70 @@ class GuiaRodadaProcessada(models.Model):
     class Meta:
         unique_together = ('rodada', 'guia')
 
+
+# =============================
+
+# REAPS - REGISTROS ANUAIS
+class ReapsAnualModel(models.Model):
+    ano = models.PositiveIntegerField(default=date.today().year)
+    criado_em = models.DateTimeField(auto_now_add=True)
+    criado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        related_name='reaps_criados'
+    )
+
+    class Meta:
+        unique_together = ('ano',)
+        verbose_name = "Lançamento REAPS Anual"
+        verbose_name_plural = "Lançamentos REAPS Anuais"
+
+    def __str__(self):
+        return f"REAPS {self.ano}"
+
+    def total_itens(self):
+        return self.itens.count()
+
+    def total_processados(self):
+        return self.itens.filter(status='CONCLUIDO').count()
+
+    def total_pendentes(self):
+        return self.itens.filter(status='PENDENTE').count()
+
+    def total_em_processamento(self):
+        return self.itens.filter(status='PROCESSANDO').count()
+
+
+class ReapsAssociadoItem(models.Model):
+    STATUS_CHOICES = [
+        ('PENDENTE', 'Pendente'),
+        ('PROCESSANDO', 'Processando'),
+        ('CONCLUIDO', 'Concluído'),
+    ]
+
+    reaps = models.ForeignKey(
+        ReapsAnualModel,
+        on_delete=models.CASCADE,
+        related_name='itens'
+    )
+    associado = models.ForeignKey(
+        'app_associados.AssociadoModel',
+        on_delete=models.CASCADE
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDENTE')
+    data_realizado = models.DateField(blank=True, null=True)
+    processado_por = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='reaps_processados'
+    )
+    atualizado_em = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('reaps', 'associado')
+
+    def __str__(self):
+        return f"{self.associado} - {self.reaps.ano} ({self.status})"

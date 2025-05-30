@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+{% block title %}Deletar REAPS{% endblock title %}
+
+{% block deletar_reaps %}
+<!-- Navbar -->
+{% if is_superuser %}
+    {% include "components/navbar_associacao.html" %}
+{% elif is_admin_associacao %}
+    {% include "components/navbar_administradores.html" %}
+{% elif is_diretor_associacao %}
+    {% include "components/navbar_diretores.html" %}
+{% elif is_presidente_associacao %}
+    {% include "components/navbar_presidente.html" %}
+{% elif is_delegado_reparticao %}
+    {% include "components/navbar_delegados.html" %}
+{% elif is_auxiliar_associacao %}
+    {% include "components/navbar_aux_associacao.html" %}
+{% else %}
+    {% include "components/navbar_aux_reparticao.html" %}
+{% endif %}
+
+<main class="flex-grow bg-gray-50 min-h-screen">
+    <div class="container mx-auto py-10 px-4 max-w-2xl">
+
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+
+
+    <h2 class="text-xl font-semibold text-red-600 mb-6">⚠️ Confirmar Exclusão do REAPS {{ reaps.ano }}</h2>
+
+    <div class="bg-white shadow rounded-md p-4 space-y-2 border">
+      <p><strong>Total de itens:</strong> {{ total }}</p>
+      <p><strong>Concluídos:</strong> ✅ {{ concluidos }}</p>
+      <p><strong>Pendentes:</strong> ⏳ {{ pendentes }}</p>
+
+      {% if pendentes > 0 %}
+        <p class="text-yellow-700 mt-2">Ainda existem itens pendentes. Tem certeza de que deseja excluir esse lançamento?</p>
+      {% else %}
+        <p class="text-green-700 mt-2">Todos os itens foram concluídos. Pode excluir com segurança.</p>
+      {% endif %}
+    </div>
+
+    <form method="post" class="mt-6 space-x-2">
+      {% csrf_token %}
+      <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded">
+        🗑️ Confirmar Exclusão
+      </button>
+      <a href="{% url 'app_tarefas:lista_reaps' %}" class="inline-block py-2 px-4 text-gray-700 hover:underline">
+        ❌ Cancelar
+      </a>
+    </form>
+  </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+
+
+{% endblock deletar_reaps %}

@@ -239,18 +239,18 @@
             <h3 class="text-lg font-semibold text-gray-800">{{ tarefa.titulo }}</h3>
             <h4 class="text-md font-semibold text-gray-700 mt-2">🔘 Tarefa de Recadastramento</h4>
 
-{% if rodada_em_andamento %}
-<div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
-    <p class="font-semibold">Rodada em andamento (ID: {{ rodada_obj.id }})</p>
-    <ul class="text-sm mt-1">
-        <li>👤 Usuários processando: {{ usuarios_em_processamento|join:", " }}</li>
-        <li>✅ Processadas: {{ contagem_tarefas_rodada.processadas }}</li>
-         <li>📁 Concluídas (fora da rodada): {{ contagem_tarefas_rodada.concluidas }}</li>
-        <li>⏳ Em processamento: {{ contagem_tarefas_rodada.em_processamento }}</li>
-        <li>📥 Aguardando processamento: {{ contagem_tarefas_rodada.nao_processadas }}</li>
-    </ul>
-</div>
-{% endif %}
+            {% if rodada_em_andamento %}
+            <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4">
+                <p class="font-semibold">Rodada em andamento (ID: {{ rodada_obj.id }})</p>
+                <ul class="text-sm mt-1">
+                    <li>👤 Usuários processando: {{ usuarios_em_processamento|join:", " }}</li>
+                    <li>✅ Processadas: {{ contagem_tarefas_rodada.processadas }}</li>
+                    <li>📁 Concluídas (fora da rodada): {{ contagem_tarefas_rodada.concluidas }}</li>
+                    <li>⏳ Em processamento: {{ contagem_tarefas_rodada.em_processamento }}</li>
+                    <li>📥 Aguardando processamento: {{ contagem_tarefas_rodada.nao_processadas }}</li>
+                </ul>
+            </div>
+            {% endif %}
 
 
 

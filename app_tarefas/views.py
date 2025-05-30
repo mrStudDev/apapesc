@@ -34,7 +34,8 @@ from django.views import View
 from django.shortcuts import get_object_or_404, redirect, render
 from .models import GuiaINSSModel, LancamentoINSSModel
 from django.contrib.auth import get_user_model
-from app_tarefas.utils import buscar_tarefas_do_lancamento
+from app_tarefas.utils import buscar_tarefas_do_lancamento, criar_lancamento_reaps
+
 
 from .models import (
     TarefaModel,
@@ -47,6 +48,8 @@ from .models import (
     ChecklistITarefastemModel,
     ProcessamentoTarefaMassa,
     RodadaProcessamentoTarefaMassa,
+    ReapsAnualModel,
+    ReapsAssociadoItem,
     
 )
 
@@ -1397,3 +1400,271 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
             messages.success(request, "Processo de emissão finalizado com sucesso!")
             request.session.pop(f'ultima_guia_{lancamento_id}', None)
             return redirect('app_tarefas:list_lancamentos')
+
+# ====================
+
+#-----------------
+# REAPS ANUAL
+# Gerar e listar Lançamentos REAPS Anuais
+class GerarListarReapsView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
+    template_name = 'app_tarefas/lista_reaps_anuais.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
+
+    def get(self, request):
+        reaps_lancamentos = ReapsAnualModel.objects.all().order_by('-ano')
+        return render(request, self.template_name, {
+            'reaps_lancamentos': reaps_lancamentos
+        })
+
+    def post(self, request):
+        ano_atual = now().year
+
+        if ReapsAnualModel.objects.filter(ano=ano_atual).exists():
+            messages.warning(request, f"⚠️ Já existe um lançamento REAPS para {ano_atual}.")
+            return redirect('app_tarefas:lista_reaps')
+
+        reaps = criar_lancamento_reaps(request.user, ano=ano_atual)
+        messages.success(request, f"✅ Lançamento REAPS {ano_atual} criado com sucesso.")
+        return redirect('app_tarefas:reaps_detalhe', pk=reaps.pk)
+
+
+ # Detalhe Lançamento REAPS Anual Lista de Intens
+class ReapsAssociadosListView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
+    model = ReapsAnualModel
+    template_name = 'app_tarefas/detalhe_reaps_ano.html'
+    context_object_name = 'reaps'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]    
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        reaps = self.get_object()
+
+        itens = reaps.itens.select_related('associado__user').order_by(
+            'associado__user__first_name',
+            'associado__user__last_name'
+        )
+
+        context.update({
+            'itens': itens,
+            'total': reaps.total_itens(),
+            'concluidos': reaps.total_processados(),
+            'pendentes': reaps.total_pendentes(),
+            'processando': reaps.total_em_processamento(),
+        })
+        return context
+
+# Gerar Procesar REAPS Individual    
+class ReapsProcessarView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailView):
+    model = ReapsAssociadoItem
+    template_name = 'app_tarefas/processar_reaps_individual.html'
+    context_object_name = 'item'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]    
+    
+    def post(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        acao = request.POST.get('acao')
+
+        if acao == 'concluir' or acao == 'concluir_proximo':
+            self.object.status = 'CONCLUIDO'
+            self.object.data_realizado = now().date()
+            self.object.processado_por = request.user
+            self.object.save()
+            
+            nome_associado = self.object.associado.user.get_full_name()
+            messages.success(request, f"✅ REAPS de {nome_associado} concluído com sucesso.")
+
+            if acao == 'concluir_proximo':
+                reaps = self.object.reaps
+                proximo_item = (
+                    ReapsAssociadoItem.objects
+                    .filter(
+                        reaps=reaps,
+                        status='PENDENTE'
+                    )
+                    .exclude(
+                        Q(status='PROCESSANDO') & ~Q(processado_por=request.user)
+                    )
+                    .order_by(
+                        'associado__user__first_name',
+                        'associado__user__last_name'
+                    )
+                    .first()
+                )
+
+                if proximo_item:
+                    updated = ReapsAssociadoItem.objects.filter(
+                        pk=proximo_item.pk,
+                        status='PENDENTE'
+                    ).update(
+                        status='PROCESSANDO',
+                        processado_por=request.user
+                    )
+
+                    if updated:
+                        return redirect(
+                            f"{reverse('app_tarefas:processar_reaps', kwargs={'pk': proximo_item.pk})}?pela_rodada=1"
+                        )
+                    else:
+                        messages.warning(request, "⚠️ Outro usuário começou a processar esse item.")
+                else:
+                    messages.info(request, "🎉 Nenhum outro REAPS disponível no momento.")
+
+        elif acao == 'pausar':
+            self.object.status = 'PENDENTE'
+            self.object.processado_por = None
+            self.object.data_realizado = None
+            self.object.save()
+            messages.info(request, "⏸️ REAPS pausado.")
+
+        elif acao == 'iniciar':
+            if self.object.status != 'CONCLUIDO' and (self.object.status != 'PROCESSANDO' or self.object.processado_por is None):
+                self.object.status = 'PROCESSANDO'
+                self.object.processado_por = request.user
+                self.object.save()
+                messages.info(request, "🔄 Iniciado o processamento do REAPS.")
+            else:
+                messages.warning(request, "⚠️ Este item já está em processamento por outro usuário.")
+ 
+        # ✅ Fallback seguro: sempre redirecionar para o detalhe do lançamento
+        return redirect('app_tarefas:reaps_detalhe', pk=self.object.reaps.pk)
+
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        associado = self.object.associado
+        reaps = self.object.reaps  # ✅ Agora sim!
+
+        usuarios_ativos = User.objects.filter(
+            reaps_processados__reaps=reaps,
+            reaps_processados__status='PROCESSANDO'
+        ).distinct()
+
+        context.update({
+            'associado_user': associado.user,
+            'cpf': associado.cpf,
+            'senha_gov': associado.senha_gov,
+            'relacao_trabalho': associado.relacao_trabalho,
+            'comercializa_produtos': associado.comercializa_produtos,
+            'bolsa_familia': associado.bolsa_familia,
+            'pela_rodada': self.request.GET.get('pela_rodada') == '1',
+            'usuarios_processando': usuarios_ativos,
+        })
+        return context
+
+
+@login_required
+def iniciar_reaps_rodada_view(request, pk):
+    reaps = get_object_or_404(ReapsAnualModel, pk=pk)
+
+    try:
+        with transaction.atomic():
+            proximo_item = (
+                ReapsAssociadoItem.objects
+                .select_related('associado__user')
+                .filter(
+                    reaps=reaps,
+                    status='PENDENTE'
+                )
+                .exclude(
+                    Q(status='PROCESSANDO') & ~Q(processado_por=request.user)
+                )
+                .order_by(
+                    'associado__user__first_name',
+                    'associado__user__last_name'
+                )
+                .first()
+            )
+
+            if proximo_item:
+                # Tenta marcar o item como PROCESSANDO apenas se ninguém já fez
+                updated = ReapsAssociadoItem.objects.filter(
+                    pk=proximo_item.pk,
+                    status='PENDENTE'
+                ).update(
+                    status='PROCESSANDO',
+                    processado_por=request.user
+                )
+
+                if updated:
+                    return redirect(
+                        f"{reverse('app_tarefas:processar_reaps', kwargs={'pk': proximo_item.pk})}?pela_rodada=1"
+                    )
+                else:
+                    messages.warning(request, "⚠️ Outro usuário já iniciou o processamento deste item.")
+                    return redirect('app_tarefas:reaps_detalhe', pk=reaps.pk)
+
+    except Exception as e:
+        messages.error(request, f"❌ Erro ao iniciar rodada: {str(e)}")
+        return redirect('app_tarefas:reaps_detalhe', pk=reaps.pk)
+
+    # ✅ Todos os itens estão processados
+    messages.info(request, "🎉 Todos os REAPS deste lançamento já foram concluídos. Nada mais a processar.")
+    messages.info(request, "🎉 Todos os itens disponíveis já estão sendo processados ou concluídos.")
+    return redirect('app_tarefas:reaps_detalhe', pk=reaps.pk)
+
+
+class ReapsDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
+    template_name = 'app_tarefas/delete_reaps.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]    
+    
+    def get(self, request, pk):
+        reaps = get_object_or_404(ReapsAnualModel, pk=pk)
+        pendentes = reaps.itens.filter(status='PENDENTE').count()
+        concluidos = reaps.itens.filter(status='CONCLUIDO').count()
+        total = reaps.itens.count()
+
+        context = {
+            'reaps': reaps,
+            'pendentes': pendentes,
+            'concluidos': concluidos,
+            'total': total,
+        }
+
+        return render(request, self.template_name, context)
+
+    def post(self, request, pk):
+        reaps = get_object_or_404(ReapsAnualModel, pk=pk)
+        pendentes = reaps.itens.filter(status='PENDENTE').count()
+
+        if pendentes > 0:
+            messages.warning(request, f"⚠️ Ainda há {pendentes} REAPS pendentes.")
+        else:
+            messages.success(request, f"✅ Lançamento REAPS {reaps.ano} deletado com sucesso.")
+
+        # Deleta os itens e o lançamento
+        reaps.itens.all().delete()
+        reaps.delete()
+
+        return redirect('app_tarefas:lista_reaps')

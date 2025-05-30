@@ -69,7 +69,7 @@ EMISSOR_RG_CHOICES = [
 ]
 STATUS_CHOICES = [
     ('Associado Lista Ativo(a)', 'Associado Lista Ativo(a)'),
-    ('Associado Lista Aposentado(a)', 'Associado  Lista Aposentado(a)'),
+    ('Associado Lista Aposentado(a)', 'Associado Lista Aposentado(a)'),
     ('Candidato(a)', 'Candidato(a)'),
     ('Cliente Especial', 'Cliente Especial'),
     ('Desassociado(a)', 'Desassociado(a)'),
@@ -135,6 +135,23 @@ SEGURO_DEFESO_CHOICES = [
     ('Não Recebe', 'Não Recebe'),
     ('Recebe', 'Recebe'),
     ('Não declarado', 'Não declarado'),     
+]
+
+RELACAO_TRABALHO_CHOICES = [
+    ('Indicidual Autônomo', 'Individual Autônomo'),
+    ('Economia Familiar', 'Economia Familiar'),
+    ('Regime de Parceria', 'Regime de Parceria'),
+    ('Não declarado', 'Não declarado'),
+]
+COMERCIALIZACAO_CHOICES = [
+    ('Sim', 'Sim'),
+    ('Não', 'Não'),
+    ('Não declarado', 'Não declarado'),
+]
+BOLSA_FAMILIA_CHOICES = [
+    ('Já recebeu', 'Já recebeu'),
+    ('Nunca recebeu', 'Nunca recebeu'),
+    ('Não declarado', 'Não declarado'),
 ]
 
 class ProfissoesModel(models.Model):
@@ -269,7 +286,31 @@ class AssociadoModel(models.Model):
         blank=True, 
         null=True, 
         default="Não declarado"
-    )    
+    )
+    relacao_trabalho = models.CharField(
+        choices=RELACAO_TRABALHO_CHOICES,
+        max_length=255, 
+        blank=True, 
+        null=True, 
+        verbose_name="Relação de Trabalho",
+        default="Não declarado"
+    )
+    comercializa_produtos = models.CharField(
+        choices=COMERCIALIZACAO_CHOICES,
+        max_length=250, 
+        blank=True, 
+        null=True, 
+        verbose_name="Comercializa Produtos",
+        default="Não declarado"
+    )
+    bolsa_familia = models.CharField(
+        choices=BOLSA_FAMILIA_CHOICES,
+        max_length=50, 
+        blank=True, 
+        null=True, 
+        verbose_name="Bolsa Família",
+        default="Não declarado"
+    )        
     # Documento RG
     rg_numero = models.CharField(
         max_length=20, 
@@ -555,6 +596,7 @@ class AssociadoModel(models.Model):
         null=True,
         verbose_name="Quantidade 5 (Kg)"
     )
+    
     data_atualizacao = models.DateField(
         auto_now=True
     )
