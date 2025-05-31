@@ -198,7 +198,8 @@
                   </p>
                     <p class="text-xs text-gray-500">Enviado em {{ doc.data_upload|date:"d/m/Y H:i" }}</p>
                   </div>
-                  <a href="{{ doc.arquivo.url }}" download class="text-green-600 hover:text-green-800" title="Baixar Documento">
+                 <a href="{% url 'app_documentos:download_documento' doc.pk %}" class="text-green-600 hover:text-green-800" title="Baixar Documento">
+
                     <i class="material-icons">cloud_download</i>
                   </a>
                 </li>

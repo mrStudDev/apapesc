@@ -60,27 +60,40 @@
         </a>
     </div>
 
-    <!-- Cards de Informações -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Card Informações Básicas -->
-        <div class="p-6 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-3 text-gray-700">Informações Básicas</h2>
+    <div class="max-w-7xl mx-auto p-6 bg-white rounded shadow space-y-10">
+        <!-- Título -->
+        <header class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-gray-800">🏛️ Detalhes da Associação</h1>
+            <p class="text-sm text-gray-500">Visualize os dados e estrutura da associação registrada.</p>
+        </header>
+
+        <!-- Grid de Informações -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Informações Básicas -->
+            <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <span class="material-icons text-base text-gray-500">badge</span> Informações Básicas
+            </h2>
             <p><strong>Nome Fantasia:</strong> {{ associacao.nome_fantasia }}</p>
             <p><strong>Razão Social:</strong> {{ associacao.razao_social }}</p>
             <p><strong>CNPJ:</strong> {{ associacao.cnpj }}</p>
-        </div>
+            </div>
 
-        <!-- Card Contato -->
-        <div class="p-6 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-3 text-gray-700">Contato</h2>
+            <!-- Contato -->
+            <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <span class="material-icons text-base text-gray-500">call</span> Contato
+            </h2>
             <p><strong>Celular:</strong> {{ associacao.celular }}</p>
             <p><strong>Email:</strong> {{ associacao.email }}</p>
             <p><strong>Telefone:</strong> {{ associacao.telefone }}</p>
-        </div>
+            </div>
 
-        <!-- Card Endereço -->
-        <div class="p-6 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-3 text-gray-700">Endereço da Associação</h2>
+            <!-- Endereço -->
+            <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <span class="material-icons text-base text-gray-500">location_on</span> Endereço
+            </h2>
             <p><strong>Logradouro:</strong> {{ associacao.logradouro }}</p>
             <p><strong>Bairro:</strong> {{ associacao.bairro }}</p>
             <p><strong>Número:</strong> {{ associacao.numero }}</p>
@@ -88,88 +101,130 @@
             <p><strong>CEP:</strong> {{ associacao.cep }}</p>
             <p><strong>Município:</strong> {{ associacao.municipio }}</p>
             <p><strong>UF:</strong> {{ associacao.uf }}</p>
-        </div>
+            </div>
 
-        <!-- Card Diretoria-->
-        <div class="p-6 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-3 text-gray-700">Diretoria</h2>
+            <!-- Diretoria -->
+            <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <span class="material-icons text-base text-gray-500">supervisor_account</span> Diretoria
+            </h2>
             <p><strong>Administrador:</strong> {{ associacao.administrador }}</p>
             <p><strong>Presidente:</strong> {{ associacao.presidente }}</p>
             <p><strong>Diretores:</strong>
                 {% for diretor in associacao.diretores.all %}
-                    {{ diretor }},
+                {{ diretor }}{% if not forloop.last %}, {% endif %}
                 {% empty %}
-                    Nenhum diretor registrado.
+                Nenhum diretor registrado.
                 {% endfor %}
             </p>
-        </div>
+            </div>
 
-        <!-- Card Fundadores -->
-        <div class="p-6 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-3 text-gray-700">Fundadores</h2>
+            <!-- Fundadores -->
+            <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <span class="material-icons text-base text-gray-500">star</span> Fundadores
+            </h2>
             <p>{{ associacao.fundadores }}</p>
-        </div>
+            </div>
 
-        <!-- Card Datas -->
-        <div class="p-6 bg-white shadow-md rounded">
-            <h2 class="text-xl font-semibold mb-3 text-gray-700">Datas</h2>
+            <!-- Datas -->
+            <div class="bg-gray-50 p-5 rounded-lg border border-gray-200 shadow-sm">
+            <h2 class="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                <span class="material-icons text-base text-gray-500">event</span> Datas
+            </h2>
             <p><strong>Data de Abertura:</strong> {{ associacao.data_abertura|date:"d/m/Y" }}</p>
-            <p><strong>Última Encerramento:</strong> {{ associacao.data_encerramento|date:"d/m/Y" }}</p>
+            <p><strong>Último Encerramento:</strong> {{ associacao.data_encerramento|date:"d/m/Y" }}</p>
+            </div>
         </div>
-    </div>
 
-    <!-- Botão de Voltar -->
-    <div class="mt-6 text-center">
-        <a href="{% url 'app_associacao:list_associacao' %}" class="text-blue-500 hover:text-blue-700">
-            &larr; Voltar para a lista Associação
-        </a>
-    </div>
+        <!-- Seção de Repartições -->
+        <section class="mt-10">
+            <h2 class="text-xl font-semibold text-indigo-700 mb-4 flex items-center gap-2">
+            <span class="material-icons text-base">account_tree</span>
+            Repartições Vinculadas
+            </h2>
 
-     <!-- Seção: Documentos -->
-     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-base font-semibold text-gray-700 mb-4">Documentos da Associação</h2>
+            {% if reparticoes_detalhadas %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full table-auto bg-white border border-gray-200 rounded-lg shadow-sm">
+                <thead class="bg-gray-100 text-gray-700">
+                    <tr>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Nome</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Delegado</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Município Sede</th>
+                    <th class="py-2 px-4 text-left text-sm font-semibold">Municípios de Circunscrição</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for r in reparticoes_detalhadas %}
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-2 px-4 text-sm text-gray-800">{{ r.nome }}</td>
+                        <td class="py-2 px-4 text-sm text-gray-800">{{ r.delegado }}</td>
+                        <td class="py-2 px-4 text-sm text-gray-800">{{ r.municipio_sede }}</td>
+                        <td class="py-2 px-4 text-sm text-gray-800">{{ r.municipios_circunscricao }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-sm text-gray-500 italic mt-3">Nenhuma repartição vinculada à associação.</p>
+            {% endif %}
+        </section>
 
-        {% if documentos %}
-            <ul class="space-y-4">
-                {% for documento in documentos %}
-                <li id="documento-{{ documento.id }}"  data-id="{{ documento.id }}"  class="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
-                    <div class="flex items-center">
-                        <i class="material-icons text-gray-500 mr-2" style="font-size: 20px;">insert_drive_file</i>
-                        <div>
-                            <a href="{{ documento.arquivo.url }}" target="_blank" class="text-blue-500 font-semibold hover:underline">
-                            {{ documento.nome }}
+        <!-- Botão Voltar -->
+        <div class="mt-8 text-center">
+            <a href="{% url 'app_associacao:list_associacao' %}" class="inline-block text-blue-600 hover:text-blue-800 font-medium">
+            &larr; Voltar para a lista de Associações
+            </a>
+        </div>
+
+        <!-- Seção: Documentos -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-base font-semibold text-gray-700 mb-4">Documentos da Associação</h2>
+
+            {% if documentos %}
+                <ul class="space-y-4">
+                    {% for documento in documentos %}
+                    <li id="documento-{{ documento.id }}"  data-id="{{ documento.id }}"  class="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
+                        <div class="flex items-center">
+                            <i class="material-icons text-gray-500 mr-2" style="font-size: 20px;">insert_drive_file</i>
+                            <div>
+                                <a href="{{ documento.arquivo.url }}" target="_blank" class="text-blue-500 font-semibold hover:underline">
+                                {{ documento.nome }}
+                                </a>
+                                <p class="text-gray-600 text-sm mt-1">Data de Upload: <strong> {{ documento.data_upload|date:"d/m/Y H:i" }}</strong></p>
+                                <p class="text-gray-600 text-sm mt-1">Extensão do Documento: <strong>{{ documento.arquivo.url|slice:"-3:" }}</strong></p> <!-- Novo -->
+                                <p class="text-gray-600 text-sm mt-1">* {{ documento.descricao|truncatechars:71 }}</p>
+
+                            </div>
+                        </div>
+
+                        <div class="flex items-center space-x-3">
+                            <!-- Link para Download do Documento -->
+                            <a href="{% url 'app_documentos:download_documento' documento.pk %}" title="Baixar">
+                                <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
                             </a>
-                            <p class="text-gray-600 text-sm mt-1">Data de Upload: <strong> {{ documento.data_upload|date:"d/m/Y H:i" }}</strong></p>
-                            <p class="text-gray-600 text-sm mt-1">Extensão do Documento: <strong>{{ documento.arquivo.url|slice:"-3:" }}</strong></p> <!-- Novo -->
-                            <p class="text-gray-600 text-sm mt-1">* {{ documento.descricao|truncatechars:71 }}</p>
+                            <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
+                                <i class="material-icons" style="font-size: 18px; color:green"> phone_android</i>
+                            </a>
+                            <a href="{% url 'app_documentos:criar_copia_pdf' documento.pk %}" title="Fazer Cópia em PDF" onclick="suaFuncaoAutomatizar()"> <!-- Adicione o link para a sua função -->
+                                <i class="material-icons" style="font-size: 20px; color:orange;">picture_as_pdf</i>
+                            </a>
+                            <a href="{% url 'app_documentos:delete_documento' documento.pk %}" 
+                            class="text-red-500 hover:text-red-700" title="Deletar">
+                                <i class="material-icons" style="font-size: 20px;">delete</i>
+                            </a>
 
                         </div>
-                    </div>
+                    </li>
+                    {% endfor %}
+                </ul>
 
-                    <div class="flex items-center space-x-3">
-                        <!-- Link para Download do Documento -->
-                        <a href="{{ documento.arquivo.url }}" download class="hover:text-green-500" title="Baixar Documento">
-                            <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
-                        </a>
-                        <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
-                            <i class="material-icons" style="font-size: 18px; color:green"> phone_android</i>
-                        </a>
-                        <a href="{% url 'app_documentos:criar_copia_pdf' documento.pk %}" title="Fazer Cópia em PDF" onclick="suaFuncaoAutomatizar()"> <!-- Adicione o link para a sua função -->
-                            <i class="material-icons" style="font-size: 20px; color:orange;">picture_as_pdf</i>
-                        </a>
-                        <a href="{% url 'app_documentos:delete_documento' documento.pk %}" 
-                        class="text-red-500 hover:text-red-700" title="Deletar">
-                            <i class="material-icons" style="font-size: 20px;">delete</i>
-                        </a>
-
-                    </div>
-                </li>
-                {% endfor %}
-            </ul>
-
-        {% else %}
-            <p class="text-gray-600">Nenhum documento disponível para este Integrante.</p>
-        {% endif %}
+            {% else %}
+                <p class="text-gray-600">Nenhum documento disponível para este Integrante.</p>
+            {% endif %}
+        </div>
     </div>
 </div>
 

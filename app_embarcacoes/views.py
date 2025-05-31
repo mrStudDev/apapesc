@@ -12,6 +12,7 @@ from django.contrib import messages
 from app_licencas.models import LicencasModel  # Adjust the import path as needed
 from datetime import date, timedelta
 from accounts.mixins import GroupPermissionRequiredMixin
+from app_documentos.models import Documento
 
 
 class CreateEmbarcacaoView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
@@ -119,10 +120,14 @@ class SingleEmbarcacaoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Det
         context.update({
             "seguro_status_cor": status_cor,
             "seguro_status_msg": status_msg,
+             
         })
 
         context['titulo'] = "Detalhes da Embarcação"
         context['licencas'] = embarcacao.licencas.order_by('-validade_final')
+        context['documentos'] = Documento.objects.filter(embarcacao=self.object)
+
+        
         return context
    
     

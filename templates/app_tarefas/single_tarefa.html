@@ -329,7 +329,7 @@
 
                         <div class="flex items-center space-x-3">
                             <!-- Link para Download do Documento -->
-                            <a href="{{ documento.arquivo.url }}" download class="hover:text-green-500" title="Baixar Documento">
+                           <a href="{% url 'app_documentos:download_documento' documento.pk %}" title="Baixar">
                                 <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
                             </a>
                             <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
@@ -414,7 +414,7 @@
                 {% endfor %}
             </tbody>
         </table>
-        <!-- Botão de Voltarrr -->
+        <!-- Botão de Voltarr -->
         <div class="mt-6 text-center">
             <a href="{% url 'app_tarefas:list_tarefas' %}" class="text-blue-500 hover:underline">Voltar para lista de tarefas</a>
             </div>

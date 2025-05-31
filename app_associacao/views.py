@@ -224,6 +224,7 @@ class AssociacaoDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, Det
     model = AssociacaoModel
     template_name = 'app_associacao/single_associacao.html'
     context_object_name = 'associacao'
+    
     group_required = [
         'Superuser',
         'Admin da Associação',
@@ -232,13 +233,31 @@ class AssociacaoDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, Det
         'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
-        ]
+    ]
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         associacao = self.get_object()
+
+        # Documentos da associação
         context['documentos'] = Documento.objects.filter(associacao=associacao)
+
+        # Todas as repartições vinculadas
+        reparticoes = associacao.reparticoes.select_related('delegado', 'municipio_sede').prefetch_related('municipios_circunscricao')
+
+        # Lista formatada para o template
+        reparticoes_detalhadas = []
+        for reparticao in reparticoes:
+            reparticoes_detalhadas.append({
+                'nome': reparticao.nome_reparticao,
+                'delegado': f"{reparticao.delegado.user.get_full_name()}" if reparticao.delegado and reparticao.delegado.user else "Não informado",
+                'municipio_sede': reparticao.municipio_sede.municipio if reparticao.municipio_sede else "Não informado",
+                'municipios_circunscricao': ", ".join([m.municipio for m in reparticao.municipios_circunscricao.all()]) or "Não informados"
+            })
+
+        context['reparticoes_detalhadas'] = reparticoes_detalhadas
         return context
-    
+
 
 class AssociacaoCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = AssociacaoModel

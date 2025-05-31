@@ -4,8 +4,11 @@ from app_associados.models import AssociadoModel
 from app_tarefas.models import TarefaModel
 from app_servicos.models import ExtraAssociadoModel
 
+
+
 class TipoDocumentoModel(models.Model):
     tipo = models.CharField(max_length=1500, verbose_name="Nome do Tipo de Documento")
+    descricao = models.TextField(null=True, blank=True)
 
     def __str__(self):
         return self.tipo
@@ -49,6 +52,13 @@ class Documento(models.Model):
         blank=True,
         related_name='documentos'
     )
+    embarcacao = models.ForeignKey(
+        'app_embarcacoes.EmbarcacoesModel',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='documentos'
+    )    
     tipo_doc = models.ForeignKey(
         'TipoDocumentoModel',
         on_delete=models.SET_NULL,
@@ -78,6 +88,8 @@ class Documento(models.Model):
             nome_proprietario = self.tarefa.titulo
         elif self.extra_associado:
             nome_proprietario = f"{self.extra_associado.nome_completo}"
+        elif self.embarcacao:
+            nome_proprietario = f"{self.embarcacao.nome_embarcacao}"
         else:
             raise ValueError("Documento deve estar associado a um Associado, Tarefa, ExtraAssociado, Integrante ou Associação.")
 
@@ -109,6 +121,8 @@ class Documento(models.Model):
             return f"{self.nome} - Tarefa: {self.tarefa.titulo}"
         elif self.extra_associado:
             return f"{self.nome} - Extra Associado: {self.extra_associado.nome_completo}"
+        elif self.embarcacao:
+            return f"{self.nome} - Embarcação: {self.embarcacao.nome_embarcacao}"
         else:
             return f"{self.nome} - Sem proprietário definido"
 

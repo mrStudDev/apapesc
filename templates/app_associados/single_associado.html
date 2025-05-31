@@ -1711,7 +1711,7 @@
 
                     <div class="flex items-center space-x-3">
                         <!-- Link para Download do Documento -->
-                        <a href="{{ documento.arquivo.url }}" download="declaracao_{{ documento.pk }}.pdf" class="hover:text-green-500" title="Baixar Documento">
+                        <a href="{% url 'app_documentos:download_documento' documento.pk %}" class="hover:text-green-500" title="Baixar Documento">
 
                             <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
                         </a>

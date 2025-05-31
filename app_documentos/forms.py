@@ -31,7 +31,7 @@ class DocumentoForm(forms.ModelForm):
 class TipoDocumentoForm(forms.ModelForm):
     class Meta:
         model = TipoDocumentoModel
-        fields = ['tipo']
+        fields = ['tipo', 'descricao']
         labels = {
             'tipo': 'Tipo de Documento',
         }
@@ -40,4 +40,11 @@ class TipoDocumentoForm(forms.ModelForm):
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'placeholder': 'Digite o nome do tipo de documento',
             }),
-        }
+            'descricao': forms.Textarea(attrs={
+                'rows': 3,
+                'class': 'min-h-[6rem] appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'placeholder': 'Digite uma descrição para o documento',
+            }),
+
+        }            
+        

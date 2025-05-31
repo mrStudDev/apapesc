@@ -32,9 +32,24 @@
         <div class="mb-6 p-4 bg-gray-200 border border-gray-300 rounded-md max-w-md mx-auto">
             <p class="text-gray-700">
                 <strong>Proprietário do Documento:</strong>
+                {% if owner.user %}
                 {{ owner.user.get_full_name }}
+                {% elif owner.nome_completo %}
+                {{ owner.nome_completo }}
+                {% elif owner.nome_fantasia %}
+                {{ owner.nome_fantasia }}
+                {% elif owner.nome_reparticao %}
+                {{ owner.nome_reparticao }}
+                {% elif owner.titulo %}
+                {{ owner.titulo }}
+                {% elif owner.nome_embarcacao %}
+                {{ owner.nome_embarcacao }}
+                {% else %}
+                <em>Proprietário desconhecido</em>
+                {% endif %}
             </p>
-        </div>      
+        </div>
+     
         <div class="mb-6 p-6 bg-yellow-100 border-l-4 border-yellow-500 rounded-md mx-auto shadow-md max-w-3xl">
             <h3 class="text-xl font-bold text-yellow-800 mb-2">Tipo ou Nome?</h3>
             <p class="text-gray-800 leading-relaxed">

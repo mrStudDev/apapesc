@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Editar TIPO de documento{% endblock title %}
+
+{% block create_tipo_documento %}
+    <!-- Navbar -->
+    {% if is_superuser %}
+        {% include "components/navbar_associacao.html" %}
+
+    {% elif is_admin_associacao %}
+        {% include "components/navbar_administradores.html" %}
+
+    {% elif is_diretor_associacao %}
+        {% include "components/navbar_diretores.html" %} 
+
+    {% elif is_presidente_associacao %}
+        {% include "components/navbar_presidente.html" %} 
+
+    {% elif is_delegado_reparticao %}
+        {% include "components/navbar_delegados.html" %}
+
+    {% elif is_auxiliar_associacao %}
+        {% include "components/navbar_aux_associacao.html" %}        
+
+    {% else %}
+        {% include "components/navbar_aux_reparticao.html" %} 
+    {% endif %}
+
+<main class="flex-grow">
+    <div class="container mx-auto my-8">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Editar Tipo de Documento</h1>
+        {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="max-w-xl mx-auto bg-white p-6 rounded shadow">
+            <h2 class="text-xl font-semibold mb-4">📝 Editar Tipo de Documento</h2>
+
+
+            {% if is_essencial %}
+            <div class="mb-4 p-4 rounded bg-yellow-100 border-l-4 border-yellow-500 text-yellow-800 text-sm">
+                ⚠️ <strong>Atenção:</strong> Este tipo de documento é considerado <strong>essencial</strong> para o funcionamento do sistema.<br><br>
+                Esse <strong>Tipo(nome)</strong> de documento <strong>NÃO</strong> pode ser alterado!<br><br>
+                O campo <strong>Tipo</strong> <u>não deve ser alterado</u>, pois é utilizado em diversas funções internas.<br><br>
+                <strong>Altere apenas a descrição</strong>, se necessário.
+            </div>
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Campo: Tipo -->
+                <div class="mb-4">
+                <label for="id_tipo" class="block text-sm font-medium text-gray-700">Tipo</label>
+                <input type="text" name="tipo" id="id_tipo" value="{{ form.tipo.value|default_if_none:'' }}"
+                        class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 text-sm focus:ring focus:ring-blue-200 focus:outline-none" required>
+                {% if form.tipo.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.tipo.errors.0 }}</p>
+                {% endif %}
+                </div>
+
+                <!-- Campo: Descrição -->
+                <div class="mb-4">
+                <label for="id_descricao" class="block text-sm font-medium text-gray-700">Descrição</label>
+                <textarea name="descricao" id="id_descricao" rows="4"
+                            class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm px-3 py-2 text-sm focus:ring focus:ring-blue-200 focus:outline-none"
+                >{{ form.descricao.value|default_if_none:'' }}</textarea>
+                {% if form.descricao.errors %}
+                    <p class="text-sm text-red-500 mt-1">{{ form.descricao.errors.0 }}</p>
+                {% endif %}
+                </div>
+
+                <!-- Ações -->
+                <div class="mt-6 flex justify-between">
+                <a href="{% url 'app_documentos:list_tipo_documento' %}" class="btn btn-secondary">⬅️ Voltar</a>
+                <button type="submit" class="btn btn-primary">💾 Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+{% endblock create_tipo_documento %}

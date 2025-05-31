@@ -48,31 +48,45 @@
             {% endfor %}
         </div>
         {% endif %}
-        <form method="post" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
-            {% csrf_token %}
-            {{ form.as_p }}
-            
+
+        <form method="post" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto space-y-6">
+        {% csrf_token %}
+
+        <!-- Mensagem explicativa -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded-md text-sm text-blue-700 shadow-sm">
+            <p class="font-medium mb-1">📘 Dica:</p>
+            <p>
+            O campo <strong>"Tipo de Documento"</strong> permite cadastrar um nome que será reutilizado frequentemente.
+            Isso ajuda na organização e facilita durante os envios futuros de documentos. A nomeção é importante para organização e identificação do sistema e busca por documentos<strong>"Essenciais"</strong>
+            </p>
+        </div>
+
+        <!-- Renderização do formulário -->
+        <div class="space-y-4">
+            {{ form.non_field_errors }}
             <div>
-                <br><p>O campo "Tipo de Documento" permite que você cadastre um novo tipo, que nada mais é do 
-                    que um nome de documento que será utilizado frequentemente.
-        
-                    Se você está diante de uma situação em que o upload de um determinado documento se tornará 
-                    habitual, criar um tipo específico para esse documento pode ser muito útil. Isso facilita o 
-                    processo de identificação e organização, pois o nome que você cadastrar aqui aparecerá 
-                    automaticamente na lista de opções durante o upload de documentos.
-                    
-                    Essa funcionalidade ajuda a manter os cadastros mais organizados e eficientes.
-                </p>
+            {{ form.tipo.label_tag }}
+            {{ form.tipo }}
+            {{ form.tipo.errors }}
             </div>
-            <div class="mt-6">
-                <button
-                    type="submit"
-                    class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full"
-                >
-                    Salvar Tipo de Documento
-                </button>
+            <div>
+            {{ form.descricao.label_tag }}
+            {{ form.descricao }}
+            {{ form.descricao.errors }}
             </div>
+        </div>
+
+        <!-- Botão -->
+        <div class="pt-4">
+            <button
+            type="submit"
+            class="bg-blue-500 text-white py-2 px-6 rounded-md hover:bg-blue-600 w-full transition"
+            >
+            💾 Salvar Tipo de Documento
+            </button>
+        </div>
         </form>
+
     </div>
 </main>
 <!-- Footer -->
