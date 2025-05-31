@@ -43,6 +43,10 @@ from .models import (
     ReciboServicoExtraModel,
     CarteirinhaAssociadoModel,
     CobrancaAnuidadeModel,
+    ProcuracaoAdministrativaModel,
+    AutorizacaoDireitoImagemModel,
+    AutorizacaoAcessoGovModel,
+    DeclaracaoDesfiliacaoModel,
     )
 
 # Deletes
@@ -57,6 +61,10 @@ MODELO_MAP = {
     'recibos_servicos_extra': ReciboServicoExtraModel,
     'carteirinha_apapesc': CarteirinhaAssociadoModel,
     'cobranca_anuidades': CobrancaAnuidadeModel,
+    'procuracao_administrativa': ProcuracaoAdministrativaModel,
+    'autorizacao_direito_imagem': AutorizacaoDireitoImagemModel,
+    'autorizacao_acesso_gov': AutorizacaoAcessoGovModel,
+    'declaracao_desfiliacao': DeclaracaoDesfiliacaoModel,
 
 }
 
@@ -95,6 +103,10 @@ def upload_pdf_base(request, automacao):
         'recibos_servicos_extra': ReciboServicoExtraModel,
         'carteirinha_apapesc': CarteirinhaAssociadoModel,
         'cobranca_anuidades': CobrancaAnuidadeModel,
+        'procuracao_administrativa': ProcuracaoAdministrativaModel,
+        'autorizacao_direito_imagem': AutorizacaoDireitoImagemModel,
+        'autorizacao_acesso_gov': AutorizacaoAcessoGovModel,
+        'declaracao_desfiliacao': DeclaracaoDesfiliacaoModel,
     }
     
     modelo = modelo_map.get(automacao)
@@ -140,6 +152,10 @@ class ListaTodosArquivosView(LoginRequiredMixin, GroupPermissionRequiredMixin, T
         context['recibos_servicos_extra'] = ReciboServicoExtraModel.objects.all()
         context['carteirinha_apapesc'] = CarteirinhaAssociadoModel.objects.all()
         context['cobranca_anuidades'] = CobrancaAnuidadeModel.objects.all()
+        context['procuracoes_procuracao_administrativa'] = ProcuracaoAdministrativaModel.objects.all()
+        context['autorizacao_direito_imagem'] = AutorizacaoDireitoImagemModel.objects.all()
+        context['autorizacao_acesso_gov'] = AutorizacaoAcessoGovModel.objects.all()
+        context['declaracao_desfiliacao'] = DeclaracaoDesfiliacaoModel.objects.all()
         
         return context
 
@@ -1566,3 +1582,511 @@ def gerar_carteirinha_apapesc(request, associado_id):
     pdf_url = f"{settings.MEDIA_URL}documentos/carteirinha_{associado.id}.pdf"
     return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")
     
+
+
+# GERAR PROCURAÇÃO ADMINISTRATIVA
+def gerar_procuracao_administrativa(request, associado_id):
+    associado = AssociadoModel.objects.get(id=associado_id)
+
+    # Caminho para o PDF de template
+    template_path = os.path.join(settings.MEDIA_ROOT, 'pdf/procuracao_administrativa.pdf')
+    if not os.path.exists(template_path):
+        return HttpResponse("O PDF base para a Procuração Administrativa não foi encontrado.", status=404)
+
+    template_pdf = PdfReader(template_path)
+
+    # Buffer em memória para o conteúdo dinâmico
+    buffer = BytesIO()
+
+    # Definindo estilos personalizados
+    styles = getSampleStyleSheet()
+    style_title = ParagraphStyle(
+        'Title',
+        parent=styles['Title'],
+        fontName='Times-Bold',
+        fontSize=17,
+        alignment=1,  # Centralizado
+        leading=32,  # Espaçamento entre as linhas do título
+        spaceBefore=80,  # Espaçamento antes do título
+    )
+    style_normal = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=14,  # Espaçamento entre linhas
+        alignment=4,  # Justificado
+    )
+    style_assinatura = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=14,  # Espaçamento entre linhas
+        alignment=1,  # Justificado
+    )
+    # Data atual
+    data_atual = datetime.now().strftime('%d/%m/%Y')
+
+    # Texto da declaração
+    texto1 = (
+        f"<strong>OUTORGANTE(S)</strong>: <strong>{associado.user.get_full_name()}</strong>, brasileira, "
+        f"profissão, {associado.profissao}, estado civil, {associado.estado_civil}, CPF nº {associado.cpf}, "
+        f"RG nº {associado.rg_numero}, com residência e domicílio estabelecido á {associado.logradouro}, "
+        f"nº {associado.numero}, {associado.complemento}, {associado.bairro}, {associado.municipio} -"
+        f" {associado.uf} {associado.cep}. "
+        f"<br /><br /><strong>OUTORGADOS</strong>: <strong>CRISTIANI JORDANI DOS SANTOS RAMOS</strong>, "
+        f"brasileira, casada, advogada, inscrição na OAB/SC sob o número 51.410, inscrita no CPF 853.801.219-34, "
+        f"<strong>SAMARA IZILDA CORREA DOS SANTOS</strong>,  brasileira, divorciada,"
+        f"advogada, inscrição na OAB/SC sob o número 51.380, inscrita no CPF 027.034.419-59, integrantes do "
+        f"escritório JORDANI & SANTOS Advogados Associados."
+    )
+    texto2 = (
+        f"<strong>PODERES:</strong> Pelo presente instrumento, o(a) outorgante confere plenos poderes à <strong>APAPESC - "
+        f"Associação de Assistência aos Servidores Públicos de Santa Catarina</strong> e/ou seus representantes legais, "
+        f"para que, em seu nome, representem seus interesses junto a qualquer órgão da Administração Pública Direta ou Indireta, "
+        f"entidades autárquicas, fundacionais, ou quaisquer repartições governamentais, em todas as esferas federativas."
+        
+        f"<br />Esta procuração concede poderes amplos, gerais e ilimitados, inclusive os da cláusula <em>“ad judicia et extra”</em>, "
+        f"permitindo aos outorgados propor requerimentos, firmar declarações, prestar informações, protocolar documentos, "
+        f"solicitar diligências e praticar todos os atos necessários para assegurar os direitos do(a) associado(a), "
+        f"em especial <strong>para fins de requerimento administrativo do benefício do Seguro Defeso</strong>, junto ao INSS, MAPA, MTE "
+        f"e demais órgãos competentes."
+        
+        f"<br /><br />A presente outorga autoriza ainda a obtenção de informações, consultas em sistemas oficiais, assinatura de formulários, "
+        f"declarações de elegibilidade, e realização de todos os procedimentos pertinentes ao andamento e conclusão do referido pedido de benefício."
+
+        f"<br /><br />Os poderes ora conferidos poderão ser exercidos em conjunto ou separadamente por quaisquer dos representantes da APAPESC, "
+        f"com faculdade de substabelecimento, no todo ou em parte, a quem melhor aprouver, com ou sem reserva de poderes."
+
+        f"<br /><br />Esta procuração é válida por prazo indeterminado, até que seja formalmente revogada pelo(a) outorgante."
+    )
+
+
+    # Local e data
+    local_data = f"{associado.reparticao.municipio_sede}, {data_atual}."
+    assinatura = (
+        "____________________________________________________________________<br/>"
+        f"<strong>{associado.user.get_full_name()}</strong><br/>"
+        f"CPF: {associado.cpf}<br/>"
+    )
+
+    # Elementos do PDF
+    elements = [
+        Paragraph("PROCURAÇÃO ADMINISTRATIVA", style_title),
+        Spacer(1, 1),
+        Paragraph(texto1, style_normal),
+        Spacer(1, 5),
+        Paragraph(texto2, style_normal),
+        Spacer(1, 5),
+        Paragraph(local_data, style_normal),
+        Spacer(1, 10),
+        Paragraph(assinatura, style_assinatura),
+    ]
+
+    # Criando o documento PDF
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=85,
+        leftMargin=85,
+        topMargin=140,
+        bottomMargin=40,
+    )
+
+    doc.build(elements)
+
+    # Mesclando o conteúdo dinâmico com o template
+    buffer.seek(0)
+    overlay_pdf = PdfReader(buffer)
+
+    # **Ajuste Importante:**
+    # O número de páginas do template e o overlay_pdf deve ser gerenciado com cuidado.
+    for index, template_page in enumerate(template_pdf.pages):
+        if index < len(overlay_pdf.pages):
+            overlay_page = overlay_pdf.pages[index]
+            PageMerge(template_page).add(overlay_page).render()
+
+    # Salvando o PDF final
+    pdf_name = f"procuracao_administrativa_{associado.user.get_full_name().replace(' ', '_')}.pdf"
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+    PdfWriter(pdf_path, trailer=template_pdf).write()
+
+    # Preparando o redirecionamento
+    pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
+    return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")
+# ======================================================================================================
+
+# Autorizacao Direitos de Imagem
+
+def gerar_autorizacao_direitos_imagem(request, associado_id):
+    associado = AssociadoModel.objects.get(id=associado_id)
+
+    # Caminho para o PDF de template
+    template_path = os.path.join(settings.MEDIA_ROOT, 'pdf/autorizacao_direito_imagem.pdf')
+    if not os.path.exists(template_path):
+        return HttpResponse("O PDF base para a Autorização de uso e Direitos de Imagem.", status=404)
+
+    template_pdf = PdfReader(template_path)
+
+    # Buffer em memória para o conteúdo dinâmico
+    buffer = BytesIO()
+
+    # Definindo estilos personalizados
+    styles = getSampleStyleSheet()
+    style_title = ParagraphStyle(
+        'Title',
+        parent=styles['Title'],
+        fontName='Times-Bold',
+        fontSize=17,
+        alignment=1,  # Centralizado
+        leading=32,  # Espaçamento entre as linhas do título
+        spaceBefore=100,  # Espaçamento antes do título
+    )
+    style_normal = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=14,  # Espaçamento entre linhas
+        alignment=4,  # Justificado
+    )
+    style_assinatura = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=14,  # Espaçamento entre linhas
+        alignment=1,  # Justificado
+    )
+    # Data atual
+    data_atual = datetime.now().strftime('%d/%m/%Y')
+
+    # Texto da Autorização
+    texto1 = (
+        f"<strong>ATORIZAÇÂO</strong>: Eu, <strong>{associado.user.get_full_name()}</strong>, brasileira, "
+        f"profissão, {associado.profissao}, estado civil, {associado.estado_civil}, CPF nº {associado.cpf}, "
+        f"RG nº {associado.rg_numero}, com residência e domicílio estabelecido á {associado.logradouro}, "
+        f"nº {associado.numero}, {associado.complemento}, {associado.bairro}, {associado.municipio} -"
+        f" {associado.uf} {associado.cep}. "
+        f"<br /><br /><strong>AUTORIZO</strong>: <strong> A ASSOCIAÇÃO APAPESC</strong>: "
+
+    )
+    texto2 = (
+        f"<strong>AUTORIZAÇÃO:</strong> O(A) associado(a) autoriza expressamente a <strong>APAPESC - Associação de "
+        f"Assistência aos Servidores Públicos de Santa Catarina</strong> a utilizar sua imagem, voz e nome para fins institucionais, "
+        f"incluindo, mas não se limitando a, postagens em redes sociais, inserções em campanhas de divulgação, matérias jornalísticas, "
+        f"artigos e publicações no site oficial da associação, bem como em materiais impressos ou digitais voltados à comunicação com os associados "
+        f"e à promoção das atividades realizadas pela associação. "
+        f"<br /><br />A presente autorização é concedida de forma gratuita, por prazo indeterminado e em caráter irrevogável, abrangendo o uso em "
+        f"todo o território nacional e internacional, sem que isso implique em qualquer ônus, remuneração ou compensação ao(à) associado(a). "
+        f"<br /><br />A APAPESC compromete-se a utilizar a imagem de forma ética, respeitosa e alinhada aos princípios estatutários da associação, "
+        f"preservando sempre a honra, reputação e dignidade do(a) associado(a)."
+    )
+
+
+    # Local e data
+    local_data = f"{associado.reparticao.municipio_sede}, {data_atual}."
+    assinatura = (
+        "____________________________________________________________________<br/>"
+        f"<strong>{associado.user.get_full_name()}</strong><br/>"
+        f"CPF: {associado.cpf}<br/>"
+    )
+
+    # Elementos do PDF
+    elements = [
+        Paragraph("AUTORIZAÇÃO DE USO E DIREITOS IMAGEM", style_title),
+        Spacer(1, 10),
+        Paragraph(texto1, style_normal),
+        Spacer(1, 10),
+        Paragraph(texto2, style_normal),
+        Spacer(1, 10),
+        Paragraph(local_data, style_normal),
+        Spacer(1, 24),
+        Paragraph(assinatura, style_assinatura),
+    ]
+
+    # Criando o documento PDF
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=85,
+        leftMargin=85,
+        topMargin=140,
+        bottomMargin=40,
+    )
+
+    doc.build(elements)
+
+    # Mesclando o conteúdo dinâmico com o template
+    buffer.seek(0)
+    overlay_pdf = PdfReader(buffer)
+
+    # **Ajuste Importante:**
+    # O número de páginas do template e o overlay_pdf deve ser gerenciado com cuidado.
+    for index, template_page in enumerate(template_pdf.pages):
+        if index < len(overlay_pdf.pages):
+            overlay_page = overlay_pdf.pages[index]
+            PageMerge(template_page).add(overlay_page).render()
+
+    # Salvando o PDF final
+    pdf_name = f"autorizacao_direito_imagem_{associado.user.get_full_name().replace(' ', '_')}.pdf"
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+    PdfWriter(pdf_path, trailer=template_pdf).write()
+
+    # Preparando o redirecionamento
+    pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
+    return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")
+# ======================================================================================================    
+
+# AUTORIZAÇÂO ACESSO GOV
+def gerar_autorizacao_acesso_gov(request, associado_id):
+    associado = AssociadoModel.objects.get(id=associado_id)
+
+    # Caminho para o PDF de template
+    template_path = os.path.join(settings.MEDIA_ROOT, 'pdf/autorizacao_acesso_gov.pdf')
+    if not os.path.exists(template_path):
+        return HttpResponse("O PDF base para a Autorização Acesso e Gestão conta Gov.", status=404)
+
+    template_pdf = PdfReader(template_path)
+
+    # Buffer em memória para o conteúdo dinâmico
+    buffer = BytesIO()
+
+    # Definindo estilos personalizados
+    styles = getSampleStyleSheet()
+    style_title = ParagraphStyle(
+        'Title',
+        parent=styles['Title'],
+        fontName='Times-Bold',
+        fontSize=17,
+        alignment=1,  # Centralizado
+        leading=32,  # Espaçamento entre as linhas do título
+        spaceBefore=100,  # Espaçamento antes do título
+    )
+    style_normal = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=14,  # Espaçamento entre linhas
+        alignment=4,  # Justificado
+    )
+    style_assinatura = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=14,  # Espaçamento entre linhas
+        alignment=1,  # Justificado
+    )
+    # Data atual
+    data_atual = datetime.now().strftime('%d/%m/%Y')
+
+    # Texto da Autorização acesso e Gestão conta Gov
+    texto1 = (
+        f"<strong>ATORIZAÇÂO</strong>: Eu, <strong>{associado.user.get_full_name()}</strong>, brasileira, "
+        f"profissão, {associado.profissao}, estado civil, {associado.estado_civil}, CPF nº {associado.cpf}, "
+        f"RG nº {associado.rg_numero}, com residência e domicílio estabelecido á {associado.logradouro}, "
+        f"nº {associado.numero}, {associado.complemento}, {associado.bairro}, {associado.municipio} -"
+        f" {associado.uf} {associado.cep}. "
+        f"<br /><br /><strong>AUTORIZO</strong>: <strong>INTEGRANTES ADMINISTRATIVOS DA APAPESC</strong>: "
+
+    )
+    texto2 = (
+    f"<strong>AUTORIZAÇÃO DE ACESSO À CONTA GOV.BR:</strong> O(A) associado(a) autoriza formalmente a <strong>APAPESC - "
+    f"Associação de Assistência aos Servidores Públicos de Santa Catarina</strong>, por meio de seus representantes administrativos, "
+    f"a realizar acesso e gestão das informações disponíveis na plataforma <strong>Gov.br</strong>, vinculadas ao seu CPF, exclusivamente "
+    f"para fins de representação institucional, acompanhamento de benefícios, atualização cadastral, instrução de processos administrativos "
+    f"ou judiciais e demais procedimentos relacionados aos direitos e interesses do(a) associado(a) perante órgãos públicos. "
+    f"<br /><br />A presente autorização inclui, mas não se limita a: geração e uso de senhas temporárias, acesso a históricos de benefícios, "
+    f"envio e recebimento de documentos por meio da conta Gov.br, assinatura digital de requerimentos e consultas em nome do(a) associado(a). "
+    f"<br /><br />A autorização é concedida por prazo indeterminado, podendo ser revogada a qualquer tempo por manifestação expressa do(a) associado(a), "
+    f"e se destina exclusivamente ao exercício de atividades relacionadas à atuação da associação em defesa dos interesses do(a) outorgante. "
+    f"<br /><br />A APAPESC compromete-se a utilizar as credenciais de forma ética, segura, e dentro dos limites legais, respeitando os princípios "
+    f"da confidencialidade, privacidade e boa-fé."
+)
+
+
+
+    # Local e data
+    local_data = f"{associado.reparticao.municipio_sede}, {data_atual}."
+    assinatura = (
+        "____________________________________________________________________<br/>"
+        f"<strong>{associado.user.get_full_name()}</strong><br/>"
+        f"CPF: {associado.cpf}<br/>"
+    )
+
+    # Elementos do PDF
+    elements = [
+        Paragraph("AUTORIZAÇÃO DE ACESSO EM CONTA GOV", style_title),
+        Spacer(1, 10),
+        Paragraph(texto1, style_normal),
+        Spacer(1, 10),
+        Paragraph(texto2, style_normal),
+        Spacer(1, 10),
+        Paragraph(local_data, style_normal),
+        Spacer(1, 24),
+        Paragraph(assinatura, style_assinatura),
+    ]
+
+    # Criando o documento PDF
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=85,
+        leftMargin=85,
+        topMargin=140,
+        bottomMargin=40,
+    )
+
+    doc.build(elements)
+
+    # Mesclando o conteúdo dinâmico com o template
+    buffer.seek(0)
+    overlay_pdf = PdfReader(buffer)
+
+    # **Ajuste Importante:**
+    # O número de páginas do template e o overlay_pdf deve ser gerenciado com cuidado.
+    for index, template_page in enumerate(template_pdf.pages):
+        if index < len(overlay_pdf.pages):
+            overlay_page = overlay_pdf.pages[index]
+            PageMerge(template_page).add(overlay_page).render()
+
+    # Salvando o PDF final
+    pdf_name = f"autorizacao_acesso_gov_{associado.user.get_full_name().replace(' ', '_')}.pdf"
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+    PdfWriter(pdf_path, trailer=template_pdf).write()
+
+    # Preparando o redirecionamento
+    pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
+    return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")
+# ======================================================================================================        
+
+
+# Declaração de Desfiliação
+def gerar_declaracao_desfiliacao(request, associado_id):
+    associado = AssociadoModel.objects.get(id=associado_id)
+
+    # Caminho para o PDF de template
+    template_path = os.path.join(settings.MEDIA_ROOT, 'pdf/declaracao_desfiliacao.pdf')
+    if not os.path.exists(template_path):
+        return HttpResponse("O PDF base para a Autorização Acesso e Gestão conta Gov.", status=404)
+
+    template_pdf = PdfReader(template_path)
+
+    # Buffer em memória para o conteúdo dinâmico
+    buffer = BytesIO()
+
+    # Definindo estilos personalizados
+    styles = getSampleStyleSheet()
+    style_title = ParagraphStyle(
+        'Title',
+        parent=styles['Title'],
+        fontName='Times-Bold',
+        fontSize=17,
+        alignment=1,  # Centralizado
+        leading=32,  # Espaçamento entre as linhas do título
+        spaceBefore=100,  # Espaçamento antes do título
+    )
+    style_normal = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=14,  # Espaçamento entre linhas
+        alignment=4,  # Justificado
+    )
+    style_assinatura = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=14,  # Espaçamento entre linhas
+        alignment=1,  # Justificado
+    )
+    # Data atual
+    data_atual = datetime.now().strftime('%d/%m/%Y')
+
+    # Texto do pedido de desfiliação
+    texto1 = (
+        f"<strong>EU</strong>: <strong>{associado.user.get_full_name()}</strong>, brasileira, "
+        f"profissão, {associado.profissao}, estado civil, {associado.estado_civil}, CPF nº {associado.cpf}, "
+        f"RG nº {associado.rg_numero}, com residência e domicílio estabelecido á {associado.logradouro}, "
+        f"nº {associado.numero}, {associado.complemento}, {associado.bairro}, {associado.municipio} -"
+        f" {associado.uf} {associado.cep}. "
+        f"<br /><br /><strong>DECLARO</strong>: "
+    )
+    
+    texto2 = (
+        f"<strong>DECLARAÇÃO DE DESFILIAÇÃO VOLUNTÁRIA:</strong> Eu, <strong>{associado.user.get_full_name()}</strong>, "
+        f"associado(a) da <strong>APAPESC - Associação de Assistência aos Servidores Públicos de Santa Catarina</strong>, "
+        f"venho por meio desta, manifestar de forma livre, consciente e espontânea minha decisão de <strong>me desligar do quadro de associados da APAPESC</strong>."
+        f"<br /><br />Declaro estar ciente de que, a partir desta data, deixarei de usufruir dos benefícios, serviços e representações oferecidos pela associação, "
+        f"renunciando voluntariamente a qualquer vínculo associativo ativo."
+        f"<br /><br />Solicito que sejam adotadas as providências administrativas necessárias para formalização da minha desfiliação, "
+        f"bem como a atualização dos registros internos da associação."
+        f"<br /><br />Reitero que esta decisão é tomada por minha livre e espontânea vontade, sem qualquer coação ou influência de terceiros, "
+        f"e reconheço o trabalho e a importância da APAPESC na defesa dos interesses dos servidores públicos catarinenses."
+    )
+
+
+
+
+    # Local e data
+    local_data = f"{associado.reparticao.municipio_sede}, {data_atual}."
+    assinatura = (
+        "____________________________________________________________________<br/>"
+        f"<strong>{associado.user.get_full_name()}</strong><br/>"
+        f"CPF: {associado.cpf}<br/>"
+    )
+
+    # Elementos do PDF
+    elements = [
+        Paragraph("DECLARAÇÃO DE DESFILIAÇÃO", style_title),
+        Spacer(1, 10),
+        Paragraph(texto1, style_normal),
+        Spacer(1, 10),
+        Paragraph(texto2, style_normal),
+        Spacer(1, 10),
+        Paragraph(local_data, style_normal),
+        Spacer(1, 24),
+        Paragraph(assinatura, style_assinatura),
+    ]
+
+    # Criando o documento PDF
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=85,
+        leftMargin=85,
+        topMargin=140,
+        bottomMargin=40,
+    )
+
+    doc.build(elements)
+
+    # Mesclando o conteúdo dinâmico com o template
+    buffer.seek(0)
+    overlay_pdf = PdfReader(buffer)
+
+    # **Ajuste Importante:**
+    # O número de páginas do template e o overlay_pdf deve ser gerenciado com cuidado.
+    for index, template_page in enumerate(template_pdf.pages):
+        if index < len(overlay_pdf.pages):
+            overlay_page = overlay_pdf.pages[index]
+            PageMerge(template_page).add(overlay_page).render()
+
+    # Salvando o PDF final
+    pdf_name = f"declaracao_desfiliacao_{associado.user.get_full_name().replace(' ', '_')}.pdf"
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+    PdfWriter(pdf_path, trailer=template_pdf).write()
+
+    # Preparando o redirecionamento
+    pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
+    return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")
+# ======================================================================================================            

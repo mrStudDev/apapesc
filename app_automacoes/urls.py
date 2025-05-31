@@ -17,6 +17,10 @@ urlpatterns = [
      path('upload/recibo-servico-extra/', upload_pdf_base, {'automacao': 'recibos_servicos_extra'}, name='upload_pdf_recibo_servico_extra'),
      path('upload/carteirinha/', upload_pdf_base, {'automacao': 'carteirinha_apapesc'}, name='upload_pdf_carteirinha_apapesc'),
      path('upload/recibo-anuidade/<int:anuidade_assoc_id>/', upload_pdf_base, {'automacao': 'recibos_anuidades'}, name='upload_pdf_recibo_anuidade'),
+     path('upload/procuracao-administrativa/', upload_pdf_base, {'automacao': 'procuracao_administrativa'}, name='upload_pdf_procuracao_administrativa'),
+     path('upload/autorizacao-direito-imagem/', upload_pdf_base, {'automacao': 'autorizacao_direito_imagem'}, name='upload_pdf_autorizacao_direito_imagem'),
+     path('upload/autorizacao-acesso-gov/', upload_pdf_base, {'automacao': 'autorizacao_acesso_gov'}, name='upload_pdf_autorizacao_acesso_gov'),
+     path('upload/declaracao-desfiliacao/', upload_pdf_base, {'automacao': 'declaracao_desfiliacao'}, name='upload_pdf_declaracao_desfiliacao'),
 
      path('lista/todos-arquivos/', ListaTodosArquivosView.as_view(), name='lista_automacoes'),
      
@@ -60,5 +64,16 @@ urlpatterns = [
      
      path('gerar-carteirinha/<int:associado_id>/', views.gerar_carteirinha_apapesc,
           name='gerar_carteirinha_apapesc'), 
+     
+     path('gerar-procuracao-administrativa/<int:associado_id>/', views.gerar_procuracao_administrativa,
+          name='gerar_procuracao_administrativa'),
+     
+     path('gerar-autorizacao-direito-imagem/<int:associado_id>/', views.gerar_autorizacao_direitos_imagem,
+          name='gerar_autorizacao_direitos_imagem'),
+     
+     path('gerar-autorizacao-acesso-gov/<int:associado_id>/', views.gerar_autorizacao_acesso_gov,
+          name='gerar_autorizacao_acesso_gov'),
+     path('gerar-declaracao-desfiliacao/<int:associado_id>/', views.gerar_declaracao_desfiliacao,
+          name='gerar_declaracao_desfiliacao'),
 
 ]

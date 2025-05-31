@@ -20,7 +20,6 @@ def upload_to_declaracao_residencia(instance, filename):
     return file_path
 
 
-
 def upload_to_declaracao_filiacao(instance, filename):
     file_path = os.path.join('pdf', 'declaracao_filiacao.pdf')
     full_path = Path(settings.MEDIA_ROOT) / file_path
@@ -157,6 +156,62 @@ def upload_to_recibo_servico_extra(instance, filename):
 
 def upload_to_carteirinha_apapesc(instance, filename):
     file_path = os.path.join('pdf', 'carteirinha_apapesc.pdf')
+    full_path = Path(settings.MEDIA_ROOT) / file_path
+    
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():  
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
+    return file_path
+
+def upload_to_procuracao_administrativa(instance, filename):
+    file_path = os.path.join('pdf', 'procuracao_administrativa.pdf')
+    full_path = Path(settings.MEDIA_ROOT) / file_path
+    
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():  
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
+    return file_path
+
+def uoload_to_autorizacao_direito_imagem(instance, filename):
+    file_path = os.path.join('pdf', 'autorizacao_direito_imagem.pdf')
+    full_path = Path(settings.MEDIA_ROOT) / file_path
+    
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():  
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
+    return file_path
+
+def upload_to_autorizacao_acesso_gov(instance, filename):
+    file_path = os.path.join('pdf', 'autorizacao_acesso_gov.pdf')
+    full_path = Path(settings.MEDIA_ROOT) / file_path
+    
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():  
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
+    return file_path
+
+def upload_to_declaracao_desfiliacao(instance, filename):
+    file_path = os.path.join('pdf', 'declaracao_desfiliacao.pdf')
     full_path = Path(settings.MEDIA_ROOT) / file_path
     
     # Verifica se o arquivo existe antes de tentar removê-lo
@@ -413,3 +468,92 @@ class CarteirinhaAssociadoModel(models.Model):
         
     def __str__(self):
         return "Carteirinha do Associado"
+    
+class ProcuracaoAdministrativaModel(models.Model):
+    pdf_base = models.FileField(
+        upload_to=upload_to_procuracao_administrativa,
+        verbose_name="PDF Base para Procuração Administrativa",
+        help_text="Substituirá o arquivo base atual para a procuração administrativa."
+    )
+    atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Última Atualização")
+    
+    def save(self, *args, **kwargs):
+        # Substituir o arquivo existente se for necessário
+        if self.pk:
+            old_instance = ProcuracaoAdministrativaModel.objects.get(pk=self.pk)
+            if old_instance.pdf_base and old_instance.pdf_base != self.pdf_base:
+                # Remove o arquivo anterior
+                if os.path.isfile(old_instance.pdf_base.path):
+                    os.remove(old_instance.pdf_base.path)
+
+        super().save(*args, **kwargs)
+        
+    def __str__(self):
+        return "Procuração Administrativa"
+
+
+class AutorizacaoDireitoImagemModel(models.Model):
+    pdf_base = models.FileField(
+        upload_to=uoload_to_autorizacao_direito_imagem,
+        verbose_name="PDF Base para Autorização de Direito de Imagem",
+        help_text="Substituirá o arquivo base atual para a autorização de direito de imagem."
+    )
+    atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Última Atualização")
+    
+    def save(self, *args, **kwargs):
+        # Substituir o arquivo existente se for necessário
+        if self.pk:
+            old_instance = AutorizacaoDireitoImagemModel.objects.get(pk=self.pk)
+            if old_instance.pdf_base and old_instance.pdf_base != self.pdf_base:
+                # Remove o arquivo anterior
+                if os.path.isfile(old_instance.pdf_base.path):
+                    os.remove(old_instance.pdf_base.path)
+
+        super().save(*args, **kwargs)
+        
+    def __str__(self):
+        return "Autorização de Direito de Imagem"
+
+class AutorizacaoAcessoGovModel(models.Model):
+    pdf_base = models.FileField(
+        upload_to=upload_to_autorizacao_acesso_gov,
+        verbose_name="PDF Base para Autorização de Acesso ao Gov",
+        help_text="Substituirá o arquivo base atual para a autorização de acesso ao Gov."
+    )
+    atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Última Atualização")
+    
+    def save(self, *args, **kwargs):
+        # Substituir o arquivo existente se for necessário
+        if self.pk:
+            old_instance = AutorizacaoAcessoGovModel.objects.get(pk=self.pk)
+            if old_instance.pdf_base and old_instance.pdf_base != self.pdf_base:
+                # Remove o arquivo anterior
+                if os.path.isfile(old_instance.pdf_base.path):
+                    os.remove(old_instance.pdf_base.path)
+
+        super().save(*args, **kwargs)
+        
+    def __str__(self):
+        return "Autorização de Acesso ao Gov"    
+    
+class DeclaracaoDesfiliacaoModel(models.Model):
+    pdf_base = models.FileField(
+        upload_to=upload_to_declaracao_desfiliacao,
+        verbose_name="PDF Base para Declaração de Desfiliação",
+        help_text="Substituirá o arquivo base atual para a declaração de desfiliação."
+    )
+    atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Última Atualização")
+    
+    def save(self, *args, **kwargs):
+        # Substituir o arquivo existente se for necessário
+        if self.pk:
+            old_instance = DeclaracaoDesfiliacaoModel.objects.get(pk=self.pk)
+            if old_instance.pdf_base and old_instance.pdf_base != self.pdf_base:
+                # Remove o arquivo anterior
+                if os.path.isfile(old_instance.pdf_base.path):
+                    os.remove(old_instance.pdf_base.path)
+
+        super().save(*args, **kwargs)
+        
+    def __str__(self):
+        return "Declaração de Desfiliação"

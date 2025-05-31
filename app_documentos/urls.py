@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import criar_copia_pdf
+from .views import criar_copia_pdf, download_documento
 
 from .views import (
     DocumentoUploadView,
@@ -21,4 +21,5 @@ urlpatterns = [
     path('detail/<int:pk>/', DocumentoDetailView.as_view(), name='documento_detail'),  # Detalhes do documento
     path('delete/<int:pk>/', DocumentoDeleteView.as_view(), name='delete_documento'),
     path('criar_pdf/<int:pk>/', criar_copia_pdf, name='criar_copia_pdf'),
-]
+    path('documento/<int:pk>/download/', download_documento, name='download_documento'),
+]    

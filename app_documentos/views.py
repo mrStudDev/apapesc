@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import Http404
+from django.http import Http404, FileResponse
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, View
@@ -116,7 +116,11 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
         elif isinstance(self.owner, ExtraAssociadoModel):
             return reverse('app_servicos:detail_extraassociado', kwargs={'pk': self.owner.pk})
         
-
+def download_documento(request, pk):
+    doc = get_object_or_404(Documento, pk=pk)
+    
+    # Certifique-se de que o campo 'arquivo' seja FileField ou equivalente
+    return FileResponse(doc.arquivo.open('rb'), as_attachment=True, filename=doc.arquivo.name.split('/')[-1])
 
 class TipoDocumentoCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = TipoDocumentoModel

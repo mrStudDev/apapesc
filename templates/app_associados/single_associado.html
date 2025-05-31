@@ -1481,8 +1481,6 @@
         </div>
     </div>
 
-
-
     <!-- Seção: Anotações -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <i class="material-icons text-gray-500" style="font-size: 24px;">notes</i>
@@ -1494,7 +1492,158 @@
 
     <!-- Seção: Documentos -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-base font-semibold text-gray-700 mb-4">Documentos do Associado</h2>
+        <h2 class="text-base font-semibold text-gray-700 mb-4">Geração de Declarações e Documentos</h2>
+        <p class="text-sm text-gray-600 mb-4">
+            Olá <strong>Integrante Apapesc</strong>! 👋 <br />
+            A partir deste cadastro, é possível gerar <strong>declarações, autorizações e procurações</strong> personalizadas automaticamente. 
+            em nome de <strong>{{ associado.user.get_full_name }}</strong>.
+
+            <br /><br />
+            ⚠️ <strong>Atenção:</strong> Para garantir a validade dos documentos gerados, verifique se todas as informações do seu cadastro estão preenchidas corretamente, como:
+            <ul class="list-disc list-inside text-sm mt-2 text-gray-700">
+                <li>Nome completo</li>
+                <li>CPF e RG</li>
+                <li>Endereço completo (logradouro, número, complemento, bairro, cidade, estado e CEP)</li>
+                <li>RGP (registro da pesca)</li>
+                <li>Produção, atividade econômica e vínculo</li>
+            </ul>
+
+            <br />
+            Caso algum campo obrigatório não esteja preenchido, o sistema pode inserir termos como <strong>"None"</strong> ou <strong>"Não declarado"</strong> nos documentos gerados — o que invalida ou compromete a sua utilização. 
+
+            <br /><br />
+            Recomendamos revisar cuidadosamente o documento após a geração e, se necessário, atualizar os dados no cadastro antes de emitir novamente.
+        </p>
+    <br>
+
+    <!-- Seção: Automação e Geração de Declarações-->
+    <div class="flex flex-col items-center space-y-6 mb-6">
+        <h2 class="text-2xl font-bold text-gray-700 mb-4">GERAR DECLARAÇÕES</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl">
+            <!-- Declaração de Filiação -->
+            <a href="{% url 'app_automacoes:gerar_declaracao_filiado' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-green-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Filiação Apapesc</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
+                </div>
+            </a>
+
+            <!-- Declaração de Atividade Pesqueira -->
+            <a href="{% url 'app_automacoes:gerar_declaracao_atividade_pesqueira' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-blue-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Atividade Pesqueira</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
+                </div>
+            </a>
+
+            <!-- Declaração de Residência -->
+            <a href="{% url 'app_automacoes:gerar_declaracao_residencia' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-yellow-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Residência</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
+                </div>
+            </a>
+
+            <!-- Declaração de Hipossuficiência -->
+            <a href="{% url 'app_automacoes:gerar_declaracao_hipo' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-purple-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Hipossuficiência</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
+                </div>
+            </a>
+
+            <!-- Declaração de Desfiliação-->
+            <a href="{% url 'app_automacoes:gerar_declaracao_desfiliacao' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-red-300 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Desfiliação</h3>
+                    <p class="text-sm text-gray-600 mt-2">Declaração de Dessfiliação Apapesc</p>
+                </div>
+            </a>              
+
+            <!-- Procuração Jurídica -->
+            <a href="{% url 'app_automacoes:gerar_procuracao_juridica' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-green-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Procuração Jurídica (Ad Judicia)</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a procuração.</p>
+                </div>
+            </a>
+
+            <!-- Procuração Administrativa -->
+            <a href="{% url 'app_automacoes:gerar_procuracao_administrativa' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-blue-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Procuração Administrativa</h3>
+                    <p class="text-sm text-gray-600 mt-2">Procuração para Representação em Órgẽos Governamentais</p>
+                </div>
+            </a>
+            <!-- Autorizacao_direitos Imagem -->
+            <a href="{% url 'app_automacoes:gerar_autorizacao_direitos_imagem' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-orange-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Autorização Uso e Direitos de Imagem</h3>
+                    <p class="text-sm text-gray-600 mt-2">Autorização de uso e direitos de imagem</p>
+                </div>
+            </a>
+            <!-- Autorizacao_Acesso COnta Gov-->
+            <a href="{% url 'app_automacoes:gerar_autorizacao_acesso_gov' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-yellow-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Autorização de Acesso Gov</h3>
+                    <p class="text-sm text-gray-600 mt-2">Autorização de acesso e Gestão da Conta Gov</p>
+                </div>
+            </a>
+
+            <!-- Carteirinha Apapesc-->
+            <a href="{% url 'app_automacoes:gerar_carteirinha_apapesc' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-blue-300 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Carteirinha Apapesc</h3>
+                    <p class="text-sm text-gray-600 mt-2">Clique para gerar a Carteirinha Apapesc</p>
+                </div>
+            </a>
+
+            <!-- Alguma Certificação -->
+            <a href="#"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-gray-200 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Aguardando</h3>
+                    <p class="text-sm text-gray-600 mt-2">O que eu posso gerar para você?</p>
+                </div>
+            </a>
+            <!-- Alguma Certificação -->
+            <a href="#"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-gray-200 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Aguardando</h3>
+                    <p class="text-sm text-gray-600 mt-2">O que eu posso gerar para você?</p>
+                </div>
+            </a>            
+        </div>
+    </div>    
+</div>
+
+    <!-- Seção: Documentos -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-4">Sessão de Documentos do Associado</h2>
     <p class="text-sm text-gray-600 mb-4">
         Para que o cadastro e a filiação estejam completos, os seguintes documentos são obrigatórios. 
         Por favor, confira se todos estão anexados, legíveis e atualizados.
@@ -1538,7 +1687,11 @@
             </ul>
         </div>
     </div>
-    </div>
+    <br>
+    <hr>
+    <br>
+
+
         {% if documentos %}
             <ul class="space-y-4">
                 {% for documento in documentos %}
@@ -1558,9 +1711,8 @@
 
                     <div class="flex items-center space-x-3">
                         <!-- Link para Download do Documento -->
-                        <a href="{% url 'app_documentos:download_documento' documento.id %}" 
-                        class="hover:text-green-500" 
-                        title="Baixar Documento">
+                        <a href="{{ documento.arquivo.url }}" download="declaracao_{{ documento.pk }}.pdf" class="hover:text-green-500" title="Baixar Documento">
+
                             <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
                         </a>
 
@@ -1583,87 +1735,6 @@
         {% else %}
             <p class="text-gray-600">Nenhum documento disponível para este associado.</p>
         {% endif %}
-    </div>
-
-    <!-- Seção: Automação e Geração de Declarações-->
-    <div class="flex flex-col items-center space-y-6 mb-6">
-        <h2 class="text-2xl font-bold text-gray-700 mb-4">GERAR DECLARAÇÕES</h2>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl">
-            <!-- Declaração de Filiação -->
-            <a href="{% url 'app_automacoes:gerar_declaracao_filiado' associado.id %}"
-               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
-                <div class="text-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Filiação</h3>
-                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
-                </div>
-            </a>
-
-            <!-- Declaração de Atividade Pesqueira -->
-            <a href="{% url 'app_automacoes:gerar_declaracao_atividade_pesqueira' associado.id %}"
-               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
-                <div class="text-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Atividade Pesqueira</h3>
-                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
-                </div>
-            </a>
-
-            <!-- Declaração de Residência -->
-            <a href="{% url 'app_automacoes:gerar_declaracao_residencia' associado.id %}"
-               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
-                <div class="text-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Residência</h3>
-                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
-                </div>
-            </a>
-
-            <!-- Declaração de Hipossuficiência -->
-            <a href="{% url 'app_automacoes:gerar_declaracao_hipo' associado.id %}"
-               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
-                <div class="text-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Declaração de Hipossuficiência</h3>
-                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a declaração.</p>
-                </div>
-            </a>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl">
-            <!-- Procuração Jurídica -->
-            <a href="{% url 'app_automacoes:gerar_procuracao_juridica' associado.id %}"
-               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
-                <div class="text-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Procuração Jurídica</h3>
-                    <p class="text-sm text-gray-600 mt-2">Clique aqui para gerar a procuração.</p>
-                </div>
-            </a>
-
-            <!-- Certificado de Registro-->
-            <a href="{% url 'app_automacoes:gerar_carteirinha_apapesc' associado.id %}"
-               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
-                <div class="text-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Carteirinha Apapesc</h3>
-                    <p class="text-sm text-gray-600 mt-2">Clique para gerar a Carteirinha Apapesc</p>
-                </div>
-            </a>
-            
-            <!-- Termo de Compromisso -->
-            <a href="#"
-               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
-                <div class="text-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Aguardando</h3>
-                    <p class="text-sm text-gray-600 mt-2">O que eu posso gerar para você?</p>
-                </div>
-            </a>
-
-            <!-- Alguma Certificação -->
-            <a href="#"
-               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
-                <div class="text-center">
-                    <h3 class="text-lg font-semibold text-gray-800">Aguardando</h3>
-                    <p class="text-sm text-gray-600 mt-2">O que eu posso gerar para você?</p>
-                </div>
-            </a>
-        </div>
     </div>
 
         <!-- Links de Ações -->
