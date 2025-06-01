@@ -247,11 +247,8 @@
 
             {% if associado.drive_folder_id %}
                 <div class="border border-gray-200 rounded-lg p-4 my-6 shadow-sm">
-                    <h3 class="text-blue-800 text-md font-semibold mb-2 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2L1.5 21h21L12 2zm0 3.3l7.53 13.2H4.47L12 5.3zM11 10v5h2v-5h-2zm0 6v2h2v-2h-2z"/>
-                        </svg>
-                        Pasta Drive - Documentos
+                    <h3 class="text-blue-950 text-md font-semibold mb-2 flex items-center">
+                        Upload e Pasta Drive
                     </h3>
                     <a href="https://drive.google.com/drive/folders/{{ associado.drive_folder_id }}"
                         target="_blank"
@@ -259,11 +256,18 @@
                         <img src="https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png"
                             alt="Google Drive"
                             class="w-6 h-6 mr-2">
-                        <span>Acessar documentos no Google Drive</span>
+                        <span>Acessar Pasta no Drive</span>
                     </a>
-                    <p class="text-sm text-gray-600 mt-1">Acesse os documentos do Associado no Drive.</p>
-                    <p class="text-sm text-gray-600 mt-1">A pasta é gerada automáticamente ao cadastrar um novo associado.</p>
-                    <a href="{% url 'app_documentos:upload_docs' associado.id %}">📤 Enviar documentos para {{ associado.user.get_full_name }}</a>
+                    <p class="text-xs text-gray-600 mt-1">Pasta criada automáticamente. Acesse a pasta ou faça upload de arquivos.</p>
+                    <br>
+                    <a href="{% url 'app_documentos:upload_docs' associado.id %}"
+                        class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        <svg class="w-5 h-5 mr-2 -ml-1 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Enviar documentos para pasta do Drive
+                    </a>
+
                 </div>
             {% else %}
                 <p><em>Nenhuma pasta associada.</em></p>
@@ -911,21 +915,35 @@
                     </div>
                 </div>
             </div>
-            {% if status_rg %}
-            {% with cor=status_rg.0 texto=status_rg.1 %}
-                {% if cor == 'vermelho' %}
-                <span class="bg-red-100 text-red-700">{{ texto }}</span>
-                {% elif cor == 'amarelo' %}
-                <span class="bg-yellow-100 text-yellow-700">{{ texto }}</span>
-                {% elif cor == 'verde' %}
-                <span class="bg-green-100 text-green-700">{{ texto }}</span>
+
+            <!--Controle de Validade RG-->
+            <div class="flex items-center space-x-3">
+                {% if status_rg %}
+                    {% with cor=status_rg.0 texto=status_rg.1 %}
+                        {% if cor == 'vermelho' %}
+                            <span class="inline-block px-2 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700">
+                                {{ texto }}
+                            </span>
+                        {% elif cor == 'amarelo' %}
+                            <span class="inline-block px-2 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-700">
+                                {{ texto }}
+                            </span>
+                        {% elif cor == 'verde' %}
+                            <span class="inline-block px-2 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
+                                {{ texto }}
+                            </span>
+                        {% else %}
+                            <span class="inline-block px-2 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+                                {{ texto }}
+                            </span>
+                        {% endif %}
+                    {% endwith %}
                 {% else %}
-                <span class="bg-gray-100 text-gray-700">{{ texto }}</span>
+                    <span class="inline-block px-2 py-1 rounded-full text-sm font-medium text-gray-500 bg-gray-100">
+                        Sem informação sobre o RG
+                    </span>
                 {% endif %}
-            {% endwith %}
-            {% else %}
-            <span class="text-gray-400">Sem informação sobre o RG</span>
-            {% endif %}
+            </div>
 
             <!-- Naturalidade -->
             <div class="flex items-center space-x-3">
@@ -959,11 +977,9 @@
             </div>
         </div>
     </div>
-
-
-    <!-- Seção: Documentos Cidadão -->
+    <!--Sessão questionario recebe INSS, BENFICIO< BOLSA, -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentos do Cidadão</h2>
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Participações</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
         <!-- Recolhe INSS -->
@@ -1028,8 +1044,81 @@
             </div>
         </div>
 
+        <!-- Comercializa Produtos -->
+        <div class="flex items-center space-x-3">
+            <i class="material-icons 
+                {% if associado.comercializa_produtos == 'Sim' %}
+                    text-green-500
+                {% elif associado.comercializa_produtos == 'Não' %}
+                    text-red-500
+                {% else %}
+                    text-gray-500
+                {% endif %}
+            " style="font-size: 24px;">storefront</i>
+            <div>
+                <strong class="text-gray-700">Comercializa Produtos:</strong>
+                <div class="mt-1 text-sm">
+                    {% if associado.comercializa_produtos == 'Sim' %}
+                        <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Sim</span>
+                    {% elif associado.comercializa_produtos == 'Não' %}
+                        <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Não</span>
+                    {% else %}
+                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
+        <!-- Bolsa Família -->
+        <div class="flex items-center space-x-3">
+            <i class="material-icons 
+                {% if associado.bolsa_familia == 'Já recebeu' %}
+                    text-green-500
+                {% elif associado.bolsa_familia == 'Nunca recebeu' %}
+                    text-red-500
+                {% else %}
+                    text-gray-500
+                {% endif %}
+            " style="font-size: 24px;">payments</i>
+            <div>
+                <strong class="text-gray-700">Bolsa Família:</strong>
+                <div class="mt-1 text-sm">
+                    {% if associado.bolsa_familia == 'Já recebeu' %}
+                        <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Já recebeu</span>
+                    {% elif associado.bolsa_familia == 'Nunca recebeu' %}
+                        <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Nunca recebeu</span>
+                    {% else %}
+                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
+        <!-- Relação de Trabalho -->
+        <div class="flex items-center space-x-3">
+            <i class="material-icons text-gray-500" style="font-size: 24px;">work</i>
+            <div>
+                <strong class="text-gray-700">Relação de Trabalho:</strong>
+                <div class="mt-1 text-sm">
+                    {% if associado.relacao_trabalho %}
+                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-blue-500 font-medium">
+                            {{ associado.relacao_trabalho }}
+                        </span>
+                    {% else %}
+                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                            Não declarado
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Seção: Documentos Cidadão -->
+    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentos do Cidadão</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <!-- NIT -->
             <div class="flex items-center space-x-3">
                 <i class="material-icons text-yellow-500" style="font-size: 24px;">account_balance_wallet</i>
@@ -1688,57 +1777,48 @@
     </div>    
 </div>
 
-    <!-- Seção: Documentos -->
-    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-        <h2 class="text-base font-semibold text-gray-700 mb-4">Sessão de Documentos do Associado</h2>
-    <p class="text-sm text-gray-600 mb-4">
+<!-- Seção: Documentos -->
+<div class="bg-white p-6 rounded-lg shadow-md mb-6">
+    <h2 class="text-base font-semibold text-gray-700 mb-4">📄 Sessão de Documentos do Associado</h2>
+    
+    <p class="text-sm text-gray-600 mb-6">
         Para que o cadastro e a filiação estejam completos, os seguintes documentos são obrigatórios. 
-        Por favor, confira se todos estão anexados, legíveis e atualizados.
-
+        Por favor, confira se todos estão anexados, legíveis e atualizados. <br>
         Esses são documentos <strong>essenciais</strong> para futuros processos, como a solicitação de benefícios e emissão de documentos.
     </p>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 text-sm text-gray-700">
-        <div>
-            <ul class="list-disc list-inside">
-                <li>Ficha de Requerimento de Filiação</li>
-                <li>Procuração Individual</li>
-                <li>Declaração de Uso de Imagem</li>
-                <li>Declaração de Autorização de Acesso Gov</li>
-                <li>RG</li>
-            </ul>
-        </div>
-        <div>
-            <ul class="list-disc list-inside">
-                <li>CNH</li>
-                <li>NIT</li>
-                <li>CEI</li>
-                <li>CAEPF</li>
-                <li>Título de Eleitor</li>
-            </ul>
-        </div>
-        <div>
-            <ul class="list-disc list-inside">
-                <li>Comprovante de Residência</li>
-                <li>Declaração de Residência (Modelo MAPA)</li>
-                <li>Foto 3x4</li>
-                <li>RGP</li>
-            </ul>
-        </div>
-                <div>
-            <ul class="list-disc list-inside">
-                <li class="font-medium text-blue-700">Para Caso de Embarcação:</li>
-                <li class="ml-4">TIE</li>
-                <li class="ml-4">Licença de Pesca</li>
-                <li class="ml-4">Seguro DPEM</li>
-            </ul>
-        </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-sm text-gray-700">
+        <!-- Coluna 1 -->
+        <ul class="list-disc list-inside space-y-1">
+            <li>RG</li>
+            <li>CPF</li>
+            <li>CNH</li>
+            <li>NIT</li>
+            <li>CEI</li>
+            <li>CAEPF</li>
+            <li>Título de Eleitor</li>                
+            <li>RGP</li>
+            <li>Comprovante de Residência</li>
+            <li>Declaração de Residência (Modelo MAPA)</li>
+        </ul>
+
+        <!-- Coluna 2 -->
+        <ul class="list-disc list-inside space-y-1">
+            <li>Ficha de Requerimento de Filiação Assinada</li>
+            <li>Procuração Individual Assinada</li>
+            <li>Declaração de Uso de Imagem Assinada</li>
+            <li>Declaração de Autorização de Acesso Gov Assinada</li>
+            <li>Comprovante Seguro Defeso (último protocolado)</li>
+            <li>Foto 3x4</li>
+            <li class="font-medium text-blue-700">Para Caso de Embarcação:</li>
+            <li class="ml-4">TIE</li>
+            <li class="ml-4">Licença de Pesca</li>
+            <li class="ml-4">Seguro DPEM</li>
+        </ul>
     </div>
-    <br>
-    <hr>
-    <br>
-
-
+</div>
+<br>
+    <div class="items-center space-y-6 mb-6">
         {% if documentos %}
             <ul class="space-y-4">
                 {% for documento in documentos %}
@@ -1760,7 +1840,7 @@
                         <!-- Link para Download do Documento -->
                         <a href="{% url 'app_documentos:download_documento' documento.pk %}" class="hover:text-green-500" title="Baixar Documento">
 
-                            <i class="material-icons" style="font-size: 20px; color:gray;">cloud_download</i>
+                            <i class="material-icons" style="font-size: 20px; color:green;">cloud_download</i>
                         </a>
 
                         <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
@@ -1782,7 +1862,7 @@
         {% else %}
             <p class="text-gray-600">Nenhum documento disponível para este associado.</p>
         {% endif %}
-    </div>
+
 
         <!-- Links de Ações -->
         <div class="flex justify-center space-x-2 mb-4">
@@ -1793,7 +1873,7 @@
                 <i class="material-icons" style="font-size: 24px; color:blue">list</i>
                 <span class="sr-only">Lista</span> Lista
             </a>
-    
+
             <!-- Botão Editar -->
             <a href="{% url 'app_associados:edit_associado' associado.pk %}"
             class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400"
@@ -1801,7 +1881,7 @@
                 <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
                 <span class="sr-only">Editar</span> Editar
             </a>
-    
+
             <!-- Botão Upload -->
             <a href="{% url 'app_documentos:upload_documento' 'associado' associado.pk %}"
             class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400"
@@ -1812,7 +1892,6 @@
         </div>
     </div>
 </div>
-
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}
 <script src="{% static 'js/copy_to_clipboard.js' %}"></script>
