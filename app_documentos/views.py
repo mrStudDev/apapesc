@@ -508,9 +508,9 @@ def upload_docs_view(request, associado_id):
                 messages.error(request, f"Erro ao enviar '{arquivo.name}': {str(e)}")
 
         messages.success(request, f"{enviados} documento(s) enviados com sucesso ao Google Drive.")
-        return redirect('associado_detail', pk=associado_id)
+        return redirect('app_associados:single_associado', pk=associado_id)
 
-    return render(request, 'associados/upload_docs.html', {
+    return render(request, 'app_documentos/upload_to_drive.html', {
         'associado': associado,
         'tipos_documento': tipos_documento
     })
