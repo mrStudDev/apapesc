@@ -85,6 +85,7 @@
             <span class="sr-only">Upload</span> Upload Doc
         </a>
     </div>
+
     <!-- Seção: Vinculos do Associaso -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Detalhes da Filiação</h2>
@@ -188,7 +189,8 @@
                         </div>
                     {% else %}
                         <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
-                            <p class="text-green-700 font-semibold">🎉 Anuidade já aplicada com sucesso!</p>
+                            <h3 class="text-lg font-semibold mb-2 text-green-700">🎉 Anuidade já aplicada com sucesso!</h3>
+                            <li class="text-sm text-gray-600 mt-1">Futuros lançamentos serão automaticamente computados.</li>
                         </div>
                     {% endif %}
                 {% endif %}
@@ -240,61 +242,45 @@
                 </div>
             {% endif %}
         </div>
-        <br>
-        {% if associado.drive_folder_id %}
-        <p><strong>Pasta Drive - Documentos:</strong> 
-            <a href="https://drive.google.com/drive/folders/{{ associado.drive_folder_id }}" 
-               target="_blank" 
-               class="text-blue-500 hover:underline flex items-center space-x-2 py-2">
-                <img src="https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png" alt="Drive" class="w-6 h-6">
-                <span>Acessar documentos no Google Drive</span>
-            </a>
-        </p>
-    {% else %}
-        <p><em>Nenhuma pasta associada.</em></p>
-    {% endif %}
-    </div>
 
-    {% if beneficios_aplicados %}
-    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg shadow mb-6">
-      <h3 class="text-lg font-semibold text-yellow-700 mb-3">✅ Benefício aplicado</h3>
-  
-      <ul class="divide-y divide-green-100 text-sm text-gray-800">
-        {% for beneficio in beneficios_aplicados %}
-          {% get_controle beneficio associado as controle %}
-          <li class="flex justify-between items-center py-2">
-            <!-- Info do benefício -->
-            <div>
-              <div class="font-medium">
-                {{ beneficio.get_nome_display }} ({{ beneficio.ano_concessao }}/{{ beneficio.estado }})
-              </div>
-              <div class="text-xs text-gray-500">
-                Aplicado até {{ beneficio.data_fim|date:"d/m/Y" }}
-              </div>
-  
-              {% if controle %}
-                <div class="mt-1">
-                  <p class="inline-block text-yellow-800 font-bold px-2 py-0.5 rounded">
-                    {{ controle.get_status_pedido_display }}
-                  </p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            {% if associado.drive_folder_id %}
+                <div class="border border-gray-200 rounded-lg p-4 my-6 shadow-sm">
+                    <h3 class="text-blue-800 text-md font-semibold mb-2 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2L1.5 21h21L12 2zm0 3.3l7.53 13.2H4.47L12 5.3zM11 10v5h2v-5h-2zm0 6v2h2v-2h-2z"/>
+                        </svg>
+                        Pasta Drive - Documentos
+                    </h3>
+                    <a href="https://drive.google.com/drive/folders/{{ associado.drive_folder_id }}"
+                        target="_blank"
+                        class="flex items-center text-blue-600 hover:underline font-medium">
+                        <img src="https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png"
+                            alt="Google Drive"
+                            class="w-6 h-6 mr-2">
+                        <span>Acessar documentos no Google Drive</span>
+                    </a>
+                    <p class="text-sm text-gray-600 mt-1">Acesse os documentos do Associado no Drive.</p>
+                    <p class="text-sm text-gray-600 mt-1">A pasta é gerada automáticamente ao cadastrar um novo associado.</p>
                 </div>
-              {% endif %}
-            </div>
-  
-            <!-- Botão de Ação -->
-            {% if controle %}
-              <a href="{% url 'app_beneficios:controle_detalhe' controle.id %}"
-                 class="inline-flex items-center px-3 py-1 text-xs text-blue-700 hover:text-blue-900 bg-yellow-100 border border-blue-200 rounded-lg hover:bg-blue-50 transition ml-2">
-                <i class="material-icons text-sm mr-1">visibility</i>
-                Ver
-              </a>
+            {% else %}
+                <p><em>Nenhuma pasta associada.</em></p>
             {% endif %}
-          </li>
-        {% endfor %}
-      </ul>
+
+            <!--Barra de Progrsso do Cadastro-->
+            <div class="border border-gray-200 rounded-lg p-4 my-6 shadow-sm">
+                <div class="my-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Progresso do Cadastro</h3>
+                    <div class="w-full bg-yellow-200  rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: {{ progresso_cadastro }}%;"></div>
+                    </div>
+                    <p class="text-sm text-gray-600 mt-1">{{ progresso_cadastro }}% completo</p>
+                    <p class="text-sm text-gray-600 mt-1">Não estão nessa contagem os campos: CNH, CTPS; e Espécies</p>
+                </div>
+            </div>
+        </div>
     </div>
-  {% endif %}
-  
 
     <!-- Seção: Informações Pessoais -->
     <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
@@ -478,6 +464,58 @@
         </div>
     </div>
     <br>
+    
+    <!--Benefício - Seguro Defeso -->
+    {% if beneficios_aplicados %}
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-5 rounded-lg shadow-lg mb-8">
+        <!-- Título e subtítulo -->
+        <div class="flex items-center justify-between mb-4">
+        <div>
+            <h3 class="text-lg font-bold text-yellow-800">🎣 Benefício de Seguro Defeso Aplicado</h3>
+            <p class="text-sm text-yellow-700 mt-1">
+            Você pode <strong>visualizar o painel de lançamento</strong> e <strong>editar as peculiaridades do processo</strong> clicando abaixo 👇
+            </p>
+        </div>
+        </div>
+
+        <!-- Lista dos benefícios -->
+        <ul class="divide-y divide-yellow-200 text-sm text-gray-800">
+        {% for beneficio in beneficios_aplicados %}
+            {% get_controle beneficio associado as controle %}
+            <li class="py-3">
+            <div class="flex justify-between items-start">
+                <!-- Info do benefício -->
+                <div>
+                <p class="font-semibold">
+                    {{ beneficio.get_nome_display }} — <span class="text-gray-500">{{ beneficio.ano_concessao }}/{{ beneficio.estado }}</span>
+                </p>
+                <p class="text-xs text-gray-500 mt-1">
+                    Vigência até <strong>{{ beneficio.data_fim|date:"d/m/Y" }}</strong>
+                </p>
+
+                {% if controle %}
+                    <span class="inline-block mt-2 text-xs font-medium text-yellow-800 bg-yellow-200 px-2 py-1 rounded">
+                    {{ controle.get_status_pedido_display }}
+                    </span>
+                {% endif %}
+                </div>
+
+                <!-- Botão de ação -->
+                {% if controle %}
+                <a href="{% url 'app_beneficios:controle_detalhe' controle.id %}"
+                    class="inline-flex items-center px-3 py-1 text-xs text-blue-700 hover:text-blue-900 bg-blue-100 border border-blue-200 rounded-md hover:bg-blue-200 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Visualizar
+                </a>
+                {% endif %}
+            </div>
+            </li>
+        {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
 
     <section class="mb-10">
         <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-green-600">

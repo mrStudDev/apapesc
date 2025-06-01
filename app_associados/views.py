@@ -502,10 +502,10 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
 
         context['beneficios_disponiveis'] = beneficios_disponiveis
         context['beneficios_aplicados'] = beneficios_aplicados
+        # Barra de Progresso Cadastro
+        context['progresso_cadastro'] = associado.calcular_progresso_cadastro()
         
         # Anuidades aplicadas
-
-
         anuidades_aplicadas = AnuidadeAssociado.objects.filter(associado=associado)
 
         total_pago = anuidades_aplicadas.aggregate(total=Sum('valor_pago'))['total'] or Decimal('0.00')

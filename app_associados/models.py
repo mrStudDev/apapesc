@@ -692,4 +692,30 @@ class AssociadoModel(models.Model):
         return f"Associado {self.user} (filiado em {self.data_filiacao})"
 
 
+    def calcular_progresso_cadastro(self):
+        campos = [
+            'cpf', 'senha_gov', 'celular', 'celular_correspondencia', 'email',
+            'senha_google', 'senha_site', 'foto', 'sexo_biologico', 'etnia',
+            'escolaridade', 'nome_mae', 'nome_pai', 'estado_civil', 'profissao',
+            'recolhe_inss', 'recebe_seguro', 'relacao_trabalho',
+            'comercializa_produtos', 'bolsa_familia', 'rg_numero', 'rg_orgao',
+            'rg_data_emissao', 'naturalidade', 'data_nascimento', 'nit', 'pis',
+            'titulo_eleitor', 'caepef', 'cei', 'rgp', 'rgp_data_emissao',
+            'primeiro_registro', 'rgp_mpa', 'logradouro', 'bairro', 'numero',
+            'complemento', 'cep', 'municipio', 'uf', 'associacao', 'reparticao',
+            'municipio_circunscricao', 'data_filiacao'
+        ]
 
+        NAO_DECLARADO = ['Não declarado', None, '', 'nao_declarado', 'não_declarado']
+        total = len(campos)
+        preenchidos = 0
+
+        for campo in campos:
+            valor = getattr(self, campo, None)
+
+            # Checa se é um valor considerado "vazio"
+            if valor and str(valor).strip() not in NAO_DECLARADO:
+                preenchidos += 1
+
+        percentual = int((preenchidos / total) * 100)
+        return percentual
