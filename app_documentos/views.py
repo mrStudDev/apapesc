@@ -489,28 +489,28 @@ def upload_docs_view(request, associado_id):
             upload = UpDocDriveModel.objects.create(
                 associado=associado,
                 tipo_documento=tipo,
-                arquivo=arquivo  # Isso salva o arquivo em MEDIA/temp_docs/
+                arquivo=arquivo
             )
 
-            # Monta nome final
+            # Nome final
             nome_extensao = os.path.splitext(arquivo.name)[-1]
             nome_final = f"{tipo.tipo} - {associado.user.get_full_name()} - {now().strftime('%Y-%m-%d_%H-%M')}{nome_extensao}"
             upload.nome_final = nome_final
             upload.save()
 
-            # Caminho absoluto do arquivo salvo
-            local_path = upload.arquivo.path
+            # Corrigir o ID da pasta
+            folder_id = associado.drive_folder_id.split('?')[0]
 
             try:
-                upload_to_drive(local_path, nome_final, associado.drive_folder_id)
+                upload_to_drive(upload.arquivo.path, nome_final, folder_id)
                 enviados += 1
             except Exception as e:
                 messages.error(request, f"Erro ao enviar '{arquivo.name}': {str(e)}")
 
         messages.success(request, f"{enviados} documento(s) enviados com sucesso ao Google Drive.")
-        return redirect('app_associados:single_associado', pk=associado_id)
+        return redirect('associado_detail', pk=associado_id)
 
-    return render(request, 'app_documentos/upload_to_drive.html', {
+    return render(request, 'associados/upload_docs.html', {
         'associado': associado,
         'tipos_documento': tipos_documento
     })
