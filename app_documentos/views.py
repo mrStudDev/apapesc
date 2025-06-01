@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404
 from django.views.generic import CreateView, ListView, DetailView, UpdateView, View
 from accounts.mixins import GroupPermissionRequiredMixin 
 from django.contrib.auth.mixins import LoginRequiredMixin
-from .models import Documento, TipoDocumentoModel
+from .models import Documento, TipoDocumentoModel, UpDocDriveModel
 from app_associados.models import AssociadoModel
 from app_associacao.models import IntegrantesModel, AssociacaoModel, ReparticoesModel
 from app_servicos.models import ServicoExtraAssociadoModel, ExtraAssociadoModel
@@ -26,14 +26,16 @@ from reportlab.lib.pagesizes import A4
 from PIL import Image
 from django.contrib import messages
 from django.utils import timezone
+from django.utils.timezone import now
 import datetime
 from django.utils.translation import gettext_lazy as _
 from django.utils.text import slugify
 from django.utils.encoding import smart_str
 import mimetypes
-
-
+from .google_drive_integration import upload_to_drive
 # Create your views here.
+
+
 
 class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = Documento
@@ -464,3 +466,51 @@ def criar_copia_pdf(request, pk):
     except Exception as e:
         messages.error(request, f'Erro ao criar a cópia do documento: {str(e)}')
         return redirect(request.META.get('HTTP_REFERER', '/'))
+
+#================================================================================
+
+
+# app_documentos
+# UPLOAD TO DRIVE FOLDER
+def upload_docs_view(request, associado_id):
+    associado = get_object_or_404(AssociadoModel, id=associado_id)
+    tipos_documento = TipoDocumentoModel.objects.all()
+
+    if request.method == 'POST':
+        arquivos = request.FILES.getlist('arquivo')
+        tipos = request.POST.getlist('tipo_documento')
+        enviados = 0
+
+        for i, arquivo in enumerate(arquivos):
+            tipo_id = tipos[i]
+            tipo = TipoDocumentoModel.objects.get(id=tipo_id)
+
+            # Criar entrada temporária no banco
+            upload = UpDocDriveModel.objects.create(
+                associado=associado,
+                tipo_documento=tipo,
+                arquivo=arquivo  # Isso salva o arquivo em MEDIA/temp_docs/
+            )
+
+            # Monta nome final
+            nome_extensao = os.path.splitext(arquivo.name)[-1]
+            nome_final = f"{tipo.tipo} - {associado.user.get_full_name()} - {now().strftime('%Y-%m-%d_%H-%M')}{nome_extensao}"
+            upload.nome_final = nome_final
+            upload.save()
+
+            # Caminho absoluto do arquivo salvo
+            local_path = upload.arquivo.path
+
+            try:
+                upload_to_drive(local_path, nome_final, associado.drive_folder_id)
+                enviados += 1
+            except Exception as e:
+                messages.error(request, f"Erro ao enviar '{arquivo.name}': {str(e)}")
+
+        messages.success(request, f"{enviados} documento(s) enviados com sucesso ao Google Drive.")
+        return redirect('app_associados:single_associado', pk=associado_id)
+
+    return render(request, 'app_documentos/upload_to_drive.html', {
+        'associado': associado,
+        'tipos_documento': tipos_documento
+    })

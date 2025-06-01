@@ -1,5 +1,5 @@
 from django import forms
-from .models import Documento, TipoDocumentoModel
+from .models import Documento, TipoDocumentoModel, UpDocDriveModel
 from app_associados.models import AssociadoModel
 from app_associacao.models import IntegrantesModel
 
@@ -47,4 +47,18 @@ class TipoDocumentoForm(forms.ModelForm):
             }),
 
         }            
-        
+
+
+# UPLOADS TO DRIVE FOLDER
+class UpDocDriveForm(forms.ModelForm):
+    class Meta:
+        model = UpDocDriveModel
+        fields = ['tipo_documento', 'arquivo']
+        widgets = {
+            'tipo_documento': forms.Select(attrs={
+                'class': 'mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-500 focus:ring-opacity-50'
+            }),
+            'arquivo': forms.ClearableFileInput(attrs={
+                'class': 'block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500'
+            }),
+        }

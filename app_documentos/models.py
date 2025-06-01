@@ -3,7 +3,7 @@ from django.utils import timezone
 from app_associados.models import AssociadoModel
 from app_tarefas.models import TarefaModel
 from app_servicos.models import ExtraAssociadoModel
-
+from datetime import datetime
 
 
 class TipoDocumentoModel(models.Model):
@@ -126,3 +126,19 @@ class Documento(models.Model):
         else:
             return f"{self.nome} - Sem proprietário definido"
 
+
+
+# UPLOADS TO DRIVE ASSOCIADOS FOLDER
+# app_documentos/models.py
+
+class UpDocDriveModel(models.Model):
+    associado = models.ForeignKey(AssociadoModel, on_delete=models.CASCADE, related_name='upload_drivefolder')
+    tipo_documento = models.ForeignKey('TipoDocumentoModel', on_delete=models.PROTECT)
+    arquivo = models.FileField(upload_to='temp_docs/')  # Pasta temporária
+    nome_final = models.CharField(max_length=500, blank=True)
+    data_envio = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if not self.nome_final:
+            self.nome_final = f"{self.tipo_documento.tipo} - {self.associado.user.get_full_name()} - {datetime.now().strftime('%Y-%m-%d_%H-%M')}"
+        super().save(*args, **kwargs)

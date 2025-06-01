@@ -263,6 +263,7 @@
                     </a>
                     <p class="text-sm text-gray-600 mt-1">Acesse os documentos do Associado no Drive.</p>
                     <p class="text-sm text-gray-600 mt-1">A pasta é gerada automáticamente ao cadastrar um novo associado.</p>
+                    <a href="{% url 'app_documentos:upload_docs' associado.id %}">📤 Enviar documentos para {{ associado.user.get_full_name }}</a>
                 </div>
             {% else %}
                 <p><em>Nenhuma pasta associada.</em></p>
