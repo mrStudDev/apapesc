@@ -286,10 +286,11 @@
                 ✅ Salvar e Próxima Tarefa
             </button>
 
-            <a href="{% url 'app_tarefas:gerar_tarefa_massa' %}"
-                class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
+            <input type="hidden" name="rodada_id" value="{{ rodada_id }}">
+            <button type="submit" name="acao" value="pausar"
+                    class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
                 ⏹️ Pausar e Voltar
-            </a>
+            </button>
 
             {% else %}
             {# Fora de rodada, botão padrão de salvar #}

@@ -251,7 +251,7 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
                         tarefa=tarefa,
                         rodada=rodada
                     )
-
+                        
                     if proc.status == 'em_processamento' and proc.processado_por != request.user:
                         messages.warning(request, "Essa tarefa já está sendo processada por outro usuário.")
                         return redirect('app_tarefas:gerar_tarefa_massa')
@@ -270,7 +270,26 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
 
 
     def post(self, request, pk):
-        tarefa = get_object_or_404(TarefaModel, pk=pk)
+        tarefa = get_object_or_404(TarefaModel, pk=pk)  # <- TEM que vir aqui antes de tudo!
+
+        # ✅ PAUSAR a tarefa e voltar
+        if request.POST.get("acao") == "pausar":
+            rodada_id = request.POST.get("rodada_id")
+            if rodada_id:
+                try:
+                    rodada = RodadaProcessamentoTarefaMassa.objects.get(pk=rodada_id)
+                    proc = ProcessamentoTarefaMassa.objects.get(tarefa=tarefa, rodada=rodada)
+
+                    if proc.status == 'em_processamento' and proc.processado_por == request.user:
+                        proc.status = 'nao_processada'
+                        proc.processado_por = None
+                        proc.iniciado_em = None
+                        proc.save()
+                        messages.info(request, "Tarefa pausada com sucesso.")
+                except Exception as e:
+                    messages.warning(request, f"Erro ao tentar pausar a tarefa: {str(e)}")
+
+            return redirect('app_tarefas:gerar_tarefa_massa')
 
         # Atualizar responsáveis
         if 'responsaveis' in request.POST:
@@ -648,7 +667,9 @@ class GerarTarefaMassaView(View):
         if 'confirmado' in request.POST:
             # Segundo POST — gerar tarefas de fato
             tipo = request.POST.get('tipo')
-            associados = AssociadoModel.objects.filter(status="Associado Lista Ativo(a)")
+            associados = AssociadoModel.objects.filter(
+                status__in=["Associado Lista Ativo(a)", "Associado Lista Aposentado(a)"]
+            )
             tarefas_criadas = []
 
             lancamento = TarefaMassaModel.objects.create(
@@ -687,7 +708,9 @@ class GerarTarefaMassaView(View):
             form = TarefaMassaForm(request.POST)
             if form.is_valid():
                 tipo = form.cleaned_data['tipo']
-                associados = AssociadoModel.objects.filter(status="Associado Lista Ativo(a)")
+                associados = AssociadoModel.objects.filter(
+                    status__in=["Associado Lista Ativo(a)", "Associado Lista Aposentado(a)"]
+                )
                 return render(request, self.confirm_template, {
                     'tipo': tipo,
                     'total': associados.count()
@@ -859,7 +882,6 @@ class IniciarRodadaProcessamentoView(LoginRequiredMixin, View):
         return redirect('app_tarefas:gerar_tarefa_massa')
 
 
-# views.py
 
 class ProcessarProximaTarefaView(LoginRequiredMixin, View):
     def get(self, request, rodada_id):
@@ -891,6 +913,7 @@ class ProcessarProximaTarefaView(LoginRequiredMixin, View):
             print(f"❌ Erro ao processar tarefa: {str(e)}")
             messages.error(request, "Erro ao acessar próxima tarefa.")
             return redirect('app_tarefas:gerar_tarefa_massa')
+
 
 # Deletar tarefas em massa
 class TarefaMassaDeleteView(LoginRequiredMixin, DeleteView):

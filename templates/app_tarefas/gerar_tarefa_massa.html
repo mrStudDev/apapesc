@@ -28,7 +28,26 @@
     <div class="container mx-auto py-6 px-4 max-w-3xl">
         <!-- Título -->
         <h2 class="text-xl font-bold mb-4">Gerar Tarefas em Massa</h2>
-    
+            {% if messages %}
+        <div class="mb-4">
+            {% for message in messages %}
+                <div class="p-4 rounded-md text-white 
+                    {% if message.tags == 'success' %}
+                        bg-green-500
+                    {% elif message.tags == 'error' %}
+                        bg-red-500
+                    {% elif message.tags == 'info' %}
+                        bg-blue-500
+                    {% else %}
+                        bg-gray-500
+                    {% endif %}
+                ">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         <!-- Card Principal -->
         <div class="bg-white p-8 rounded-xl shadow-lg">
             <div class="text-center">
@@ -66,42 +85,42 @@
                 </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
-{% for item in historico %}
-<tr>
-    <td class="px-4 py-2 text-sm">{{ item.get_tipo_display }}</td>
-    <td class="px-4 py-2 text-sm">{{ item.criado_em|date:"d/m/Y H:i" }}</td>
-    <td class="px-4 py-2 text-sm">
-        {{ item.criado_por.get_full_name|default:"(Usuário Removido)" }}
-    </td>
-    <td class="px-4 py-2 text-sm">
-        {{ item.total_geradas }}<br>
-        ✅ Concluídas: {{ item.total_concluidas }}<br>
-        🕐 Pendentes: {{ item.total_pendentes }}
-    </td>
-    <td>
-        {% if item.ultima_rodada and not item.tem_tarefa_nao_concluida %}
-            <span class="text-gray-500 text-sm">✅ Rodada Finalizada</span><br>
-            <form method="post" action="{% url 'app_tarefas:iniciar_rodada_processamento' item.id %}">
-                {% csrf_token %}
-                <button type="submit" class="text-blue-600 hover:underline">♻️ Nova Rodada</button>
-            </form>
-        {% elif item.tem_tarefa_nao_concluida %}
-            <a href="{% url 'app_tarefas:processar_proxima_tarefa' item.ultima_rodada.id %}" class="text-green-600 hover:underline">
-                ▶️ Processar Próxima
-            </a>
-        {% else %}
-            <form method="post" action="{% url 'app_tarefas:iniciar_rodada_processamento' item.id %}">
-                {% csrf_token %}
-                <button type="submit" class="text-blue-600 hover:underline">🚀 Iniciar Rodada</button>
-            </form>
-        {% endif %}
-        <a href="{% url 'app_tarefas:delete_tarefa_massa' item.id %}" class="text-red-600 hover:underline">
-            🗑️ Deletar
-        </a>
+                {% for item in historico %}
+                <tr>
+                    <td class="px-4 py-2 text-sm">{{ item.get_tipo_display }}</td>
+                    <td class="px-4 py-2 text-sm">{{ item.criado_em|date:"d/m/Y H:i" }}</td>
+                    <td class="px-4 py-2 text-sm">
+                        {{ item.criado_por.get_full_name|default:"(Usuário Removido)" }}
+                    </td>
+                    <td class="px-4 py-2 text-sm">
+                        {{ item.total_geradas }}<br>
+                        ✅ Concluídas: {{ item.total_concluidas }}<br>
+                        🕐 Pendentes: {{ item.total_pendentes }}
+                    </td>
+                    <td>
+                        {% if item.ultima_rodada and not item.tem_tarefa_nao_concluida %}
+                            <span class="text-gray-500 text-sm">✅ Rodada Finalizada</span><br>
+                            <form method="post" action="{% url 'app_tarefas:iniciar_rodada_processamento' item.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="text-blue-600 hover:underline">♻️ Nova Rodada</button>
+                            </form>
+                        {% elif item.tem_tarefa_nao_concluida %}
+                            <a href="{% url 'app_tarefas:processar_proxima_tarefa' item.ultima_rodada.id %}" class="text-green-600 hover:underline">
+                                ▶️ Processar Próxima
+                            </a>
+                        {% else %}
+                            <form method="post" action="{% url 'app_tarefas:iniciar_rodada_processamento' item.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="text-blue-600 hover:underline">🚀 Iniciar Rodada</button>
+                            </form>
+                        {% endif %}
+                        <a href="{% url 'app_tarefas:delete_tarefa_massa' item.id %}" class="text-red-600 hover:underline">
+                            🗑️ Deletar
+                        </a>
 
-    </td>
-</tr>
-{% endfor %}
+                    </td>
+                </tr>
+                {% endfor %}
 
 
 

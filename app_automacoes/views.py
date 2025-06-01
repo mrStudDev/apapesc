@@ -8,7 +8,7 @@ from pdfrw import PdfReader, PdfWriter, PageMerge
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib import colors
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Frame
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Frame, PageBreak
 from io import BytesIO
 from datetime import datetime
 import os
@@ -47,6 +47,7 @@ from .models import (
     AutorizacaoDireitoImagemModel,
     AutorizacaoAcessoGovModel,
     DeclaracaoDesfiliacaoModel,
+    DireitosDeveres,
     )
 
 # Deletes
@@ -65,6 +66,7 @@ MODELO_MAP = {
     'autorizacao_direito_imagem': AutorizacaoDireitoImagemModel,
     'autorizacao_acesso_gov': AutorizacaoAcessoGovModel,
     'declaracao_desfiliacao': DeclaracaoDesfiliacaoModel,
+    'direitos_deveres':DireitosDeveres
 
 }
 
@@ -107,6 +109,7 @@ def upload_pdf_base(request, automacao):
         'autorizacao_direito_imagem': AutorizacaoDireitoImagemModel,
         'autorizacao_acesso_gov': AutorizacaoAcessoGovModel,
         'declaracao_desfiliacao': DeclaracaoDesfiliacaoModel,
+        'direitos_deveres':DireitosDeveres
     }
     
     modelo = modelo_map.get(automacao)
@@ -156,6 +159,7 @@ class ListaTodosArquivosView(LoginRequiredMixin, GroupPermissionRequiredMixin, T
         context['autorizacao_direito_imagem'] = AutorizacaoDireitoImagemModel.objects.all()
         context['autorizacao_acesso_gov'] = AutorizacaoAcessoGovModel.objects.all()
         context['declaracao_desfiliacao'] = DeclaracaoDesfiliacaoModel.objects.all()
+        context['direitos_deveres'] = DireitosDeveres.objects.all()
         
         return context
 
@@ -2090,3 +2094,162 @@ def gerar_declaracao_desfiliacao(request, associado_id):
     pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
     return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")
 # ======================================================================================================            
+
+def gerar_direitos_deveres(request, associado_id):
+    associado = AssociadoModel.objects.get(id=associado_id)
+    associacao = associado.associacao
+
+    # PDF base
+    template_path = os.path.join(settings.MEDIA_ROOT, 'pdf/direitos_deveres.pdf')
+    if not os.path.exists(template_path):
+        return HttpResponse("O PDF base não foi encontrado.", status=404)
+
+    template_pdf = PdfReader(template_path)
+    buffer = BytesIO()
+
+    # Estilos
+    styles = getSampleStyleSheet()
+    style_normal = ParagraphStyle(
+        'NormalJustified',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=16,
+        alignment=4,  # Justificado
+    )
+
+
+    style_title = ParagraphStyle(
+        'TitlePadrao',
+        parent=styles['Title'],
+        fontName='Times-Bold',
+        fontSize=17,
+        alignment=1,
+        leading=32,
+        spaceBefore=20,  # Usual nas páginas seguintes
+    )
+
+    style_assinatura = ParagraphStyle(
+        'Signature',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        alignment=1,  # Centralizado
+    )
+
+    data_atual = datetime.now().strftime('%d/%m/%Y')
+    local_data = f"{associado.reparticao.municipio_sede}, {data_atual}."
+    assinatura = (
+        "____________________________________________________________________<br/>"
+        f"<strong>{associado.user.get_full_name()}</strong><br/>"
+        f"CPF: {associado.cpf}<br/>"
+    )
+
+    # Dividindo em 3 partes (como textos)
+    texto1 = (
+        f"<strong>REGRAMENTO INTERNO – DIREITOS, DEVERES E COMPROMISSOS ASSOCIATIVOS</strong><br/><br/>"
+        f"<strong>Seja muito bem-vindo(a) à Associação dos Pescadores e Agricultores – APAPESC!</strong><br/><br/>"
+        f"Sua participação é fundamental para o fortalecimento da nossa comunidade. Ao se unir à APAPESC, "
+        f"você passa a fazer parte de um grupo que acredita no desenvolvimento sustentável, na cooperação entre os associados "
+        f"e no protagonismo da pesca e da agricultura familiar.<br/><br/>"
+        f"A coletividade é o nosso alicerce. Trabalhamos juntos para garantir dignidade, reconhecimento e apoio real aos trabalhadores do mar e do campo.<br/><br/>"
+        f"<strong>O Que Fazemos por Você</strong><br/>"
+        f"✅ <strong>Defesa dos Interesses Coletivos:</strong> Buscamos políticas públicas e soluções práticas que beneficiem pescadores e agricultores, "
+        f"como incentivos, acesso a crédito, regularização de documentos e infraestrutura adequada.<br/>"
+        f"✅ <strong>Assistência Junto a Órgãos Governamentais:</strong> Ajudamos na emissão de documentos obrigatórios (RGP, TIE, CAEPF, licenças e registros), "
+        f"intermediação com o MAPA, Receita Federal, Marinha, INSS e outros órgãos.<br/>"
+        f"✅ <strong>Suporte Jurídico e Administrativo:</strong> Oferecemos apoio em processos como o Seguro Defeso, regularização previdenciária, impugnações, petições e orientações jurídicas especializadas.<br/>"
+        f"✅ <strong>Fortalecimento da Classe:</strong> A união dos associados é nossa força. Quanto mais organizados estivermos, maior será nossa representatividade diante das autoridades e dos desafios cotidianos."
+    )
+
+
+    texto2 = (
+        f"<strong>Direitos dos Associados</strong><br/>"
+        f"• Receber orientações e assistência técnica nos processos de regularização.<br/>"
+        f"• Ter acesso ao suporte jurídico, institucional e documental disponibilizado pela Associação.<br/>"
+        f"• Participar de campanhas, projetos e iniciativas promovidas pela APAPESC.<br/>"
+        f"• Ter seus interesses coletivos representados em órgãos públicos e espaços de decisão.<br/>"
+        f"• Ser tratado com respeito, atenção e igualdade.<br/><br/>"
+
+        f"<strong>Deveres e Regramentos Internos</strong><br/>"
+        f"🔹 <strong>Cordialidade e Respeito:</strong> Zelar pela boa convivência entre os membros. Condutas ofensivas, desrespeitosas ou de cunho discriminatório não são adequadas e podem gerar consequências a ser deliberadas pela administração da APAPESC.<br/>"
+        f"🔹 <strong>Documentos em Boa Qualidade:</strong> É responsabilidade do associado entregar documentos solicitados em bom estado, coloridos e legíveis, preferencialmente escaneados em papelaria.<br/>"
+        f"🔹 <strong>Comunicação Oficial e Grupos da APAPESC:</strong> Os associados devem permanecer nos grupos oficiais de WhatsApp:<br/>"
+        f"&nbsp;&nbsp;&nbsp;&nbsp;• Grupo Administrativo da APAPESC (obrigatório)<br/>"
+        f"&nbsp;&nbsp;&nbsp;&nbsp;• Grupo Família APAPESC (opcional)<br/>"
+        f"&nbsp;&nbsp;&nbsp;&nbsp;• Grupo de Envio de Fotos (opcional)<br/><br/>"
+        f"📵 É proibida a divulgação de conteúdos ofensivos ou que possam ferir a integridade de outros membros.<br/>"
+        f"🔐 Jamais compartilhe seus dados pessoais ou senhas com terceiros desconhecidos.<br/><br/>"
+        f"🔹 <strong>Participação Ativa:</strong> Os associados devem participar, sempre que possível e dentro das suas condições, das reuniões, eventos, mutirões e ações promovidas pela associação.<br/>"
+        f"🔹 <strong>Atualização Cadastral:</strong> É dever do associado manter seus dados e documentos atualizados, comunicar mudança de endereço, celular e realizar recadastramento quando solicitado."
+    )
+
+
+    texto3 = (
+        f"<strong>Anuidade Associativa</strong><br/>"
+        f"🔹 <strong>Exercício e Vencimento:</strong> A anuidade vigora entre 1º de janeiro e 31 de dezembro de cada ano. "
+        f"Preferencialmente, ela deve ser paga na data de filiação. No entanto, isso não é um obstáculo! Sempre podem ser concedidos prazos e condições especiais, mediante conversa com a administração.<br/><br/>"
+        f"🔹 <strong>Anuidade do Ano Atual:</strong> Pode ser paga a qualquer momento dentro do exercício.<br/>"
+        f"🔹 <strong>Anuidade Atrasada (Exercícios Anteriores):</strong> Caso a anuidade de anos anteriores não tenha sido quitada, ela será considerada em atraso. Neste caso, será aplicada a mesma tarifa vigente do ano atual. Exemplo: se a anuidade de 2024 (R$230,00) não for paga até 31/12/2024, em 2025 o valor cobrado será o da anuidade atual.<br/><br/>"
+        f"🔹 <strong>Regularização e Notificações:</strong> Associados com anuidades em aberto poderão ser notificados para apresentar comprovante de pagamento ou negociar condições de regularização diretamente com a administração. Casos específicos serão analisados individualmente, com atenção às possibilidades de cada associado.<br/><br/>"
+
+        f"<strong>Compromisso Coletivo</strong><br/>"
+        f"Na APAPESC, buscamos o fortalecimento da pesca artesanal e da agricultura familiar de forma organizada, legal e sustentável.<br/>"
+        f"Nossa missão é cuidar de quem vive da pesca e do campo, com justiça, respeito e dignidade.<br/><br/>"
+        f"💙 Conte conosco. Crescemos juntos.<br/><br/>"
+        f"APAPESC – Por uma pesca legal, sustentável e valorizada.<br/><br/>"
+        f"{local_data}<br/><br/>"
+        f"{assinatura}"
+    )
+
+
+    # Criando o conteúdo
+    from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, PageBreak
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=85,
+        leftMargin=85,
+        topMargin=60,  # ⬅️ Margem superior reduzida
+        bottomMargin=50,
+    )
+
+    elements = [
+        Spacer(1, 120),  # Primeira página mais abaixo
+        Paragraph("REGRAMENTO INTERNO - DIREITOS E DEVERES", style_title),
+        Spacer(1, 12),
+        Paragraph(texto1, style_normal),
+
+        PageBreak(),
+        Spacer(1, 60),  # ⬅️ Espaço no topo da segunda página
+        Paragraph("REGRAMENTO INTERNO - DIREITOS E DEVERES", style_title),
+        Spacer(1, 12),
+        Paragraph(texto2, style_normal),
+
+        PageBreak(),
+        Spacer(1, 60),  # ⬅️ Espaço no topo da terceira página
+        Paragraph("REGRAMENTO INTERNO - DIREITOS E DEVERES", style_title),
+        Spacer(1, 12),
+        Paragraph(texto3, style_normal),
+    ]
+
+
+
+    # Gera o PDF em memória
+    doc.build(elements)
+    buffer.seek(0)
+    overlay_pdf = PdfReader(buffer)
+
+    # Mescla o conteúdo com o template base
+    for i, template_page in enumerate(template_pdf.pages):
+        if i < len(overlay_pdf.pages):
+            PageMerge(template_page).add(overlay_pdf.pages[i]).render()
+
+    # Salva o resultado final
+    pdf_name = f"direitos_deveres_{associado.user.get_full_name().replace(' ', '_')}.pdf"
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+    PdfWriter(pdf_path, trailer=template_pdf).write()
+
+    pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
+    return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")

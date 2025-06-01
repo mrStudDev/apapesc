@@ -224,6 +224,22 @@ def upload_to_declaracao_desfiliacao(instance, filename):
             print(f"Erro ao remover {full_path}: {e}")
     return file_path
 
+
+def upload_to_direitos_deveres(instance, filename):
+    file_path = os.path.join('pdf', 'direitos_deveres.pdf')
+    full_path = Path(settings.MEDIA_ROOT) / file_path
+    
+    # Verifica se o arquivo existe antes de tentar removê-lo
+    if full_path.exists():  
+        try:
+            full_path.unlink()  # Remove o arquivo existente
+        except PermissionError:
+            print(f"Permissão negada ao tentar remover {full_path}")
+        except Exception as e:
+            print(f"Erro ao remover {full_path}: {e}")
+    return file_path
+
+    
 # Modelos para armazenar os arquivos PDF
 class DeclaracaoResidenciaModel(models.Model):
     pdf_base = models.FileField(
@@ -557,3 +573,25 @@ class DeclaracaoDesfiliacaoModel(models.Model):
         
     def __str__(self):
         return "Declaração de Desfiliação"
+    
+class DireitosDeveres(models.Model):
+    pdf_base = models.FileField(
+        upload_to=upload_to_direitos_deveres,
+        verbose_name="PDF Base para Regramentos Direitos e Deveres",
+        help_text="Substituirá o arquivo base atual para Regramentos Direitos e Deveres."
+    )
+    atualizado_em = models.DateTimeField(auto_now=True, verbose_name="Última Atualização")
+    
+    def save(self, *args, **kwargs):
+        # Substituir o arquivo existente se for necessário
+        if self.pk:
+            old_instance = DireitosDeveres.objects.get(pk=self.pk)
+            if old_instance.pdf_base and old_instance.pdf_base != self.pdf_base:
+                # Remove o arquivo anterior
+                if os.path.isfile(old_instance.pdf_base.path):
+                    os.remove(old_instance.pdf_base.path)
+
+        super().save(*args, **kwargs)
+        
+    def __str__(self):
+        return "Declaração de Desfiliação"    

@@ -54,30 +54,49 @@
     <form method="post" class="mb-8">
       {% csrf_token %}
       <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">
-        ➕ Criar Lançamento de {{ now.year }}
+        ➕ Criar Lançamento de {% now "Y" %}
       </button>
     </form>
 
-    <div class="space-y-4">
+    <div class="mt-10 space-y-6">
+      
+      <!-- Título e explicação -->
+      <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
+        <h2 class="text-blue-800 font-semibold text-lg flex items-center">
+          <i class="material-icons mr-2 text-blue-600">calendar_today</i>
+          Lista de Lançamentos de REAPS
+        </h2>
+        <p class="text-sm text-blue-700 mt-1">
+          Somente um lançamento por ano. Participam apenas <strong>associados ativos</strong> e <strong>aposentados filiados</strong>.
+        </p>
+      </div>
+
       {% if reaps_lancamentos %}
         {% for reaps in reaps_lancamentos %}
-<div class="flex items-center justify-between">
-  <a href="{% url 'app_tarefas:reaps_detalhe' reaps.pk %}" class="text-blue-600 hover:underline font-medium text-lg">
-    REAPS {{ reaps.ano }}
-  </a>
-  <a href="{% url 'app_tarefas:reaps_deletar' reaps.pk %}" class="text-red-500 hover:text-red-700 text-sm font-medium">
-    🗑️ Deletar
-  </a>
-</div>
-<p class="text-sm text-gray-600">Criado em: {{ reaps.criado_em|date:"d/m/Y" }}</p>
-
+          <div class="p-4 bg-white rounded shadow flex items-center justify-between border">
+            <div>
+              <a href="{% url 'app_tarefas:reaps_detalhe' reaps.pk %}" 
+                class="text-blue-700 hover:underline font-semibold text-base flex items-center">
+                <i class="material-icons mr-1 text-blue-600">description</i>
+                REAPS {{ reaps.ano }}
+              </a>
+              <p class="text-sm text-gray-600 mt-1">Criado em: {{ reaps.criado_em|date:"d/m/Y" }}</p>
+            </div>
+            <a href="{% url 'app_tarefas:reaps_deletar' reaps.pk %}" 
+              class="text-red-500 hover:text-red-700 text-sm font-medium flex items-center" 
+              title="Deletar Lançamento">
+              <i class="material-icons mr-1">delete</i> Deletar
+            </a>
+          </div>
         {% endfor %}
       {% else %}
-        <div class="p-4 bg-yellow-100 text-yellow-800 rounded">
+        <div class="p-4 bg-yellow-100 text-yellow-800 rounded border border-yellow-300">
+          <i class="material-icons mr-2 align-middle">info</i>
           Nenhum lançamento encontrado.
         </div>
       {% endif %}
     </div>
+
   </div>
 </main>
 

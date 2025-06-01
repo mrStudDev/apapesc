@@ -21,6 +21,7 @@ urlpatterns = [
      path('upload/autorizacao-direito-imagem/', upload_pdf_base, {'automacao': 'autorizacao_direito_imagem'}, name='upload_pdf_autorizacao_direito_imagem'),
      path('upload/autorizacao-acesso-gov/', upload_pdf_base, {'automacao': 'autorizacao_acesso_gov'}, name='upload_pdf_autorizacao_acesso_gov'),
      path('upload/declaracao-desfiliacao/', upload_pdf_base, {'automacao': 'declaracao_desfiliacao'}, name='upload_pdf_declaracao_desfiliacao'),
+     path('upload/direitos-deveres/', upload_pdf_base, {'automacao': 'direitos_deveres'}, name='upload_pdf_direitos_deveres'),
 
      path('lista/todos-arquivos/', ListaTodosArquivosView.as_view(), name='lista_automacoes'),
      
@@ -73,7 +74,11 @@ urlpatterns = [
      
      path('gerar-autorizacao-acesso-gov/<int:associado_id>/', views.gerar_autorizacao_acesso_gov,
           name='gerar_autorizacao_acesso_gov'),
+     
      path('gerar-declaracao-desfiliacao/<int:associado_id>/', views.gerar_declaracao_desfiliacao,
           name='gerar_declaracao_desfiliacao'),
+     
+     path('gerar-direitos-deveres/<int:associado_id>/', views.gerar_direitos_deveres,
+          name='gerar_direitos_deveres'),
 
 ]

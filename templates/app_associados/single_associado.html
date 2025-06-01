@@ -1608,7 +1608,15 @@
                     <p class="text-sm text-gray-600 mt-2">Autorização de acesso e Gestão da Conta Gov</p>
                 </div>
             </a>
-
+            <!-- Regramentos, Direitos e Deveres-->
+            <a href="{% url 'app_automacoes:gerar_direitos_deveres' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-yellow-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-blue-500 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Regramentos, Direitos e Deveres</h3>
+                    <p class="text-sm text-gray-600 mt-2">Direitos e Deveres dos Associados e Integrantes</p>
+                </div>
+            </a>
             <!-- Carteirinha Apapesc-->
             <a href="{% url 'app_automacoes:gerar_carteirinha_apapesc' associado.id %}"
                class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-blue-300 transition-all duration-300">
