@@ -12,6 +12,7 @@ from django.db import transaction
 from decimal import Decimal
 from .utils import format_celular_for_whatsapp
 import re
+from django.core.exceptions import ValidationError
 
 from app_associacao.models import(
     AssociacaoModel,
@@ -160,6 +161,11 @@ class ProfissoesModel(models.Model):
         unique=True, 
         verbose_name="Profissão"
     )
+    def clean(self):
+        # Confere se já existe um "tipo" igual (case-insensitive), ignorando ele mesmo
+        if ProfissoesModel.objects.filter(municipio__iexact=self.nome).exclude(pk=self.pk).exists():
+            raise ValidationError({'nome': 'Esta Profissão já está cadastrado.'})
+            
     def __str__(self):
         return self.nome
 

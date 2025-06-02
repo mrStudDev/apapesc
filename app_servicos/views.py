@@ -52,7 +52,16 @@ class SingleServicoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Detail
         })
 
         # Tipos relevantes: RG, RGP, NIT
-        tipos_desejados = ['RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI', 'TIE', 'Licença Embarcação(Pesca)', 'Título Eleitor', 'Comprovante Residência', 'Declaração Residência - MAPA', 'Foto3x4', 'CAEPF']
+        tipos_desejados = [
+            'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CPF', 'TIE', 'CEI', 'CAEPF', 'Foto3x4', 
+            'Comprovante Residência', 'Declaração Residência - MAPA',
+            'Auto Declaração', 'Autorização de Acesso Gov Assinada',
+            'Autorização de Uso de Imagem Assinada', 'Comprovante Seguro Defeso',
+            'Ficha de Requerimento de Filiação Assinada', 'Título Eleitor',
+            'Procuração Individual Ad Judicia Assinada', 'Procuração Individual Administrativa Assinada',
+            'Licença Embarcação(Pesca)', 'Seguro DPEM',
+            
+        ]
         tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
 
         # Busca documentos do associado com esses tipos
@@ -104,7 +113,15 @@ class ServicoExtraDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin,  
             'extra_associado': servico.extra_associado
         })
         # Tipos relevantes: RG, RGP, NIT
-        tipos_desejados = ['RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI', 'Comprovante Residência', 'Declaração Residência - MAPA', 'Foto3x4', 'CAEPF']
+        tipos_desejados = [
+            'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CPF', 'TIE', 'CEI', 'CAEPF', 'Foto3x4', 
+            'Comprovante Residência', 'Declaração Residência - MAPA',
+            'Auto Declaração', 'Autorização de Acesso Gov Assinada',
+            'Autorização de Uso de Imagem Assinada', 'Comprovante Seguro Defeso',
+            'Ficha de Requerimento de Filiação Assinada', 'Título Eleitor',
+            'Procuração Individual Ad Judicia Assinada', 'Procuração Individual Administrativa Assinada',
+            'Licença Embarcação(Pesca)', 'Seguro DPEM',
+        ]
         tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
 
         # Busca documentos do associado com esses tipos
@@ -238,7 +255,7 @@ class CreateServicoAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixi
         servico.associado = self.associado
         servico.criado_por = self.request.user
         servico.save()
-        return redirect('app_servicos:list_servicos')
+        return redirect('app_servicos:single_servico', pk=servico.pk)
 
 
     def get_context_data(self, **kwargs):

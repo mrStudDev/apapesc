@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.validators import RegexValidator
 from django.utils import timezone
 from django.contrib.auth.models import User
-
+from django.core.exceptions import ValidationError
 
 UF_CHOICES = [
     ('AC', 'Acre'), ('AL', 'Alagoas'), ('AP', 'Amapá'), ('AM', 'Amazonas'),
@@ -246,7 +246,11 @@ class CargosModel(models.Model):
         unique=True, 
         verbose_name="Nome do Cargo"
     )
-
+    def clean(self):
+        # Confere se já existe um "tipo" igual (case-insensitive), ignorando ele mesmo
+        if CargosModel.objects.filter(nome__iexact=self.nome).exclude(pk=self.pk).exists():
+            raise ValidationError({'nome': 'Este Cargo já está cadastrado.'})
+        
     def __str__(self):
         return self.nome
 
@@ -255,7 +259,8 @@ class CargosModel(models.Model):
 # MUNICIPIOS DE CIRCUNSCRIÇÂO
 class MunicipiosModel(models.Model):
     municipio = models.CharField(
-        max_length=120
+        max_length=120,
+        unique=True
     )
     uf = models.CharField(
         max_length=50, 
@@ -264,6 +269,11 @@ class MunicipiosModel(models.Model):
         blank=True, null=True, 
         verbose_name="Estado"
     )
+    def clean(self):
+        # Confere se já existe um "tipo" igual (case-insensitive), ignorando ele mesmo
+        if MunicipiosModel.objects.filter(municipio__iexact=self.municipio).exclude(pk=self.pk).exists():
+            raise ValidationError({'municipio': 'Este municipio já está cadastrado.'})
+            
     def __str__(self):
         return self.municipio
 

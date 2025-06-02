@@ -6,7 +6,7 @@ from app_associados.models import AssociadoModel
 from datetime import date, timedelta
 
 class TipoEmbarcacaoModel(models.Model):
-    nome = models.CharField(max_length=150)
+    nome = models.CharField(max_length=150, unique=True)
     descricao = models.TextField(blank=True, null=True)
 
     def __str__(self):
@@ -14,7 +14,7 @@ class TipoEmbarcacaoModel(models.Model):
 
 
 class TipoPropulsaoModel(models.Model):
-    nome = models.CharField(max_length=150)
+    nome = models.CharField(max_length=150, unique=True)
     descricao = models.TextField(blank=True, null=True)
 
     def __str__(self):

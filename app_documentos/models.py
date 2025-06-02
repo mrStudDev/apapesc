@@ -4,11 +4,20 @@ from app_associados.models import AssociadoModel
 from app_tarefas.models import TarefaModel
 from app_servicos.models import ExtraAssociadoModel
 from datetime import datetime
-
+from django.core.exceptions import ValidationError
 
 class TipoDocumentoModel(models.Model):
-    tipo = models.CharField(max_length=1500, verbose_name="Nome do Tipo de Documento")
+    tipo = models.CharField(
+        max_length=1500,
+        unique=True,
+        verbose_name="Nome do Tipo de Documento"
+    )
     descricao = models.TextField(null=True, blank=True)
+
+    def clean(self):
+        # Confere se já existe um "tipo" igual (case-insensitive), ignorando ele mesmo
+        if TipoDocumentoModel.objects.filter(tipo__iexact=self.tipo).exclude(pk=self.pk).exists():
+            raise ValidationError({'tipo': 'Este tipo de documento já está cadastrado.'})
 
     def __str__(self):
         return self.tipo

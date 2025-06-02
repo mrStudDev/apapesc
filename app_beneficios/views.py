@@ -255,9 +255,14 @@ class ControleBeneficioDetailView(LoginRequiredMixin, GroupPermissionRequiredMix
         veio_da_leva = self.request.GET.get('pela_leva') == '1'
     
         tipos_desejados = [
-            'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI',
+            'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CPF', 'TIE', 'CEI', 'CAEPF', 'Foto3x4', 
             'Comprovante Residência', 'Declaração Residência - MAPA',
-            'Foto3x4', 'CAEPF'
+            'Auto Declaração', 'Autorização de Acesso Gov Assinada',
+            'Autorização de Uso de Imagem Assinada', 'Comprovante Seguro Defeso',
+            'Ficha de Requerimento de Filiação Assinada', 'Título Eleitor',
+            'Procuração Individual Ad Judicia Assinada', 'Procuração Individual Administrativa Assinada',
+            'Licença Embarcação(Pesca)', 'Seguro DPEM',
+           
         ]
 
         tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
@@ -824,9 +829,13 @@ class ProcessarLevaItemView(LoginRequiredMixin, GroupPermissionRequiredMixin, Fo
         total_itens = itens_pendentes + itens_em_processamento + itens_concluidos
 
         tipos_desejados = [
-            'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI',
+            'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CPF', 'TIE', 'CEI', 'CAEPF', 'Foto3x4', 
             'Comprovante Residência', 'Declaração Residência - MAPA',
-            'Foto3x4', 'CAEPF'
+            'Auto Declaração', 'Autorização de Acesso Gov Assinada',
+            'Autorização de Uso de Imagem Assinada', 'Comprovante Seguro Defeso',
+            'Ficha de Requerimento de Filiação Assinada', 'Título Eleitor',
+            'Procuração Individual Ad Judicia Assinada', 'Procuração Individual Administrativa Assinada',
+            'Licença Embarcação(Pesca)', 'Seguro DPEM',
         ]
 
         tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
