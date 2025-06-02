@@ -163,7 +163,7 @@ class ProfissoesModel(models.Model):
     )
     def clean(self):
         # Confere se já existe um "tipo" igual (case-insensitive), ignorando ele mesmo
-        if ProfissoesModel.objects.filter(municipio__iexact=self.nome).exclude(pk=self.pk).exists():
+        if ProfissoesModel.objects.filter(nome__iexact=self.nome).exclude(pk=self.pk).exists():
             raise ValidationError({'nome': 'Esta Profissão já está cadastrado.'})
             
     def __str__(self):
