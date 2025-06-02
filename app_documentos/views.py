@@ -186,10 +186,13 @@ class TipoDocumentoEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, Up
     ]
 
     DOCUMENTOS_ESSENCIAIS = [
-        'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CEI', 'TIE',
-        'Licença Embarcação(Pesca)', 'Título Eleitor',
+        'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'CPF', 'TIE', 'CEI', 'CAEPF', 'Foto3x4', 
         'Comprovante Residência', 'Declaração Residência - MAPA',
-        'Foto3x4', 'CAEPF'
+        'Auto Declaração', 'Autorização de Acesso Gov Assinada',
+        'Autorização de Uso de Imagem Assinada', 'Comprovante Seguro Defeso',
+        'Ficha de Requerimento de Filiação Assinada', 'Título Eleitor',
+        'Procuração Individual Ad Judicia Assinada', 'Procuração Individual Administrativa Assinada',
+        'Licença Embarcação(Pesca)', 'Seguro DPEM',
     ]
 
     def get_context_data(self, **kwargs):
