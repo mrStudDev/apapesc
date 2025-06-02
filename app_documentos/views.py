@@ -474,7 +474,8 @@ def criar_copia_pdf(request, pk):
 # UPLOAD TO DRIVE FOLDER
 def upload_docs_view(request, associado_id):
     associado = get_object_or_404(AssociadoModel, id=associado_id)
-    tipos_documento = TipoDocumentoModel.objects.all()
+    tipos_documento = TipoDocumentoModel.objects.order_by('tipo')
+    
 
     if request.method == 'POST':
         arquivos = request.FILES.getlist('arquivo')
