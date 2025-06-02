@@ -33,6 +33,10 @@ from django.utils.text import slugify
 from django.utils.encoding import smart_str
 import mimetypes
 from .google_drive_integration import upload_to_drive
+import fitz 
+
+
+
 # Create your views here.
 
 
@@ -484,7 +488,9 @@ def upload_docs_view(request, associado_id):
         arquivos = request.FILES.getlist('arquivo')
         tipos = request.POST.getlist('tipo_documento')
         enviados = 0
-
+        total_antes = 0
+        total_depois = 0
+        
         for i, arquivo in enumerate(arquivos):
             tipo_id = tipos[i]
             tipo = TipoDocumentoModel.objects.get(id=tipo_id)
@@ -504,17 +510,78 @@ def upload_docs_view(request, associado_id):
 
             # Corrigir o ID da pasta
             folder_id = associado.drive_folder_id.split('?')[0]
+            
+            # Comprimir arquivo
+            # Detectar extensão e comprimir apropriadamente
+            path = upload.arquivo.path
+            extensao = os.path.splitext(upload.arquivo.path)[-1].lower()
+            
+            tamanho_antes = os.path.getsize(path)
 
+
+            print(f"📁 Iniciando compressão para: {upload.arquivo.name} ({extensao})")
+            print(f"🔸 Tamanho antes: {tamanho_antes} bytes")
+            # Comprimir se for imagem ou PDF
+            if extensao in ['.jpg', '.jpeg', '.png']:
+                comprimir_imagem(path)
+            elif extensao == '.pdf':
+                comprimir_pdf(path)
+
+            # Tamanho depois
+            tamanho_depois = os.path.getsize(path)
+            print(f"🔻 Tamanho depois: {tamanho_depois} bytes")
+            # Atualizar estatísticas
+            total_antes += tamanho_antes
+            total_depois += tamanho_depois                
+                
             try:
                 upload_to_drive(upload.arquivo.path, nome_final, folder_id)
                 enviados += 1
             except Exception as e:
                 messages.error(request, f"Erro ao enviar '{arquivo.name}': {str(e)}")
+                
+        # Estatísticas de compressão
+        economia_bytes = total_antes - total_depois
+        economia_percentual = (economia_bytes / total_antes * 100) if total_antes else 0
+        economia_str = f"{economia_bytes // 1024} KB ({economia_percentual:.1f}%)" if economia_bytes > 0 else "sem compressão aplicada"
+             
+        messages.success(request, f"{enviados} documento(s) enviados com sucesso ao Google Drive. Economia total: {economia_str}")
 
-        messages.success(request, f"{enviados} documento(s) enviados com sucesso ao Google Drive.")
         return redirect('app_associados:single_associado', pk=associado_id)
 
     return render(request, 'app_documentos/upload_to_drive.html', {
         'associado': associado,
         'tipos_documento': tipos_documento
     })
+    
+
+def comprimir_imagem(path, qualidade=75):
+    try:
+        img = Image.open(path)
+        if img.format in ['JPEG', 'JPG', 'PNG']:
+            img = img.convert('RGB')
+            img.save(path, optimize=True, quality=qualidade)
+            print(f"✔️ Imagem comprimida: {path}")
+            return True
+        else:
+            print(f"🟡 Formato não suportado: {img.format}")
+    except Exception as e:
+        print(f"❌ Erro ao comprimir imagem: {e}")
+    return False
+
+
+def comprimir_pdf(path):
+    try:
+        temp_path = path.replace(".pdf", "_compressed.pdf")
+        doc = fitz.open(path)
+        doc.save(temp_path, deflate=True, garbage=4)
+        doc.close()
+
+        # Substitui o original pelo comprimido
+        os.replace(temp_path, path)
+
+        print(f"✔️ PDF comprimido com sucesso: {path}")
+        return True
+    except Exception as e:
+        print(f"❌ Erro ao comprimir PDF: {e}")
+        return False

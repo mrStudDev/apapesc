@@ -63,7 +63,9 @@
                 class="w-6 h-6 mr-2">
             Enviar Documentos para <strong class="text-blue-600">:  {{ associado.user.get_full_name }}</strong>
         </h2>
-
+        <p class="mt-2 text-sm text-gray-500">
+        🔄 Os arquivos serão automaticamente otimizados (imagens e PDFs) para economizar espaço no Drive.
+        </p> 
         <form id="upload-form" method="POST" enctype="multipart/form-data" class="space-y-6">
             {% csrf_token %}
             <div id="form-container" class="space-y-4">
@@ -83,7 +85,9 @@
                 <label class="block text-sm font-medium text-gray-700 mb-1">Arquivo</label>
                 <input type="file" name="arquivo" required class="block w-full text-sm text-gray-900 border border-gray-300 rounded-md cursor-pointer bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
                 </div>
+
             </div>
+                <br>           
             </div>
 
             <div class="flex gap-3 mt-4">
@@ -98,7 +102,6 @@
             class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
                 Voltar pág. Associado
             </a>
-
             </div>
         </form>
         </div>
