@@ -109,83 +109,74 @@
         <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
             {% csrf_token %}
 
-                <!-- Tipo do Documento -->
-                <div class="mb-4">
-                    <label for="id_tipo_doc" class="block text-sm font-medium text-gray-700 mb-1">Tipo do Documento (Os tipos são nomes pré-definidos para documentos.)</label>
-                    <select
-                        name="{{ form.tipo_doc.name }}"
-                        id="{{ form.tipo_doc.id_for_label }}"
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                        <option value="" {% if not form.tipo_doc.value %}selected{% endif %}>Vazio</option>
-                        {% for tipo in form.tipo_doc.field.queryset %}
-                            <option value="{{ tipo.id }}" {% if tipo.id|stringformat:"s" == form.tipo_doc.value|stringformat:"s" %}selected{% endif %}>
-                                {{ tipo }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                    {% for error in form.tipo_doc.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
+            <div id="upload-groups" class="space-y-6">
+                <!-- Grupo de Upload -->
+                <div class="upload-entry border p-4 rounded-md bg-gray-50">
+                    <!-- Tipo -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tipo do Documento (pré-definido)</label>
+                        <select
+                            name="tipo_doc"
+                            class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        >
+                            <option value="" selected>Vazio</option>
+                            {% for tipo in tipos_documento %}
+                                <option value="{{ tipo.id }}">{{ tipo }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <!-- Nome Livre -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome do Documento (livre)</label>
+                        <input 
+                            type="text" 
+                            name="nome"
+                            class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Digite o nome do documento"
+                        >
+                    </div>
+
+                    <!-- Arquivo -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Arquivo</label>
+                        <input
+                            type="file"
+                            name="arquivo"
+                            class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            required
+                        >
+                        <small class="text-blue-500">Máximo 100 MB</small>
+                    </div>
+
+                    <!-- Descrição -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Descrição (opcional)</label>
+                        <textarea
+                            name="descricao"
+                            class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Adicione uma breve descrição para o documento..."
+                        ></textarea>
+                    </div>
                 </div>
-                 
-                <!-- Nome do Documento -->
-                <div id="nome-doc-field" class="mb-4">
-                    <label for="id_nome" class="block text-sm font-medium text-gray-700 mb-1">Nome do Documento</label>
-                    <input 
-                        type="text" 
-                        name="{{ form.nome.name }}" 
-                        id="{{ form.nome.id_for_label }}" 
-                        class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                        placeholder="Digite o nome do documento"
-                        value="{{ form.nome.value|default:'' }}"
-                    >
-                    {% for error in form.nome.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>    
-
-            <!-- Arquivo -->
-            <div class="mb-4">
-                <label for="id_arquivo" class="block text-sm font-medium text-gray-700 mb-1">Arquivo</label>
-                <input
-                    type="file"
-                    name="{{ form.arquivo.name }}"
-                    id="{{ form.arquivo.id_for_label }}"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                {% for error in form.arquivo.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-                <small class="text-blue-500">Máximo 100 MB</small>
             </div>
 
-            <!-- Descrição -->
-            <div class="mb-4">
-                <label for="id_descricao" class="block text-sm font-medium text-gray-700 mb-1">Descrição</label>
-                <textarea
-                    name="{{ form.descricao.name }}"
-                    id="{{ form.descricao.id_for_label }}"
-                    class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Adicione uma breve descrição para o documento..."
-                >{{ form.descricao.value|default:'' }}</textarea>
-                {% for error in form.descricao.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-
-            <!-- Botão de Envio -->
-            <div class="mt-6">
-                <!-- Botão de ação -->
-                <div class="mt-6">
-                    <button
-                        type="submit"
-                        class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 w-full"
-                    >
-                        Enviar Documento
-                    </button>
+            <!-- Botões -->
+            <div class="mt-6 flex flex-col sm:flex-row gap-4">
+                <button type="button" onclick="addUploadGroup()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md w-full sm:w-auto">
+                    ➕ Adicionar Outro Documento
+                </button>
+                <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md w-full sm:w-auto">
+                    🚀 Enviar Documentos
+                </button>
+                <a href="{% url 'app_associados:single_associado' owner.id %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md w-full sm:w-auto">
+                    Voltar para Associado
+                </a>
             </div>
         </form>
+
+
+
     </div>
     <br><br>
     <div class="mb-6 p-6 bg-blue-100 border-l-4 border-blue-500 rounded-md mx-auto shadow-md max-w-3xl">
@@ -223,21 +214,66 @@
 {% include "components/footer_associacao.html" %}
 
 <script>
-    // JavaScript para ocultar/exibir o campo "Nome do Documento" baseado na seleção de "Tipo do Documento"
-    document.addEventListener("DOMContentLoaded", function() {
-        const tipoDocField = document.querySelector("#id_tipo_doc");
-        const nomeDocField = document.querySelector("#nome-doc-field");
+document.addEventListener("DOMContentLoaded", function() {
+    // Inicializa listeners para todos os grupos
+    function inicializarListeners(grupo) {
+        const tipoSelect = grupo.querySelector('select[name="tipo_doc"]');
+        const nomeFieldWrapper = grupo.querySelector('input[name="nome"]').closest('div');
 
-        function toggleNomeDocField() {
-            if (tipoDocField.value) {
-                nomeDocField.style.display = "none";
+        function toggleNomeField() {
+            if (tipoSelect.value) {
+                nomeFieldWrapper.style.display = "none";
             } else {
-                nomeDocField.style.display = "block";
+                nomeFieldWrapper.style.display = "block";
             }
         }
 
-        tipoDocField.addEventListener("change", toggleNomeDocField);
-        toggleNomeDocField(); // Verifica o estado inicial
+        tipoSelect.addEventListener("change", toggleNomeField);
+        toggleNomeField(); // Verifica estado inicial
+    }
+
+    // Inicializa o primeiro grupo
+    document.querySelectorAll(".upload-entry").forEach(inicializarListeners);
+
+    // Função global que adiciona novos grupos
+    window.addUploadGroup = function() {
+        const container = document.getElementById('upload-groups');
+        const firstGroup = container.querySelector('.upload-entry');
+        const newGroup = firstGroup.cloneNode(true);
+
+        // Limpa os valores do grupo clonado
+        newGroup.querySelectorAll('input, textarea, select').forEach(el => {
+            if (el.tagName === 'SELECT') {
+                el.selectedIndex = 0;
+            } else {
+                el.value = '';
+            }
+        });
+
+        container.appendChild(newGroup);
+
+        // Inicializa os listeners no novo grupo
+        inicializarListeners(newGroup);
+    };
+});
+</script>
+
+<script>
+function addUploadGroup() {
+    const container = document.getElementById('upload-groups');
+    const firstGroup = container.querySelector('.upload-entry');
+    const newGroup = firstGroup.cloneNode(true);
+
+    // Limpa os valores dos inputs
+    newGroup.querySelectorAll('input, textarea, select').forEach(el => {
+        if (el.tagName === 'SELECT') {
+            el.selectedIndex = 0;
+        } else {
+            el.value = '';
+        }
     });
+
+    container.appendChild(newGroup);
+}
 </script>
 {% endblock upload_documentos %}

@@ -34,7 +34,7 @@ from django.utils.encoding import smart_str
 import mimetypes
 from .google_drive_integration import upload_to_drive
 import fitz 
-
+from django.http import HttpResponseRedirect
 
 
 # Create your views here.
@@ -74,6 +74,94 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
             raise Http404("Tipo de proprietário inválido.")
 
         return super().dispatch(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        tipos = request.POST.getlist('tipo_doc')
+        nomes = request.POST.getlist('nome')
+        arquivos = request.FILES.getlist('arquivo')
+        descricoes = request.POST.getlist('descricao')
+
+        enviados = 0
+        total_antes = 0
+        total_depois = 0
+        mensagens_individuais = []
+
+        for i in range(len(arquivos)):
+            arquivo = arquivos[i]
+            tipo_doc_id = tipos[i] if i < len(tipos) else ''
+            nome_livre = nomes[i] if i < len(nomes) else ''
+            descricao = descricoes[i] if i < len(descricoes) else ''
+
+            doc = Documento(arquivo=arquivo)
+
+            # Relacionamento com owner
+            if isinstance(self.owner, AssociadoModel):
+                doc.associado = self.owner
+            elif isinstance(self.owner, IntegrantesModel):
+                doc.integrante = self.owner
+            elif isinstance(self.owner, AssociacaoModel):
+                doc.associacao = self.owner
+            elif isinstance(self.owner, ReparticoesModel):
+                doc.reparticao = self.owner
+            elif isinstance(self.owner, TarefaModel):
+                doc.tarefa = self.owner
+            elif isinstance(self.owner, ExtraAssociadoModel):
+                doc.extra_associado = self.owner
+            elif isinstance(self.owner, EmbarcacoesModel):
+                doc.embarcacao = self.owner
+
+            # Tipo ou nome?
+            if tipo_doc_id:
+                tipo_doc = get_object_or_404(TipoDocumentoModel, id=tipo_doc_id)
+                doc.tipo_doc = tipo_doc
+            elif nome_livre:
+                doc.nome = nome_livre
+            else:
+                messages.warning(request, f"❗ Documento {i+1} ignorado: nenhum tipo ou nome informado.")
+                continue
+
+            # Agora sim, seta a descrição
+            doc.descricao = descricao
+
+            doc.save()
+
+            # Compressão
+            path = doc.arquivo.path
+            extensao = os.path.splitext(path)[-1].lower()
+            tamanho_antes = os.path.getsize(path)
+
+            comprimido = False
+            if extensao in ['.jpg', '.jpeg', '.png']:
+                comprimido = comprimir_imagem(path)
+            elif extensao == '.pdf':
+                comprimido = comprimir_pdf(path)
+
+            tamanho_depois = os.path.getsize(path)
+            total_antes += tamanho_antes
+            total_depois += tamanho_depois
+            enviados += 1
+
+            if comprimido and tamanho_depois < tamanho_antes:
+                economia = tamanho_antes - tamanho_depois
+                mensagens_individuais.append(f"📄 Documento {i+1}: economia de {economia // 1024} KB")
+            elif comprimido:
+                mensagens_individuais.append(f"📄 Documento {i+1}: compressão aplicada, sem ganho real")
+            else:
+                mensagens_individuais.append(f"📄 Documento {i+1}: não foi possível comprimir")
+
+        # Estatística geral
+        economia = total_antes - total_depois
+        economia_pct = (economia / total_antes * 100) if total_antes else 0
+        economia_str = f"{economia // 1024} KB ({economia_pct:.1f}%)" if economia > 0 else "sem compressão aplicada"
+
+        for msg in mensagens_individuais:
+            messages.info(request, msg)
+
+        messages.success(request, f"{enviados} documento(s) enviados. Economia total: {economia_str}")
+        return HttpResponseRedirect(self.get_success_url())
+
+
+
 
     def form_valid(self, form):
         arquivo = form.cleaned_data.get("arquivo")
@@ -108,6 +196,7 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['owner'] = self.owner
+        context['tipos_documento'] = TipoDocumentoModel.objects.order_by('tipo')
         return context
 
     def get_success_url(self):
@@ -129,7 +218,7 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
         elif isinstance(self.owner, EmbarcacoesModel)        :
             return reverse('app_embarcacoes:single_embarcacao', kwargs={'pk':self.owner.pk})
 
-
+    
 
 def download_documento(request, pk):
     doc = get_object_or_404(Documento, pk=pk)
