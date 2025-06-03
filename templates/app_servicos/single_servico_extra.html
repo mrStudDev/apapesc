@@ -31,25 +31,48 @@
     <main class="flex-grow">
         <div class="container mx-auto max-8xl bg-white p-6 rounded-lg shadow-lg">
 
-            {% if messages %}
-            <div class="mb-4">
-                {% for message in messages %}
-                    <div class="p-4 rounded-md text-white 
-                        {% if message.tags == 'success' %}
-                            bg-green-500
-                        {% elif message.tags == 'error' %}
-                            bg-red-500
-                        {% elif message.tags == 'info' %}
-                            bg-blue-500
-                        {% else %}
-                            bg-gray-500
-                        {% endif %}
-                    ">
-                        {{ message }}
-                    </div>
-                {% endfor %}
+        {% if messages %}
+        <div class="space-y-4 mb-6">
+            {% for message in messages %}
+            <div class="flex items-start gap-3 p-4 rounded-lg shadow-md border-l-4 transition-all duration-300
+                {% if message.tags == 'success' %}
+                bg-green-50 border-green-500 text-green-800
+                {% elif message.tags == 'error' %}
+                bg-red-50 border-red-500 text-red-800
+                {% elif message.tags == 'info' %}
+                bg-blue-50 border-blue-500 text-blue-800
+                {% else %}
+                bg-gray-50 border-gray-500 text-gray-800
+                {% endif %}
+            ">
+                <div class="pt-1">
+                {% if message.tags == 'success' %}
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                {% elif message.tags == 'error' %}
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                {% elif message.tags == 'info' %}
+                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 12h.01"/>
+                    </svg>
+                {% else %}
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h.01M12 4h.01"/>
+                    </svg>
+                {% endif %}
+                </div>
+                <div class="text-sm leading-relaxed">{{ message }}</div>
             </div>
-            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
 
             <!-- Container -->
             <div class="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md space-y-8">
@@ -128,6 +151,41 @@
                         </p>
                       </div>
                     </div>
+                    <!-- Seção: Logins e Senhas -->
+                    <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                        <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Conta Gov do Associado</h2>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+                            <!-- CPF -->
+                            <div class="flex items-center space-x-3">
+                                <i class="material-icons text-red-500" style="font-size: 24px;">fingerprint</i>
+                                <div>
+                                    <strong class="text-gray-700">Login Gov - CPF:</strong>
+                                    <div class="flex items-center">
+                                        <span id="cpf-{{ extra_associado.pk }}" class="text-gray-800">{{ servico.extra_associado.cpf }}</span>
+                                        <button onclick="copyToClipboard('cpf-{{ extra_associado.pk }}')" class="ml-2 text-gray-600 hover:text-orange-500">
+                                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Senha Gov -->
+                            <div class="flex items-center space-x-3">
+                                <i class="material-icons text-red-500" style="font-size: 24px;">lock</i>
+                                <div>
+                                    <strong class="text-gray-700">Senha Gov:</strong>
+                                    <div class="flex items-center">
+                                        <span id="senha-gov-{{ extra_associado.pk }}" class="text-gray-800">{{ servico.extra_associado.senha_gov }}</span>
+                                        <button onclick="copyToClipboard('senha-gov-{{ extra_associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                                            <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
+
                   
                     <!-- Anotações -->
                     {% if servico.content %}
@@ -334,4 +392,5 @@
 
     <!-- Footer -->
     {% include "components/footer_associacao.html" %}
+    <script src="{% static 'js/copy_to_clipboard.js' %}"></script>
 {% endblock single_ServicoExtra %}

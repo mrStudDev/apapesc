@@ -38,9 +38,6 @@ import fitz
 
 
 # Create your views here.
-
-
-
 class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
     model = Documento
     form_class = DocumentoForm
@@ -196,7 +193,7 @@ class TipoDocumentoEditView(LoginRequiredMixin, GroupPermissionRequiredMixin, Up
         'Autorização de Uso de Imagem Assinada', 'Comprovante Seguro Defeso',
         'Ficha de Requerimento de Filiação Assinada', 'Título Eleitor',
         'Procuração Individual Ad Judicia Assinada', 'Procuração Individual Administrativa Assinada',
-        'Licença Embarcação(Pesca)', 'Seguro DPEM',
+        'Licença Embarcação(Pesca)', 'Seguro DPEM', 'Protocolo RGP',
     ]
 
     def get_context_data(self, **kwargs):
@@ -255,7 +252,6 @@ class DocumentoDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
         return context
 
 
-
 class DocumentoDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
     group_required = [
         'Superuser',
@@ -282,7 +278,7 @@ class DocumentoDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, View
         associcao = documento.associacao
         reparticao = documento.reparticao
         tarefa = documento.tarefa
-        extra_associado = documento.extraassociado
+        extra_associado = documento.extra_associado
         embarcacao = documento.embarcacao
 
         try:
@@ -482,7 +478,6 @@ def criar_copia_pdf(request, pk):
 def upload_docs_view(request, associado_id):
     associado = get_object_or_404(AssociadoModel, id=associado_id)
     tipos_documento = TipoDocumentoModel.objects.order_by('tipo')
-    
 
     if request.method == 'POST':
         arquivos = request.FILES.getlist('arquivo')
@@ -490,69 +485,81 @@ def upload_docs_view(request, associado_id):
         enviados = 0
         total_antes = 0
         total_depois = 0
-        
+        mensagens_individuais = []  # <- Aqui estava faltando inicialização!
+
         for i, arquivo in enumerate(arquivos):
             tipo_id = tipos[i]
             tipo = TipoDocumentoModel.objects.get(id=tipo_id)
 
-            # Criar entrada temporária no banco
             upload = UpDocDriveModel.objects.create(
                 associado=associado,
                 tipo_documento=tipo,
                 arquivo=arquivo
             )
 
-            # Nome final
             nome_extensao = os.path.splitext(arquivo.name)[-1]
             nome_final = f"{tipo.tipo} - {associado.user.get_full_name()} - {now().strftime('%Y-%m-%d_%H-%M')}{nome_extensao}"
             upload.nome_final = nome_final
             upload.save()
 
-            # Corrigir o ID da pasta
             folder_id = associado.drive_folder_id.split('?')[0]
-            
-            # Comprimir arquivo
-            # Detectar extensão e comprimir apropriadamente
             path = upload.arquivo.path
-            extensao = os.path.splitext(upload.arquivo.path)[-1].lower()
-            
+            extensao = os.path.splitext(path)[-1].lower()
+
             tamanho_antes = os.path.getsize(path)
-
-
             print(f"📁 Iniciando compressão para: {upload.arquivo.name} ({extensao})")
             print(f"🔸 Tamanho antes: {tamanho_antes} bytes")
-            # Comprimir se for imagem ou PDF
-            if extensao in ['.jpg', '.jpeg', '.png']:
-                comprimir_imagem(path)
-            elif extensao == '.pdf':
-                comprimir_pdf(path)
 
-            # Tamanho depois
+            # Compressão
+            comprimido = False
+            if extensao in ['.jpg', '.jpeg', '.png']:
+                comprimido = comprimir_imagem(path)
+            elif extensao == '.pdf':
+                comprimido = comprimir_pdf(path)
+
             tamanho_depois = os.path.getsize(path)
             print(f"🔻 Tamanho depois: {tamanho_depois} bytes")
-            # Atualizar estatísticas
+
             total_antes += tamanho_antes
-            total_depois += tamanho_depois                
-                
+            total_depois += tamanho_depois
+
+            if comprimido and tamanho_depois < tamanho_antes:
+                economia = tamanho_antes - tamanho_depois
+                mensagens_individuais.append(
+                    f"📁 '{nome_final}': economia de {economia // 1024} KB"
+                )
+            elif comprimido:
+                mensagens_individuais.append(
+                    f"📁 '{nome_final}': compressão aplicada, mas sem redução significativa"
+                )
+            else:
+                mensagens_individuais.append(
+                    f"📁 '{nome_final}': não foi possível aplicar compressão"
+                )
+
             try:
-                upload_to_drive(upload.arquivo.path, nome_final, folder_id)
+                upload_to_drive(path, nome_final, folder_id)
                 enviados += 1
             except Exception as e:
                 messages.error(request, f"Erro ao enviar '{arquivo.name}': {str(e)}")
-                
-        # Estatísticas de compressão
+
+        # 🔹 Estatísticas Finais
         economia_bytes = total_antes - total_depois
         economia_percentual = (economia_bytes / total_antes * 100) if total_antes else 0
         economia_str = f"{economia_bytes // 1024} KB ({economia_percentual:.1f}%)" if economia_bytes > 0 else "sem compressão aplicada"
-             
-        messages.success(request, f"{enviados} documento(s) enviados com sucesso ao Google Drive. Economia total: {economia_str}")
 
+        # 🔹 Exibe todas as mensagens após o loop
+        for msg in mensagens_individuais:
+            messages.info(request, msg)
+
+        messages.success(request, f"{enviados} documento(s) enviados com sucesso ao Google Drive. Economia total: {economia_str}")
         return redirect('app_associados:single_associado', pk=associado_id)
 
     return render(request, 'app_documentos/upload_to_drive.html', {
         'associado': associado,
         'tipos_documento': tipos_documento
     })
+
     
 
 def comprimir_imagem(path, qualidade=75):

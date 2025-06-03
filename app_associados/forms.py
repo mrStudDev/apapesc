@@ -138,7 +138,10 @@ class AssociadoForm(forms.ModelForm):
             }),
             'recebe_seguro': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-            }),            
+            }),  
+            'ja_recebeu_defeso_algumavez': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),                       
             'relacao_trabalho': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),

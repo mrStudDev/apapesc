@@ -431,10 +431,30 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
         context = super().get_context_data(**kwargs)
         associado = self.object  # Associado atual
 
+        # Listagem dos nomes dos tipos que devem ser verificados
+        tipos_a_verificar = [
+            'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'TIE', 'CEI', 'CAEPF', 'Foto3x4',
+            'Comprovante Residência', 'Declaração Residência - MAPA', 'Auto Declaração',
+            'Autorização de Acesso Gov Assinada', 'Autorização de Uso de Imagem Assinada',
+            'Comprovante Seguro Defeso', 'Ficha de Requerimento de Filiação Assinada',
+            'Título Eleitor', 'Procuração Individual Ad Judicia Assinada',
+            'Procuração Individual Administrativa Assinada', 'Licença Embarcação(Pesca)',
+            'Seguro DPEM', 'Protocolo RGP'
+        ]
+
+        documentos = Documento.objects.filter(associado=associado)
+
+        status_documentos = {}
+        for tipo in tipos_a_verificar:
+            tem_documento = documentos.filter(tipo_doc__tipo__iexact=tipo).exists()
+            status_documentos[tipo] = tem_documento
+
+        context['status_documentos'] = status_documentos
+
         # Documentos relacionados ao associado
         context['documentos'] = Documento.objects.filter(associado=associado)
         context['embarcacoes'] = EmbarcacoesModel.objects.filter(proprietario=associado)
-
+        context['quantidade_documentos'] = documentos.count()
         # 👇 Adicione aqui a data de hoje
         from datetime import date
         context['today'] = date.today()

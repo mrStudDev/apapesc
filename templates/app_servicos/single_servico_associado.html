@@ -29,216 +29,275 @@
     <main class="flex-grow">
         <div class="container mx-auto max-8xl bg-white p-6 rounded-lg shadow-lg">
 
-            {% if messages %}
-            <div class="mb-4">
-                {% for message in messages %}
-                    <div class="p-4 rounded-md text-white 
-                        {% if message.tags == 'success' %}
-                            bg-green-500
-                        {% elif message.tags == 'error' %}
-                            bg-red-500
-                        {% elif message.tags == 'info' %}
-                            bg-blue-500
-                        {% else %}
-                            bg-gray-500
-                        {% endif %}
-                    ">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            </div>
-            {% endif %}
-
-             <!-- Container -->
-            <div class="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md space-y-8">
-              <!-- 🔹 Título Principal -->
-              <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                  <i class="material-icons text-blue-500 mr-2">description</i> 
-                  Detalhes do Serviço - Associado
-              </h2>
-                
-            <!-- 🔸 Card Principal Aprimorado -->
-            <div class="bg-white rounded-xl shadow-md p-6 space-y-8 border border-gray-100">
-
-              <!-- 🔹 Cabeçalho -->
-              <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4">
-                <div>
-                  <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                    <span class="material-icons text-blue-500 text-base">assignment</span>
-                    Informações do Serviço
-                  </h3>
-                  <p class="text-sm text-gray-500 mt-1">Registrado em {{ servico.data_inicio|date:"d/m/Y H:i" }}</p>
-                </div>
-                <span class="text-xs text-gray-400 mt-2 md:mt-0">Última alteração: {{ servico.ultima_alteracao|date:"d/m/Y H:i" }}</span>
-              </div>
-
-              <!-- 🔹 Grid de Dados -->
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800">
-
-                <!-- Proprietário -->
-                <div>
-                  {% if servico.associado %}
-                    <div class="bg-gray-50 border border-blue-200 rounded-lg p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <div>
-                        <h4 class="text-sm font-semibold text-blue-800 flex items-center gap-1">
-                          <span class="material-icons text-base">person</span>
-                          Proprietário
-                        </h4>
-                        <p>{{ servico.associado.user.get_full_name }}</p>
-                      </div>
-                      <a href="{% url 'app_associados:single_associado' servico.associado.id %}" 
-                        class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
-                        title="Ver detalhes do associado">
-                        <span class="material-icons text-sm">visibility</span> Ver
-                      </a>
-                    </div>
-                  {% else %}
-                    <span class="text-gray-400 italic">Proprietário não informado</span>
-                  {% endif %}
-                </div>
-
-                <!-- Associação -->
-                <div>
-                  <h4 class="text-sm font-semibold text-gray-700 mb-1">Associação Responsável</h4>
-                  {% if servico.associacao %}
-                    <p>{{ servico.associacao.nome_fantasia }}</p>
-                  {% else %}
-                    <span class="text-gray-400 italic">Não informada</span>
-                  {% endif %}
-                </div>
-
-                <!-- Repartição -->
-                <div>
-                  <h4 class="text-sm font-semibold text-gray-700 mb-1">Repartição Responsável</h4>
-                  {% if servico.reparticao %}
-                    <p>{{ servico.reparticao.nome_reparticao }}</p>
-                  {% else %}
-                    <span class="text-gray-400 italic">Não informada</span>
-                  {% endif %}
-                </div>
-
-                <!-- Status -->
-                <div>
-                  <h4 class="text-sm font-semibold text-gray-700 mb-1">Status do Serviço</h4>
-                  <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs font-semibold">
-                    {{ servico.get_status_etapa_display }}
-                  </span>
-                </div>
-
-                <!-- Valor -->
-                <div>
-                  <h4 class="text-sm font-semibold text-gray-700 mb-1">Valor do Serviço</h4>
-                  {% if servico.valor_servico %}
-                    <p class="text-green-600 font-semibold">R$ {{ servico.valor_servico|floatformat:2 }}</p>
-                  {% else %}
-                    <span class="text-gray-400 italic">Não informado</span>
-                  {% endif %}
-                </div>
-              </div>
-
-              <!-- Tipo de Serviço -->
-              <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 shadow-sm">
-                <h4 class="text-sm font-semibold text-blue-800 mb-1 flex items-center gap-2">
-                  <span class="material-icons text-base">work_outline</span>
-                  Tipo de Serviço
-                </h4>
-                <p class="text-gray-800 text-sm">{{ servico.tipo_servico }}</p>
-              </div>
-
-              <!-- Descrição -->
-              {% if servico.content %}
-                <div class="mt-6">
-                  <h4 class="text-sm font-semibold text-gray-700 mb-2">📝 Descrição do Serviço:</h4>
-                  <div class="bg-gray-50 border border-gray-200 rounded-md p-4 shadow-sm text-sm text-gray-700 leading-relaxed">
-                    {{ servico.content|safe }}
-                  </div>
-                </div>
-              {% endif %}
-
-            </div>
-            <!-- 🔸 Ações -->                
-
-              <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
-
-                <!-- 🔙 Voltar para lista -->
-                <a href="{% url 'app_servicos:list_servicos' %}" 
-                  class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition">
-                  <i class="material-icons text-base mr-1">arrow_back</i> Voltar para lista
-                </a>
-              
-                <!-- ✏️ Editar serviço (associado) -->
-                {% if servico.pk %}
-                <a href="{% url 'app_servicos:edit_servico_associado' servico.pk %}" 
-                  class="inline-flex items-center text-sm text-yellow-600 hover:text-yellow-800 transition">
-                  <i class="material-icons text-base mr-1">edit</i> Editar Serviço
-                </a>
+        {% if messages %}
+        <div class="space-y-4 mb-6">
+            {% for message in messages %}
+            <div class="flex items-start gap-3 p-4 rounded-lg shadow-md border-l-4 transition-all duration-300
+                {% if message.tags == 'success' %}
+                bg-green-50 border-green-500 text-green-800
+                {% elif message.tags == 'error' %}
+                bg-red-50 border-red-500 text-red-800
+                {% elif message.tags == 'info' %}
+                bg-blue-50 border-blue-500 text-blue-800
+                {% else %}
+                bg-gray-50 border-gray-500 text-gray-800
                 {% endif %}
-              
-              </div>
+            ">
+                <div class="pt-1">
+                {% if message.tags == 'success' %}
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                {% elif message.tags == 'error' %}
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                {% elif message.tags == 'info' %}
+                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 12h.01"/>
+                    </svg>
+                {% else %}
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h.01M12 4h.01"/>
+                    </svg>
+                {% endif %}
+                </div>
+                <div class="text-sm leading-relaxed">{{ message }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
 
-              {% if documentos_relevantes %}
-              <div class="bg-white p-6 rounded-lg shadow-md mt-6">
-                <h2 class="text-base font-semibold text-gray-700 mb-4">📎 Documentos Relevantes do Associado</h2>
-                <ul class="space-y-4">
-                  {% for doc in documentos_relevantes %}
-                  <li class="flex items-center justify-between bg-gray-50 border p-3 rounded-md">
-                    <div>
-                      <p class="text-sm font-medium text-gray-800">
-                        <i class="material-icons text-sm text-blue-400 align-middle">insert_drive_file</i>
-                        {{ doc.tipo_doc.tipo }} – 
-                        <a href="{{ doc.arquivo.url }}" class="text-blue-600 hover:underline" target="_blank">Visualizar</a>
-                      
-                      <span class="inline-block text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full ml-2">
-                        {{ doc.arquivo.url|slice:"-3:"|upper }}
-                      </span>
-                    </p>
-                      <p class="text-xs text-gray-500">Enviado em {{ doc.data_upload|date:"d/m/Y H:i" }}</p>
-                    </div>
-                    <a href="{% url 'app_documentos:download_documento' doc.pk %}" class="text-green-600 hover:text-green-800" title="Baixar Documento">
-                      <i class="material-icons">cloud_download</i>
-                    </a>
-                  </li>
-                  {% endfor %}
-                </ul>
-              </div>
+          <!-- Container -->
+        <div class="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md space-y-8">
+          <!-- 🔹 Título Principal -->
+          <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
+              <i class="material-icons text-blue-500 mr-2">description</i> 
+              Detalhes do Serviço - Associado
+          </h2>
+            
+        <!-- 🔸 Card Principal Aprimorado -->
+        <div class="bg-white rounded-xl shadow-md p-6 space-y-8 border border-gray-100">
+
+          <!-- 🔹 Cabeçalho -->
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4">
+            <div>
+              <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <span class="material-icons text-blue-500 text-base">assignment</span>
+                Informações do Serviço
+              </h3>
+              <p class="text-sm text-gray-500 mt-1">Registrado em {{ servico.data_inicio|date:"d/m/Y H:i" }}</p>
+            </div>
+            <span class="text-xs text-gray-400 mt-2 md:mt-0">Última alteração: {{ servico.ultima_alteracao|date:"d/m/Y H:i" }}</span>
+          </div>
+
+          <!-- 🔹 Grid de Dados -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800">
+
+            <!-- Proprietário -->
+            <div>
+              {% if servico.associado %}
+                <div class="bg-gray-50 border border-blue-200 rounded-lg p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <h4 class="text-sm font-semibold text-blue-800 flex items-center gap-1">
+                      <span class="material-icons text-base">person</span>
+                      Proprietário
+                    </h4>
+                    <p>{{ servico.associado.user.get_full_name }}</p>
+                  </div>
+                  <a href="{% url 'app_associados:single_associado' servico.associado.id %}" 
+                    class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                    title="Ver detalhes do associado">
+                    <span class="material-icons text-sm">visibility</span> Ver
+                  </a>
+                </div>
               {% else %}
-                <p class="text-gray-500 text-sm italic mt-4">Nenhum documento RG, RGP ou NIT foi encontrado para o associado.</p>
+                <span class="text-gray-400 italic">Proprietário não informado</span>
               {% endif %}
-              
-           </div>              
-              <!-- 🔸 Tabela Alternativa (se necessário) -->
-              {% if historico %}
-              <div class="bg-white border border-blue-100 rounded-md p-4 mt-8 shadow-sm">
-                <h3 class="text-blue-700 font-semibold mb-3 text-lg flex items-center">
-                  <i class="material-icons mr-2">history</i> Histórico do Serviço
-                </h3>
-                <table class="table-auto w-full text-sm">
-                  <thead>
-                    <tr class="bg-blue-50 text-left text-xs text-gray-600">
-                      <th class="px-3 py-2">Campo</th>
-                      <th class="px-3 py-2">De</th>
-                      <th class="px-3 py-2">Para</th>
-                      <th class="px-3 py-2">Alterado por</th>
-                      <th class="px-3 py-2">Data</th>
-                    </tr>
-                  </thead>
-                  <tbody class="divide-y divide-gray-100">
-                    {% for h in historico %}
-                    <tr>
-                      <td class="px-3 py-2 font-medium">{{ h.campo }}</td>
-                      <td class="px-3 py-2 text-gray-600">{{ h.valor_antigo|safe }}</td>
-                      <td class="px-3 py-2 text-blue-700 font-semibold">{{ h.valor_novo|safe }}</td>
-                      <td class="px-3 py-2">{{ h.alterado_por.get_full_name }}</td>
-                      <td class="px-3 py-2 text-xs">{{ h.data_alteracao|date:"d/m/Y H:i" }}</td>
-                    </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
+            </div>
+
+            <!-- Associação -->
+            <div>
+              <h4 class="text-sm font-semibold text-gray-700 mb-1">Associação Responsável</h4>
+              {% if servico.associacao %}
+                <p>{{ servico.associacao.nome_fantasia }}</p>
+              {% else %}
+                <span class="text-gray-400 italic">Não informada</span>
+              {% endif %}
+            </div>
+
+            <!-- Repartição -->
+            <div>
+              <h4 class="text-sm font-semibold text-gray-700 mb-1">Repartição Responsável</h4>
+              {% if servico.reparticao %}
+                <p>{{ servico.reparticao.nome_reparticao }}</p>
+              {% else %}
+                <span class="text-gray-400 italic">Não informada</span>
+              {% endif %}
+            </div>
+
+            <!-- Status -->
+            <div>
+              <h4 class="text-sm font-semibold text-gray-700 mb-1">Status do Serviço</h4>
+              <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs font-semibold">
+                {{ servico.get_status_etapa_display }}
+              </span>
+            </div>
+
+            <!-- Valor -->
+            <div>
+              <h4 class="text-sm font-semibold text-gray-700 mb-1">Valor do Serviço</h4>
+              {% if servico.valor_servico %}
+                <p class="text-green-600 font-semibold">R$ {{ servico.valor_servico|floatformat:2 }}</p>
+              {% else %}
+                <span class="text-gray-400 italic">Não informado</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Tipo de Serviço -->
+          <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 shadow-sm">
+            <h4 class="text-sm font-semibold text-blue-800 mb-1 flex items-center gap-2">
+              <span class="material-icons text-base">work_outline</span>
+              Tipo de Serviço
+            </h4>
+            <p class="text-gray-800 text-sm">{{ servico.tipo_servico }}</p>
+          </div>
+
+          <!-- Descrição -->
+          {% if servico.content %}
+            <div class="mt-6">
+              <h4 class="text-sm font-semibold text-gray-700 mb-2">📝 Descrição do Serviço:</h4>
+              <div class="bg-gray-50 border border-gray-200 rounded-md p-4 shadow-sm text-sm text-gray-700 leading-relaxed">
+                {{ servico.content|safe }}
               </div>
-              {% endif %}
+            </div>
+          {% endif %}
+
+          <!-- Seção: Logins e Senhas -->
+          <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+              <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Conta Gov do Associado</h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+                  <!-- CPF -->
+                  <div class="flex items-center space-x-3">
+                      <i class="material-icons text-red-500" style="font-size: 24px;">fingerprint</i>
+                      <div>
+                          <strong class="text-gray-700">Login Gov - CPF:</strong>
+                          <div class="flex items-center">
+                              <span id="cpf-{{ associado.pk }}" class="text-gray-800">{{ servico.associado.cpf }}</span>
+                              <button onclick="copyToClipboard('cpf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-orange-500">
+                                  <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+
+                  <!-- Senha Gov -->
+                  <div class="flex items-center space-x-3">
+                      <i class="material-icons text-red-500" style="font-size: 24px;">lock</i>
+                      <div>
+                          <strong class="text-gray-700">Senha Gov:</strong>
+                          <div class="flex items-center">
+                              <span id="senha-gov-{{ associado.pk }}" class="text-gray-800">{{ servico.associado.senha_gov }}</span>
+                              <button onclick="copyToClipboard('senha-gov-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                                  <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                              </button>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          </div> 
+
+        </div>
+        <!-- 🔸 Ações -->                
+
+          <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
+
+            <!-- 🔙 Voltar para lista -->
+            <a href="{% url 'app_servicos:list_servicos' %}" 
+              class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition">
+              <i class="material-icons text-base mr-1">arrow_back</i> Voltar para lista
+            </a>
+          
+            <!-- ✏️ Editar serviço (associado) -->
+            {% if servico.pk %}
+            <a href="{% url 'app_servicos:edit_servico_associado' servico.pk %}" 
+              class="inline-flex items-center text-sm text-yellow-600 hover:text-yellow-800 transition">
+              <i class="material-icons text-base mr-1">edit</i> Editar Serviço
+            </a>
+            {% endif %}
+          
+          </div>
+
+          {% if documentos_relevantes %}
+          <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+            <h2 class="text-base font-semibold text-gray-700 mb-4">📎 Documentos Relevantes do Associado</h2>
+            <ul class="space-y-4">
+              {% for doc in documentos_relevantes %}
+              <li class="flex items-center justify-between bg-gray-50 border p-3 rounded-md">
+                <div>
+                  <p class="text-sm font-medium text-gray-800">
+                    <i class="material-icons text-sm text-blue-400 align-middle">insert_drive_file</i>
+                    {{ doc.tipo_doc.tipo }} – 
+                    <a href="{{ doc.arquivo.url }}" class="text-blue-600 hover:underline" target="_blank">Visualizar</a>
+                  
+                  <span class="inline-block text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full ml-2">
+                    {{ doc.arquivo.url|slice:"-3:"|upper }}
+                  </span>
+                </p>
+                  <p class="text-xs text-gray-500">Enviado em {{ doc.data_upload|date:"d/m/Y H:i" }}</p>
+                </div>
+                <a href="{% url 'app_documentos:download_documento' doc.pk %}" class="text-green-600 hover:text-green-800" title="Baixar Documento">
+                  <i class="material-icons">cloud_download</i>
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          {% else %}
+            <p class="text-gray-500 text-sm italic mt-4">Nenhum documento RG, RGP ou NIT foi encontrado para o associado.</p>
+          {% endif %}
+          
+        </div>              
+          <!-- 🔸 Tabela Alternativa (se necessário) -->
+          {% if historico %}
+          <div class="bg-white border border-blue-100 rounded-md p-4 mt-8 shadow-sm">
+            <h3 class="text-blue-700 font-semibold mb-3 text-lg flex items-center">
+              <i class="material-icons mr-2">history</i> Histórico do Serviço
+            </h3>
+            <table class="table-auto w-full text-sm">
+              <thead>
+                <tr class="bg-blue-50 text-left text-xs text-gray-600">
+                  <th class="px-3 py-2">Campo</th>
+                  <th class="px-3 py-2">De</th>
+                  <th class="px-3 py-2">Para</th>
+                  <th class="px-3 py-2">Alterado por</th>
+                  <th class="px-3 py-2">Data</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                {% for h in historico %}
+                <tr>
+                  <td class="px-3 py-2 font-medium">{{ h.campo }}</td>
+                  <td class="px-3 py-2 text-gray-600">{{ h.valor_antigo|safe }}</td>
+                  <td class="px-3 py-2 text-blue-700 font-semibold">{{ h.valor_novo|safe }}</td>
+                  <td class="px-3 py-2">{{ h.alterado_por.get_full_name }}</td>
+                  <td class="px-3 py-2 text-xs">{{ h.data_alteracao|date:"d/m/Y H:i" }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% endif %}
       
     </main>
 <!-- CSS do Editor -->
 <link rel="stylesheet" href="{% static 'css/editor.css' %}">
+<script src="{% static 'js/copy_to_clipboard.js' %}"></script>
 {% include "components/footer_associacao.html" %}
 {% endblock single_servico %}

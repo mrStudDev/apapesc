@@ -59,7 +59,7 @@ class SingleServicoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Detail
             'Autorização de Uso de Imagem Assinada', 'Comprovante Seguro Defeso',
             'Ficha de Requerimento de Filiação Assinada', 'Título Eleitor',
             'Procuração Individual Ad Judicia Assinada', 'Procuração Individual Administrativa Assinada',
-            'Licença Embarcação(Pesca)', 'Seguro DPEM',
+            'Licença Embarcação(Pesca)', 'Seguro DPEM', 'Protocolo RGP',
             
         ]
         tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
@@ -120,7 +120,7 @@ class ServicoExtraDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin,  
             'Autorização de Uso de Imagem Assinada', 'Comprovante Seguro Defeso',
             'Ficha de Requerimento de Filiação Assinada', 'Título Eleitor',
             'Procuração Individual Ad Judicia Assinada', 'Procuração Individual Administrativa Assinada',
-            'Licença Embarcação(Pesca)', 'Seguro DPEM',
+            'Licença Embarcação(Pesca)', 'Seguro DPEM','Protocolo RGP',
         ]
         tipos = TipoDocumentoModel.objects.filter(tipo__in=tipos_desejados)
 

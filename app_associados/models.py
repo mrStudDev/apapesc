@@ -137,7 +137,11 @@ SEGURO_DEFESO_CHOICES = [
     ('Recebe', 'Recebe'),
     ('Não declarado', 'Não declarado'),     
 ]
-
+JA_RECEBEU_DEFESO_ALGUMA_VEZ = [
+    ('Sim', 'Sim'),
+    ('Não', 'Não'),
+    ('Não declarado', 'Não declarado'),   
+]
 RELACAO_TRABALHO_CHOICES = [
     ('Indicidual Autônomo', 'Individual Autônomo'),
     ('Economia Familiar', 'Economia Familiar'),
@@ -293,6 +297,14 @@ class AssociadoModel(models.Model):
         null=True, 
         default="Não declarado"
     )
+    ja_recebeu_defeso_algumavez = models.CharField(
+        max_length=50, 
+        choices=JA_RECEBEU_DEFESO_ALGUMA_VEZ, 
+        blank=True, 
+        null=True, 
+        verbose_name='Já Recebeu Seguro Defeso Alguma Vez?',
+        default="Não declarado"
+    )    
     relacao_trabalho = models.CharField(
         choices=RELACAO_TRABALHO_CHOICES,
         max_length=255, 
@@ -703,13 +715,13 @@ class AssociadoModel(models.Model):
             'cpf', 'senha_gov', 'celular', 'celular_correspondencia', 'email',
             'senha_google', 'senha_site', 'foto', 'sexo_biologico', 'etnia',
             'escolaridade', 'nome_mae', 'nome_pai', 'estado_civil', 'profissao',
-            'recolhe_inss', 'recebe_seguro', 'relacao_trabalho',
+            'recolhe_inss', 'recebe_seguro', 'relacao_trabalho', 
             'comercializa_produtos', 'bolsa_familia', 'rg_numero', 'rg_orgao',
             'rg_data_emissao', 'naturalidade', 'data_nascimento', 'nit', 'pis',
             'titulo_eleitor', 'caepef', 'cei', 'rgp', 'rgp_data_emissao',
             'primeiro_registro', 'rgp_mpa', 'logradouro', 'bairro', 'numero',
             'complemento', 'cep', 'municipio', 'uf', 'associacao', 'reparticao',
-            'municipio_circunscricao', 'data_filiacao'
+            'municipio_circunscricao', 'data_filiacao', 'ja_recebeu_defeso_algumavez',
         ]
 
         NAO_DECLARADO = ['Não declarado', None, '', 'nao_declarado', 'não_declarado']
