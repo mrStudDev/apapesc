@@ -7,7 +7,10 @@ from .views import (
     TipoDocListView,
     DocumentoDetailView,
     DocumentoDeleteView,
-    TipoDocumentoEditView
+    TipoDocumentoEditView,
+    RepositorioUpListView,
+    DocumentoDeleteView,
+    MensagensRepositorioView,
     )
 
 
@@ -27,4 +30,9 @@ urlpatterns = [
     
     # Upload to Drive Folder
      path('upload/<int:associado_id>/', upload_docs_view, name='upload_docs'),
-]    
+     
+    path('repositorio/', RepositorioUpListView.as_view(), name='repositorio_list'),
+    path('documento/delete/<int:pk>/', DocumentoDeleteView.as_view(), name='delete_documento'),
+
+    path('mensagens-repositorio/', MensagensRepositorioView.as_view(), name='repositorio_msg'),
+]  

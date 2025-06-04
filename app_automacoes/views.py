@@ -902,103 +902,76 @@ def gerar_procuracao_juridica(request, associado_id):
 # ======================================================================================================
 
 # GERAR RECIBO DE ANUIDADE
+from decimal import Decimal
+from django.db.models import Sum
+
 def gerar_recibo_anuidade(request, anuidade_assoc_id):
-    anuidade_assoc = get_object_or_404(AnuidadeAssociado, id=anuidade_assoc_id, pago=True)
+    anuidade_assoc = get_object_or_404(AnuidadeAssociado, id=anuidade_assoc_id)
     associado = anuidade_assoc.associado
     associacao = associado.associacao
 
-    # Caminho para o PDF de template
+    # ⚠️ Verifica se existe pagamento ou desconto suficiente
+    total_pago = anuidade_assoc.pagamentos.aggregate(total=Sum('valor'))['total'] or Decimal('0.00')
+    total_desconto = anuidade_assoc.descontos.aggregate(total=Sum('valor_desconto'))['total'] or Decimal('0.00')
+    valor_anuidade = anuidade_assoc.anuidade.valor_anuidade
+    soma_total = total_pago + total_desconto
+
+    if soma_total < valor_anuidade:
+        return HttpResponse("Ainda há saldo devedor. O recibo será gerado apenas quando o total for quitado (via pagamento ou desconto).", status=400)
+
+    # ⚠️ Verifica se o template existe
     template_path = os.path.join(settings.MEDIA_ROOT, 'pdf/recibo_anuidade.pdf')
     if not os.path.exists(template_path):
         return HttpResponse("O PDF base para o Recibo de Anuidade não foi encontrado.", status=404)
 
     template_pdf = PdfReader(template_path)
 
-    # Último pagamento registrado
-    ultimo_pagamento = anuidade_assoc.pagamentos.last()
-    if not ultimo_pagamento:
-        return HttpResponse("Nenhum pagamento encontrado para gerar recibo.", status=404)
-
-    buffer = BytesIO()
-    data_pagamento = ultimo_pagamento.data_pagamento.strftime('%d/%m/%Y')
+    # Dados de pagamento
+    ultimo_pagamento = anuidade_assoc.pagamentos.order_by('-data_pagamento').first()
+    data_pagamento = (
+        ultimo_pagamento.data_pagamento.strftime('%d/%m/%Y')
+        if ultimo_pagamento else datetime.now().strftime('%d/%m/%Y')
+    )
     data_hoje = datetime.now().strftime('%d/%m/%Y')
 
-    # Estilos
-    # Estilos personalizados
-    styles = getSampleStyleSheet()
-    style_title = ParagraphStyle(
-        'Title',
-        parent=styles['Title'],
-        fontName='Times-Bold',
-        fontSize=14,  # Levemente maior pra se destacar
-        alignment=TA_CENTER,
-        leading=28,
-        spaceBefore=40,  # 🔽 Aumenta distância do topo
-        textColor=colors.black,
-    )
-
-    style_normal = ParagraphStyle(
-        'Normal',
-        parent=styles['Normal'],
-        fontName='Times-Roman',
-        fontSize=12,
-        leading=18,  # 🔼 Tamanho de linha mais compacto
-        alignment=TA_JUSTIFY,
-        spaceBefore=0,  # 🔼 remove espaço extra antes do parágrafo
-    )
-
-
-    style_assinatura = ParagraphStyle(
-        'Assinatura',
-        parent=styles['Normal'],
-        fontName='Times-Roman',
-        fontSize=12,
-        leading=18,
-        alignment=TA_CENTER,
-        spaceBefore=10,
-    )
-    style_presidente = ParagraphStyle(
-        'Presidente',
-        parent=styles['Normal'],
-        fontName='Times-Bold',
-        fontSize=12,
-        alignment=2,
-        leading=16,
-        spaceBefore=10,  # 🔼 Menos espaço acima
-        textColor=colors.grey,
-    )
-    nome_presidente = ( f"{associacao.presidente.user.get_full_name()}")
-
-    # Data atual
-    data_hoje = datetime.now().strftime('%d/%m/%Y')
-
+    # Construção do texto dinâmico
     texto = (
         f"Recebemos de <strong>{associado.user.get_full_name()}</strong>, "
         f"inscrito no CPF sob o nº <strong>{associado.cpf}</strong>, "
-        f"a importância de <strong>R$ {anuidade_assoc.valor_pago:.2f}</strong> "
-        f"(referente ao pagamento da anuidade - exercício de <strong>{anuidade_assoc.anuidade.ano}</strong>), "
-        f"pelo qual, registramos a confirmação de pagamento em nosso sistema na data de <strong>{data_pagamento}</strong>. "
+        f"a importância de <strong>R$ {total_pago:.2f}</strong> referente ao pagamento da anuidade do exercício de <strong>{anuidade_assoc.anuidade.ano}</strong>."
+    )
+
+    if total_desconto > 0:
+        texto += f" Um desconto de <strong>R$ {total_desconto:.2f}</strong> foi concedido, totalizando o valor integral de <strong>R$ {valor_anuidade:.2f}</strong>."
+
+    texto += (
         f"<br/><br/>Este pagamento foi efetuado à <strong>{associacao.razao_social}</strong>, "
         f"inscrita no CNPJ sob o nº {associacao.cnpj}, com sede na {associacao.logradouro}, nº {associacao.numero}, "
         f"{associacao.bairro}, {associacao.municipio or 'Município não informado'}/{associacao.uf}. "
-        f"<br/><br/><i>Aproveitamos para agradecer por sua confiança, por fazer parte do nosso grupo de associados e por acreditar em nosso trabalho. "
-        f"A contribuição anual é essencial para a manutenção e fortalecimento das atividades da associação, refletindo diretamente no apoio prestado à categoria.</i>"
+        f"<br/><br/><i>Agradecemos por sua confiança. A contribuição anual é essencial para a manutenção das atividades da associação, refletindo diretamente no apoio prestado à categoria.</i>"
     )
-
 
     assinatura = (
         f"{associacao.presidente.user.get_full_name()}<br/>"
         f"Presidente da Associação<br/>"
-        f"Forte Abraço!"
+        f"Forte abraço!"
     )
 
     municipio = associacao.municipio.upper() if associacao.municipio else "CIDADE NÃO DEFINIDA"
     local_data = f"{municipio}, {data_hoje}."
 
-    # Elementos do PDF
+    # PDF Elements
+    styles = getSampleStyleSheet()
+    style_title = ParagraphStyle('Title', parent=styles['Title'], fontName='Times-Bold', fontSize=14, alignment=TA_CENTER, leading=28, spaceBefore=40)
+    style_normal = ParagraphStyle('Normal', parent=styles['Normal'], fontName='Times-Roman', fontSize=12, leading=18, alignment=TA_JUSTIFY)
+    style_assinatura = ParagraphStyle('Assinatura', parent=styles['Normal'], fontName='Times-Roman', fontSize=12, leading=18, alignment=TA_CENTER)
+    style_presidente = ParagraphStyle('Presidente', parent=styles['Normal'], fontName='Times-Bold', fontSize=12, alignment=2, textColor=colors.grey)
+
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=50, leftMargin=50, topMargin=120, bottomMargin=50)
     elements = [
         Spacer(1, 50),
-        Paragraph(nome_presidente, style_presidente),
+        Paragraph(associacao.presidente.user.get_full_name(), style_presidente),
         Spacer(1, 35),
         Paragraph("RECIBO DE PAGAMENTO DE ANUIDADE", style_title),
         Spacer(1, 20),
@@ -1008,41 +981,26 @@ def gerar_recibo_anuidade(request, anuidade_assoc_id):
         Spacer(1, 20),
         Paragraph(assinatura, style_assinatura),
     ]
-
-    # Geração do PDF em memória
-    doc = SimpleDocTemplate(
-        buffer,
-        pagesize=A4,
-        rightMargin=50,
-        leftMargin=50,
-        topMargin=120,
-        bottomMargin=50,
-    )
     doc.build(elements)
     buffer.seek(0)
 
-    # Mesclando conteúdo dinâmico com o template
     overlay_pdf = PdfReader(buffer)
-
     for index, template_page in enumerate(template_pdf.pages):
         if index < len(overlay_pdf.pages):
             overlay_page = overlay_pdf.pages[index]
             PageMerge(template_page).add(overlay_page).render()
 
-    # Salvando o PDF final
+    # Geração do arquivo
     nome_associado = slugify(associado.user.get_full_name())
     pdf_name = f"recibo_anuidade_{associado.id}_{nome_associado}_{anuidade_assoc.anuidade.ano}.pdf"
     pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
     os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
     PdfWriter(pdf_path, trailer=template_pdf).write()
 
-    # Redireciona com link do PDF
+    # Redireciona com o link do PDF
     pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
     query_string = urlencode({'pdf_url': pdf_url})
-    #return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?{query_string}")
     return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?{query_string}&tipo=anuidade")
-
-
 
     # =======================================================================================================
 # GERAR COBRANÇA NUIDADE APAPESC ASSOCIADO

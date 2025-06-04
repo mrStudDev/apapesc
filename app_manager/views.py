@@ -423,7 +423,17 @@ class AuxiliarReparticaoDashboardView(LoginRequiredMixin, GroupPermissionRequire
 # Associado da Associação    
 class AssociadoDashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
     template_name = 'app_manager/dash_associado.html'
-    group_required = 'Associados da Associação'    
+    group_required = 'Associados da Associação'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        associado = AssociadoModel.objects.select_related(
+            'associacao', 'reparticao', 'municipio_circunscricao'
+        ).get(user=self.request.user)
+
+        context['associado'] = associado
+        return context
+    
     
 class UserVipDashboardView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
     template_name = 'app_manager/dash_user_vip.html'    

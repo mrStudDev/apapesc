@@ -67,7 +67,11 @@ class Documento(models.Model):
         null=True,
         blank=True,
         related_name='documentos'
-    )    
+    )
+    repositorio_padrao = models.BooleanField(
+        default=False,
+        verbose_name="É Documento do Repositório?"
+    )
     tipo_doc = models.ForeignKey(
         'TipoDocumentoModel',
         on_delete=models.SET_NULL,
@@ -83,6 +87,8 @@ class Documento(models.Model):
     def save(self, *args, **kwargs):
         # Inicializa a data atual formatada
         data_str = timezone.now().strftime('%Y-%m-%d')
+        
+        nome_proprietario = None
 
         # Determina o proprietário (associado, integrante ou associação) e usa nome e sobrenome
         if self.associado:
@@ -99,8 +105,15 @@ class Documento(models.Model):
             nome_proprietario = f"{self.extra_associado.nome_completo}"
         elif self.embarcacao:
             nome_proprietario = f"{self.embarcacao.nome_embarcacao}"
+        elif self.repositorio_padrao:
+            nome_proprietario = "Repositório Padrão"
         else:
             raise ValueError("Documento deve estar associado a um Associado, Tarefa, ExtraAssociado, Integrante ou Associação.")
+
+        # 🚨 Validação: se nenhum proprietário foi definido
+        if not nome_proprietario:
+            raise ValueError("Documento deve estar associado a um proprietário ou marcado como do repositório.")
+
 
         # Define o nome do documento
         if self.tipo_doc:
@@ -132,6 +145,8 @@ class Documento(models.Model):
             return f"{self.nome} - Extra Associado: {self.extra_associado.nome_completo}"
         elif self.embarcacao:
             return f"{self.nome} - Embarcação: {self.embarcacao.nome_embarcacao}"
+        elif self.repositorio_padrao:
+            return f"{self.nome} - Repositório Padrão"
         else:
             return f"{self.nome} - Sem proprietário definido"
 

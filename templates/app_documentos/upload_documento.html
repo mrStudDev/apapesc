@@ -27,6 +27,7 @@
 
 <main class="flex-grow">
     <div class="container mx-auto my-8">
+
         <h1 class="text-2xl font-bold text-gray-800 mb-6 text-center">Upload de Documento</h1>
         {% if messages %}
         <div class="space-y-4 mb-6">
@@ -70,41 +71,42 @@
             {% endfor %}
         </div>
         {% endif %}
-
-        <!-- Exibir o nome do proprietário -->
-        <div class="mb-6 p-4 bg-gray-200 border border-gray-300 rounded-md max-w-md mx-auto">
-            <p class="text-gray-700">
-                <strong>Proprietário do Documento:</strong>
-                {% if owner.user %}
-                {{ owner.user.get_full_name }}
-                {% elif owner.nome_completo %}
-                {{ owner.nome_completo }}
-                {% elif owner.nome_fantasia %}
-                {{ owner.nome_fantasia }}
-                {% elif owner.nome_reparticao %}
-                {{ owner.nome_reparticao }}
-                {% elif owner.titulo %}
-                {{ owner.titulo }}
-                {% elif owner.nome_embarcacao %}
-                {{ owner.nome_embarcacao }}
-                {% else %}
-                <em>Proprietário desconhecido</em>
-                {% endif %}
-            </p>
-        </div>
      
-        <div class="mb-6 p-6 bg-yellow-100 border-l-4 border-yellow-500 rounded-md mx-auto shadow-md max-w-3xl">
+        <div class="mb-6 p-6 border-l-4 border-yellow-500 rounded-md mx-auto shadow-md max-w-4xl">
             <h3 class="text-xl font-bold text-yellow-800 mb-2">Tipo ou Nome?</h3>
             <p class="text-gray-800 leading-relaxed">
                 Se o documento que você deseja 
                 enviar não se encaixa em nenhum dos tipos disponíveis, você pode optar por dar um 
-                nome ao documento. Para isso, basta deixar o campo <strong>"Tipo do Documento"</strong> vazio e preencher o campo 
-                <strong>"Nome do Documento"</strong>.<br> 
-
-                Você também pode adicionar à lista de tipos um novo tipo de documento. 
-                Veja as instruções abaixo do formulário.
+                nome ao documento. Para isso, basta deixar o campo <strong>"Tipo do Documento(pré-definido)",</strong> selecionado <strong>VAZIO</strong> e preencher o campo 
+                <strong>"Nome do Documento(livre)"</strong>.<br> 
             </p>
         </div>
+
+
+        <!-- Exibir o nome do proprietário -->
+        <div class="mb-6 p-4 bg-green-50 border border-gray-300 rounded-md max-w-4xl mx-auto">
+            
+        <p class="text-gray-700">
+            <strong>O Proprietário do Documento será:</strong>
+            {% if owner == 'repositorio_padrao' %}
+                📁 Repositório Padrão
+            {% elif owner.user %}
+                {{ owner.user.get_full_name }}
+            {% elif owner.nome_completo %}
+                {{ owner.nome_completo }}
+            {% elif owner.nome_fantasia %}
+                {{ owner.nome_fantasia }}
+            {% elif owner.nome_reparticao %}
+                {{ owner.nome_reparticao }}
+            {% elif owner.titulo %}
+                {{ owner.titulo }}
+            {% elif owner.nome_embarcacao %}
+                {{ owner.nome_embarcacao }}
+            {% else %}
+                <em>Proprietário desconhecido</em>
+            {% endif %}
+        </p>
+        </div>        
 
         <form method="post" enctype="multipart/form-data" class="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
             {% csrf_token %}
@@ -119,7 +121,7 @@
                             name="tipo_doc"
                             class="appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         >
-                            <option value="" selected>Vazio</option>
+                            <option value="" selected>VAZIO</option>
                             {% for tipo in tipos_documento %}
                                 <option value="{{ tipo.id }}">{{ tipo }}</option>
                             {% endfor %}
@@ -158,6 +160,14 @@
                             placeholder="Adicione uma breve descrição para o documento..."
                         ></textarea>
                     </div>
+                    <!-- Botão de Remover Grupo -->
+                    <div class="text-right">
+                        <button type="button" onclick="removeUploadGroup(this)"
+                                class="text-red-600 hover:text-red-800 text-sm font-medium mt-2">
+                            🗑️ Remover este Documento
+                        </button>
+                    </div>
+
                 </div>
             </div>
 
@@ -169,17 +179,22 @@
                 <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md w-full sm:w-auto">
                     🚀 Enviar Documentos
                 </button>
+                {% if owner.id and owner.user %}
                 <a href="{% url 'app_associados:single_associado' owner.id %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md w-full sm:w-auto">
                     Voltar para Associado
                 </a>
+                {% elif owner == 'repositorio_padrao' %}
+                <a href="{% url 'app_documentos:repositorio_list' %}" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-md w-full sm:w-auto">
+                    Voltar para Repositório
+                </a>
+                {% endif %}
+
             </div>
         </form>
 
-
-
     </div>
     <br><br>
-    <div class="mb-6 p-6 bg-blue-100 border-l-4 border-blue-500 rounded-md mx-auto shadow-md max-w-3xl">
+    <div class="mb-6 p-6 bg-blue-100 border-l-4 border-blue-500 rounded-md mx-auto shadow-md max-w-4xl">
         <h3 class="text-xl font-bold text-blue-800 mb-2">Instruções sobre Tipos e Nomes de Documentos</h3>
         <p class="text-gray-800 leading-relaxed mb-4">
             Os <strong>tipos pré-definidos</strong> de documentos são projetados para facilitar o envio de 
@@ -208,8 +223,9 @@
             Criar Novo Tipo de Documento
         </a>
     </div>
-    
+    <br>
 </main>
+
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}
 
@@ -255,6 +271,18 @@ document.addEventListener("DOMContentLoaded", function() {
         // Inicializa os listeners no novo grupo
         inicializarListeners(newGroup);
     };
+
+    // Remove grupo de upload
+    window.removeUploadGroup = function(button) {
+        const group = button.closest('.upload-entry');
+        const container = document.getElementById('upload-groups');
+
+        if (container.querySelectorAll('.upload-entry').length > 1) {
+            group.remove();
+        } else {
+            alert("❗Pelo menos um campo de envio de documento deve permanecer.");
+        }        
+    };
 });
 </script>
 
@@ -276,4 +304,5 @@ function addUploadGroup() {
     container.appendChild(newGroup);
 }
 </script>
+
 {% endblock upload_documentos %}

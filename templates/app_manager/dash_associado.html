@@ -6,5 +6,51 @@
 {% block dashboard_Associados %}
     <!-- Navbar -->
     {% include "components/navbar_associado.html" %}
-    <h1>Dashboard Associado</h1>
+ <div class="max-w-4xl mx-auto p-6">
+        <h1 class="text-2xl font-semibold mb-4 text-blue-700">🎯 Painel do Associado</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="bg-white rounded shadow p-4">
+                <h2 class="text-lg font-bold text-gray-800 mb-2">📇 Dados Pessoais</h2>
+                <p><strong>Nome:</strong> {{ associado.user.get_full_name }}</p>
+                <p><strong>Email:</strong> {{ associado.user.email }}</p>
+                <p><strong>Status:</strong> {{ associado.status }}</p>
+                <p><strong>Data de Filiação:</strong> {{ associado.data_filiacao|date:"d/m/Y" }}</p>
+            </div>
+
+            <div class="bg-white rounded shadow p-4">
+                <h2 class="text-lg font-bold text-gray-800 mb-2">📂 Informações de Filiação</h2>
+                <p><strong>Associação:</strong> {{ associado.associacao.nome_fantasia }}</p>
+                <p><strong>Repartição:</strong> {{ associado.reparticao.nome_reparticao }}</p>
+                {% if associado.reparticao.delegado %}
+                <p><strong>Delegado:</strong> {{ associado.reparticao.delegado.user.get_full_name }}</p>
+                {% else %}
+                    <p><strong>Delegado:</strong> Não definido</p>
+                {% endif %}
+
+
+                <p><strong>Município de Circunscrição:</strong> {{ associado.municipio_circunscricao.municipio }}</p>
+            </div>
+
+            <div class="bg-white rounded shadow p-4">
+                <h2 class="text-lg font-bold text-gray-800 mb-2">⚙️ Situação Previdenciária</h2>
+                <p><strong>Recolhe INSS:</strong> {{ associado.recolhe_inss|yesno:"Sim,Não" }}</p>
+                <p><strong>Recebe Seguro:</strong> {{ associado.recebe_seguro|yesno:"Sim,Não" }}</p>
+                <p><strong>Já recebeu Defeso?</strong> {{ associado.ja_recebeu_defeso_algumavez|yesno:"Sim,Não" }}</p>
+            </div>
+
+            <div class="bg-white rounded shadow p-4">
+                <h2 class="text-lg font-bold text-gray-800 mb-2">💼 Atividade</h2>
+                <p><strong>Relação de Trabalho:</strong> {{ associado.relacao_trabalho }}</p>
+                <p><strong>Comercializa Produtos:</strong> {{ associado.comercializa_produtos|yesno:"Sim,Não" }}</p>
+                <p><strong>Recebe Bolsa Família:</strong> {{ associado.bolsa_familia|yesno:"Sim,Não" }}</p>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
 {% endblock dashboard_Associados%}

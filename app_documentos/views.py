@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import Http404, FileResponse
 from django.urls import reverse
 from django.shortcuts import get_object_or_404
-from django.views.generic import CreateView, ListView, DetailView, UpdateView, View
+from django.views.generic import CreateView, ListView, DetailView, UpdateView, View, DeleteView, TemplateView
 from accounts.mixins import GroupPermissionRequiredMixin 
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import Documento, TipoDocumentoModel, UpDocDriveModel
@@ -35,7 +35,8 @@ import mimetypes
 from .google_drive_integration import upload_to_drive
 import fitz 
 from django.http import HttpResponseRedirect
-
+from django.views.decorators.csrf import csrf_protect
+from django.utils.decorators import method_decorator
 
 # Create your views here.
 class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, CreateView):
@@ -56,6 +57,7 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
         tipo = kwargs.get('tipo')
         obj_id = kwargs.get('id')
 
+
         if tipo == 'associado':
             self.owner = get_object_or_404(AssociadoModel, id=obj_id)
         elif tipo == 'integrante':
@@ -70,6 +72,8 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
             self.owner = get_object_or_404(ExtraAssociadoModel, id=obj_id)
         elif tipo == 'embarcacao':
             self.owner = get_object_or_404(EmbarcacoesModel, id=obj_id)
+        elif tipo == 'repositorio':
+            self.owner = 'repositorio_padrao'           
         else:
             raise Http404("Tipo de proprietário inválido.")
 
@@ -109,6 +113,9 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
                 doc.extra_associado = self.owner
             elif isinstance(self.owner, EmbarcacoesModel):
                 doc.embarcacao = self.owner
+            elif self.owner == 'repositorio_padrao':
+                doc.repositorio_padrao = True
+
 
             # Tipo ou nome?
             if tipo_doc_id:
@@ -185,6 +192,8 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
             form.instance.extra_associado = self.owner  
         elif isinstance(self.owner, EmbarcacoesModel):
             form.instance.embarcacao = self.owner
+        elif self.owner == 'repositorio_padrao':
+            form.instance.repositorio_padrao = True
 
         # Validação extra: Garante que pelo menos o tipo ou o nome seja fornecido
         if not form.instance.tipo_doc and not form.instance.nome:
@@ -215,8 +224,10 @@ class DocumentoUploadView(LoginRequiredMixin, GroupPermissionRequiredMixin, Crea
             return reverse('app_tarefas:single_tarefa', kwargs={'pk': self.owner.pk})
         elif isinstance(self.owner, ExtraAssociadoModel):
             return reverse('app_servicos:detail_extraassociado', kwargs={'pk': self.owner.pk})
-        elif isinstance(self.owner, EmbarcacoesModel)        :
+        elif isinstance(self.owner, EmbarcacoesModel):
             return reverse('app_embarcacoes:single_embarcacao', kwargs={'pk':self.owner.pk})
+        elif self.owner == 'repositorio_padrao':
+            return reverse('app_documentos:repositorio_list')
 
     
 
@@ -681,3 +692,63 @@ def comprimir_pdf(path):
     except Exception as e:
         print(f"❌ Erro ao comprimir PDF: {e}")
         return False
+    
+    
+#==========================================================================
+
+
+
+# Repositório de Documentos e Mensagens
+#RepositórioDocumentos
+class RepositorioUpListView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Diretor(a) da Associação',
+    ]
+    template_name = 'app_documentos/repositorio_upload_list.html'
+    form_class = DocumentoForm
+
+    def get(self, request, *args, **kwargs):
+        form = self.form_class()
+        documentos = Documento.objects.filter(repositorio_padrao=True).order_by('-data_upload')
+        return render(request, self.template_name, {
+            'form': form,
+            'documentos': documentos
+        })
+
+    @method_decorator(csrf_protect)
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST, request.FILES)
+        if form.is_valid():
+            doc = form.save(commit=False)
+            doc.repositorio_padrao = True
+            doc.save()
+
+            # Compressão
+            path = doc.arquivo.path
+            extensao = os.path.splitext(path)[-1].lower()
+            if extensao in ['.jpg', '.jpeg', '.png']:
+                comprimir_imagem(path)
+            elif extensao == '.pdf':
+                comprimir_pdf(path)
+
+            messages.success(request, "📥 Documento enviado ao repositório com sucesso!")
+            return redirect('app_documentos:repositorio')  # Define esse nome no `urls.py`
+
+        documentos = Documento.objects.filter(repositorio_padrao=True).order_by('-data_upload')
+        return render(request, self.template_name, {
+            'form': form,
+            'documentos': documentos
+        })    
+        
+class DocumentoDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteView):
+    model = Documento
+    success_url = reverse_lazy('app_documentos:repositorio_list')
+    group_required = ['Superuser', 'Admin da Associação', 'Diretor(a) da Associação']
+
+
+# Mensagens padrão - página
+class MensagensRepositorioView(LoginRequiredMixin, GroupPermissionRequiredMixin, TemplateView):
+    template_name = 'app_documentos/repositorio_msg.html'
+    group_required = ['Superuser', 'Admin da Associação', 'Auxiliar da Repartição']

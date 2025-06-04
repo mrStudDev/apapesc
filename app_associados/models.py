@@ -153,6 +153,12 @@ COMERCIALIZACAO_CHOICES = [
     ('Não', 'Não'),
     ('Não declarado', 'Não declarado'),
 ]
+OUTRA_FONTE_RENDA = [
+    ('Sim', 'Sim'),
+    ('Não', 'Não'),
+    ('Não declarado', 'Não declarado'),
+]
+
 BOLSA_FAMILIA_CHOICES = [
     ('Já recebeu', 'Já recebeu'),
     ('Nunca recebeu', 'Nunca recebeu'),
@@ -321,6 +327,14 @@ class AssociadoModel(models.Model):
         verbose_name="Comercializa Produtos",
         default="Não declarado"
     )
+    outra_fonte_renda = models.CharField(
+        choices=OUTRA_FONTE_RENDA,
+        max_length=250, 
+        blank=True, 
+        null=True, 
+        verbose_name="Possui outra Fonte de renda?",
+        default="Não declarado"
+    )    
     bolsa_familia = models.CharField(
         choices=BOLSA_FAMILIA_CHOICES,
         max_length=50, 
