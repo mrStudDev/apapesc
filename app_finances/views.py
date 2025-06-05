@@ -420,11 +420,11 @@ class CreateAnuidadeView(LoginRequiredMixin, GroupPermissionRequiredMixin ,Creat
         return super().form_valid(form)
 
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['anuidades'] = AnuidadeModel.objects.order_by('-ano')
-        return context
+        context['current_year'] = datetime.now().year # ➕ adiciona o ano atual
+        context['anuidades'] = AnuidadeModel.objects.order_by('-ano')  # opcional
+        return context 
     
     
 

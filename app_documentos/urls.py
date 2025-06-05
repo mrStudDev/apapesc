@@ -11,6 +11,7 @@ from .views import (
     RepositorioUpListView,
     DocumentoDeleteView,
     MensagensRepositorioView,
+    DocumentoRepositorioDeleteView,
     )
 
 
@@ -32,7 +33,7 @@ urlpatterns = [
      path('upload/<int:associado_id>/', upload_docs_view, name='upload_docs'),
      
     path('repositorio/', RepositorioUpListView.as_view(), name='repositorio_list'),
-    path('documento/delete/<int:pk>/', DocumentoDeleteView.as_view(), name='delete_documento'),
+    path('documento/delete/<int:pk>/', DocumentoRepositorioDeleteView.as_view(), name='delete_doc_repositorio'),
 
     path('mensagens-repositorio/', MensagensRepositorioView.as_view(), name='repositorio_msg'),
 ]  

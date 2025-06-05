@@ -1,4 +1,5 @@
 from django import forms
+from datetime import datetime
 from app_finances.models import AnuidadeModel
 from app_finances.models import (
     TipoDespesaModel,
@@ -16,7 +17,9 @@ class AnuidadeForm(forms.ModelForm):
         fields = ['ano', 'valor_anuidade']
         widgets = {
             'ano': forms.NumberInput(attrs={
-                'placeholder': 'Digite o Ano (Ex: 2025)',
+                'min': 2022,
+                'max': datetime.now().year + 2,
+                'step': 1,
                 'class': 'border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm'
             }),
             'valor_anuidade': forms.TextInput(attrs={
@@ -24,7 +27,29 @@ class AnuidadeForm(forms.ModelForm):
                 'class': 'border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm',
             }),
         }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        current_year = datetime.now().year
+        choices = [(y, y) for y in range(2022, current_year + 5)]
+        self.fields['ano'] = forms.ChoiceField(
+            choices=choices,
+            label="Ano da Anuidade",
+            widget=forms.Select(attrs={
+                'class': 'border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm'
+            })
+        )
+    def clean_ano(self):
+        ano_str = self.cleaned_data['ano']
+        try:
+            ano = int(ano_str)
+        except ValueError:
+            raise forms.ValidationError("Ano inválido.")
 
+        ano_atual = datetime.now().year
+        if ano < 2022 or ano > ano_atual + 5:
+            raise forms.ValidationError(f"O ano deve estar entre 2022 e {ano_atual + 5}.")
+
+        return ano
 
 # 🔹 Formulário para cadastrar/editar tipos de despesas
 class TipoDespesaForm(forms.ModelForm):

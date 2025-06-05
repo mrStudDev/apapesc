@@ -29,6 +29,21 @@
                 </button>
                 <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
                     <a href="{% url 'app_manager:super_dashboard' %}" class="block px-4 py-2 hover:bg-gray-200">Dashboard</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_manager:quadro_associados' %}" class="block px-4 py-2 hover:bg-gray-200">Associados Status</a>
+                    <hr class="border-t-2 border-gray-500 my-2">
+                    <a href="{% url 'app_automacoes:lista_automacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Declarações Uploads</a>
+                    <a href="{% url 'app_documentos:repositorio_list' %}" class="block px-4 py-2 hover:bg-gray-200">Repositório DOC</a>
+                    <a href="{% url 'app_documentos:repositorio_msg' %}" class="block px-4 py-2 hover:bg-gray-200">Repositório MSG</a>                   
+                </div>
+            </div> 
+            <!-- Dropdown Finances -->
+            <div class="relative group" style="font-size:13px;">
+                <button class="hover:text-gray-200 focus:outline-none">
+                    Finanças
+                    <span class="material-icons align-middle">arrow_drop_down</span>
+                </button>
+                <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
                     <a href="{% url 'app_finances:resumo_financeiro' %}" class="block px-4 py-2 hover:bg-gray-200">Finances</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_finances:list_despesas' %}" class="block px-4 py-2 text-red-500 hover:bg-gray-200">Listas de Despesas</a>
@@ -42,17 +57,10 @@
                     <a href="{% url 'app_finances:tri_condictions' %}" class="block px-4 py-2 text-green-700 hover:bg-gray-200">Lista Tri Anuidaeds</a>
                     <a href="{% url 'app_finances:descontos_anuidades' %}" class="block px-4 py-2 text-green-700 hover:bg-gray-200">Descontos Anuidades</a>
                     <a href="{% url 'app_finances:create_anuidade' %}" class="block px-4 py-2 text-green-700 bg-gray-100 hover:bg-red-600 hover:text-white">Cadastrar Anuidade</a>
-                    <a href="{% url 'app_finances:relatorio_anuidades' %}" class="block px-4 py-2 text-green-700 hover:bg-gray-200">Relatório Anuidades</a>
-                    <hr class="border-t-2 border-gray-500 my-2">
-                    <a href="{% url 'app_manager:quadro_associados' %}" class="block px-4 py-2 hover:bg-gray-200">Associados Status</a>
-                    <hr class="border-t-2 border-gray-500 my-2">
-                    <a href="{% url 'app_automacoes:lista_automacoes' %}" class="block px-4 py-2 hover:bg-gray-200">Declarações Uploads</a>
-                    <a href="{% url 'app_documentos:repositorio_list' %}" class="block px-4 py-2 hover:bg-gray-200">Repositório DOC</a>
-                    <a href="{% url 'app_documentos:repositorio_msg' %}" class="block px-4 py-2 hover:bg-gray-200">Repositório MSG</a>
-
-                   
+                    <a href="{% url 'app_finances:relatorio_anuidades' %}" class="block px-4 py-2 text-green-700 hover:bg-gray-200">Relatório Pagamentos</a>
                 </div>
-            </div>           
+            </div>
+
             <!-- Dropdown Listas -->
             <div class="relative group" style="font-size:13px;">
                 <button class="hover:text-gray-200 focus:outline-none">
@@ -138,26 +146,26 @@
                     <a href="{% url 'app_tarefas:board_tarefas' %}" class="block px-4 py-2 hover:bg-gray-200">Fluxo Tarefas</a>
                     <a href="{% url 'app_tarefas:tarefas_arquivadas' %}" class="block px-4 py-2 hover:bg-gray-200">Tarefas Arquivadas</a>
                     <hr class="border-t-2 border-gray-500 my-2">
-                    <a href="{% url 'app_tarefas:gerar_tarefa_massa' %}" class="block px-4 py-2 hover:bg-gray-200">Tarefas em Massa</a>
+                    <a href="{% url 'app_tarefas:gerar_tarefa_massa' %}" class="block px-4 py-2 hover:bg-gray-200">Gerar Tarefas em Massa</a>
+                </div>
+            </div>
+
+            <!-- Produção Inss e Beneficios  -->
+            <div class="relative group" style="font-size:13px;">
+                <button class="hover:text-gray-200 focus:outline-none">
+                    Produção
+                    <span class="material-icons align-middle">arrow_drop_down</span>
+                </button>
+                <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">               
+                    <a href="{% url 'app_beneficios:beneficios' %}" class="block px-4 py-2 hover:bg-gray-200">Benefícios Lançados</a>
+                    <a href="{% url 'app_beneficios:lista_beneficios' %}" class="block px-4 py-2 hover:bg-gray-200">Lista/Distribuição</a>
+                    <a href="{% url 'app_beneficios:painel_beneficios' %}" class="block px-4 py-2 hover:bg-gray-200">Painel/Status Benefício</a>
+                    <a href="{% url 'app_beneficios:create_beneficio' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Benefício</a> 
                     <hr class="border-t-2 border-gray-500 my-2">                    
                     <a href="{% url 'app_tarefas:lista_reaps' %}" class="block px-4 py-2 hover:bg-gray-200">REAPS Anuais</a>
                     <hr class="border-t-2 border-gray-500 my-2">
                     <a href="{% url 'app_tarefas:create_lancamentoInss' %}" class="block px-4 py-2 hover:bg-gray-200">Lançar INSS do Mês</a>
-                    <a href="{% url 'app_tarefas:list_lancamentos' %}" class="block px-4 py-2 hover:bg-gray-200">Controle/Lançamentos</a>
-                </div>
-            </div>
-
-            <!-- Beneficios  -->
-            <div class="relative group" style="font-size:13px;">
-                <button class="hover:text-gray-200 focus:outline-none">
-                    Benefícios
-                    <span class="material-icons align-middle">arrow_drop_down</span>
-                </button>
-                <div class="absolute left-0 top-full w-48 bg-white text-black rounded-md shadow-lg z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-200 invisible group-hover:visible">
-                    <a href="{% url 'app_beneficios:create_beneficio' %}" class="block px-4 py-2 hover:bg-gray-200">Novo Benefício</a>                    
-                    <a href="{% url 'app_beneficios:beneficios' %}" class="block px-4 py-2 hover:bg-gray-200">Benefícios Lançados</a>
-                    <a href="{% url 'app_beneficios:lista_beneficios' %}" class="block px-4 py-2 hover:bg-gray-200">Controle/Distribuição</a>
-                    <a href="{% url 'app_beneficios:painel_beneficios' %}" class="block px-4 py-2 hover:bg-gray-200">Painel/Status Benefício</a>
+                    <a href="{% url 'app_tarefas:list_lancamentos' %}" class="block px-4 py-2 hover:bg-gray-200">Lista/Lançamentos</a>
                 </div>
             </div>
 

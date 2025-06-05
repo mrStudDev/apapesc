@@ -1909,7 +1909,8 @@
                         </div>
                     </div>
 
-                    <div class="flex items-center space-x-3">
+                    <div x-data="{ openDelete_{{ documento.pk }}: false }" class="flex items-center space-x-3">
+
                         <!-- Link para Download do Documento -->
                         <a href="{% url 'app_documentos:download_documento' documento.pk %}" class="hover:text-green-500" title="Baixar Documento">
 
@@ -1922,10 +1923,37 @@
                         <a href="{% url 'app_documentos:criar_copia_pdf' documento.pk %}" title="Fazer Cópia em PDF" onclick="suaFuncaoAutomatizar()"> <!-- Adicione o link para a sua função -->
                             <i class="material-icons" style="font-size: 20px; color:orange;">picture_as_pdf</i>
                         </a>
-                        <a href="{% url 'app_documentos:delete_documento' documento.pk %}" 
-                        class="text-red-500 hover:text-red-700" title="Deletar">
-                            <i class="material-icons" style="font-size: 20px;">delete</i>
-                        </a>
+                        <!-- Botão de Deletar -->
+                        <button @click="openDelete_{{ documento.pk }} = true"
+                                title="Excluir Documento"
+                                class="hover:text-red-600 focus:outline-none">
+                            <i class="material-icons" style="font-size: 20px; color:red;">delete</i>
+                        </button>
+                        <!-- Modal de Confirmação -->
+                        <div x-show="openDelete_{{ documento.pk }}"
+                            x-cloak
+                            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md text-center">
+                                <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar Exclusão</h2>
+                                <p class="text-gray-600 mb-6">
+                                    Deseja realmente excluir o documento <strong>{{ documento.nome|default:documento.tipo_doc }}</strong>?
+                                </p>
+
+                                <form method="post" action="{% url 'app_documentos:delete_documento' documento.pk %}">
+                                    {% csrf_token %}
+                                    <div class="flex justify-center gap-4">
+                                        <button type="submit"
+                                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-semibold">
+                                            Sim, Excluir
+                                        </button>
+                                        <button type="button" @click="openDelete_{{ documento.pk }} = false"
+                                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md font-medium">
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
 
                     </div>
                 </li>
@@ -1968,4 +1996,7 @@
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}
 <script src="{% static 'js/copy_to_clipboard.js' %}"></script>
+<script src="//unpkg.com/alpinejs" defer></script>
+
+
 {% endblock single_associado %}

@@ -741,8 +741,9 @@ class RepositorioUpListView(LoginRequiredMixin, GroupPermissionRequiredMixin, Vi
             'form': form,
             'documentos': documentos
         })    
+
         
-class DocumentoDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteView):
+class DocumentoRepositorioDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteView):
     model = Documento
     success_url = reverse_lazy('app_documentos:repositorio_list')
     group_required = ['Superuser', 'Admin da Associação', 'Diretor(a) da Associação']

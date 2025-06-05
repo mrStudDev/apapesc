@@ -156,7 +156,7 @@
                                     </p>
 
                                     <div class="flex justify-center gap-4">
-                                        <form method="post" action="{% url 'app_documentos:delete_documento' doc.id %}">
+                                        <form method="post" action="{% url 'app_documentos:delete_doc_repositorio' doc.id %}">
                                             {% csrf_token %}
                                             <button type="submit"
                                                     class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-medium">
