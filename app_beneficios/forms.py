@@ -108,4 +108,12 @@ class BeneficioModelForm(forms.ModelForm):
         # Remove o campo nome se estiver editando
         if modo_edicao:
             self.fields.pop('nome', None)
+            
+            
+        # 🔻 Remover temporariamente opções não utilizadas
+        opcoes_excluidas = ['seguro_tainha', 'seguro_camarao']
+        self.fields['nome'].choices = [
+            choice for choice in self.fields['nome'].choices
+            if choice[0] not in opcoes_excluidas
+        ]    
       
