@@ -83,70 +83,34 @@
                     Salvar
                 </button>
             </form>
-
-            <!-- 🔽 Aqui embaixo: exibição dos serviços já cadastrados -->
-            <div class="mt-8">
-            <h3 class="text-xl font-semibold text-gray-800 mb-4">Tipos de Serviço já cadastrados</h3>
-
-            {% if tipos_servicos %}
-                <ul class="divide-y divide-gray-200 rounded-lg border border-gray-100 bg-white">
-                {% for tipo in tipos_servicos %}
-                    <li class="px-4 py-2 hover:bg-gray-50 flex justify-between items-center">
-                    <div>
-                        <p class="text-sm font-medium text-gray-900">{{ tipo.nome }}</p>
-                        <p class="text-xs text-gray-600">
-                        {{ tipo.get_natureza_display }}{% if tipo.descricao %} — {{ tipo.descricao }}{% endif %}
-                        </p>
-                    </div>
-                    <a href="{% url 'app_finances:edit_tipo_servico' tipo.id %}" class="text-blue-500 text-xs hover:underline">
-                        editar
-                    </a>
-                    </li>
-                {% endfor %}
-                </ul>
-            {% else %}
-                <p class="text-sm text-gray-500">Nenhum tipo de serviço cadastrado até agora.</p>
-            {% endif %}
-            </div>
-        </div>
-
         </div>
     </div>
-    <!-- Tabela -->
-    <div class="bg-white shadow-lg rounded-lg p-6 max-w-7xl mx-auto">
-        <h2 class="text-xl font-bold mb-4 text-gray-800">Lista de Tipos de Serviços</h2>
-        <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
-            <thead class="bg-gray-100">
-                <tr>
-                    <th class="py-3 px-4 border-b text-left">Nome</th>
-                    <th class="py-3 px-4 border-b text-left">Descrição</th>
-                    <th class="py-3 px-4 border-b text-center">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for tipo in tipos_servicos %}
-                <tr class="border-b hover:bg-gray-50">
-                    <td class="py-3 px-4">{{ tipo.nome }}</td>
-                    <td class="py-3 px-4">{{ tipo.descricao }}</td>
-                    <td class="py-3 px-4 text-center">
-                        <a href="{% url 'app_finances:edit_tipo_servico' tipo.pk %}" 
-                            class="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 transition">
-                            <i class="material-icons text-base align-middle">edit</i>
-                            Editar
-                        </a>
 
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" class="py-4 px-4 text-center text-gray-500 italic">
-                        Nenhum tipo de serviço cadastrado.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- 🔽 Aqui embaixo: exibição dos serviços já cadastrados -->
+    <div class="mt-8 max-w-7xl mx-auto">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4">Tipos de Serviço já cadastrados</h3>
+
+        {% if tipos_servicos %}
+            <ul class="divide-y divide-gray-200 rounded-lg border border-gray-100 bg-white">
+            {% for tipo in tipos_servicos %}
+                <li class="px-4 py-2 hover:bg-gray-50 flex justify-between items-center">
+                <div>
+                    <p class="text-sm font-medium text-gray-900">{{ tipo.nome }}</p>
+                    <p class="text-xs text-gray-600">
+                    <strong class="text-xs text-blue-400">{{ tipo.get_natureza_display }}</strong>{% if tipo.descricao %} — {{ tipo.descricao }}{% endif %}
+                    </p>
+                </div>
+                <a href="{% url 'app_finances:edit_tipo_servico' tipo.id %}" class="text-blue-500 text-xs hover:underline">
+                    editar
+                </a>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-sm text-gray-500">Nenhum tipo de serviço cadastrado até agora.</p>
+        {% endif %}
     </div>
+    <br><br>
 </main>
 
 {% include 'components/footer_associacao.html' %}

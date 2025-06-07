@@ -73,27 +73,25 @@
               
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       
-<!-- Associação -->
-<div>
-  <label class="block text-sm font-medium text-gray-700 mb-1">Associação</label>
-  <input type="text" readonly
-         class="block w-full bg-gray-100 border border-gray-300 rounded-md px-4 py-2 text-gray-700"
-         value="{{ associado.associacao.nome_fantasia }}">
-  <input type="hidden" name="associacao" value="{{ associado.associacao.id }}">
-</div>
+                        <!-- Associação -->
+                        <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Associação</label>
+                        <input type="text" readonly
+                                class="block w-full bg-gray-100 border border-gray-300 rounded-md px-4 py-2 text-gray-700"
+                                value="{{ associado.associacao.nome_fantasia }}">
+                        <input type="hidden" name="associacao" value="{{ associado.associacao.id }}">
+                        </div>
 
-<!-- Repartição -->
-<div>
-  <label class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
-  <input type="text" readonly
-         class="block w-full bg-gray-100 border border-gray-300 rounded-md px-4 py-2 text-gray-700"
-         value="{{ associado.reparticao.nome_reparticao }}">
-  <input type="hidden" name="reparticao" value="{{ associado.reparticao.id }}">
-</div>
+                        <!-- Repartição -->
+                        <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
+                        <input type="text" readonly
+                                class="block w-full bg-gray-100 border border-gray-300 rounded-md px-4 py-2 text-gray-700"
+                                value="{{ associado.reparticao.nome_reparticao }}">
+                        <input type="hidden" name="reparticao" value="{{ associado.reparticao.id }}">
+                        </div>
 
                         
-
-
                         <div>
                             <label for="{{ form.natureza_servico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                                 {{ form.natureza_servico.label }}
