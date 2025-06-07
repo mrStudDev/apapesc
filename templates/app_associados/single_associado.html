@@ -35,8 +35,20 @@
     {% if associado.foto %}
         <img src="{{ associado.foto.url }}" alt="Foto do associado" class="w-32 h-32 rounded-full mx-auto mb-4 shadow-lg">
     {% endif %}
-    <h1 class="text-4xl font-bold">{{ associado.user.get_full_name }}</h1>
-    <p class="text-xl mt-2">Associado desde {{ associado.data_filiacao|date:'Y'  }}</p>
+    
+    <h1 class="text-4xl font-bold">
+        {{ associado.user.get_full_name }}
+    </h1>
+
+    {% if associado.apelido %}
+        <p class="text-pink-300 italic text-lg mt-1">
+            Conhecido(a) carinhosamente como <strong>“{{ associado.apelido }}”</strong> 💛
+        </p>
+    {% endif %}
+
+    <p class="text-xl mt-2">
+        Associado desde {{ associado.data_filiacao|date:'Y' }}
+    </p>
 </div>
 
 <!-- Conteúdo Principal -->
@@ -285,7 +297,7 @@
                     </a>
                     <p class="text-xs text-gray-600 mt-1">Pasta criada automáticamente. Acesse a pasta ou faça upload de arquivos.</p>
                     <br>
-                    <a href="{% url 'app_documentos:upload_docs' associado.id %}"
+                    <a href="{% url 'app_documentos:upload_docs' associado.id %}?next={% url 'app_associados:single_associado' associado.id %}"
                         class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                         <svg class="w-5 h-5 mr-2 -ml-1 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -414,6 +426,7 @@
                     <span class="text-gray-800">{{ associado.nome_mae }}</span>
                 </div>
             </div>
+
             <!-- Filiação - Pai -->
             <div class="flex items-center space-x-3">
                 <i class="material-icons text-blue-500" style="font-size: 24px;">person</i>
@@ -1127,27 +1140,35 @@
         <!-- Outra Fonte de Renda -->
         <div class="flex items-center space-x-3 mt-4">
             <i class="material-icons 
-                {% if associado.outra_fonte_renda == 'Sim' %}
-                    text-yellow-500
-                {% elif associado.outra_fonte_renda == 'Não' %}
+                {% if associado.outra_fonte_renda == 'Não Possui' %}
                     text-blue-500
-                {% else %}
+                {% elif associado.outra_fonte_renda == 'Não declarado' or not associado.outra_fonte_renda %}
                     text-gray-500
+                {% else %}
+                    text-yellow-500
                 {% endif %}
             " style="font-size: 24px;">payments</i>
+
             <div>
                 <strong class="text-gray-700">Outra Fonte de Renda:</strong>
                 <div class="mt-1 text-sm">
-                    {% if associado.outra_fonte_renda == 'Sim' %}
-                        <span class="inline-block px-2 py-1 rounded bg-yellow-100 text-yellow-800 font-medium">Sim</span>
-                    {% elif associado.outra_fonte_renda == 'Não' %}
-                        <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 font-medium">Não</span>
+                    {% if associado.outra_fonte_renda == 'Não Possui' %}
+                        <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 font-medium">
+                            Não Possui
+                        </span>
+                    {% elif associado.outra_fonte_renda == 'Não declarado' or not associado.outra_fonte_renda %}
+                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                            Não declarado
+                        </span>
                     {% else %}
-                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                        <span class="inline-block px-2 py-1 rounded bg-yellow-100 text-yellow-800 font-medium">
+                            {{ associado.outra_fonte_renda }}
+                        </span>
                     {% endif %}
                 </div>
             </div>
         </div>
+
 
 
         <!-- Bolsa Família -->
@@ -1182,8 +1203,27 @@
                 <strong class="text-gray-700">Relação de Trabalho:</strong>
                 <div class="mt-1 text-sm">
                     {% if associado.relacao_trabalho %}
-                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-blue-500 font-medium">
+                        <span class="inline-block px-2 py-1 rounded bg-gray-50 text-gray-700  font-semibold shadow-sm">
                             {{ associado.relacao_trabalho }}
+                        </span>
+                    {% else %}
+                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                            Não declarado
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Casa Onde Mora -->
+        <div class="flex items-center space-x-3">
+            <i class="material-icons text-gray-500" style="font-size: 24px;">home</i>
+            <div>
+                <strong class="text-gray-700">Casa Onde Mora</strong>
+                <div class="mt-1 text-sm">
+                    {% if associado.casa_onde_mora %}
+                        <span class="inline-block px-2 py-1 rounded bg-gray-50 text-gray-700  font-semibold shadow-sm">
+                            {{ associado.casa_onde_mora }}
                         </span>
                     {% else %}
                         <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
@@ -1836,7 +1876,15 @@
                     <p class="text-sm text-gray-600 mt-2">Clique para gerar a Carteirinha Apapesc</p>
                 </div>
             </a>
-
+            <!-- Retirada Documentos -->
+            <a href="{% url 'app_automacoes:gerar_retirada_documentos' associado.id %}"
+               class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">
+                <div class="text-center">
+                    <span class="absolute top-2 left-2 w-2 h-2 bg-gray-200 rounded-full"></span>
+                    <h3 class="text-lg font-semibold text-gray-800">Retirada de Documentos</h3>
+                    <p class="text-sm text-gray-600 mt-2">Retirada de documentos como Licença, TIE, RGP, etc.</p>
+                </div>
+            </a>
             <!-- Alguma Certificação -->
             <a href="#"
                class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-gray-200 transition-all duration-300">

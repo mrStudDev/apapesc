@@ -48,6 +48,7 @@ from .models import (
     AutorizacaoAcessoGovModel,
     DeclaracaoDesfiliacaoModel,
     DireitosDeveres,
+    RetiradaDocumentos,
     )
 
 # Deletes
@@ -66,7 +67,8 @@ MODELO_MAP = {
     'autorizacao_direito_imagem': AutorizacaoDireitoImagemModel,
     'autorizacao_acesso_gov': AutorizacaoAcessoGovModel,
     'declaracao_desfiliacao': DeclaracaoDesfiliacaoModel,
-    'direitos_deveres':DireitosDeveres
+    'direitos_deveres':DireitosDeveres,
+    'retirada_documentos': RetiradaDocumentos,
 
 }
 
@@ -109,7 +111,8 @@ def upload_pdf_base(request, automacao):
         'autorizacao_direito_imagem': AutorizacaoDireitoImagemModel,
         'autorizacao_acesso_gov': AutorizacaoAcessoGovModel,
         'declaracao_desfiliacao': DeclaracaoDesfiliacaoModel,
-        'direitos_deveres':DireitosDeveres
+        'direitos_deveres':DireitosDeveres,
+        'retirada_documentos': RetiradaDocumentos,
     }
     
     modelo = modelo_map.get(automacao)
@@ -160,6 +163,7 @@ class ListaTodosArquivosView(LoginRequiredMixin, GroupPermissionRequiredMixin, T
         context['autorizacao_acesso_gov'] = AutorizacaoAcessoGovModel.objects.all()
         context['declaracao_desfiliacao'] = DeclaracaoDesfiliacaoModel.objects.all()
         context['direitos_deveres'] = DireitosDeveres.objects.all()
+        context['retirada_documentos'] = RetiradaDocumentos.objects.all()
         
         return context
 
@@ -2209,5 +2213,141 @@ def gerar_direitos_deveres(request, associado_id):
     os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
     PdfWriter(pdf_path, trailer=template_pdf).write()
 
+    pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
+    return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")
+# ----------------------------------------------------------------------------------------------------
+
+# Retirada de Documentos
+
+
+def gerar_retirada_documentos(request, associado_id):
+    associado = get_object_or_404(AssociadoModel, id=associado_id)
+    associacao = associado.associacao
+    # 📄 Template base da declaração
+    template_path = os.path.join(settings.MEDIA_ROOT, 'pdf', 'retirada_documentos.pdf')
+    if not os.path.exists(template_path):
+        return HttpResponse("O PDF base para retirada de documentos não foi encontrado.", status=404)
+
+    template_pdf = PdfReader(template_path)
+    buffer = BytesIO()
+
+    # 🎨 Estilos
+    styles = getSampleStyleSheet()
+    style_title = ParagraphStyle(
+        'Title',
+        parent=styles['Title'],
+        fontName='Times-Bold',
+        fontSize=17,
+        alignment=1,
+        leading=28,
+        spaceBefore=30,
+    )
+    style_normal = ParagraphStyle(
+        'Normal',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        leading=16,
+        alignment=4,
+    )
+    style_assinatura = ParagraphStyle(
+        'Assinatura',
+        parent=styles['Normal'],
+        fontName='Times-Roman',
+        fontSize=12,
+        alignment=1,
+    )
+    style_presidente = ParagraphStyle(
+        'Presidente',
+        parent=styles['Normal'],
+        fontName='Times-Bold',
+        fontSize=12,
+        alignment=2,
+        leading=16,
+        spaceBefore=10,
+        textColor=colors.grey,
+    )
+    nome_presidente = associacao.presidente.user.get_full_name()    
+
+    # 📅 Data atual
+    data_atual = datetime.now().strftime('%d/%m/%Y')
+
+    # ✍️ Conteúdo
+    paragrafo_inicial = (
+        f"<strong>{associado.user.get_full_name()}</strong>, CPF: {associado.cpf}, RG: {associado.rg_numero}, "
+        f"residente em {associado.logradouro}, {associado.numero} - {associado.bairro}, "
+        f"{associado.municipio}/{associado.uf}, vem por meio desta declarar que retirei os seguintes documentos:"
+    )
+
+    lista_documentos = (
+        "<br/><br/>"
+        "[ ] LICENÇA<br/>"
+        "[ ] RG<br/>"
+        "[ ] CPF<br/>"
+        "[ ] RGP<br/>"
+        "[ ] Carteirinha da APAPESC<br/>"
+        "[ ] TIE<br/>"
+        "[ ] Seguro DPEM<br/><br/>"
+        "[ ] _____________________________________________<br/>"
+        "[ ] _____________________________________________<br/>"
+        "[ ] _____________________________________________<br/><br/>"
+    )
+
+    aviso = (
+        "<strong>Declaro estar ciente</strong> de que a retirada dos documentos acima mencionados é de minha total responsabilidade, "
+        "assumindo a guarda e conservação dos mesmos. Estou ciente de que a APAPESC não se responsabiliza pela perda, dano ou extravio "
+        "dos documentos após esta retirada."
+    )
+
+    local_data = f"{associado.reparticao.municipio_sede}, {data_atual}"
+    assinatura = (
+        "____________________________________________________________________<br/>"
+        f"<strong>{associado.user.get_full_name()}</strong><br/>"
+        f"CPF: {associado.cpf}<br/>"
+    )
+
+    # 📄 Elementos a renderizar
+    elements = [
+        Spacer(1, 50),
+        Paragraph(nome_presidente, style_presidente),
+        Paragraph("DECLARAÇÃO DE RETIRADA DE DOCUMENTOS", style_title),
+        Spacer(1, 10),
+        Paragraph(paragrafo_inicial, style_normal),
+        Spacer(1, 12),
+        Paragraph(lista_documentos, style_normal),
+        Spacer(1, 8),
+        Paragraph(aviso, style_normal),
+        Spacer(1, 24),
+        Paragraph(local_data, style_normal),
+        Spacer(1, 30),
+        Paragraph(assinatura, style_assinatura),
+    ]
+
+    # 📄 Criando PDF overlay
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        leftMargin=85,
+        rightMargin=85,
+        topMargin=115,
+        bottomMargin=40,
+    )
+    doc.build(elements)
+
+    # 📎 Mesclando com o template
+    buffer.seek(0)
+    overlay_pdf = PdfReader(buffer)
+
+    for idx, template_page in enumerate(template_pdf.pages):
+        if idx < len(overlay_pdf.pages):
+            PageMerge(template_page).add(overlay_pdf.pages[idx]).render()
+
+    # 💾 Salvando o PDF final
+    pdf_name = f"retirada_documentos_{associado.user.get_full_name().replace(' ', '_')}.pdf"
+    pdf_path = os.path.join(settings.MEDIA_ROOT, 'documentos', pdf_name)
+    os.makedirs(os.path.dirname(pdf_path), exist_ok=True)
+    PdfWriter(pdf_path, trailer=template_pdf).write()
+
+    # 🔗 Redireciona com link para download
     pdf_url = f"{settings.MEDIA_URL}documentos/{pdf_name}"
     return redirect(f"{reverse('app_automacoes:pagina_acoes', args=[associado.id])}?pdf_url={pdf_url}")

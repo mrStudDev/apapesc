@@ -154,8 +154,12 @@ COMERCIALIZACAO_CHOICES = [
     ('Não declarado', 'Não declarado'),
 ]
 OUTRA_FONTE_RENDA = [
-    ('Sim', 'Sim'),
-    ('Não', 'Não'),
+    ('Não Possui', 'Não Possui'),
+    ('Aposentadoria (INSS)', 'Aposentadoria (INSS)'),
+    ('MEI', 'MEI'),
+    ('Sócio de Empresa', 'Sócio de Empresa'),
+    ('CLT', 'CLT'),
+    ('Servidor Público', 'Servidor Público'),
     ('Não declarado', 'Não declarado'),
 ]
 
@@ -164,6 +168,14 @@ BOLSA_FAMILIA_CHOICES = [
     ('Nunca recebeu', 'Nunca recebeu'),
     ('Não declarado', 'Não declarado'),
 ]
+CASA_ONDE_MORA = [
+    ('Mora em casa prórpia', 'Mora em pasa prórpia'),
+    ('Mora em casa augada', 'Mora em casa augada'),
+    ('Mora em casa cedida', 'Mora em casa cedida'),
+    ('Mora em casa de terceiros', 'Mora em casa de terceiros'),
+    ('Não declarado', 'Não declarado'),
+]
+
 
 class ProfissoesModel(models.Model):
     nome = models.CharField(
@@ -243,6 +255,13 @@ class AssociadoModel(models.Model):
         blank=True, 
         null=True
     )
+    apelido = models.CharField(
+        max_length=80, 
+        blank=True,
+        null=True,
+        verbose_name="Apelido Carinhoso",
+        help_text="Apelido Carinhoso.",
+    )     
     sexo_biologico = models.CharField(
         max_length=15, 
         choices=SEXO_CHOICES,
@@ -342,7 +361,15 @@ class AssociadoModel(models.Model):
         null=True, 
         verbose_name="Bolsa Família",
         default="Não declarado"
-    )        
+    )   
+    casa_onde_mora = models.CharField(
+        choices=CASA_ONDE_MORA,
+        max_length=50, 
+        blank=True, 
+        null=True, 
+        verbose_name="Casa Onde Mora",
+        default="Não declarado"
+    )           
     # Documento RG
     rg_numero = models.CharField(
         max_length=20, 

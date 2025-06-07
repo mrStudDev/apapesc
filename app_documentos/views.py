@@ -653,7 +653,8 @@ def upload_docs_view(request, associado_id):
             messages.info(request, msg)
 
         messages.success(request, f"{enviados} documento(s) enviados com sucesso ao Google Drive. Economia total: {economia_str}")
-        return redirect('app_associados:single_associado', pk=associado_id)
+        next_url = request.GET.get('next') or request.POST.get('next')
+        return redirect(next_url or reverse('app_associados:single_associado', args=[associado_id]))
 
     return render(request, 'app_documentos/upload_to_drive.html', {
         'associado': associado,

@@ -73,36 +73,24 @@
               
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                       
-                        <!-- Associação -->
-                        <div>
-                            <label for="{{ form.associacao.id_for_label }}">Associação</label>
-                            <select name="associacao" id="id_associacao_servico"
-                                    class="appearance-none block w-full border border-gray-300 rounded-lg bg-white py-3 px-4 pr-10 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm">
-                                {% for associacao in form.fields.associacao.queryset %}
-                                    <option value="{{ associacao.id }}"
-                                        {% if form.initial.associacao == associacao.id or form.data.associacao == associacao.id|stringformat:"s" %}
-                                            selected
-                                        {% endif %}
-                                    >{{ associacao.nome_fantasia }}</option>
-                                {% endfor %}
-                            </select>
-                            {% for error in form.associacao.errors %}
-                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                            {% endfor %}
-                        </div>
-                        
-                    
-                        <!-- Repartição (Filtrada dinamicamente via JS) -->
-                        <!-- Repartição -->
-                        <div>
-                            <label for="{{ form.reparticao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                                {{ form.reparticao.label }}
-                            </label>
-                            {{ form.reparticao }}
-                            {% for error in form.reparticao.errors %}
-                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                            {% endfor %}
-                        </div>
+<!-- Associação -->
+<div>
+  <label class="block text-sm font-medium text-gray-700 mb-1">Associação</label>
+  <input type="text" readonly
+         class="block w-full bg-gray-100 border border-gray-300 rounded-md px-4 py-2 text-gray-700"
+         value="{{ associado.associacao.nome_fantasia }}">
+  <input type="hidden" name="associacao" value="{{ associado.associacao.id }}">
+</div>
+
+<!-- Repartição -->
+<div>
+  <label class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
+  <input type="text" readonly
+         class="block w-full bg-gray-100 border border-gray-300 rounded-md px-4 py-2 text-gray-700"
+         value="{{ associado.reparticao.nome_reparticao }}">
+  <input type="hidden" name="reparticao" value="{{ associado.reparticao.id }}">
+</div>
+
                         
 
 
@@ -190,6 +178,35 @@
     
 </script>
 
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const naturezaSelect = document.getElementById('id_natureza_servico');
+    const tipoServicoSelect = document.getElementById('id_tipo_servico');
+
+    naturezaSelect.addEventListener('change', function () {
+        const selectedNatureza = this.value;
+
+        // Limpa as opções existentes
+        tipoServicoSelect.innerHTML = '<option value="">Carregando...</option>';
+
+        fetch(`/financas/filtrar-tipos-por-natureza/?natureza=${selectedNatureza}`)
+            .then(response => response.json())
+            .then(data => {
+                tipoServicoSelect.innerHTML = '<option value="">Selecione um tipo...</option>';
+                data.tipos.forEach(function (tipo) {
+                    const option = document.createElement('option');
+                    option.value = tipo.id;
+                    option.text = tipo.nome;
+                    tipoServicoSelect.appendChild(option);
+                });
+            })
+            .catch(err => {
+                tipoServicoSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+                console.error("Erro ao buscar tipos:", err);
+            });
+    });
+});
+</script>
 
     {% include "components/footer_associacao.html" %}
 {% endblock create_servico_Associado %}

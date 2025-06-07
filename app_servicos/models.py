@@ -33,8 +33,8 @@ class ServicoAssociadoModel(models.Model):
         ('emissao_documento', 'Emissão de Documento'),
         ('servico_consultoria', 'Serviço de Consultoria'),
         ('servico_geral', 'Serviço Geral'),
-
     ]
+    
     natureza_servico = models.CharField(
         max_length=50,
         choices=NATUREZA_CHOICES,
@@ -58,7 +58,7 @@ class ServicoAssociadoModel(models.Model):
         verbose_name="Repartição"
     )    
 
-    tipo_servico = models.ForeignKey(TipoServicoModel, on_delete=models.SET_NULL, null=True)
+    tipo_servico = models.ForeignKey('app_finances.TipoServicoModel', on_delete=models.SET_NULL, null=True)
 
     # 🔹 Só um desses será preenchido
     associado = models.ForeignKey(

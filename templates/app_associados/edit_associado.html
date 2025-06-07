@@ -135,6 +135,33 @@
             </div>
         </div>
 
+        <div class="mb-6 p-4 border-l-4 border-pink-500 bg-pink-50 rounded-md shadow-sm">
+            <div class="flex items-start space-x-3">
+                <!-- Ícone de cuidado/carinho -->
+                <div class="flex-shrink-0">
+                    <i class="material-icons text-pink-500 text-3xl" title="Dra. Samara, carinho e respeito">
+                        favorite
+                    </i>
+                </div>
+                <div>
+                    <label for="{{ form.apelido.id_for_label }}" class="block text-sm font-semibold text-gray-700">
+                        {{ form.apelido.label }} <span class="text-pink-600">(Opcional)</span>
+                    </label>
+                    <p class="text-sm text-gray-600 mb-2">
+                        Muitos pescadores são conhecidos por apelidos carinhosos. Caso deseje, registre aqui um apelido que represente <strong>afeto e respeito</strong>.  
+                        <br>
+                        <span class="text-pink-600 font-medium">Evite apelidos que possam ser ofensivos ou comprometer a imagem do associado.</span><br>
+                        💬 Como diria a Dra. Samara: <em>"Aqui todo mundo é tratado como família."</em>
+                    </p>
+                    {{ form.apelido }}
+                    {% for error in form.apelido.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+
         
         <div class="border-b border-gray-300 pb-6 mb-6">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Vínculos</h2>
@@ -575,7 +602,18 @@
                     {% for error in form.bolsa_familia.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>                                                  
+                </div>  
+                <div class="mb-4">
+                    <label for="{{ form.casa_onde_mora.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.casa_onde_mora.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.casa_onde_mora }}
+                    </div>
+                    {% for error in form.casa_onde_mora.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                                                                
             </div> 
             <br>
             <!--Documentos Oficiais - Cidadão -->

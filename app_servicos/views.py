@@ -47,8 +47,20 @@ class SingleServicoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Detail
         servico = self.get_object()
         associado = servico.associado
 
+        # Verificação adicional
+        if associado.drive_folder_id:
+            print(f"Drive Folder ID: {associado.drive_folder_id}")
+            print(f"Drive Folder Link: https://drive.google.com/drive/folders/{associado.drive_folder_id}")
+        else:
+            print("Nenhum Drive Folder ID associado.")
+        context['drive_folder_id'] = associado.drive_folder_id  
+        # 
+        context['outros_servicos'] = ServicoAssociadoModel.objects.filter(associado=servico.associado).exclude(id=servico.id).order_by('-data_inicio')[:5]
+        context['quantidade_total_servicos'] = ServicoAssociadoModel.objects.filter(associado=servico.associado).exclude(id=servico.id).count()
+                        
         context.update({
             "historico": servico.historico.select_related("alterado_por").order_by("-data_alteracao") if hasattr(servico, 'historico') else [],
+            "associado": associado  
         })
 
         # Tipos relevantes: RG, RGP, NIT
@@ -248,7 +260,8 @@ class CreateServicoAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixi
 
     def form_valid(self, form):
         servico = form.save(commit=False)
-        
+        form.instance.associacao = self.associado.associacao
+        form.instance.reparticao = self.associado.reparticao        
         # 💡 VERIFIQUE se esse associado realmente existe aqui
         print("ASSOCIADO SETADO:", self.associado)
 

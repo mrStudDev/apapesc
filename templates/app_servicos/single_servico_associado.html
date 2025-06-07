@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load filter_campos_essenciais %}
+
 {% block title %}Serviço {{ servico.associado.user.get_full_name }}{% endblock title %}
 
 {% block single_servico %}
@@ -27,7 +29,7 @@
     {% endif %}
 
     <main class="flex-grow">
-        <div class="container mx-auto max-8xl bg-white p-6 rounded-lg shadow-lg">
+      <div class="container mx-auto max-8xl bg-white p-6 rounded-lg shadow-lg">
 
         {% if messages %}
         <div class="space-y-4 mb-6">
@@ -72,232 +74,637 @@
         </div>
         {% endif %}
 
-          <!-- Container -->
-        <div class="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md space-y-8">
+        <!-- Container mais amplo e compacto -->
+        <div class="max-w-screen-xl mx-auto bg-white p-6 rounded-lg shadow-md space-y-6">
+
           <!-- 🔹 Título Principal -->
-          <h2 class="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-              <i class="material-icons text-blue-500 mr-2">description</i> 
-              Detalhes do Serviço - Associado
+          <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+            <i class="material-icons text-blue-500 mr-2">description</i> 
+            Detalhes do Serviço - Associado
           </h2>
-            
-        <!-- 🔸 Card Principal Aprimorado -->
-        <div class="bg-white rounded-xl shadow-md p-6 space-y-8 border border-gray-100">
 
-          <!-- 🔹 Cabeçalho -->
-          <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-4">
-            <div>
-              <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
-                <span class="material-icons text-blue-500 text-base">assignment</span>
-                Informações do Serviço
-              </h3>
-              <p class="text-sm text-gray-500 mt-1">Registrado em {{ servico.data_inicio|date:"d/m/Y H:i" }}</p>
+          <!-- 🔸 Card Compactado com 3 Colunas -->
+          <div class="bg-white rounded-xl shadow-md p-4 space-y-6 border border-gray-100">
+
+            <!-- 🔹 Cabeçalho -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b pb-3">
+              <div>
+                <h3 class="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <span class="material-icons text-blue-500 text-base">assignment</span>
+                  Informações do Serviço
+                </h3>
+                <p class="text-xs text-gray-500 mt-0.5">Registrado em {{ servico.data_inicio|date:"d/m/Y H:i" }}</p>
+              </div>
+              <span class="text-xs text-gray-400 mt-2 md:mt-0">
+                Última alteração: {{ servico.ultima_alteracao|date:"d/m/Y H:i" }}
+              </span>
             </div>
-            <span class="text-xs text-gray-400 mt-2 md:mt-0">Última alteração: {{ servico.ultima_alteracao|date:"d/m/Y H:i" }}</span>
-          </div>
 
-          <!-- 🔹 Grid de Dados -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-800">
+            <!-- 🔹 Grid de Dados - 3 colunas -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-gray-800">
 
-            <!-- Proprietário -->
-            <div>
-              {% if servico.associado %}
-                <div class="bg-gray-50 border border-blue-200 rounded-lg p-4 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div>
+              <!-- Proprietário -->
+              <div class="col-span-1">
+                {% if servico.associado %}
+                  <div class="bg-gray-50 border border-blue-200 rounded-lg p-3 shadow-sm flex flex-col gap-2">
                     <h4 class="text-sm font-semibold text-blue-800 flex items-center gap-1">
                       <span class="material-icons text-base">person</span>
                       Proprietário
                     </h4>
-                    <p>{{ servico.associado.user.get_full_name }}</p>
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm">{{ servico.associado.user.get_full_name }}</p>
+                      <a href="{% url 'app_associados:single_associado' servico.associado.id %}" 
+                        class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
+                        title="Ver detalhes do associado">
+                        <span class="material-icons text-sm">visibility</span> Ver
+                      </a>
+                    </div>
                   </div>
-                  <a href="{% url 'app_associados:single_associado' servico.associado.id %}" 
-                    class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
-                    title="Ver detalhes do associado">
-                    <span class="material-icons text-sm">visibility</span> Ver
-                  </a>
+                {% else %}
+                  <span class="text-gray-400 italic">Proprietário não informado</span>
+                {% endif %}
+              </div>
+
+              <!-- Associação -->
+              <div>
+                <h4 class="text-sm font-semibold text-gray-700 mb-1">Associação Responsável</h4>
+                {% if servico.associacao %}
+                  <p>{{ servico.associacao.nome_fantasia }}</p>
+                {% else %}
+                  <span class="text-gray-400 italic">Não informada</span>
+                {% endif %}
+              </div>
+
+              <!-- Repartição -->
+              <div>
+                <h4 class="text-sm font-semibold text-gray-700 mb-1">Repartição Responsável</h4>
+                {% if servico.reparticao %}
+                  <p>{{ servico.reparticao.nome_reparticao }}</p>
+                {% else %}
+                  <span class="text-gray-400 italic">Não informada</span>
+                {% endif %}
+              </div>
+
+              <!-- Status -->
+              <div>
+                <h4 class="text-sm font-semibold text-gray-700 mb-1">Status do Serviço</h4>
+                <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs font-semibold">
+                  {{ servico.get_status_etapa_display }}
+                </span>
+              </div>
+
+              <!-- Valor -->
+              <div>
+                <h4 class="text-sm font-semibold text-gray-700 mb-1">Valor do Serviço</h4>
+                {% if servico.valor_servico %}
+                  <p class="text-green-600 font-semibold">R$ {{ servico.valor_servico|floatformat:2 }}</p>
+                {% else %}
+                  <span class="text-gray-400 italic">Não informado</span>
+                {% endif %}
+              </div>
+
+              <!-- Tipo de Serviço -->
+              <div>
+                <h4 class="text-sm font-semibold text-gray-700 mb-1 flex items-center gap-1">
+                  <span class="material-icons text-base text-yellow-500">work_outline</span>
+                  Tipo de Serviço
+                </h4>
+                <p class="text-gray-800 text-sm">{{ servico.tipo_servico }}</p>
+              </div>
+            </div>
+
+            <!-- Descrição (1 Coluna) -->
+            {% if servico.content %}
+              <div class="mt-2">
+                <h4 class="text-sm font-semibold text-gray-700 mb-2">📝 Descrição do Serviço:</h4>
+                <div class="bg-gray-50 border border-gray-200 rounded-md p-3 shadow-sm text-sm text-gray-700 leading-relaxed">
+                  {{ servico.content|safe }}
                 </div>
-              {% else %}
-                <span class="text-gray-400 italic">Proprietário não informado</span>
-              {% endif %}
-            </div>
-
-            <!-- Associação -->
-            <div>
-              <h4 class="text-sm font-semibold text-gray-700 mb-1">Associação Responsável</h4>
-              {% if servico.associacao %}
-                <p>{{ servico.associacao.nome_fantasia }}</p>
-              {% else %}
-                <span class="text-gray-400 italic">Não informada</span>
-              {% endif %}
-            </div>
-
-            <!-- Repartição -->
-            <div>
-              <h4 class="text-sm font-semibold text-gray-700 mb-1">Repartição Responsável</h4>
-              {% if servico.reparticao %}
-                <p>{{ servico.reparticao.nome_reparticao }}</p>
-              {% else %}
-                <span class="text-gray-400 italic">Não informada</span>
-              {% endif %}
-            </div>
-
-            <!-- Status -->
-            <div>
-              <h4 class="text-sm font-semibold text-gray-700 mb-1">Status do Serviço</h4>
-              <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs font-semibold">
-                {{ servico.get_status_etapa_display }}
-              </span>
-            </div>
-
-            <!-- Valor -->
-            <div>
-              <h4 class="text-sm font-semibold text-gray-700 mb-1">Valor do Serviço</h4>
-              {% if servico.valor_servico %}
-                <p class="text-green-600 font-semibold">R$ {{ servico.valor_servico|floatformat:2 }}</p>
-              {% else %}
-                <span class="text-gray-400 italic">Não informado</span>
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- Tipo de Serviço -->
-          <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 shadow-sm">
-            <h4 class="text-sm font-semibold text-blue-800 mb-1 flex items-center gap-2">
-              <span class="material-icons text-base">work_outline</span>
-              Tipo de Serviço
-            </h4>
-            <p class="text-gray-800 text-sm">{{ servico.tipo_servico }}</p>
-          </div>
-
-          <!-- Descrição -->
-          {% if servico.content %}
-            <div class="mt-6">
-              <h4 class="text-sm font-semibold text-gray-700 mb-2">📝 Descrição do Serviço:</h4>
-              <div class="bg-gray-50 border border-gray-200 rounded-md p-4 shadow-sm text-sm text-gray-700 leading-relaxed">
-                {{ servico.content|safe }}
               </div>
-            </div>
-          {% endif %}
-
-          <!-- Seção: Logins e Senhas -->
-          <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-              <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Conta Gov do Associado</h2>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-                  <!-- CPF -->
-                  <div class="flex items-center space-x-3">
-                      <i class="material-icons text-red-500" style="font-size: 24px;">fingerprint</i>
-                      <div>
-                          <strong class="text-gray-700">Login Gov - CPF:</strong>
-                          <div class="flex items-center">
-                              <span id="cpf-{{ associado.pk }}" class="text-gray-800">{{ servico.associado.cpf }}</span>
-                              <button onclick="copyToClipboard('cpf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-orange-500">
-                                  <i class="material-icons" style="font-size: 16px;">content_copy</i>
-                              </button>
-                          </div>
-                      </div>
-                  </div>
-
-                  <!-- Senha Gov -->
-                  <div class="flex items-center space-x-3">
-                      <i class="material-icons text-red-500" style="font-size: 24px;">lock</i>
-                      <div>
-                          <strong class="text-gray-700">Senha Gov:</strong>
-                          <div class="flex items-center">
-                              <span id="senha-gov-{{ associado.pk }}" class="text-gray-800">{{ servico.associado.senha_gov }}</span>
-                              <button onclick="copyToClipboard('senha-gov-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
-                                  <i class="material-icons" style="font-size: 16px;">content_copy</i>
-                              </button>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div> 
-
-        </div>
-        <!-- 🔸 Ações -->                
-
-          <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
-
-            <!-- 🔙 Voltar para lista -->
-            <a href="{% url 'app_servicos:list_servicos' %}" 
-              class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition">
-              <i class="material-icons text-base mr-1">arrow_back</i> Voltar para lista
-            </a>
-          
-            <!-- ✏️ Editar serviço (associado) -->
-            {% if servico.pk %}
-            <a href="{% url 'app_servicos:edit_servico_associado' servico.pk %}" 
-              class="inline-flex items-center text-sm text-yellow-600 hover:text-yellow-800 transition">
-              <i class="material-icons text-base mr-1">edit</i> Editar Serviço
-            </a>
             {% endif %}
-          
           </div>
 
-          {% if documentos_relevantes %}
-          <div class="bg-white p-6 rounded-lg shadow-md mt-6">
-            <h2 class="text-base font-semibold text-gray-700 mb-4">📎 Documentos Relevantes do Associado</h2>
-            <ul class="space-y-4">
-              {% for doc in documentos_relevantes %}
-              <li class="flex items-center justify-between bg-gray-50 border p-3 rounded-md">
-                <div>
-                  <p class="text-sm font-medium text-gray-800">
-                    <i class="material-icons text-sm text-blue-400 align-middle">insert_drive_file</i>
-                    {{ doc.tipo_doc.tipo }} – 
-                    <a href="{{ doc.arquivo.url }}" class="text-blue-600 hover:underline" target="_blank">Visualizar</a>
-                  
-                  <span class="inline-block text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full ml-2">
-                    {{ doc.arquivo.url|slice:"-3:"|upper }}
-                  </span>
-                </p>
-                  <p class="text-xs text-gray-500">Enviado em {{ doc.data_upload|date:"d/m/Y H:i" }}</p>
-                </div>
-                <a href="{% url 'app_documentos:download_documento' doc.pk %}" class="text-green-600 hover:text-green-800" title="Baixar Documento">
-                  <i class="material-icons">cloud_download</i>
+          <div class="grid grid-cols-1 md:[grid-template-columns:300px_300px_1fr] gap-6 mb-6">
+
+            <!-- 🟦 Coluna 1: Drive -->
+            <div class="border border-gray-200 rounded-lg p-4 shadow-sm bg-white">
+              <h3 class="text-blue-950 text-sm font-semibold mb-2 flex items-center">
+                Upload e Pasta Drive
+              </h3>
+              {% if associado.drive_folder_id %}
+                <a href="https://drive.google.com/drive/folders/{{ associado.drive_folder_id }}"
+                  target="_blank"
+                  class="flex items-center text-blue-600 hover:underline font-medium mb-2">
+                  <img src="https://www.gstatic.com/images/branding/product/2x/drive_2020q4_48dp.png"
+                      alt="Google Drive"
+                      class="w-6 h-6 mr-2">
+                  <span>Acessar Pasta no Drive</span>
                 </a>
-              </li>
-              {% endfor %}
-            </ul>
-          </div>
-          {% else %}
-            <p class="text-gray-500 text-sm italic mt-4">Nenhum documento RG, RGP ou NIT foi encontrado para o associado.</p>
-          {% endif %}
-          
-        </div>              
-          <!-- 🔸 Tabela Alternativa (se necessário) -->
-          {% if historico %}
-          <div class="bg-white border border-blue-100 rounded-md p-4 mt-8 shadow-sm">
-            <h3 class="text-blue-700 font-semibold mb-3 text-lg flex items-center">
-              <i class="material-icons mr-2">history</i> Histórico do Serviço
-            </h3>
-            <table class="table-auto w-full text-sm">
-              <thead>
-                <tr class="bg-blue-50 text-left text-xs text-gray-600">
-                  <th class="px-3 py-2">Campo</th>
-                  <th class="px-3 py-2">De</th>
-                  <th class="px-3 py-2">Para</th>
-                  <th class="px-3 py-2">Alterado por</th>
-                  <th class="px-3 py-2">Data</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                {% for h in historico %}
-                <tr>
-                  <td class="px-3 py-2 font-medium">{{ h.campo }}</td>
-                  <td class="px-3 py-2 text-gray-600">{{ h.valor_antigo|safe }}</td>
-                  <td class="px-3 py-2 text-blue-700 font-semibold">{{ h.valor_novo|safe }}</td>
-                  <td class="px-3 py-2">{{ h.alterado_por.get_full_name }}</td>
-                  <td class="px-3 py-2 text-xs">{{ h.data_alteracao|date:"d/m/Y H:i" }}</td>
-                </tr>
+                <p class="text-xs text-gray-600 mb-3">Pasta criada automaticamente. Acesse ou envie arquivos.</p>
+                <a href="{% url 'app_documentos:upload_docs' associado.id %}?next={% url 'app_servicos:single_servico' servico.id %}"
+                  class="inline-flex items-center px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-md shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1">
+                  <svg class="w-4 h-4 mr-1 -ml-1 text-white" xmlns="http://www.w3.org/2000/svg" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 4v16m8-8H4"/>
+                  </svg>
+                  Enviar Documento Drive
+                </a>
+              {% else %}
+                <p class="text-sm italic text-gray-500">Nenhuma pasta associada.</p>
+              {% endif %}
+            </div>
+
+            <!-- 🟨 Coluna 2: Conta Gov -->
+            <div class="border border-gray-200 rounded-lg p-4 shadow-sm bg-white space-y-4">
+              <h3 class="text-blue-950 text-sm font-semibold mb-2 flex items-center">
+                Conta Gov
+              </h3>
+              <!-- CPF -->
+              <div class="flex items-center text-sm">
+                  <i class="material-icons text-red-500 mr-2" style="font-size: 18px;">fingerprint</i>
+                  <strong class="mr-2">CPF:</strong>
+                  <span id="cpf-{{ associado.pk }}">{{ associado.cpf }}</span>
+                  <button onclick="copyToClipboard('cpf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-orange-500">
+                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                  </button>
+                </div>
+
+                <!-- Senha Gov -->
+                <div class="flex items-center text-sm">
+                  <i class="material-icons text-red-500 mr-2" style="font-size: 18px;">lock</i>
+                  <strong class="mr-2">Senha:</strong>
+                  <span id="senha-gov-{{ associado.pk }}">{{ associado.senha_gov }}</span>
+                  <button onclick="copyToClipboard('senha-gov-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-yellow-500">
+                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                  </button>
+                </div>
+                <!-- Serviços Relacionados -->
+                <div class="mt-2 border-t border-gray-200 pt-2">
+                  <p class="text-xs text-gray-600 mb-1 flex items-center">
+                    <i class="material-icons text-blue-400 mr-1" style="font-size: 16px;">assignment</i>
+                    Serviços deste Associado:
+                  </p>
+
+                  {% if outros_servicos %}
+                    <ul class="text-xs text-blue-700 space-y-1">
+                      {% for outro in outros_servicos|slice:":3" %}
+                        <li>
+                          <a href="{% url 'app_servicos:single_servico' outro.id %}" class="hover:underline hover:text-blue-900">
+                            • {{ outro.tipo_servico|default:"Serviço" }} - {{ outro.created_at|date:"d/m/Y" }}
+                          </a>
+                        </li>
+                      {% endfor %}
+                      {% if quantidade_total_servicos > 3 %}
+                        <li class="text-gray-500">+{{ quantidade_total_servicos|add:"-3" }} serviços</li>
+                      {% endif %}
+                    </ul>
+                  {% else %}
+                    <p class="text-xs text-gray-400 italic">Nenhum outro serviço.</p>
+                  {% endif %}
+                </div>
+
+              </div>
+
+                <!-- 🟩 Coluna 3: Dados MAPA/Questionário (mantém como estava em 2 colunas internas) -->
+                <div class="border border-gray-200 rounded-lg p-4 shadow-sm bg-white">
+                  <h3 class="text-blue-950 text-sm font-semibold mb-2 flex items-center">
+                    Participações / Perfil
+                  </h3>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-800">
+                  <div>
+                    <strong>Recolhe INSS:</strong><br>
+                    <span>{{ associado.recolhe_inss|default:"—" }}</span>
+                  </div>
+                  <div>
+                    <strong>Recebe Seguro:</strong><br>
+                    <span>{{ associado.recebe_seguro|default:"—" }}</span>
+                  </div>
+                  <div>
+                    <strong>Defeso alguma vez:</strong><br>
+                    <span>{{ associado.ja_recebeu_defeso_algumavez|default:"—" }}</span>
+                  </div>
+                  <div>
+                    <strong>Comercializa Produtos:</strong><br>
+                    <span>{{ associado.comercializa_produtos|default:"—" }}</span>
+                  </div>
+                  <div>
+                    <strong>Outra Renda:</strong><br>
+                    <span>{{ associado.outra_fonte_renda|default:"—" }}</span>
+                  </div>
+                  <div>
+                    <strong>Bolsa Família:</strong><br>
+                    <span>{{ associado.bolsa_familia|default:"—" }}</span>
+                  </div>
+                  <div>
+                    <strong>Relação de Trabalho:</strong><br>
+                    <span>{{ associado.relacao_trabalho|default:"—" }}</span>
+                  </div>
+                  <div>
+                    <strong>Casa onde mora:</strong><br>
+                    <span>{{ associado.casa_onde_mora|default:"—" }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+              <div class="mb-10">
+                <h2 class="text-sm font-semibold text-gray-600 border-b pb-1 mb-4 uppercase tracking-wider">📄 Dados Pessoais</h2>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6 text-sm text-gray-800">
+
+                  <!-- Nome -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">Nome:</span>
+                    <span id="nome-{{ associado.pk }}">{{ associado.user.get_full_name }}</span>
+                    <button onclick="copyToClipboard('nome-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Celular -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">Celular:</span>
+                    <span id="celular-{{ associado.pk }}">{{ associado.celular }}</span>
+                    <button onclick="copyToClipboard('celular-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-green-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Nome do Pai -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">Pai:</span>
+                    <span id="pai-{{ associado.pk }}">{{ associado.nome_pai }}</span>
+                    <button onclick="copyToClipboard('pai-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-purple-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- RG -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">RG:</span>
+                    <span id="rg-numero-{{ associado.pk }}">{{ associado.rg_numero }}</span>
+                    <button onclick="copyToClipboard('rg-numero-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Órgão Expedidor -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">Órgão:</span>
+                    <span id="rg-orgao-{{ associado.pk }}">{{ associado.rg_orgao }}</span>
+                    <button onclick="copyToClipboard('rg-orgao-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-green-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Data de Emissão do RG -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">Emissão RG:</span>
+                    <span id="rg-data-emissao-{{ associado.pk }}">{{ associado.rg_data_emissao|date:"d/m/Y" }}</span>
+                    <button onclick="copyToClipboard('rg-data-emissao-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-yellow-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Naturalidade -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">Naturalidade:</span>
+                    <span id="naturalidade-{{ associado.pk }}">{{ associado.naturalidade }}</span>
+                    <button onclick="copyToClipboard('naturalidade-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-purple-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Data de Nascimento -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">Nascimento:</span>
+                    <span id="data_nascimento-{{ associado.pk }}">{{ associado.data_nascimento|date:"d/m/Y" }}</span>
+                    <button onclick="copyToClipboard('data_nascimento-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-pink-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- NIT -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">NIT:</span>
+                    <span id="nit-{{ associado.pk }}">{{ associado.nit }}</span>
+                    <button onclick="copyToClipboard('nit-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Título de Eleitor -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">Título Eleitor:</span>
+                    <span id="titulo-eleitor-{{ associado.pk }}">{{ associado.titulo_eleitor }}</span>
+                    <button onclick="copyToClipboard('titulo-eleitor-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-yellow-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- CAEPF -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">CAEPF:</span>
+                    <span id="caepef-{{ associado.pk }}">{{ associado.caepef }}</span>
+                    <button onclick="copyToClipboard('caepef-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-yellow-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- CEI -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">CEI:</span>
+                    <span id="cei-{{ associado.pk }}">{{ associado.cei }}</span>
+                    <button onclick="copyToClipboard('cei-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-yellow-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- RGP -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">RGP:</span>
+                    <span id="rgp-{{ associado.pk }}">{{ associado.rgp }}</span>
+                    <button onclick="copyToClipboard('rgp-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Emissão RGP -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">Emissão RGP:</span>
+                    <span id="rgp-data-emissao-{{ associado.pk }}">{{ associado.rgp_data_emissao|date:"d/m/Y" }}</span>
+                    <button onclick="copyToClipboard('rgp-data-emissao-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-green-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- CNH -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">CNH:</span>
+                    <span id="cnh-{{ associado.pk }}">{{ associado.cnh }}</span>
+                    <button onclick="copyToClipboard('cnh-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Emissão CNH -->
+                  <div class="flex items-center">
+                    <span class="font-medium text-gray-700 mr-2">Emissão CNH:</span>
+                    <span id="cnh-data-emissao-{{ associado.pk }}">{{ associado.cnh_data_emissao|date:"d/m/Y" }}</span>
+                    <button onclick="copyToClipboard('cnh-data-emissao-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-green-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Seção: Endereço -->
+            <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+              <div class="mb-8">
+                <h2 class="text-sm font-semibold text-gray-600 border-b pb-1 mb-4 uppercase tracking-wider">
+                  📍 Endereço
+                </h2>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-6 text-sm text-gray-800">
+
+
+                  <!-- Logradouro -->
+                  <div class="flex items-center">
+                    <span class="font-medium mr-2 text-gray-700">Logradouro:</span>
+                    <span id="logradouro-{{ associado.pk }}">{{ associado.logradouro }}</span>
+                    <button onclick="copyToClipboard('logradouro-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Número -->
+                  <div class="flex items-center">
+                    <span class="font-medium mr-2 text-gray-700">Número:</span>
+                    <span id="numero-{{ associado.pk }}">{{ associado.numero }}</span>
+                    <button onclick="copyToClipboard('numero-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Complemento -->
+                  <div class="flex items-center">
+                    <span class="font-medium mr-2 text-gray-700">Complemento:</span>
+                    <span id="complemento-{{ associado.pk }}">{{ associado.complemento }}</span>
+                    <button onclick="copyToClipboard('complemento-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Bairro -->
+                  <div class="flex items-center">
+                    <span class="font-medium mr-2 text-gray-700">Bairro:</span>
+                    <span id="bairro-{{ associado.pk }}">{{ associado.bairro }}</span>
+                    <button onclick="copyToClipboard('bairro-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- Município -->
+                  <div class="flex items-center">
+                    <span class="font-medium mr-2 text-gray-700">Município:</span>
+                    <span id="municipio-{{ associado.pk }}">{{ associado.municipio }}</span>
+                    <button onclick="copyToClipboard('municipio-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- UF -->
+                  <div class="flex items-center">
+                    <span class="font-medium mr-2 text-gray-700">UF:</span>
+                    <span id="uf-{{ associado.pk }}">{{ associado.uf }}</span>
+                    <button onclick="copyToClipboard('uf-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+
+                  <!-- CEP -->
+                  <div class="flex items-center">
+                    <span class="font-medium mr-2 text-gray-700">CEP:</span>
+                    <span id="cep-{{ associado.pk }}">{{ associado.cep }}</span>
+                    <button onclick="copyToClipboard('cep-{{ associado.pk }}')" class="ml-2 text-gray-500 hover:text-blue-500">
+                      <i class="material-icons text-sm">content_copy</i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Seção: Endereço -->
+            <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+              <div class="mb-8">
+                <h2 class="text-sm font-semibold text-gray-600 border-b pb-1 mb-4 uppercase tracking-wider">
+                  <i class="material-icons mr-2">sailing</i> Embarcações
+                </h2>              
+                {% if associado.embarcacoes.exists %}
+                <div x-data="{ openBoat: null }" class="space-y-4 mt-6">
+                  <h2 class="text-base font-semibold text-gray-700 mb-2">⛵ Embarcações do Associado</h2>
+
+                  {% for embarcacao in associado.embarcacoes.all %}
+                    <div class="border rounded-md shadow-sm overflow-hidden">
+                      <button @click="openBoat === {{ forloop.counter }} ? openBoat = null : openBoat = {{ forloop.counter }}"
+                              class="w-full px-4 py-2 bg-blue-100 text-left text-sm font-medium text-blue-800 hover:bg-blue-200 flex justify-between items-center">
+                        {{ embarcacao.nome_embarcacao }} - {{ embarcacao.inscricao_embarcacao }}
+                        <i class="material-icons text-base">expand_more</i>
+                      </button>
+
+                      <div x-show="openBoat === {{ forloop.counter }}" x-transition class="p-4 bg-white text-sm text-gray-700 space-y-2">
+                        <p><strong>Validade TIE:</strong> {{ embarcacao.validade_tie|date:"d/m/Y" }}</p>
+                        <p><strong>Porte:</strong> {{ embarcacao.porte }}</p>
+                        <p><strong>Tipo Propulsão:</strong> {{ embarcacao.tipo_propulsao }}</p>
+                        <p><strong>Combustível:</strong> {{ embarcacao.combustivel }}</p>
+                        <p><strong>Co-proprietário:</strong> {{ embarcacao.co_proprietario_nome }}</p>
+                        <p><strong>Seguro DPEN:</strong> {{ embarcacao.seguro_dpen }}</p>
+                        <p><strong>Seguro DPEM Nº:</strong> {{ embarcacao.seguro_dpem_numero }}</p>
+                        <p><strong>Vencimento DPEM:</strong> {{ embarcacao.seguro_dpem_data_vencimento|date:"d/m/Y" }}</p>
+
+                        {% if embarcacao.licencas.exists %}
+                          <div x-data="{ openLic: false }" class="mt-4">
+                            <button @click="openLic = !openLic"
+                                    class="text-blue-700 font-medium hover:underline">
+                              📄 Ver Licenças ({{ embarcacao.licencas.count }})
+                            </button>
+                            <div x-show="openLic" x-transition class="mt-2 space-y-2 border-l pl-4">
+                              {% for licenca in embarcacao.licencas.all %}
+                                <div class="border border-gray-100 rounded-md p-2 bg-gray-50">
+                                  <p><strong>Órgão:</strong> {{ licenca.orgao_nome }}</p>
+                                  <p><strong>Licença:</strong> {{ licenca.licenca_nome }}</p>
+                                  <p><strong>Código Frota:</strong> {{ licenca.codigo_frota }}</p>
+                                  <p><strong>Inscrição Aut. Naval:</strong> {{ licenca.inscricao_aut_naval }}</p>
+                                  <p><strong>Validade:</strong> {{ licenca.validade_final|date:"d/m/Y" }}</p>
+                                </div>
+                              {% endfor %}
+                            </div>
+                          </div>
+                        {% else %}
+                          <p class="text-gray-500 text-sm mt-2 italic">Nenhuma licença vinculada.</p>
+                        {% endif %}
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-gray-500 text-sm mt-2 italic">Este Associado não possui embarcações vinculadas em seu nome.</p>
+                {% endif %}
+              </div>
+            </div>
+
+            <!-- 🔸 Ações -->                
+            <div class="mt-8 flex flex-wrap items-center justify-between gap-4">
+              <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+                <!-- 🔙 Voltar para lista -->
+                <a href="{% url 'app_servicos:list_servicos' %}" 
+                  class="inline-flex items-center text-sm text-blue-600 hover:text-blue-800 transition">
+                  <i class="material-icons text-base mr-1">arrow_back</i> Voltar para lista
+                </a>
+              
+                <!-- ✏️ Editar serviço (associado) -->
+                {% if servico.pk %}
+                <a href="{% url 'app_servicos:edit_servico_associado' servico.pk %}" 
+                  class="inline-flex items-center text-sm text-yellow-600 hover:text-yellow-800 transition">
+                  <i class="material-icons text-base mr-1">edit</i> Editar Serviço
+                </a>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if documentos_relevantes %}
+            <div class="bg-white p-6 rounded-lg shadow-md mt-6">
+              <!-- Título e parágrafo com estilo mais suave -->
+              <div class="mb-4">
+                <h2 class="text-sm font-semibold text-gray-800 mb-1 flex items-center gap-1">
+                  <i class="material-icons text-blue-400 text-base">attach_file</i>
+                  Documentos Relevantes <span class="text-xs text-gray-500">(somente ESSENCIAIS)</span>
+                </h2>
+
+                <p class="text-xs text-gray-600">
+                  Não encontrou o documento <strong class="text-gray-800 font-medium">essencial</strong> que procurava?
+                  Faça o upload clicando no botão abaixo:
+                </p>
+              </div>
+
+              <!-- Botão Upload compacto e elegante -->
+              <a href="{% url 'app_documentos:upload_documento' 'associado' associado.pk %}"
+                class="inline-flex items-center gap-2 bg-gray-300 hover:bg-green-300 text-sm text-blue-600 px-3 py-1.5 rounded-md shadow-sm border border-gray-300 transition"
+                title="Upload de Documento">
+                <i class="material-icons text-blue-500 text-base">upload_file</i>
+                <span>Upload de Documento</span>
+              </a><br><br>
+
+              <ul class="space-y-4">
+                {% for doc in documentos_relevantes %}
+                <li class="flex items-center justify-between bg-gray-50 border p-3 rounded-md">
+                  <div>
+                    <p class="text-sm font-medium text-gray-800">
+                      <i class="material-icons text-sm text-blue-400 align-middle">insert_drive_file</i>
+                      {{ doc.tipo_doc.tipo }} – 
+                      <a href="{{ doc.arquivo.url }}" class="text-blue-600 hover:underline" target="_blank">Visualizar</a>
+                    
+                    <span class="inline-block text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full ml-2">
+                      {{ doc.arquivo.url|slice:"-3:"|upper }}
+                    </span>
+                  </p>
+                    <p class="text-xs text-gray-500">Enviado em {{ doc.data_upload|date:"d/m/Y H:i" }}</p>
+                  </div>
+                  <a href="{% url 'app_documentos:download_documento' doc.pk %}" class="text-green-600 hover:text-green-800" title="Baixar Documento">
+                    <i class="material-icons">cloud_download</i>
+                  </a>
+                </li>
                 {% endfor %}
-              </tbody>
-            </table>
+              </ul>
+            </div>
+            {% else %}
+              <p class="text-gray-500 text-sm italic mt-4">Nenhum documento RG, RGP ou NIT foi encontrado para o associado.</p>
+            {% endif %}
+            
+            </div>              
+            <!-- 🔸 Tabela Alternativa (se necessário) -->
+            {% if historico %}
+            <div class="bg-white border border-blue-100 rounded-md p-4 mt-8 shadow-sm">
+              <h3 class="text-blue-700 font-semibold mb-3 text-lg flex items-center">
+                <i class="material-icons mr-2">history</i> Histórico do Serviço
+              </h3>
+              <table class="table-auto w-full text-sm">
+                <thead>
+                  <tr class="bg-blue-50 text-left text-xs text-gray-600">
+                    <th class="px-3 py-2">Campo</th>
+                    <th class="px-3 py-2">De</th>
+                    <th class="px-3 py-2">Para</th>
+                    <th class="px-3 py-2">Alterado por</th>
+                    <th class="px-3 py-2">Data</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  {% for h in historico %}
+                  <tr>
+                    <td class="px-3 py-2 font-medium">{{ h.campo }}</td>
+                    <td class="px-3 py-2 text-gray-600">{{ h.valor_antigo|safe }}</td>
+                    <td class="px-3 py-2 text-blue-700 font-semibold">{{ h.valor_novo|safe }}</td>
+                    <td class="px-3 py-2">{{ h.alterado_por.get_full_name }}</td>
+                    <td class="px-3 py-2 text-xs">{{ h.data_alteracao|date:"d/m/Y H:i" }}</td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+            {% endif %}
           </div>
-          {% endif %}
-      
+        </div>
+      </div>
     </main>
 <!-- CSS do Editor -->
 <link rel="stylesheet" href="{% static 'css/editor.css' %}">
 <script src="{% static 'js/copy_to_clipboard.js' %}"></script>
+<script src="//unpkg.com/alpinejs" defer></script>
+
 {% include "components/footer_associacao.html" %}
 {% endblock single_servico %}

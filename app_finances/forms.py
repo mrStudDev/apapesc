@@ -142,8 +142,11 @@ class DespesaAssociacaoForm(forms.ModelForm):
 class TipoServicoForm(forms.ModelForm):
     class Meta:
         model = TipoServicoModel
-        fields = ['nome', 'descricao']
+        fields = ['nome', 'descricao', 'natureza']
         widgets = {
+            'natureza': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),            
             'nome': forms.TextInput(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'placeholder': 'Nome do Tipo de Serviço'
@@ -154,7 +157,10 @@ class TipoServicoForm(forms.ModelForm):
                 'placeholder': 'Descrição opcional'
             }),
         }
-
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['natureza'].empty_label = "Selecione uma natureza"
+    
 # 🔹 Formulário para cadastrar/editar Entradas da Associação
 class EntradaFinanceiraForm(forms.ModelForm):
 

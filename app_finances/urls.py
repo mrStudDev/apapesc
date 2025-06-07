@@ -58,6 +58,6 @@ urlpatterns = [
     
     # Relatórios
     path('relatorio-anuidades/', RelatorioAnuidadesView.as_view(), name='relatorio_anuidades'),
-    
-
+    # Filtra serviços para servir App Serviços
+    path('filtrar-tipos-por-natureza/', views.filtrar_tipos_por_natureza, name='filtrar_tipos'),
 ]

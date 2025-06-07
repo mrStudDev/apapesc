@@ -842,6 +842,16 @@ class TipoServicoCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, Su
         context = super().get_context_data(**kwargs)
         context["tipos_servicos"] = TipoServicoModel.objects.all().order_by('nome')
         return context
+
+# Filtra para criação de servoiços associados...
+def filtrar_tipos_por_natureza(request):
+    natureza = request.GET.get('natureza')
+    tipos = TipoServicoModel.objects.filter(natureza=natureza).order_by('nome')
+
+    data = [{'id': tipo.id, 'nome': tipo.nome} for tipo in tipos]
+    return JsonResponse({'tipos': data})
+
+
     
 class EditTipoServicoView(LoginRequiredMixin, GroupPermissionRequiredMixin, SuccessMessageMixin, UpdateView):
     model = TipoServicoModel

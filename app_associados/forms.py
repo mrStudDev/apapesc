@@ -108,6 +108,10 @@ class AssociadoForm(forms.ModelForm):
             'foto': forms.FileInput(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
+            'apelido': forms.TextInput(attrs={
+                'placeholder': 'Carinhosamente Chamado como... (somente apelidos carinhosos)',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),            
             'sexo_biologico': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
@@ -150,7 +154,10 @@ class AssociadoForm(forms.ModelForm):
             }),
             'outra_fonte_renda': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-            }),            
+            }), 
+            'casa_onde_mora': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),                        
             'bolsa_familia': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
@@ -341,6 +348,11 @@ class AssociadoForm(forms.ModelForm):
         # Configurações de Municípios
         self.fields['municipio_circunscricao'].queryset = MunicipiosModel.objects.all()
         self.fields['municipio_circunscricao'].label_from_instance = lambda obj: obj.municipio
+        
+        # Campos nome_pai e nome_mae devem sempre vir da instância
+        self.fields['nome_mae'].initial = self.instance.nome_mae
+        self.fields['nome_pai'].initial = self.instance.nome_pai
+
 
     def clean_user(self):
         # Não permitir alteração do campo `user` na edição

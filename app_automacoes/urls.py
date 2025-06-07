@@ -22,6 +22,7 @@ urlpatterns = [
      path('upload/autorizacao-acesso-gov/', upload_pdf_base, {'automacao': 'autorizacao_acesso_gov'}, name='upload_pdf_autorizacao_acesso_gov'),
      path('upload/declaracao-desfiliacao/', upload_pdf_base, {'automacao': 'declaracao_desfiliacao'}, name='upload_pdf_declaracao_desfiliacao'),
      path('upload/direitos-deveres/', upload_pdf_base, {'automacao': 'direitos_deveres'}, name='upload_pdf_direitos_deveres'),
+     path('upload/retirada-documentos/', upload_pdf_base, {'automacao': 'retirada_documentos'}, name='upload_pdf_retirada_documentos'),
 
      path('lista/todos-arquivos/', ListaTodosArquivosView.as_view(), name='lista_automacoes'),
      
@@ -80,5 +81,8 @@ urlpatterns = [
      
      path('gerar-direitos-deveres/<int:associado_id>/', views.gerar_direitos_deveres,
           name='gerar_direitos_deveres'),
+     
+     path('gerar-retirada_documentos/<int:associado_id>/', views.gerar_retirada_documentos,
+          name='gerar_retirada_documentos'),
 
 ]

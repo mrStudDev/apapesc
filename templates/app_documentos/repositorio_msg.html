@@ -38,11 +38,67 @@
                 <!-- Ficha de Filiação -->
                 <div class="border rounded-md shadow">
                     <button type="button" onclick="toggleAccordion(this)" class="w-full bg-gray-200 text-left px-4 py-3 font-semibold text-gray-700 hover:bg-gray-300 rounded-t-md focus:outline-none">
-                        🧾 Filiação
+                        🧾 Associação - Grupo MSG 01
                     </button>
                     <div class="accordion-body hidden px-4 py-3 space-y-3 text-gray-800 bg-white">
+                        <!--CNPJ -->
                         <div>
-                            <p id="msg01">
+                            <p id="msg01a">
+
+                                <strong>CNPJ/PIX</strong> - Esse é o número do CNPJ da APAPESC para sua conferência. 
+                                Também é a chave pix, para aqueles que desejam contribuir com o trabalho da Associação.
+                                A Apapesc atua na frente e na busca de melhorias para um desenvolvimento sustentável e legalizado em ações e atos junto às entidades 
+                                competentes, defendendo os interesses de toda comunidade pesqueira brasileira, em especial na região sul do país. 
+                                A Chave serve ainda para fazer pagamentos de taxas, anuidades etc. A chave PIX é= <strong> 48.719.703/0001-09</strong>.
+                            </p>
+                            <button onclick="copyToClipboard('msg01a')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                        </div>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />
+                    </div>
+
+                </div>
+
+                <!-- Mesagens de Lead -->
+                <div class="border rounded-md shadow">
+                    <button type="button" onclick="toggleAccordion(this)" class="w-full bg-gray-200 text-left px-4 py-3 font-semibold text-gray-700 hover:bg-gray-300 rounded-t-md focus:outline-none">
+                        🏠 Leads de Novos Associados - Grupo MSG 02
+                    </button>
+                    <div class="accordion-body hidden px-4 py-3 space-y-3 text-gray-800 bg-white">
+                        
+                        <div>
+                            <p id="msg02a">
+                                Você, pescador ou agricultor, enfrenta desafios diários além do seu trabalho. Lidar com burocracias, garantir direitos e acessar serviços públicos pode ser difícil sozinho. Ao se associar à APAPESC, você entra para uma rede que luta por seus direitos.<br><br>
+                                <strong>Benefícios da Associação:</strong><br>
+                                - Defesa de interesses coletivos: políticas públicas, incentivos e acesso a créditos rurais/pesqueiros.<br>
+                                - Assistência com órgãos públicos: emissão de licenças, registros, regularizações.<br>
+                                - Suporte jurídico especializado: auxílio em processos como o Seguro Defeso administrativo.<br>
+                                - Fortalecimento da classe: quanto mais associados, mais representatividade e força!<br><br>
+                                <strong>Associe-se agora</strong> e faça parte de um movimento que protege, representa e valoriza você e sua profissão.
+                            </p>
+                            <button onclick="copyToClipboard('msg02a')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                        </div>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />
+
+                        <div>
+                            <p id="msg02b">
+                                Com a aproximação do final do ano, a partir de <strong>11 de novembro</strong> iniciaremos os processos para o <strong>Seguro Defeso</strong>.
+                                Por isso, é essencial que sua situação esteja <strong>em dia no INSS</strong> e com a documentação correta. Evite atrasos!
+                            </p>
+                            <button onclick="copyToClipboard('msg02b')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                        </div>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />
+                        <div>
+                            <p id="msg02c">Se você não possui comprovante de residência em seu nome, preencha a <strong>Declaração de Residência</strong> padrão do MAPA, assinada por alguém que tenha.</p>
+                            <button onclick="copyToClipboard('msg02c')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                        </div>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />
+                        <div>
+                            <p id="msg02d">📎 Junte um comprovante no nome do declarante e envie junto com a declaração para validação.</p>
+                            <button onclick="copyToClipboard('msg02d')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                        </div>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />                       
+                        <div>
+                            <p id="msg02e">
                                 Para registro inicial de filiação na APAPESC, é necessário preencher a <strong>Ficha de Solicitação de Filiação</strong> e enviar os seguintes documentos:<br>
                                 - Documento de identidade (RG)<br>
                                 - Documento de habilitação (CNH)<br>
@@ -51,124 +107,95 @@
                                 - Se possuir carteirinha de pescador (RGP) ou protocolo, envie também.<br><br>
                                 <strong>Importante:</strong> Dê preferência por documentos escaneados em papelaria e no formato PDF. Caso envie fotos tiradas com o celular, elas devem estar <strong>completas e legíveis</strong>.
                             </p>
-                            <button onclick="copyToClipboard('msg01')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                            <button onclick="copyToClipboard('msg02e')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
                         </div>
-                        <hr>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />
                         <div>
-                            <p id="msg02">
-                                Você, pescador ou agricultor, enfrenta desafios diários além do seu trabalho. Lidar com burocracias, garantir direitos e acessar serviços públicos pode ser difícil sozinho. Ao se associar à APAPESC, você entra para uma rede que luta por seus direitos.<br><br>
-                                <strong>Benefícios da Associação:</strong><br>
-                                - Defesa de interesses coletivos: políticas públicas, incentivos e acesso a créditos rurais/pesqueiros.<br>
-                                - Assistência com órgãos públicos: emissão de licenças, registros, regularizações.<br>
-                                - Suporte jurídico especializado: auxílio em processos como o Seguro Defeso administrativo.<br>
-                                - Fortalecimento da classe: quanto mais associados, mais representatividade e força!<br><br>
-                                <strong>Associe-se agora</strong> e faça parte de um movimento que protege, representa e valoriza você e sua profissão.
+                            <p id="msg02f">
+                                Para registro ... <strong>de...</strong> ..:<br>
+                                -...<br>
+                                - <br>
+                                - <br>
+                                -  <em>...</em><br>
+                                - .<br><br>
+                                <strong>Importante:</strong> ??? <strong>/??</strong>.
                             </p>
-                            <button onclick="copyToClipboard('msg02')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                            <button onclick="copyToClipboard('msg02f')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
                         </div>
-                        <hr>
-                        <div>                            
-                            <p id="msg03">
-                                📍 Rua Fernando Machado, nº 73, sala 301, Edifício Fernando Machado, Centro, Florianópolis/SC<br>
-                                📞 WhatsApp: (48) 99112-7238 / (48) 99102-4785<br>
-                                📠 Telefone fixo: (48) 3065-6784<br>
-                                📧 E-mail: <a href="mailto:apaescpescadores@gmail.com">apaescpescadores@gmail.com</a>
-                            </p>
-                            <button onclick="copyToClipboard('msg03')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
-                        </div>
-                        <hr>
-                        <div>
-                            <p id="msg04">📥 Envie os documentos digitalizados ou entregue presencialmente na sede da associação.</p>
-                            <button onclick="copyToClipboard('msg04')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
-                        </div>
-                    </div>
-                </div>
-                                <!-- Mesagens de Lead -->
-                <div class="border rounded-md shadow">
-                    <button type="button" onclick="toggleAccordion(this)" class="w-full bg-gray-200 text-left px-4 py-3 font-semibold text-gray-700 hover:bg-gray-300 rounded-t-md focus:outline-none">
-                        🏠 Leads de Novos Associados
-                    </button>
-                    <div class="accordion-body hidden px-4 py-3 space-y-3 text-gray-800 bg-white">
-                        <div>
-                            <p id="msg05">
-                                Você, pescador ou agricultor, enfrenta desafios diários além do seu trabalho. Lidar com burocracias, garantir direitos e acessar serviços públicos pode ser difícil sozinho. Ao se associar à APAPESC, você entra para uma rede que luta por seus direitos.<br><br>
-                                <strong>Benefícios da Associação:</strong><br>
-                                - Defesa de interesses coletivos: políticas públicas, incentivos e acesso a créditos rurais/pesqueiros.<br>
-                                - Assistência com órgãos públicos: emissão de licenças, registros, regularizações.<br>
-                                - Suporte jurídico especializado: auxílio em processos como o Seguro Defeso administrativo.<br>
-                                - Fortalecimento da classe: quanto mais associados, mais representatividade e força!<br><br>
-                                <strong>Associe-se agora</strong> e faça parte de um movimento que protege, representa e valoriza você e sua profissão.
-                            </p>
-                            <button onclick="copyToClipboard('msg05')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
-                        </div>
-                        <hr>
-                        <div>
-                            <p id="msg06">
-                                Com a aproximação do final do ano, a partir de <strong>11 de novembro</strong> iniciaremos os processos para o <strong>Seguro Defeso</strong>.
-                                Por isso, é essencial que sua situação esteja <strong>em dia no INSS</strong> e com a documentação correta. Evite atrasos!
-                            </p>
-                            <button onclick="copyToClipboard('msg06')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
-                        </div>
-                        <hr>
-                        <div>
-                            <p id="msg07">Se você não possui comprovante de residência em seu nome, preencha a <strong>Declaração de Residência</strong> padrão do MAPA, assinada por alguém que tenha.</p>
-                            <button onclick="copyToClipboard('msg07')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
-                        </div>
-                        <hr>
-                        <div>
-                            <p id="msg08">📎 Junte um comprovante no nome do declarante e envie junto com a declaração para validação.</p>
-                            <button onclick="copyToClipboard('msg08')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
-                        </div>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />                       
                     </div>
                 </div>
 
                 <!-- Licença de Pesca -->
                 <div class="border rounded-md shadow">
                     <button type="button" onclick="toggleAccordion(this)" class="w-full bg-gray-200 text-left px-4 py-3 font-semibold text-gray-700 hover:bg-gray-300 rounded-t-md focus:outline-none">
-                        🎣 Emissão de Documentos
+                        🎣 Emissão de Documentos - Grupo MSG 03
                     </button>
                     <div class="accordion-body hidden px-4 py-3 space-y-3 text-gray-800 bg-white">
+
                         <div>
-                            <p id="msg09">
+                            <p id="msg03a">
                                 Para não filiados à APAPESC, oferecemos <strong>serviço de emissão da Carteira Profissional de Pescador (RGP)</strong> mediante contribuição de R$ 80,00.<br><br>
                                 <strong>O que está incluso:</strong><br>
                                 - Levantamento da documentação (NIT, PIS, dados pessoais)<br>
-                                - Atualização cadastral na Receita (quando aplicável)<br>
+                                - Atualização cadastral na Receita (quando aplicável) - OBS: pode haver exigência de comparecimento pessoal do interessado!<br>
                                 - Preenchimento de formulários<br>
                                 - Comunicação com o MAPA<br>
                                 - Cumprimento de exigências até a finalização do processo<br><br>
                                 Conte conosco para facilitar esse caminho!
                             </p>
-                            <button onclick="copyToClipboard('msg09')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                            <button onclick="copyToClipboard('msg03a')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
                         </div>
-                        <hr>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />
+
                         <div>
-                            <p id="msg10">Para solicitar sua <strong>Licença de Pesca Profissional</strong>, precisamos da Ficha de Solicitação preenchida, além do RG, CPF, e Comprovante de Residência atualizado.</p>
-                            <button onclick="copyToClipboard('msg10')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                            <p id="msg03b">Para solicitar sua <strong>Licença de Pesca Profissional</strong>, precisamos dos dados para preencher a Ficha de Solicitação preenchida, além do RG, CPF, e Comprovante de Residência atualizado.</p>
+                            <button onclick="copyToClipboard('msg03b')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
                         </div>
-                        <hr>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />
+
                         <div>
-                            <p id="msg11">🛠️ Caso sua licença esteja vencida, podemos auxiliar na renovação mediante entrega da documentação.</p>
-                            <button onclick="copyToClipboard('msg11')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                            <p id="msg03c">🛠️ Caso sua licença esteja vencida, podemos auxiliar na renovação mediante entrega da documentação.</p>
+                            <button onclick="copyToClipboard('msg03c')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
                         </div>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />
+
+                        <div>
+                            <p id="msg03d">
+                                Para emissão de <strong>Carteira Profissional de Pescador (RGP)</strong><br><br>
+                                <strong>Conta Gov - Acesso nível Prata ou Ouro **Isso é Essencial** (conta gov é o aplicativo gov que pode ser baixado no PlayStore)</strong><br>
+                                - Foto 3x4 (Pode ser pelo celular imitando uma 3x4 = ombro e rosto)<br>
+                                - Doc. de identidade (RG) Colorido<br>
+                                - Documento de cadastro de pessoa física (CPF)<br>
+                                - Comprovante de residência em nome do titular/ Caso Não tiver, enviamos(para preencher e assinar) uma declaração Padrão, Oficial do MAPA(na hora do atendimento)<br>
+                                - NIT (nós vazemos)<br><br>
+                                - Declaração de filiação da APAPESC preenchida. (nós vazemos) <br><br>
+                                Conte conosco para facilitar esse caminho!
+                            </p>
+                            <button onclick="copyToClipboard('msg03d')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                        </div>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />
+
                     </div>
                 </div>
 
                 <!-- Agendamento Marinha -->
                 <div class="border rounded-md shadow">
                     <button type="button" onclick="toggleAccordion(this)" class="w-full bg-gray-200 text-left px-4 py-3 font-semibold text-gray-700 hover:bg-gray-300 rounded-t-md focus:outline-none">
-                        ⚓ Agendamentos
+                        ⚓ Agendamentos - Grupo MSG - 04
                     </button>
                     <div class="accordion-body hidden px-4 py-3 space-y-3 text-gray-800 bg-white">
                         <div>
-                            <p id="msg12">⚓ Para agendar atendimento na Capitania dos Portos, envie a <strong>Ficha de Agendamento</strong> preenchida, junto aos seus documentos pessoais e da embarcação.</p>
-                            <button onclick="copyToClipboard('msg12')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                            <p id="msg04a">⚓ Para agendar atendimento na Capitania dos Portos, envie a <strong>Ficha de Agendamento</strong> preenchida, junto aos seus documentos pessoais e da embarcação.</p>
+                            <button onclick="copyToClipboard('msg04a')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
                         </div>
-                        <hr>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />
+
                         <div>
-                            <p id="msg13">✅ O agendamento depende da disponibilidade de datas na Marinha. Após envio, nossa equipe fará contato para confirmação.</p>
-                            <button onclick="copyToClipboard('msg13')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
+                            <p id="msg04b">✅ O agendamento depende da disponibilidade de datas na Marinha. Após envio, nossa equipe fará contato para confirmação.</p>
+                            <button onclick="copyToClipboard('msg04b')" class="text-sm text-blue-600 hover:underline">📋 Copiar</button>
                         </div>
+                        <hr class="border-t-2 border-gray-300 my-4 mb-2" />
                     </div>
                 </div>
             </div>

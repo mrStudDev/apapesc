@@ -16,6 +16,7 @@ from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 
 
+
 class AnuidadeModel(models.Model):
     ano = models.PositiveIntegerField(unique=True, verbose_name="Ano da Anuidade")
     valor_anuidade = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Valor da Anuidade")
@@ -323,10 +324,23 @@ class DespesaAlteracaoModel(models.Model):
 
 
 # ENTRADAS
-# Tipo de Serviço
+# APP FINANCES Tipo de Serviço
+NATUREZA_CHOICES = [
+    ('emissao_documento', 'Emissão de Documento'),
+    ('servico_consultoria', 'Serviço de Consultoria'),
+    ('servico_geral', 'Serviço Geral'),
+]
+
 class TipoServicoModel(models.Model):
+
     nome = models.CharField(max_length=255, unique=True, verbose_name="Nome do Tipo de Serviço")
     descricao = models.TextField(blank=True, null=True, verbose_name="Descrição")
+    natureza = models.CharField(
+        max_length=50,
+        choices=NATUREZA_CHOICES,
+        blank=True,
+        verbose_name="Natureza do Serviço"
+    )
 
     class Meta:
         ordering = ['nome']
