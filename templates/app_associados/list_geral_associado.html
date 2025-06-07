@@ -134,9 +134,9 @@
                 <thead class="bg-gray-100 text-gray-600 uppercase text-xs leading-normal">
                     <tr>
                         <th class="px-4 py-2 border">Nome</th>
+                        <th class="px-4 py-2 border">💛</th>
                         <th class="px-4 py-2 border">CPF</th>
                         <th class="px-4 py-2 border">Gov</th>
-                        <th class="px-4 py-2 border">Celular</th>
                         <th class="px-4 py-2 border">S</th>
                         <th class="px-4 py-2 border">NS</th>
                         <th class="px-4 py-2 border">T</th>
@@ -153,19 +153,23 @@
                 <tbody>
                     {% for associado in associados %}
                         <tr class="hover:bg-gray-50 transition">
-                        <td class="px-4 py-2 border">
-                        <div class="flex items-center space-x-1">
-                            <span class="material-icons {{ associado.status_rg_icon.0|default:'' }} text-sm" title="{{ associado.status_rg_icon.1|default:'' }}">
-                                assignment_ind
-                            </span>
-                            <a href="{% url 'app_associados:single_associado' associado.id %}" 
-                                class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">
-                                {{ associado.user.get_full_name }}
-                            </a>
-                        </div>
-                        </td>
-                              
-                              
+                            <td class="px-4 py-2 border">
+                                <div class="flex items-center space-x-1">
+                                    <span class="material-icons {{ associado.status_rg_icon.0|default:'' }} text-sm" title="{{ associado.status_rg_icon.1|default:'' }}">
+                                        assignment_ind
+                                    </span>
+                                    <a href="{% url 'app_associados:single_associado' associado.id %}" 
+                                        class="text-blue-600 hover:text-blue-800 hover:underline text-sm font-medium">
+                                        {{ associado.user.get_full_name }}
+                                    </a>
+                                </div>
+                            </td>
+                            <td class="px-4 py-2 border text-center">
+                                {% if associado.apelido %}
+                                    {{ associado.apelido }}
+                                {% else %}
+                                    <span>***</span>
+                                {% endif %}                  
                             <td class="px-4 py-2 border"><span id="cpf-{{ associado.pk }}" class="text-gray-800">{{ associado.cpf }}</span>
                                 <button onclick="copyToClipboard('cpf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-orange-500">
                                     <i class="material-icons" style="font-size: 16px;">content_copy</i>
@@ -176,12 +180,7 @@
                                     <i class="material-icons" style="font-size: 16px;">content_copy</i>
                                 </button>
                             </td>
-                            <td class="px-4 py-2 border"><span id="celular-{{ associado.pk }}" class="text-gray-800">{{ associado.celular }}</span>
-                                <button onclick="copyToClipboard('celular-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
-                                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
-                                </button>
-                            </td>
-
+   
                             <td class="px-4 py-2 border text-center">
                                 {% if associado.qtd_servicos > 0 %}
                                   <div class="relative inline-block w-4 h-4 bg-green-500 rounded-full">
