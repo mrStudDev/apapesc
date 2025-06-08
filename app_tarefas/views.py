@@ -310,7 +310,7 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
 
         # ✅ Processamento da rodada
         rodada_id = request.POST.get("rodada_id")
-        if rodada_id:
+        if rodada_id and rodada_id.isdigit():
             try:
                 rodada = RodadaProcessamentoTarefaMassa.objects.get(pk=rodada_id)
                 proc = ProcessamentoTarefaMassa.objects.get(tarefa=tarefa, rodada=rodada)
@@ -339,11 +339,12 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
                     rodada.encerrada = True
                     rodada.save()
                     messages.success(request, "Todas as tarefas da rodada foram processadas. Rodada encerrada.")
-                    return redirect('app_tarefas:gerar_tarefa_massa')
+                    return redirect('app_tarefas:list_tarefas')
 
             except (RodadaProcessamentoTarefaMassa.DoesNotExist, ProcessamentoTarefaMassa.DoesNotExist):
                 messages.error(request, "Erro ao atualizar o processamento da tarefa.")
                 return redirect('app_tarefas:gerar_tarefa_massa')
+        return redirect('app_tarefas:single_tarefa', pk=tarefa.pk)
 
         
     def get_object(self, queryset=None):
@@ -648,6 +649,37 @@ class TarefaDeleteView(LoginRequiredMixin, GroupPermissionRequiredMixin, DeleteV
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
     ]
+
+# ==============================fim    
+# Minhas Tarefas
+
+
+class MinhasTarefasView(LoginRequiredMixin, TemplateView):
+    template_name = "app_tarefas/minhas_tarefas.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+
+        try:
+            integrante = IntegrantesModel.objects.get(user=user)
+        except IntegrantesModel.DoesNotExist:
+            integrante = None
+
+        # 👤 Tarefas criadas por mim
+        tarefas_criadas_por_mim = TarefaModel.objects.filter(criado_por=user).order_by('-data_criacao')
+
+        # 🧾 Tarefas atribuídas a mim (por outro usuário)
+        tarefas_atribuídas = TarefaModel.objects.none()
+        if integrante:
+            tarefas_atribuídas = TarefaModel.objects.filter(responsaveis=integrante).exclude(criado_por=user).order_by('-data_criacao')
+
+        context["tarefas_criadas"] = tarefas_criadas_por_mim
+        context["tarefas_atribuidas"] = tarefas_atribuídas
+
+        return context
+
+
     
 # ==============================fim    
 # Tarefas em Massa

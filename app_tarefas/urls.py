@@ -21,7 +21,9 @@ from .views import (
     GerarListarReapsView,
     ReapsAssociadosListView,
     ReapsProcessarView,
-    ReapsDeleteView
+    ReapsDeleteView,
+    MinhasTarefasView
+    
 
     )
 
@@ -34,6 +36,7 @@ urlpatterns = [
     path('create-tarefa/<int:associado_id>/', views.TarefaCreateView.as_view(), name='create_tarefa_associado'),
     path('editar-tarefa/<int:pk>/', TarefaEditView.as_view(), name='edit_tarefa'),
     path('single/<int:pk>/', TarefaDetailView.as_view(), name='single_tarefa'),
+    path('minhas-tarefas/', MinhasTarefasView.as_view(), name='minhas_tarefas'),
     
     # Guias INSS
     path('lancamento/', LancamentoINSSListView.as_view(), name='list_lancamentos'),
