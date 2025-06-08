@@ -1347,6 +1347,10 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
         ).exclude(id__in=guias_processadas_ids).count()
         pendentes = total_guias - processadas - em_processamento
 
+        percentual = 0
+        if total_guias > 0:
+            percentual = (processadas / total_guias) * 100
+            
         return render(request, self.template_name, {
             'guia': guia,
             'lancamento': lancamento,
@@ -1363,6 +1367,7 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
             'pendentes': pendentes,
             'rodada': rodada,
             'usuarios_participantes': usuarios_participantes,
+            'percentual': percentual,
         })
 
 

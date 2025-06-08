@@ -123,11 +123,9 @@
 
                   <!-- ✅ Barra de progresso -->
                   {% if total > 0 %}
-                    {% with percentual=processadas|divisibleby:total %}
                       <div class="mt-3 h-2 bg-gray-200 rounded-full overflow-hidden">
                         <div class="bg-green-500 h-full" style="width:{{ percentual|floatformat:0 }}%;"></div>
                       </div>
-                    {% endwith %}
                   {% endif %}
                 </div>
                 <!-- 👥 Participantes da Rodada -->
