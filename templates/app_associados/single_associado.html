@@ -52,7 +52,8 @@
     </div>
 
     <!-- Conteúdo Principal -->
-    <div class="container mx-auto py-6 px-4 max-w-7xl">
+    <div class="container mx-auto my-6 max-w-7xl">
+
         {% if messages %}
         <div class="space-y-4 mb-6">
             {% for message in messages %}
@@ -97,35 +98,40 @@
         {% endif %}
 
         <!-- Links de Ações -->
-        <div class="flex justify-center space-x-2 mb-4">
-            <!-- Botão Lista -->
-            <a href="{% url 'app_associados:list_geral_associado' %}"
-            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300"
-            title="Lista de Associados">
-                <i class="material-icons" style="font-size: 24px; color:blue">list</i>
-                <span class="sr-only">Lista</span> Lista
-            </a>
+        <div class="bg-gray-100 p-4 rounded-md shadow border border-gray-100">
+            <!-- Linha com título à esquerda e botões à direita -->
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
+                <h1 class="text-xl font-semibold text-gray-800">Detalhes do Associado</h1>
+                <div class="flex flex-wrap justify-center sm:justify-end gap-2 text-sm">
+                    <!-- Botão Lista -->
+                    <a href="{% url 'app_associados:list_geral_associado' %}"
+                    class="inline-flex items-center space-x-1 bg-gray-100 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-md border border-gray-300 transition"
+                    title="Lista de Associados">
+                        <i class="material-icons text-base">list</i>
+                        <span>Lista</span>
+                    </a>
 
-            <!-- Botão Editar -->
-            <a href="{% url 'app_associados:edit_associado' associado.pk %}"
-            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400"
-            title="Editar Associado">
-                <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
-                <span class="sr-only">Editar</span> Editar
-            </a>
+                    <!-- Botão Editar -->
+                    <a href="{% url 'app_associados:edit_associado' associado.pk %}"
+                    class="inline-flex items-center space-x-1 bg-gray-100 hover:bg-yellow-100 text-yellow-600 px-3 py-1.5 rounded-md border border-gray-300 transition"
+                    title="Editar">
+                        <i class="material-icons text-base">edit</i>
+                        <span>Editar</span>
+                    </a>
 
-            <!-- Botão Upload -->
-            <a href="{% url 'app_documentos:upload_documento' 'associado' associado.pk %}"
-            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400"
-            title="Upload de Documento">
-                <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
-                <span class="sr-only">Upload</span> Upload Doc
-            </a>
+                    <!-- Botão Upload -->
+                    <a href="{% url 'app_documentos:upload_documento' 'associado' associado.pk %}"
+                    class="inline-flex items-center space-x-1 bg-gray-100 hover:bg-green-100 text-green-600 px-3 py-1.5 rounded-md border border-gray-300 transition"
+                    title="Upload de Documento">
+                        <i class="material-icons text-base">upload_file</i>
+                        <span>Upload</span>
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- Seção: Vinculos do Associaso -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Detalhes da Filiação</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 <!-- ASsociação-->
                 <div class="flex items-center space-x-3">
@@ -158,7 +164,7 @@
                 <div class="flex items-center space-x-3">
                     <i class="material-icons text-green-500" style="font-size: 24px;">supervisor_account</i>
                     <div>
-                        <strong class="text-gray-700">Delegado / Responsável:</strong>
+                        <strong class="text-gray-700">Delegado(a) / Responsável:</strong>
                         <span id="delegado-{{ associado.pk }}" class="text-gray-800">{{ associado.reparticao.delegado }}</span>
                     </div>
                 </div>
@@ -225,7 +231,7 @@
                                 </form>
                             </div>
                         {% else %}
-                            <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow">
+                            <div class="bg-white border-l-4 border-green-400 p-4 rounded shadow">
                                 <h3 class="text-lg font-semibold mb-2 text-green-700">🎉 Anuidade já aplicada com sucesso!</h3>
                                 <li class="text-sm text-gray-600 mt-1">Futuros lançamentos serão automaticamente computados.</li>
                             </div>
@@ -265,7 +271,7 @@
                 {% endif %}
                     
                 {% if beneficios_aplicados %}
-                    <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded shadow mb-6">
+                    <div class="bg-white border-l-4 border-green-400 p-4 rounded shadow mb-6">
                         <h3 class="text-lg font-semibold mb-2 text-green-700">✅ Benefícios já aplicados</h3>
 
                         <ul class="list-disc pl-5 text-sm text-gray-800">
@@ -298,7 +304,7 @@
                         <p class="text-xs text-gray-600 mt-1">Pasta criada automáticamente. Acesse a pasta ou faça upload de arquivos.</p>
                         <br>
                         <a href="{% url 'app_documentos:upload_docs' associado.id %}?next={% url 'app_associados:single_associado' associado.id %}"
-                            class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                            class="inline-flex items-center px-4 py-2 bg-green-500 hover:bg-green-700 text-white text-sm font-medium rounded-md shadow-sm transition focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                             <svg class="w-5 h-5 mr-2 -ml-1 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
@@ -314,68 +320,67 @@
                 <div class="border border-gray-200 rounded-lg p-4 my-6 shadow-sm">
                     <div class="my-6">
                         <h3 class="text-lg font-semibold text-gray-800 mb-2">Progresso do Cadastro</h3>
-                        <div class="w-full bg-yellow-200  rounded-full h-2">
-                            <div class="bg-green-500 h-2 rounded-full" style="width: {{ progresso_cadastro }}%;"></div>
+                        <div class="w-full bg-gray-200  rounded-full h-2">
+                            <div class="bg-green-400 h-2 rounded-full" style="width: {{ progresso_cadastro }}%;"></div>
                         </div>
                         <p class="text-sm text-gray-600 mt-1">{{ progresso_cadastro }}% completo</p>
                         <p class="text-sm text-gray-600 mt-1">Não estão nessa contagem os campos: CNH, CTPS; e Espécies</p>
                     </div>
                 </div>
             </div>
-                    {% if beneficios_aplicados %}
-                <div class="text-xs">
-                    <div cclass="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                        <hsmall class="text-sm font-semibold text-yellow-800">🎣 Benefícios Aplicados</hsmall>
-                        <small class="text-[11px] text-yellow-700">
-                            Visualize ou edite as informações clicando abaixo.
-                        </small>
-                    </div>
 
-                    <div class="space-y-2">
-                        {% for beneficio in beneficios_aplicados %}
-                            {% get_controle beneficio associado as controle %}
+                {% if beneficios_aplicados %}
+                    <div class="bg-white shadow-md rounded-lg p-4 border-l-4 border-green-400">
 
-                            <div class="w-full bg-yellow-50 border border-yellow-200 rounded px-4 py-2 text-[12px] flex items-center justify-between gap-4">
-                                
-                                <!-- Dados principais (nome, estado, ano, data, status) -->
-                                <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px]">
-                                    <span class="font-semibold text-yellow-900 truncate max-w-[150px]">
-                                        {{ beneficio.get_nome_display }}
-                                    </span>
-                                    <span class="text-gray-600">
-                                        {{ beneficio.ano_concessao }}/{{ beneficio.estado }}
-                                    </span>
-                                    <span class="text-gray-500">
-                                        Vigente até {{ beneficio.data_fim|date:"d/m/Y" }}
-                                    </span>
+                        <div class="text-xs">
+                            {% for beneficio in beneficios_aplicados %}
+                                {% get_controle beneficio associado as controle %}
+
+                                <div class="w-full border border-green-100 rounded px-4 py-2 text-[14px] flex items-center justify-between gap-4">
                                     
-                                    {% if controle %}
-                                        <span class="text-[11px] font-medium text-yellow-800 bg-yellow-200 px-2 py-0.5 rounded">
-                                            {{ controle.get_status_pedido_display }}
+                                    <!-- Dados principais (nome, estado, ano, data, status) -->
+                                    <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-[12px]">
+                                        <span class="font-semibold text-gray-900 truncate max-w-[150px]">
+                                            {{ beneficio.get_nome_display }}
                                         </span>
+                                        <span class="text-gray-600">
+                                            {{ beneficio.ano_concessao }}/{{ beneficio.estado }}
+                                        </span>
+                                        <span class="text-gray-500">
+                                            Vigente até {{ beneficio.data_fim|date:"d/m/Y" }}
+                                        </span>
+                                        
+                                        {% if controle %}
+                                            <span class="text-[11px] font-medium text-yellow-700 px-2 py-0.5 rounded">
+                                                {{ controle.get_status_pedido_display }}
+                                            </span>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Botão -->
+                                    {% if controle %}
+                                    <a href="{% url 'app_beneficios:controle_detalhe' controle.id %}"
+                                    class="inline-flex items-center px-3 py-1 text-[14px] text-white bg-green-500 border border-green-200 rounded hover:bg-green-400 transition whitespace-nowrap">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        Visualizar
+                                    </a>
                                     {% endif %}
                                 </div>
-
-                                <!-- Botão -->
-                                {% if controle %}
-                                <a href="{% url 'app_beneficios:controle_detalhe' controle.id %}"
-                                class="inline-flex items-center px-3 py-1 text-[11px] text-blue-700 hover:text-blue-900 bg-blue-100 border border-blue-200 rounded hover:bg-blue-200 transition whitespace-nowrap">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    Visualizar
-                                </a>
-                                {% endif %}
-                            </div>
-                        {% endfor %}
+                            {% endfor %}
+                        </div>
                     </div>
-                </div>
-            {% endif %}
-        </div>
+                {% endif %}
+            </div>
+
 
         <!-- Seção: Informações Pessoais -->
         <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
-            <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Informações Pessoais</h2>
+            <h2 class="text-base font-semibold text-gray-700 mb-3 border-b-4 border-blue-200 pb-2">
+                Informações Pessoais
+            </h2>
+
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <!-- Nome -->
                 <div class="flex items-center space-x-3">
@@ -486,7 +491,7 @@
         </div>
         <!-- 🔐 Conta Gov + 💰 Painel Financeiro -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Conta Gov e Resumo Financeiro</h2>
+            <h2 class="text-base font-semibold text-gray-700 mb-3 border-b-4 border-gray-200 pb-2">Conta Gov e Resumo Financeiro</h2>
 
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
                 <!-- Coluna 1: Login e Senha (1/4) -->
@@ -559,9 +564,9 @@
             </div><br>
         </div>
 
-        <section class="mb-3 py-4">
+        <section class="mb-1 py-4">
             <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-green-600">
-                <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-3 rounded border border-green-100 shadow-sm mb-4">
+                <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-3 rounded border border-green-100 shadow-sm mb-1">
 
                     <!-- Título + ícone -->
                     <div class="flex items-center text-green-700 text-sm font-semibold">
@@ -578,13 +583,12 @@
                     <a href="{% url 'app_servicos:create_servico_associado' associado.id %}"
                     class="inline-flex items-center px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded shadow-sm transition">
                         <i class="material-icons mr-1 text-xs">add_circle</i>
-                        Novo Serviço
                     </a>
                 </div>
 
                 {% if servicos %}
                     <div class="overflow-x-auto bg-white shadow-sm rounded-lg py-3 mt-4">
-                        <table class="min-w-full table-auto border-collapse text-xs">
+                        <table class="min-w-full table-auto border-collapse text-sm">
                             <thead class="bg-gray-100 border-b">
                                 <tr>
                                     <th class="text-left py-2 px-3 font-medium text-gray-600">Natureza</th>
@@ -623,25 +627,27 @@
         </section>
 
         <section class="mb-3">
-            <div class="bg-white shadow-sm rounded-lg p-4 border-l-4 border-purple-600 mb-6">
-                <div class="flex items-center justify-between mb-2">
-                <h2 class="text-base font-semibold text-purple-700 flex items-center">
-                    <i class="material-icons mr-1 text-sm">assignment</i> Tarefas Relacionadas
-                </h2>
-                <a href="{% url 'app_tarefas:create_tarefa_associado' associado.id %}"
-                    class="inline-flex items-center px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded shadow transition">
-                    <i class="material-icons mr-1 text-xs">add_task</i>
-                    Nova Tarefa
-                </a>
-                </div>
+            <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-purple-600 mb-6">
+                 <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-3 rounded border border-green-100 shadow-sm mb-1">
+                                        <!-- Título + ícone -->
+                    <div class="flex items-center text-purple-600 text-sm font-semibold">
+                        <i class="material-icons mr-1 text-sm">assignment</i> Tarefas Relacionadas
+                    </div>
+                                        <!-- Descrição -->
+                    <p class="text-xs text-gray-600 m-0">
+                        <strong>Tarefas e procedimentos internos.</strong> Gerencie tarefas relacionadas a este associado.
+                    </p>
 
-                <p class="text-xs text-gray-600 mb-3">
-                <strong>Adequada para processos de filiação.</strong> Gerencie tarefas específicas relacionadas a este associado.
-                </p>
+                    <!-- Botão -->
+                    <a href="{% url 'app_tarefas:create_tarefa_associado' associado.id %}"
+                    class="inline-flex items-center px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white text-xs font-medium rounded shadow transition">
+                        <i class="material-icons mr-1 text-xs">add_circle</i>
+                    </a>
+                </div>
 
                 {% if tarefas %}
                 <div class="overflow-x-auto bg-white shadow rounded-lg py-3">
-                <table class="min-w-full table-auto border-collapse text-xs">
+                <table class="min-w-full table-auto border-collapse text-sm">
                     <thead class="bg-gray-100 border-b">
                     <tr>
                         <th class="text-left py-2 px-3 font-medium text-gray-600">Título</th>
@@ -703,26 +709,27 @@
             </div>
         </section>
 
-        <section class="mb-10">
-            <div class="bg-white shadow-sm rounded-lg p-4 border-l-4 border-orange-600">
-                <div class="flex items-center justify-between mb-2">
-                <h2 class="text-base font-semibold text-orange-700 flex items-center">
+        <section class="mb-1 py-4">
+             <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-orange-600">
+                <div class="flex flex-wrap items-center justify-between gap-4 bg-white p-3 rounded border border-green-100 shadow-sm mb-1">
+
+                <div class="flex items-center text-orange-700 text-sm font-semibold">
                     <i class="material-icons mr-1 text-sm">sailing</i> Embarcações do Associado
-                </h2>
-                <a href="{% url 'app_embarcacoes:create_embarcacao' associado.id %}"
-                    class="inline-flex items-center px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded shadow transition">
-                    <i class="material-icons mr-1 text-xs">add_circle</i>
-                    Nova Embarcação
-                </a>
                 </div>
 
                 <p class="text-xs text-gray-600 mb-3">
                 <strong>Cadastro de Embarcações</strong>. Veja as embarcações do associado.
-                </p>
+                </p>  
+
+                <a href="{% url 'app_embarcacoes:create_embarcacao' associado.id %}"
+                    class="inline-flex items-center px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded shadow-sm transition">
+                    <i class="material-icons mr-1 text-xs">add_circle</i>
+                </a>
+            </div>
 
                 {% if embarcacoes %}
                 <div class="overflow-x-auto bg-white shadow rounded-lg py-3 mt-4">
-                <table class="min-w-full table-auto border-collapse text-xs">
+                <table class="min-w-full table-auto border-collapse text-sm">
                     <thead class="bg-gray-100 border-b">
                     <tr>
                         <th class="text-left py-2 px-3 font-medium text-gray-600">Nome</th>
@@ -880,7 +887,7 @@
 
         <!-- Seção: Documentos do Associado -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6 py-4">
-            <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentos - RG</h2>
+            <h2 class="text-base font-semibold text-gray-700 mb-3 border-b-4 border-gray-200 pb-2">Documentos - RG</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
 
@@ -988,229 +995,10 @@
             </div>
         </div>
 
-        <!--Sessão questionario recebe INSS, BENFICIO< BOLSA, -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Participações / Atividade</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-                <!-- Recolhe INSS -->
-                <div class="flex items-center space-x-3">
-                    <i class="material-icons 
-                        {% if associado.recolhe_inss == 'Sim' %}
-                            text-green-500
-                        {% elif associado.recolhe_inss == 'Não' %}
-                            text-red-500
-                        {% else %}
-                            text-gray-500
-                        {% endif %}
-                    " style="font-size: 24px;">verified_user</i>
-                    <div>
-                        <strong class="text-gray-700">Recolhe INSS:</strong>
-                        <div class="mt-1 text-sm">
-                            {% if associado.recolhe_inss == 'Sim' %}
-                                <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">
-                                    Sim
-                                </span>
-                            {% elif associado.recolhe_inss == 'Não' %}
-                                <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">
-                                    Não
-                                </span>
-                            {% else %}
-                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
-                                    Não declarado
-                                </span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recebe Seguro -->
-                <div class="flex items-center space-x-3">
-                    <i class="material-icons 
-                        {% if associado.recebe_seguro == 'Recebe' %}
-                            text-green-500
-                        {% elif associado.recebe_seguro == 'Não Recebe' %}
-                            text-red-500
-                        {% else %}
-                            text-gray-500
-                        {% endif %}
-                    " style="font-size: 24px;">security</i>
-                    <div>
-                        <strong class="text-gray-700">Recebe Seguro:</strong>
-                        <div class="mt-1 text-sm">
-                            {% if associado.recebe_seguro == 'Recebe' %}
-                                <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">
-                                    Recebe
-                                </span>
-                            {% elif associado.recebe_seguro == 'Não Recebe' %}
-                                <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">
-                                    Não Recebe
-                                </span>
-                            {% else %}
-                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
-                                    Não declarado
-                                </span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Informações MAPA</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
-                <!-- Já recebeu defeso alguma vez? -->
-                <div class="flex items-center space-x-3">
-                    <i class="material-icons 
-                        {% if associado.ja_recebeu_defeso_algumavez == 'Sim' %}
-                            text-green-500
-                        {% elif associado.ja_recebeu_defeso_algumavez == 'Não' %}
-                            text-red-500
-                        {% else %}
-                            text-gray-500
-                        {% endif %}
-                    " style="font-size: 24px;">storefront</i>
-                    <div>
-                        <strong class="text-gray-700">Já recebeu Seguro Defeso alguma vez?</strong>
-                        <div class="mt-1 text-sm">
-                            {% if associado.ja_recebeu_defeso_algumavez == 'Sim' %}
-                                <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Sim</span>
-                            {% elif associado.ja_recebeu_defeso_algumavez == 'Não' %}
-                                <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Não</span>
-                            {% else %}
-                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Comercializa Produtos -->
-                <div class="flex items-center space-x-3">
-                    <i class="material-icons 
-                        {% if associado.comercializa_produtos == 'Sim' %}
-                            text-green-500
-                        {% elif associado.comercializa_produtos == 'Não' %}
-                            text-red-500
-                        {% else %}
-                            text-gray-500
-                        {% endif %}
-                    " style="font-size: 24px;">storefront</i>
-                    <div>
-                        <strong class="text-gray-700">Comercializa Produtos:</strong>
-                        <div class="mt-1 text-sm">
-                            {% if associado.comercializa_produtos == 'Sim' %}
-                                <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Sim</span>
-                            {% elif associado.comercializa_produtos == 'Não' %}
-                                <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Não</span>
-                            {% else %}
-                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Outra Fonte de Renda -->
-                <div class="flex items-center space-x-3 mt-4">
-                    <i class="material-icons 
-                        {% if associado.outra_fonte_renda == 'Não Possui' %}
-                            text-blue-500
-                        {% elif associado.outra_fonte_renda == 'Não declarado' or not associado.outra_fonte_renda %}
-                            text-gray-500
-                        {% else %}
-                            text-yellow-500
-                        {% endif %}
-                    " style="font-size: 24px;">payments</i>
-
-                    <div>
-                        <strong class="text-gray-700">Outra Fonte de Renda:</strong>
-                        <div class="mt-1 text-sm">
-                            {% if associado.outra_fonte_renda == 'Não Possui' %}
-                                <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 font-medium">
-                                    Não Possui
-                                </span>
-                            {% elif associado.outra_fonte_renda == 'Não declarado' or not associado.outra_fonte_renda %}
-                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
-                                    Não declarado
-                                </span>
-                            {% else %}
-                                <span class="inline-block px-2 py-1 rounded bg-yellow-100 text-yellow-800 font-medium">
-                                    {{ associado.outra_fonte_renda }}
-                                </span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Bolsa Família -->
-                <div class="flex items-center space-x-3">
-                    <i class="material-icons 
-                        {% if associado.bolsa_familia == 'Já recebeu' %}
-                            text-green-500
-                        {% elif associado.bolsa_familia == 'Nunca recebeu' %}
-                            text-red-500
-                        {% else %}
-                            text-gray-500
-                        {% endif %}
-                    " style="font-size: 24px;">payments</i>
-                    <div>
-                        <strong class="text-gray-700">Bolsa Família:</strong>
-                        <div class="mt-1 text-sm">
-                            {% if associado.bolsa_familia == 'Já recebeu' %}
-                                <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Já recebeu</span>
-                            {% elif associado.bolsa_familia == 'Nunca recebeu' %}
-                                <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Nunca recebeu</span>
-                            {% else %}
-                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Relação de Trabalho -->
-                <div class="flex items-center space-x-3">
-                    <i class="material-icons text-gray-500" style="font-size: 24px;">work</i>
-                    <div>
-                        <strong class="text-gray-700">Relação de Trabalho:</strong>
-                        <div class="mt-1 text-sm">
-                            {% if associado.relacao_trabalho %}
-                                <span class="inline-block px-2 py-1 rounded bg-gray-50 text-gray-700  font-semibold shadow-sm">
-                                    {{ associado.relacao_trabalho }}
-                                </span>
-                            {% else %}
-                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
-                                    Não declarado
-                                </span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Casa Onde Mora -->
-                <div class="flex items-center space-x-3">
-                    <i class="material-icons text-gray-500" style="font-size: 24px;">home</i>
-                    <div>
-                        <strong class="text-gray-700">Casa Onde Mora</strong>
-                        <div class="mt-1 text-sm">
-                            {% if associado.casa_onde_mora %}
-                                <span class="inline-block px-2 py-1 rounded bg-gray-50 text-gray-700  font-semibold shadow-sm">
-                                    {{ associado.casa_onde_mora }}
-                                </span>
-                            {% else %}
-                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
-                                    Não declarado
-                                </span>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
 
         <!-- Seção: Documentos Cidadão -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentos do Cidadão</h2>
+            <h2 class="text-base font-semibold text-gray-700 mb-3 border-b-4 border-gray-200 pb-2">Documentos do Cidadão</h2>
             <div class="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-5 gap-6">
                 <!-- NIT -->
                 <div class="flex items-center space-x-3">
@@ -1284,10 +1072,224 @@
             </div>
         </div>
 
+        
+        <!--Sessão Participações / Atividade / MAPA-->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-base font-semibold text-gray-700 mb-3 border-b-4 border-gray-200 pb-2">Participações / Atividade / MAPA</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+
+                <!-- Recolhe INSS -->
+                <div class="flex items-center space-x-3">
+                    <i class="material-icons 
+                        {% if associado.recolhe_inss == 'Sim' %}
+                            text-green-500
+                        {% elif associado.recolhe_inss == 'Não' %}
+                            text-red-500
+                        {% else %}
+                            text-gray-500
+                        {% endif %}
+                    " style="font-size: 24px;">verified_user</i>
+                    <div>
+                        <strong class="text-gray-700">Recolhe INSS?</strong>
+                        <div class="mt-1 text-sm">
+                            {% if associado.recolhe_inss == 'Sim' %}
+                                <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">
+                                    Sim
+                                </span>
+                            {% elif associado.recolhe_inss == 'Não' %}
+                                <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">
+                                    Não
+                                </span>
+                            {% else %}
+                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                                    Não declarado
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recebe Seguro -->
+                <div class="flex items-center space-x-3">
+                    <i class="material-icons 
+                        {% if associado.recebe_seguro == 'Recebe' %}
+                            text-green-500
+                        {% elif associado.recebe_seguro == 'Não Recebe' %}
+                            text-red-500
+                        {% else %}
+                            text-gray-500
+                        {% endif %}
+                    " style="font-size: 24px;">security</i>
+                    <div>
+                        <strong class="text-gray-700">Recebe Seguro?</strong>
+                        <div class="mt-1 text-sm">
+                            {% if associado.recebe_seguro == 'Recebe' %}
+                                <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">
+                                    Recebe
+                                </span>
+                            {% elif associado.recebe_seguro == 'Não Recebe' %}
+                                <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">
+                                    Não Recebe
+                                </span>
+                            {% else %}
+                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                                    Não declarado
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Já recebeu defeso alguma vez? -->
+                <div class="flex items-center space-x-3">
+                    <i class="material-icons 
+                        {% if associado.ja_recebeu_defeso_algumavez == 'Sim' %}
+                            text-green-500
+                        {% elif associado.ja_recebeu_defeso_algumavez == 'Não' %}
+                            text-red-500
+                        {% else %}
+                            text-gray-500
+                        {% endif %}
+                    " style="font-size: 24px;">storefront</i>
+                    <div>
+                        <strong class="text-gray-700">Já recebeu Defeso?</strong>
+                        <div class="mt-1 text-sm">
+                            {% if associado.ja_recebeu_defeso_algumavez == 'Sim' %}
+                                <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Sim</span>
+                            {% elif associado.ja_recebeu_defeso_algumavez == 'Não' %}
+                                <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Não</span>
+                            {% else %}
+                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Comercializa Produtos -->
+                <div class="flex items-center space-x-3">
+                    <i class="material-icons 
+                        {% if associado.comercializa_produtos == 'Sim' %}
+                            text-green-500
+                        {% elif associado.comercializa_produtos == 'Não' %}
+                            text-red-500
+                        {% else %}
+                            text-gray-500
+                        {% endif %}
+                    " style="font-size: 24px;">storefront</i>
+                    <div>
+                        <strong class="text-gray-700">Comercializa Produtos?</strong>
+                        <div class="mt-1 text-sm">
+                            {% if associado.comercializa_produtos == 'Sim' %}
+                                <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Sim</span>
+                            {% elif associado.comercializa_produtos == 'Não' %}
+                                <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Não</span>
+                            {% else %}
+                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Outra Fonte de Renda -->
+                <div class="flex items-center space-x-3 mt-4">
+                    <i class="material-icons 
+                        {% if associado.outra_fonte_renda == 'Não Possui' %}
+                            text-blue-500
+                        {% elif associado.outra_fonte_renda == 'Não declarado' or not associado.outra_fonte_renda %}
+                            text-gray-500
+                        {% else %}
+                            text-yellow-500
+                        {% endif %}
+                    " style="font-size: 24px;">payments</i>
+
+                    <div>
+                        <strong class="text-gray-700">Outra Fonte de Renda?</strong>
+                        <div class="mt-1 text-sm">
+                            {% if associado.outra_fonte_renda == 'Não Possui' %}
+                                <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 font-medium">
+                                    Não Possui
+                                </span>
+                            {% elif associado.outra_fonte_renda == 'Não declarado' or not associado.outra_fonte_renda %}
+                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                                    Não declarado
+                                </span>
+                            {% else %}
+                                <span class="inline-block px-2 py-1 rounded bg-yellow-100 text-yellow-800 font-medium">
+                                    {{ associado.outra_fonte_renda }}
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bolsa Família -->
+                <div class="flex items-center space-x-3">
+                    <i class="material-icons 
+                        {% if associado.bolsa_familia == 'Já recebeu' %}
+                            text-green-500
+                        {% elif associado.bolsa_familia == 'Nunca recebeu' %}
+                            text-red-500
+                        {% else %}
+                            text-gray-500
+                        {% endif %}
+                    " style="font-size: 24px;">payments</i>
+                    <div>
+                        <strong class="text-gray-700">Bolsa Família?</strong>
+                        <div class="mt-1 text-sm">
+                            {% if associado.bolsa_familia == 'Já recebeu' %}
+                                <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Já recebeu</span>
+                            {% elif associado.bolsa_familia == 'Nunca recebeu' %}
+                                <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Nunca recebeu</span>
+                            {% else %}
+                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Relação de Trabalho -->
+                <div class="flex items-center space-x-3">
+                    <i class="material-icons text-gray-500" style="font-size: 24px;">work</i>
+                    <div>
+                        <strong class="text-gray-700">Relação de Trabalho?</strong>
+                        <div class="mt-1 text-sm">
+                            {% if associado.relacao_trabalho %}
+                                <span class="inline-block px-2 py-1 rounded bg-gray-50 text-gray-700  font-semibold shadow-sm">
+                                    {{ associado.relacao_trabalho }}
+                                </span>
+                            {% else %}
+                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                                    Não declarado
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Casa Onde Mora -->
+                <div class="flex items-center space-x-3">
+                    <i class="material-icons text-gray-500" style="font-size: 24px;">home</i>
+                    <div>
+                        <strong class="text-gray-700">Mora em Casa?</strong>
+                        <div class="mt-1 text-sm">
+                            {% if associado.casa_onde_mora %}
+                                <span class="inline-block px-2 py-1 rounded bg-gray-50 text-gray-700  font-semibold shadow-sm">
+                                    {{ associado.casa_onde_mora }}
+                                </span>
+                            {% else %}
+                                <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                                    Não declarado
+                                </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Seção: Documentação Profissional - RGP -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentação Profissional - RGP</h2>
+            <h2 class="text-base font-semibold text-gray-700 mb-3 border-b-4 border-gray-200 pb-2">Documentação Profissional - RGP</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
 
                 <!-- RGP -->
@@ -1348,10 +1350,71 @@
             </div>
         </div>
 
+                <!-- Seção: Documento de Habilitação (CNH) -->
+        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-base font-semibold text-gray-700 mb-3 border-b-4 border-gray-200 pb-2">Documento Habilitação - CNH</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
+
+                <!-- CNH -->
+                <div class="flex items-center space-x-3">
+                    <i class="material-icons text-orange-500" style="font-size: 24px;">drive_eta</i>
+                    <div>
+                        <strong class="text-gray-700">CNH:</strong>
+                        <div class="flex items-center">
+                            <span id="cnh-{{ associado.pk }}" class="text-gray-800">{{ associado.cnh }}</span>
+                            <button onclick="copyToClipboard('cnh-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
+                                <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data de Emissão da CNH -->
+                <div class="flex items-center space-x-3">
+                    <i class="material-icons text-orange-500" style="font-size: 24px;">event</i>
+                    <div>
+                        <strong class="text-gray-700">Emissão (CNH):</strong>
+                        <div class="flex items-center">
+                            <span id="cnh-data-emissao-{{ associado.pk }}" class="text-gray-800">{{ associado.cnh_data_emissao|date:"d/m/Y" }}</span>
+                            <button onclick="copyToClipboard('cnh-data-emissao-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                                <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Data de Validade da CNH -->
+                <div class="flex items-center space-x-3">
+                    <i class="material-icons text-orange-500" style="font-size: 24px;">event</i>
+                    <div>
+                        <strong class="text-gray-700">Validade(CNH):</strong>
+                        <div class="flex items-center">
+                            <span id="cnh-data-validade-{{ associado.pk }}" class="text-gray-800">{{ associado.cnh_data_validade|date:"d/m/Y" }}</span>
+                            <button onclick="copyToClipboard('cnh-data-validade-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
+                                <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>   
+                <!-- UF CNH -->
+                <div class="flex items-center space-x-3">
+                    <i class="material-icons text-orange-500" style="font-size: 24px;">public</i>
+                    <div>
+                        <strong class="text-gray-700">UF:</strong>
+                        <div class="flex items-center">
+                            <span id="cnh-uf-{{ associado.pk }}" class="text-gray-800">{{ associado.cnh_uf }}</span>
+                            <button onclick="copyToClipboard('cnh-uf-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-purple-500">
+                                <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>                             
+
+            </div>
+        </div>
 
         <!-- Seção: Documentação Trabalho - CTPS -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentação Trabalho - CTPS</h2>
+            <h2 class="text-base font-semibold text-gray-700 mb-3 border-b-4 border-gray-200 pb-2">Documentação Trabalho - CTPS</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
 
                 <!-- CTPS -->
@@ -1412,46 +1475,9 @@
             </div>
         </div>
 
-
-        <!-- Seção: Documento de Habilitação (CNH) -->
-        <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documento Habilitação - CNH</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-
-                <!-- CNH -->
-                <div class="flex items-center space-x-3">
-                    <i class="material-icons text-orange-500" style="font-size: 24px;">drive_eta</i>
-                    <div>
-                        <strong class="text-gray-700">CNH:</strong>
-                        <div class="flex items-center">
-                            <span id="cnh-{{ associado.pk }}" class="text-gray-800">{{ associado.cnh }}</span>
-                            <button onclick="copyToClipboard('cnh-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
-                                <i class="material-icons" style="font-size: 16px;">content_copy</i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Data de Emissão da CNH -->
-                <div class="flex items-center space-x-3">
-                    <i class="material-icons text-orange-500" style="font-size: 24px;">event</i>
-                    <div>
-                        <strong class="text-gray-700">Data de Emissão (CNH):</strong>
-                        <div class="flex items-center">
-                            <span id="cnh-data-emissao-{{ associado.pk }}" class="text-gray-800">{{ associado.cnh_data_emissao|date:"d/m/Y" }}</span>
-                            <button onclick="copyToClipboard('cnh-data-emissao-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
-                                <i class="material-icons" style="font-size: 16px;">content_copy</i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-
         <!-- Seção: Endereço -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Endereço</h2>
+            <h2 class="text-base font-semibold text-gray-700 mb-3 border-b-4 border-gray-200 pb-2">Endereço</h2>
             <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
 
                 <!-- Logradouro -->
@@ -1558,14 +1584,14 @@
         <!-- Seção: Produção Média Anual -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
             <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Produção Média Anual</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-6">
 
                 <!-- Espécie 1 -->
                 <div class="flex items-center space-x-3">
                     <i class="material-icons text-blue-500" style="font-size: 24px;">emoji_nature</i>
                     <div>
-                        <strong class="text-gray-700">Espécie 1:</strong>
-                        <div class="flex items-center">
+                        <strong class="text-gray-700 text-xs">Espécie 1:</strong>
+                        <div class="flex items-center text-sm">
                             <span id="especie1-{{ associado.pk }}" class="text-gray-800">{{ associado.especie1 }}</span>
                             <button onclick="copyToClipboard('especie1-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
                                 <i class="material-icons" style="font-size: 16px;">content_copy</i>
@@ -1578,8 +1604,8 @@
                 <div class="flex items-center space-x-3">
                     <i class="material-icons text-blue-500" style="font-size: 24px;">scale</i>
                     <div>
-                        <strong class="text-gray-700">Quantidade 1 (Kg):</strong>
-                        <div class="flex items-center">
+                        <strong class="text-gray-700 text-xs">Quantidade 1 (Kg):</strong>
+                        <div class="flex items-center text-sm">
                             <span id="quantidade1-{{ associado.pk }}" class="text-gray-800">{{ associado.quantidade1 }}</span>
                             <button onclick="copyToClipboard('quantidade1-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
                                 <i class="material-icons" style="font-size: 16px;">content_copy</i>
@@ -1592,8 +1618,8 @@
                 <div class="flex items-center space-x-3">
                     <i class="material-icons text-purple-500" style="font-size: 24px;">emoji_nature</i>
                     <div>
-                        <strong class="text-gray-700">Espécie 2:</strong>
-                        <div class="flex items-center">
+                        <strong class="text-gray-700 text-xs">Espécie 2:</strong>
+                        <div class="flex items-center text-sm">
                             <span id="especie2-{{ associado.pk }}" class="text-gray-800">{{ associado.especie2 }}</span>
                             <button onclick="copyToClipboard('especie2-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
                                 <i class="material-icons" style="font-size: 16px;">content_copy</i>
@@ -1606,8 +1632,8 @@
                 <div class="flex items-center space-x-3">
                     <i class="material-icons text-purple-500" style="font-size: 24px;">scale</i>
                     <div>
-                        <strong class="text-gray-700">Quantidade 2 (Kg):</strong>
-                        <div class="flex items-center">
+                        <strong class="text-gray-700 text-xs">Quantidade 2 (Kg):</strong>
+                        <div class="flex items-center text-sm">
                             <span id="quantidade2-{{ associado.pk }}" class="text-gray-800">{{ associado.quantidade2 }}</span>
                             <button onclick="copyToClipboard('quantidade2-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
                                 <i class="material-icons" style="font-size: 16px;">content_copy</i>
@@ -1620,8 +1646,8 @@
                 <div class="flex items-center space-x-3">
                     <i class="material-icons text-orange-500" style="font-size: 24px;">emoji_nature</i>
                     <div>
-                        <strong class="text-gray-700">Espécie 3:</strong>
-                        <div class="flex items-center">
+                        <strong class="text-gray-700 text-xs">Espécie 3:</strong>
+                        <div class="flex items-center text-sm">
                             <span id="especie3-{{ associado.pk }}" class="text-gray-800">{{ associado.especie3 }}</span>
                             <button onclick="copyToClipboard('especie3-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
                                 <i class="material-icons" style="font-size: 16px;">content_copy</i>
@@ -1634,8 +1660,8 @@
                 <div class="flex items-center space-x-3">
                     <i class="material-icons text-orange-500" style="font-size: 24px;">scale</i>
                     <div>
-                        <strong class="text-gray-700">Quantidade 3 (Kg):</strong>
-                        <div class="flex items-center">
+                        <strong class="text-gray-700 text-xs">Quantidade 3 (Kg):</strong>
+                        <div class="flex items-center text-sm">
                             <span id="quantidade3-{{ associado.pk }}" class="text-gray-800">{{ associado.quantidade3 }}</span>
                             <button onclick="copyToClipboard('quantidade3-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
                                 <i class="material-icons" style="font-size: 16px;">content_copy</i>
@@ -1648,8 +1674,8 @@
                 <div class="flex items-center space-x-3">
                     <i class="material-icons text-green-500" style="font-size: 24px;">emoji_nature</i>
                     <div>
-                        <strong class="text-gray-700">Espécie 4:</strong>
-                        <div class="flex items-center">
+                        <strong class="text-gray-700 text-xs">Espécie 4:</strong>
+                        <div class="flex items-center text-sm">
                             <span id="especie4-{{ associado.pk }}" class="text-gray-800">{{ associado.especie4 }}</span>
                             <button onclick="copyToClipboard('especie4-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
                                 <i class="material-icons" style="font-size: 16px;">content_copy</i>
@@ -1662,8 +1688,8 @@
                 <div class="flex items-center space-x-3">
                     <i class="material-icons text-green-500" style="font-size: 24px;">scale</i>
                     <div>
-                        <strong class="text-gray-700">Quantidade 4 (Kg):</strong>
-                        <div class="flex items-center">
+                        <strong class="text-gray-700 text-xs">Quantidade 4 (Kg):</strong>
+                        <div class="flex items-center text-sm">
                             <span id="quantidade4-{{ associado.pk }}" class="text-gray-800">{{ associado.quantidade4 }}</span>
                             <button onclick="copyToClipboard('quantidade4-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
                                 <i class="material-icons" style="font-size: 16px;">content_copy</i>
@@ -1676,8 +1702,8 @@
                 <div class="flex items-center space-x-3">
                     <i class="material-icons text-yellow-500" style="font-size: 24px;">emoji_nature</i>
                     <div>
-                        <strong class="text-gray-700">Espécie 5:</strong>
-                        <div class="flex items-center">
+                        <strong class="text-gray-700 text-xs">Espécie 5:</strong>
+                        <div class="flex items-center text-sm">
                             <span id="especie5-{{ associado.pk }}" class="text-gray-800">{{ associado.especie5 }}</span>
                             <button onclick="copyToClipboard('especie5-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-blue-500">
                                 <i class="material-icons" style="font-size: 16px;">content_copy</i>
@@ -1690,8 +1716,8 @@
                 <div class="flex items-center space-x-3">
                     <i class="material-icons text-yellow-500" style="font-size: 24px;">scale</i>
                     <div>
-                        <strong class="text-gray-700">Quantidade 5 (Kg):</strong>
-                        <div class="flex items-center">
+                        <strong class="text-gray-700 text-xs">Quantidade 5 (Kg):</strong>
+                        <div class="flex items-center text-sm">
                             <span id="quantidade5-{{ associado.pk }}" class="text-gray-800">{{ associado.quantidade5 }}</span>
                             <button onclick="copyToClipboard('quantidade5-{{ associado.pk }}')" class="ml-2 text-gray-600 hover:text-green-500">
                                 <i class="material-icons" style="font-size: 16px;">content_copy</i>
@@ -1704,14 +1730,16 @@
 
         <!-- Seção: Anotações -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
-            <i class="material-icons text-gray-500" style="font-size: 24px;">notes</i>
-            <h2 class="text-base font-semibold text-gray-700 mb-4">Anotações</h2><hr>
-            <div id="editor">
+            <i class="material-icons text-gray-500" style="font-size:18px;">notes</i>
+            <small class="text-base font-semibold text-gray-700 mb-4"> Anotações</small><hr>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
                 <div class="prose max-w-none text-gray-700">
-                {{ associado.content | safe }}
+                    {{ associado.content|safe }}
+                </div>
             </div>
         </div>
-    </div>
+
+
         <!-- Seção: Declarações -->
         <div class="bg-white p-6 rounded-lg shadow-md mb-6">
             <h2 class="text-base font-semibold text-gray-700 mb-4">Geração de Declarações e Documentos</h2>
@@ -1732,14 +1760,12 @@
 
                 <br />
                 Caso algum campo obrigatório não esteja preenchido, o sistema pode inserir termos como <strong>"None"</strong> ou <strong>"Não declarado"</strong> nos documentos gerados — o que invalida ou compromete a sua utilização. 
-
-                <br /><br />
                 Recomendamos revisar cuidadosamente o documento após a geração e, se necessário, atualizar os dados no cadastro antes de emitir novamente.
             </p>
-        <br>
+            <hr class="my-6 border-t-2 border-gray-200">
 
         <!-- Seção: Automação e Geração de Declarações-->
-        <div class="flex flex-col items-center space-y-6 mb-6">
+        <div class="flex flex-col items-center mb-6 bg-gray-100 p-2">
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-7xl">
                 <!-- Declaração de Filiação -->
@@ -1997,29 +2023,30 @@
         </div>
 
         <!-- Links de Ações -->
-        <div class="flex justify-center space-x-2 mb-4 py-4">
+
+        <div class="flex flex-wrap justify-center sm:justify-end gap-2 text-sm py-4">
             <!-- Botão Lista -->
             <a href="{% url 'app_associados:list_geral_associado' %}"
-            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300"
+            class="inline-flex items-center space-x-1 bg-gray-100 hover:bg-blue-100 text-blue-600 px-3 py-1.5 rounded-md border border-gray-300 transition"
             title="Lista de Associados">
-                <i class="material-icons" style="font-size: 24px; color:blue">list</i>
-                <span class="sr-only">Lista</span> Lista
+                <i class="material-icons text-base">list</i>
+                <span>Lista</span>
             </a>
 
             <!-- Botão Editar -->
             <a href="{% url 'app_associados:edit_associado' associado.pk %}"
-            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-yellow-400"
-            title="Editar Associado">
-                <i class="material-icons" style="font-size: 24px; color:blue">edit</i>
-                <span class="sr-only">Editar</span> Editar
+            class="inline-flex items-center space-x-1 bg-gray-100 hover:bg-yellow-100 text-yellow-600 px-3 py-1.5 rounded-md border border-gray-300 transition"
+            title="Editar">
+                <i class="material-icons text-base">edit</i>
+                <span>Editar</span>
             </a>
 
             <!-- Botão Upload -->
             <a href="{% url 'app_documentos:upload_documento' 'associado' associado.pk %}"
-            class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-green-400"
+            class="inline-flex items-center space-x-1 bg-gray-100 hover:bg-green-100 text-green-600 px-3 py-1.5 rounded-md border border-gray-300 transition"
             title="Upload de Documento">
-                <i class="material-icons" style="font-size: 24px; color:blue">upload_file</i>
-                <span class="sr-only">Upload</span> Upload Doc
+                <i class="material-icons text-base">upload_file</i>
+                <span>Upload</span>
             </a>
         </div>
     </div>

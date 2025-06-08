@@ -27,7 +27,7 @@
         {% include "components/navbar_aux_reparticao.html" %} 
     {% endif %}
     
-<div class="container mx-auto mt-8 bg-gray-100" style="max-width: 980px;">
+<div  class="container mx-auto my-6 max-w-7xl bg-gray-100">
     {% if messages %}
     <div class="space-y-4 mb-6">
         {% for message in messages %}
@@ -81,88 +81,55 @@
                 {{ form.non_field_errors }}
             </div>
         {% endif %}
+
         <!-- Foto do Associado -->
-        <div class="border-b border-gray-300 pb-6 mb-6">
-            <h2 class="text-xl font-semibold text-gray-700 mb-4">Foto do Associado</h2>
-            <div class="mb-4">
-                <label for="{{ form.foto.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                    {{ form.foto.label }}
-                </label>
-                {% if form.instance.foto %}
-                    <!-- Exibir a foto atual -->
-                    <div class="mb-2">
-                        <img src="{{ form.instance.foto.url }}" alt="Foto do Associado" class="w-32 h-32 object-cover rounded-md shadow-md">
+        <div class="grid grid-cols-1 bg-gray-50 md:grid-cols-[1fr_1.4fr_1.2fr_1fr] gap-4 items-start text-sm">
+
+            <!--  Foto e Nome -->
+            <div class="space-y-2">
+                <h2 class="font-medium text-gray-700">👤 Nome</h2>
+                <p class="text-blue-500 text-md truncate">{{ associado.user.get_full_name }}</p>
+            </div>
+            <div class="space-y-2">
+                <div class="flex items-center space-x-3 mt-2">
+                    {% if form.instance.foto %}
+                        <img src="{{ form.instance.foto.url }}" alt="Foto do Associado" class="w-16 h-16 object-cover rounded-md border shadow-sm">
+                    {% endif %}
+                    <div class="flex flex-col gap-1">
+                        <label for="{{ form.foto.id_for_label }}" class="text-xs text-gray-600">{{ form.foto.label }}</label>
+                        {{ form.foto }}
+                        {% for error in form.foto.errors %}
+                            <p class="text-red-500 text-xs">{{ error }}</p>
+                        {% endfor %}
                     </div>
-                {% endif %}
-                <div class="mt-1">
-                    {{ form.foto }}
-                </div>
-                {% for error in form.foto.errors %}
-                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                {% endfor %}
-            </div>
-        </div>
-        <!-- Informações Pessoais -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Exibir o nome do usuário selecionado -->
-            <h2 class="text-xl font-bold mb-4">
-                {{ associado.user.get_full_name }}
-            <hr class="border-t-4 rounded-lg my-6">
-            </h2>
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">
-                Usuário selecionado: Username | Nome | Email Pessoal
-                </label>
-                <div class="bg-gray-100 p-2 rounded-md">
-                    <span class="text-gray-500">{{ associado.user.username }}</span> 
-                    <span class="text-green-500">{{ associado.user.get_full_name }}</span>
-                    <span class="text-blue-500">{{ associado.user.email }}</span>
                 </div>
             </div>
-        </div>
-        <div class="border-b border-gray-300 pb-6 mb-6">
-            <div class="mb-4">
+            <!-- Username e Email -->
+            <div class="space-y-2">
+                <h2 class="font-medium text-gray-700">👥 Login & Contato</h2>
+                <div class="bg-gray-50 p-2 rounded-md border text-gray-700 space-y-1">
+                    <small class="text-gray-500 truncate">{{ associado.user.username }}</small>
+                    <small class="text-blue-600 truncate">{{ associado.user.email }}</small>
+                </div>
+            </div>
+
+            <!-- Drive Folder -->
+            <div class="space-y-2">
                 <label for="{{ form.drive_folder_id.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                     {{ form.drive_folder_id.label }}
                 </label>
                 <div class="mt-1 relative">
                     {{ form.drive_folder_id }}
-                    <span class="absolute top-2 right-2 text-gray-500 italic text-sm">Somente leitura</span>
+                    <span class="absolute top-2 right-2 text-gray-500 italic text-sm"></span>
                 </div>
                 {% for error in form.drive_folder_id.errors %}
                     <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                 {% endfor %}
             </div>
+
         </div>
 
-        <div class="mb-6 p-4 border-l-4 border-pink-500 bg-pink-50 rounded-md shadow-sm">
-            <div class="flex items-start space-x-3">
-                <!-- Ícone de cuidado/carinho -->
-                <div class="flex-shrink-0">
-                    <i class="material-icons text-pink-500 text-3xl" title="Dra. Samara, carinho e respeito">
-                        favorite
-                    </i>
-                </div>
-                <div>
-                    <label for="{{ form.apelido.id_for_label }}" class="block text-sm font-semibold text-gray-700">
-                        {{ form.apelido.label }} <span class="text-pink-600">(Opcional)</span>
-                    </label>
-                    <p class="text-sm text-gray-600 mb-2">
-                        Muitos pescadores são conhecidos por apelidos carinhosos. Caso deseje, registre aqui um apelido que represente <strong>afeto e respeito</strong>.  
-                        <br>
-                        <span class="text-pink-600 font-medium">Evite apelidos que possam ser ofensivos ou comprometer a imagem do associado.</span><br>
-                        💬 Como diria a Dra. Samara: <em>"Aqui todo mundo é tratado como família."</em>
-                    </p>
-                    {{ form.apelido }}
-                    {% for error in form.apelido.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-
-
-        
+        <hr class="my-6 border-t-2 border-gray-200">
         <div class="border-b border-gray-300 pb-6 mb-6">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Vínculos</h2>
             <!--Dados Principais -->
@@ -216,7 +183,7 @@
                 </div>
             </div>
                 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div class="mb-4">
                     <label for="{{ form.data_filiacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                         {{ form.data_filiacao.label }}
@@ -306,46 +273,12 @@
                     {% for error in form.senha_google.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>  
-
-                <!-- Status do Associado  -->
-                <div class="mb-4 bg-blue-50 p-4 rounded-lg">
-                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Status</h2>
-                    <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.status.label }} - <small class="text-blue-500">Determine o Status </small>
-                    </label>
-                    
-                    <div class="mt-1">
-                        {{ form.status }}
-                    </div>
-                    {% for error in form.status.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-
-                    <br><div id="campo_data_desfiliacao" 
-                        class="mb-6 p-4 rounded-lg border-l-4 border-red-500 bg-red-50 shadow-sm" 
-                        style="display: none;">
-                
-                        <label for="{{ form.data_desfiliacao.id_for_label }}" 
-                                class="block text-sm font-semibold text-red-700 mb-2">
-                        {{ form.data_desfiliacao.label }}
-                        </label>
-                    
-                        <div class="mt-1">
-                        {{ form.data_desfiliacao }}
-                        </div>
-                    
-                        {% for error in form.data_desfiliacao.errors %}
-                        <p class="text-red-600 text-xs mt-2 italic">{{ error }}</p>
-                        {% endfor %}
-                    </div>
-               
                 </div>                
             </div>
-
+            <hr class="my-6 border-t-2 border-gray-200">
             <!--Daocumento RG  -->
             <h2 class="text-xl font-semibold text-gray-700 mb-4 py-4">Documento RG</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-5 gap-4">
                 
                 <div class="mb-4">
                     <label for="{{ form.rg_numero.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
@@ -407,7 +340,7 @@
             <br>
             <!--Documento Habilitação  -->
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Documento CNH</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div class="mb-4">
                     <label for="{{ form.cnh.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                         {{ form.cnh.label }}
@@ -429,13 +362,35 @@
                     {% for error in form.cnh_data_emissao.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
-                </div>                           
+                </div> 
+                <div class="mb-4">
+                    <label for="{{ form.cnh_data_validade.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.cnh_data_validade.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.cnh_data_validade }}
+                    </div>
+                    {% for error in form.cnh_data_validade.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                 
+                <div class="mb-4">
+                    <label for="{{ form.cnh_uf.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.cnh_uf.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.cnh_uf }}
+                    </div>
+                    {% for error in form.cnh_uf.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                                           
             </div> 
             <br>
-
+            <hr class="my-6 border-t-2 border-gray-200">
             <!--Dados Complementares -->
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Dados Complementares</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
                 <div class="mb-4">
                     <label for="{{ form.sexo_biologico.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
@@ -516,6 +471,67 @@
                 </div>                                                                               
             </div>
 
+            <hr class="my-6 border-t-2 border-gray-200">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="flex items-start space-x-3">
+             
+                <div class="p-4 border-l-4 border-pink-500 bg-pink-50 rounded-md shadow-sm">
+                    <!-- Ícone de cuidado/carinho -->
+                    <div class="flex-shrink-0">
+                        <i class="material-icons text-pink-500 text-3xl" title="Dra. Samara, carinho e respeito">
+                            favorite
+                        </i>
+                    </div>                       
+                    <label for="{{ form.apelido.id_for_label }}" class="block text-sm font-semibold text-gray-700">
+                        {{ form.apelido.label }} <span class="text-pink-600">(Opcional)</span>
+                    </label>
+
+                    <p class="text-sm text-gray-600 mb-2">
+                        Caso deseje, registre aqui um apelido que represente <strong>afeto e respeito</strong>.  
+                        <br>
+                        <span class="text-pink-600 font-medium">Evite apelidos que possam ser ofensivos ou comprometer a imagem do associado.</span><br>
+                        💬 Como diria a Dra. Samara: <em>"Aqui todo mundo é tratado como família."</em>
+                    </p>
+                    {{ form.apelido }}
+                    {% for error in form.apelido.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>
+  
+            <!-- Status do Associado  -->
+            <div class="p-4 bg-blue-50 rounded-lg shadow-sm">
+                <h2 class="text-xl font-semibold text-gray-700 mb-4">Status</h2>
+                <label for="{{ form.status.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                    {{ form.status.label }} - <small class="text-blue-500">Determine o Status </small>
+                </label>
+                
+                <div class="mt-1">
+                    {{ form.status }}
+                </div>
+                {% for error in form.status.errors %}
+                    <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                {% endfor %}
+
+                <br><div id="campo_data_desfiliacao" 
+                    class="mb-6 p-4 rounded-lg border-l-4 border-red-500 bg-red-50 shadow-sm" 
+                    style="display: none;">
+            
+                    <label for="{{ form.data_desfiliacao.id_for_label }}" 
+                            class="block text-sm font-semibold text-red-700 mb-2">
+                    {{ form.data_desfiliacao.label }}
+                    </label>
+                
+                    <div class="mt-1">
+                    {{ form.data_desfiliacao }}
+                    </div>
+                
+                    {% for error in form.data_desfiliacao.errors %}
+                    <p class="text-red-600 text-xs mt-2 italic">{{ error }}</p>
+                    {% endfor %}
+                </div>
+            </div>  
+        </div><br>            
             <!--Dados Singulares de Atividade -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-blue-50 p-4 rounded-lg">
                 <h2 class="text-xl font-semibold text-gray-700 mb-4">Dados Singulares de Atividade</h2>
@@ -544,10 +560,8 @@
                 </div>
             </div>
 
-            <br>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-yellow-100 p-4 rounded-lg">
-                <h2 class="text-xl font-semibold text-gray-700 mb-4">Informações para o MAPA</h2>
-                <span class="text-sm">Atualização Anual - Reaps</span>
+            <br><h2 class="text-xl font-semibold text-gray-700 mb-4">Informações para o MAPA</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-yellow-100 p-4 rounded-lg">
                 <div class="mb-4">
                     <label for="{{ form.ja_recebeu_defeso_algumavez.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                         {{ form.ja_recebeu_defeso_algumavez.label }}
@@ -616,9 +630,10 @@
                 </div>                                                                
             </div> 
             <br>
+            <hr class="my-6 border-t-2 border-gray-200">
             <!--Documentos Oficiais - Cidadão -->
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Documentos do Cidadão</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div class="mb-4">
                     <label for="{{ form.nit.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                         {{ form.nit.label }}
@@ -676,9 +691,10 @@
                 </div>              
             </div>
             <br>
+            <hr class="my-6 border-t-2 border-gray-200">
             <!--Documentos Profissionais RGP -->
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Documentação Profissional - RGP</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div class="mb-4">
                     <label for="{{ form.rgp.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                         {{ form.rgp.label }}
@@ -725,8 +741,9 @@
                 </div>
             </div>
             <br>
+            <hr class="my-6 border-t-2 border-gray-200">
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Documentação Trabalho - CTPS</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div class="mb-4">
                     <label for="{{ form.ctps.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                         {{ form.ctps.label }}
@@ -773,9 +790,10 @@
                 </div>                    
             </div>
             <br>
+            <hr class="my-6 border-t-2 border-gray-200">
             <!-- Seção Endereço do Associado -->
             <h2 class="text-xl font-semibold text-gray-700 mb-4">Endereço</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div class="mb-4">
                     <label for="{{ form.logradouro.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                         {{ form.logradouro.label }}
@@ -855,59 +873,64 @@
                 </div>                
             </div>
             <br>
-            <hr>
-            <br>
+
+
             <!--Tabela informativa -->
-            <div class="overflow-x-auto">
-                <!-- Produção Anual  -->
-                <h2 class="text-xl font-semibold text-gray-700 mb-4 py-4">Produção Anual</h2>
-                <h3 class="text-lg font-bold text-gray-700 mb-4">Informações Auxiliares</h3>
-                <p>Guia - Para o preenchimento do formulário de produção anual, use valores de peso entre os indicados, <strong>EXCETO em casos específicos</strong></p>
-                <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
-                    <thead class="bg-gray-100">
-                        <tr>
-                            <th class="py-2 px-4 text-left text-sm font-medium text-gray-600">Espécie</th>
-                            <th class="py-2 px-4 text-left text-sm font-medium text-gray-600">Quantidade Média a partir</th>
-                            <th class="py-2 px-4 text-left text-sm font-medium text-gray-600">Quantidade Média máxima</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- Pampo -->
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-2 px-4 text-sm text-gray-700">Pampo</td>
-                            <td class="py-2 px-4 text-sm text-gray-700">de 170,00 kg</td>
-                            <td class="py-2 px-4 text-sm text-gray-700">até 230,00 kg</td>
-                        </tr>
-                        <!-- Abrótea -->
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-2 px-4 text-sm text-gray-700">Abrótea</td>
-                            <td class="py-2 px-4 text-sm text-gray-700">de 3.500,00  kg</td>
-                            <td class="py-2 px-4 text-sm text-gray-700">até 3.700,00 kg</td>
-                        </tr>
-                        <!-- Tainha -->
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-2 px-4 text-sm text-gray-700">Tainha</td>
-                            <td class="py-2 px-4 text-sm text-gray-700">de 3.900,00 kg</td>
-                            <td class="py-2 px-4 text-sm text-gray-700">até 4.100,00 kg</td>
-                        </tr>
-                        <!-- Anchova -->
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-2 px-4 text-sm text-gray-700">Anchova</td>
-                            <td class="py-2 px-4 text-sm text-gray-700">de 3.100,00 kg</td>
-                            <td class="py-2 px-4 text-sm text-gray-700">até 3.300,00 kg</td>
-                        </tr>
-                        <!-- Robalo -->
-                        <tr class="hover:bg-gray-50">
-                            <td class="py-2 px-4 text-sm text-gray-700">Robalo</td>
-                            <td class="py-2 px-4 text-sm text-gray-700">de 270,00 kg</td>
-                            <td class="py-2 px-4 text-sm text-gray-700">até 330,00 kg</td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                <!-- Coluna 1: Informações auxiliares -->
+                <div class="md:col-span-1 space-y-3 text-sm text-gray-700 bg-gray-50 p-4">
+
+                    <h2 class="text-xl font-semibold text-gray-700 mb-4 py-4">Produção Anual</h2>
+                    <h3 class="text-lg font-bold text-gray-700 mb-4">Informações Auxiliares</h3>
+                    <p>Guia - Para o preenchimento do formulário de produção anual, use valores de peso entre os indicados, <strong>EXCETO em casos específicos</strong></p>
+                </div>
+                <div class="md:col-span-2 overflow-x-auto">
+                    <table class="min-w-full bg-white border border-gray-300 rounded-lg shadow-md">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="py-2 px-4 text-left text-sm font-medium text-gray-600">Espécie</th>
+                                <th class="py-2 px-4 text-left text-sm font-medium text-gray-600">Quantidade Média a partir</th>
+                                <th class="py-2 px-4 text-left text-sm font-medium text-gray-600">Quantidade Média máxima</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Pampo -->
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-2 px-4 text-sm text-gray-700">Pampo</td>
+                                <td class="py-2 px-4 text-sm text-gray-700">de 170,00 kg</td>
+                                <td class="py-2 px-4 text-sm text-gray-700">até 230,00 kg</td>
+                            </tr>
+                            <!-- Abrótea -->
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-2 px-4 text-sm text-gray-700">Abrótea</td>
+                                <td class="py-2 px-4 text-sm text-gray-700">de 3.500,00  kg</td>
+                                <td class="py-2 px-4 text-sm text-gray-700">até 3.700,00 kg</td>
+                            </tr>
+                            <!-- Tainha -->
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-2 px-4 text-sm text-gray-700">Tainha</td>
+                                <td class="py-2 px-4 text-sm text-gray-700">de 3.900,00 kg</td>
+                                <td class="py-2 px-4 text-sm text-gray-700">até 4.100,00 kg</td>
+                            </tr>
+                            <!-- Anchova -->
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="py-2 px-4 text-sm text-gray-700">Anchova</td>
+                                <td class="py-2 px-4 text-sm text-gray-700">de 3.100,00 kg</td>
+                                <td class="py-2 px-4 text-sm text-gray-700">até 3.300,00 kg</td>
+                            </tr>
+                            <!-- Robalo -->
+                            <tr class="hover:bg-gray-50">
+                                <td class="py-2 px-4 text-sm text-gray-700">Robalo</td>
+                                <td class="py-2 px-4 text-sm text-gray-700">de 270,00 kg</td>
+                                <td class="py-2 px-4 text-sm text-gray-700">até 330,00 kg</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <h3 class="text-lg font-bold text-gray-700 mb-4 py-8">Produção Anual - Atividade Pesqueira</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">        
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">        
                 <div class="mb-4">
                     <label for="{{ form.especie1.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
                         {{ form.especie1.label }}
@@ -1020,7 +1043,7 @@
                 </div>                                                                            
             </div>
             <br>
-            <div class="border-b border-gray-300 pb-6 mb-6">
+            <div class="border-gray-300 pb-6 mb-6">
                    <h2 class="text-xl font-semibold text-gray-700 mb-4">Anotações</h2>
                 <!-- Campos da Seção 4 -->
                 <div class="mt-1 w-full" style="max-width: 100%; padding: 0; margin: 0;">

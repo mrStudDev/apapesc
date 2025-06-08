@@ -96,14 +96,20 @@ class AssociadoForm(forms.ModelForm):
             
             # Documentação de Habilitação CNH
             'cnh': forms.TextInput(attrs={
-                'placeholder': 'Digite somente números 00000000',
+                'placeholder': '00000000',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
+            'cnh_uf': forms.Select(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),            
             'cnh_data_emissao': forms.DateInput(attrs={
                 'type': 'date',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }, format='%Y-%m-%d'),
-                        
+            'cnh_data_validade': forms.DateInput(attrs={
+                'type': 'date',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }, format='%Y-%m-%d'),                        
             # Informações Pessoais
             'foto': forms.FileInput(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
@@ -163,23 +169,23 @@ class AssociadoForm(forms.ModelForm):
             }),
             # Identificacoes Oficiais/Números Cidadão INSS/NIT/PIS/TITULO
             'nit': forms.TextInput(attrs={
-                'placeholder': 'Digite somente números 0123456789',
+                'placeholder': '0123456789',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'pis': forms.TextInput(attrs={
-                'placeholder': 'Digite somente números 0123456789',
+                'placeholder': '0123456789',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'caepef': forms.TextInput(attrs={
-                'placeholder': 'Digite somente números 0123456789',
+                'placeholder': '0123456789',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'cei': forms.TextInput(attrs={
-                'placeholder': 'Digite somente números 0123456789',
+                'placeholder': '0123456789',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'titulo_eleitor': forms.TextInput(attrs={
-                'placeholder': 'Digite somente números 0123456789',
+                'placeholder': '0123456789',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             
@@ -203,7 +209,7 @@ class AssociadoForm(forms.ModelForm):
 
             # Documentação de Trabalho
             'ctps': forms.TextInput(attrs={
-                'placeholder': 'Digite somente números 0123456789',
+                'placeholder': '0123456789',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'ctps_serie': forms.TextInput(attrs={

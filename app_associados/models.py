@@ -497,7 +497,19 @@ class AssociadoModel(models.Model):
         null=True, 
         verbose_name="Data Emissão da CNH"
     )
-
+    cnh_data_validade = models.DateField(
+        blank=True, 
+        null=True, 
+        verbose_name="Data Validade da CNH"
+    )    
+    cnh_uf = models.CharField(
+        blank=True, 
+        null=True, 
+        max_length=50, 
+        choices=UF_CHOICES, 
+        default="Não declarado",
+        verbose_name="CNH UF"
+    )
     # Endereço residencial
     logradouro = models.CharField(
         max_length=255, 
