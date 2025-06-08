@@ -98,22 +98,21 @@ class BeneficioModelForm(forms.ModelForm):
             }),
         }
     def __init__(self, *args, **kwargs):
-        modo_edicao = kwargs.pop('modo_edicao', False)  # 👈 isso é o que estava faltando!
+        modo_edicao = kwargs.pop('modo_edicao', False)
         super().__init__(*args, **kwargs)
 
-        # Garante que o formato da data seja interpretado corretamente
+        # Formato correto para datas
         self.fields['data_inicio'].input_formats = ['%Y-%m-%d']     
         self.fields['data_fim'].input_formats = ['%Y-%m-%d']   
 
-        # Remove o campo nome se estiver editando
+        # 🔻 Remover temporariamente opções não utilizadas
+        if 'nome' in self.fields:
+            opcoes_excluidas = ['seguro_tainha', 'seguro_camarao']
+            self.fields['nome'].choices = [
+                choice for choice in self.fields['nome'].choices
+                if choice[0] not in opcoes_excluidas
+            ]
+
+        # ❌ Só remove o campo depois de usar
         if modo_edicao:
             self.fields.pop('nome', None)
-            
-            
-        # 🔻 Remover temporariamente opções não utilizadas
-        opcoes_excluidas = ['seguro_tainha', 'seguro_camarao']
-        self.fields['nome'].choices = [
-            choice for choice in self.fields['nome'].choices
-            if choice[0] not in opcoes_excluidas
-        ]    
-      

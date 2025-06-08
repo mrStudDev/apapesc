@@ -52,7 +52,7 @@
 </div>
 
 <!-- Conteúdo Principal -->
-<div class="container mx-auto py-6 px-4 max-w-5xl">
+<div class="container mx-auto py-6 px-4 max-w-7xl">
     {% if messages %}
     <div class="space-y-4 mb-6">
         {% for message in messages %}
@@ -327,8 +327,7 @@
     <!-- Seção: Informações Pessoais -->
     <div class="bg-white p-6 rounded-lg shadow-lg mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Informações Pessoais</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
             <!-- Nome -->
             <div class="flex items-center space-x-3">
                 <i class="material-icons text-blue-500" style="font-size: 24px;">person</i>
@@ -342,9 +341,7 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
             <!-- Celular -->
             <div class="flex items-center space-x-3">
                 <i class="material-icons text-blue-500" style="font-size: 24px;">phone</i>
@@ -372,7 +369,8 @@
                     </div>
                 </div>
             </div>
-
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 py-4">
             <!-- Sexo Biológico -->
             <div class="flex items-center space-x-3">
                 <i class="material-icons text-blue-500" style="font-size: 24px;">wc</i>
@@ -472,95 +470,99 @@
             </div>
         </div>
     </div> 
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
   
-    <!-- 💳 Painel Financeiro -->
-    <div class="mt-8 bg-white rounded-xl shadow p-6 border border-gray-200">
-        <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-bold text-gray-800">💰 Resumo Financeiro</h2>
-            <a href="{% url 'app_finances:financeiro_associado' associado.id %}"
-            class="inline-flex items-center bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded hover:bg-blue-700 transition">
-            <i class="material-icons text-base mr-1">account_balance</i>
-            Ver Financeiro
-            </a>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 text-sm">
-            <div class="bg-gray-50 rounded-lg p-4 border">
-            <p class="text-gray-500">Total de Anuidades</p>
-            <p class="text-lg font-semibold text-blue-700">R$ {{ total_aplicado|floatformat:2 }}</p>
+        <!-- 💳 Painel Financeiro -->
+        <div class="bg-white rounded-xl shadow p-6 border border-gray-200">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-bold text-gray-800">💰 Resumo Financeiro</h2>
+                <a href="{% url 'app_finances:financeiro_associado' associado.id %}"
+                    class="inline-flex items-center bg-blue-600 text-white text-sm font-semibold px-4 py-2 rounded hover:bg-blue-700 transition">
+                    <i class="material-icons text-base mr-1">account_balance</i>
+                    Ver Financeiro
+                </a>
             </div>
 
-            <div class="bg-green-50 rounded-lg p-4 border">
-            <p class="text-gray-500">Total Pago</p>
-            <p class="text-lg font-semibold text-green-700">R$ {{ total_pago|floatformat:2 }}</p>
-            </div>
-
-            <div class="bg-yellow-50 rounded-lg p-4 border">
-                <p class="text-gray-500">Descontos Aplicados</p>
-                <p class="text-lg font-semibold text-yellow-700">R$ {{ total_desconto|floatformat:2 }}</p>
-            </div>
-
-            <div class="bg-red-50 rounded-lg p-4 border">
-            <p class="text-gray-500">Saldo Devedor</p>
-            <p class="text-lg font-semibold text-red-700">R$ {{ total_debito|floatformat:2 }}</p>
-            </div>
-        </div>
-    </div>
-    <br>
-    
-    <!--Benefício - Seguro Defeso -->
-    {% if beneficios_aplicados %}
-    <div class="border-l-4 border-yellow-400 p-5 rounded-lg shadow-lg mb-8">
-        <!-- Título e subtítulo -->
-        <div class="flex items-center justify-between mb-4">
-        <div>
-            <h3 class="text-lg font-bold text-yellow-800">🎣 Benefício de Seguro Defeso Aplicado</h3>
-            <p class="text-sm text-yellow-700 mt-1">
-            Você pode <strong>visualizar o painel de lançamento</strong> e <strong>editar as peculiaridades do processo</strong> clicando abaixo 👇
-            </p>
-        </div>
-        </div>
-
-        <!-- Lista dos benefícios -->
-        <ul class="divide-y divide-yellow-200 text-sm text-gray-800">
-        {% for beneficio in beneficios_aplicados %}
-            {% get_controle beneficio associado as controle %}
-            <li class="py-3">
-            <div class="flex justify-between items-start">
-                <!-- Info do benefício -->
-                <div>
-                <p class="font-semibold">
-                    {{ beneficio.get_nome_display }} — <span class="text-gray-500">{{ beneficio.ano_concessao }}/{{ beneficio.estado }}</span>
-                </p>
-                <p class="text-xs text-gray-500 mt-1">
-                    Vigência até <strong>{{ beneficio.data_fim|date:"d/m/Y" }}</strong>
-                </p>
-
-                {% if controle %}
-                    <span class="inline-block mt-2 text-xs font-medium text-yellow-800 bg-yellow-200 px-2 py-1 rounded">
-                    {{ controle.get_status_pedido_display }}
-                    </span>
-                {% endif %}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <!-- Total de Anuidades -->
+                <div class="bg-gray-50 rounded-lg p-4 border">
+                    <p class="text-gray-500">Total de Anuidades</p>
+                    <p class="text-lg font-semibold text-blue-700">R$ {{ total_aplicado|floatformat:2 }}</p>
                 </div>
 
-                <!-- Botão de ação -->
-                {% if controle %}
-                <a href="{% url 'app_beneficios:controle_detalhe' controle.id %}"
-                    class="inline-flex items-center px-3 py-1 text-xs text-blue-700 hover:text-blue-900 bg-blue-100 border border-blue-200 rounded-md hover:bg-blue-200 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Visualizar
-                </a>
-                {% endif %}
-            </div>
-            </li>
-        {% endfor %}
-        </ul>
-    </div>
-    {% endif %}
+                <!-- Total Pago -->
+                <div class="bg-green-50 rounded-lg p-4 border">
+                    <p class="text-gray-500">Total Pago</p>
+                    <p class="text-lg font-semibold text-green-700">R$ {{ total_pago|floatformat:2 }}</p>
+                </div>
 
-    <section class="mb-10">
+                <!-- Descontos Aplicados -->
+                <div class="bg-yellow-50 rounded-lg p-4 border">
+                    <p class="text-gray-500">Descontos Aplicados</p>
+                    <p class="text-lg font-semibold text-yellow-700">R$ {{ total_desconto|floatformat:2 }}</p>
+                </div>
+
+                <!-- Saldo Devedor -->
+                <div class="bg-red-50 rounded-lg p-4 border">
+                    <p class="text-gray-500">Saldo Devedor</p>
+                    <p class="text-lg font-semibold text-red-700">R$ {{ total_debito|floatformat:2 }}</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 🎣 Benefício - Seguro Defeso -->
+        {% if beneficios_aplicados %}
+        <div class="border-l-4 border-yellow-400 p-5 rounded-lg shadow-lg bg-white border">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-yellow-800">🎣 Benefício de Seguro Defeso Aplicado</h3>
+                    <p class="text-sm text-yellow-700 mt-1">
+                        Você pode <strong>visualizar o painel de lançamento</strong> e <strong>editar as peculiaridades do processo</strong> clicando abaixo 👇
+                    </p>
+                </div>
+            </div>
+
+            <ul class="divide-y divide-yellow-200 text-sm text-gray-800">
+                {% for beneficio in beneficios_aplicados %}
+                    {% get_controle beneficio associado as controle %}
+                    <li class="py-3">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-semibold">
+                                    {{ beneficio.get_nome_display }} — 
+                                    <span class="text-gray-500">{{ beneficio.ano_concessao }}/{{ beneficio.estado }}</span>
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Vigência até <strong>{{ beneficio.data_fim|date:"d/m/Y" }}</strong>
+                                </p>
+
+                                {% if controle %}
+                                    <span class="inline-block mt-2 text-xs font-medium text-yellow-800 bg-yellow-200 px-2 py-1 rounded">
+                                        {{ controle.get_status_pedido_display }}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            {% if controle %}
+                                <a href="{% url 'app_beneficios:controle_detalhe' controle.id %}"
+                                    class="inline-flex items-center px-3 py-1 text-xs text-blue-700 hover:text-blue-900 bg-blue-100 border border-blue-200 rounded-md hover:bg-blue-200 transition">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Visualizar
+                                </a>
+                            {% endif %}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+
+    <section class="mb-10 py-2">
         <div class="bg-white shadow-md rounded-lg p-6 border-l-4 border-green-600">
             <div class="flex items-center justify-between mb-3">
                 <h2 class="text-lg font-semibold text-green-700 flex items-center">
@@ -910,7 +912,8 @@
     <!-- Seção: Documentos do Associado -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6 py-4">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentos - RG</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
 
             <!-- RG Número -->
             <div class="flex items-center space-x-3">
@@ -1086,160 +1089,161 @@
     </div>
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Informações MAPA</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <!-- Já recebeu defeso alguma vez? -->
-        <div class="flex items-center space-x-3">
-            <i class="material-icons 
-                {% if associado.ja_recebeu_defeso_algumavez == 'Sim' %}
-                    text-green-500
-                {% elif associado.ja_recebeu_defeso_algumavez == 'Não' %}
-                    text-red-500
-                {% else %}
-                    text-gray-500
-                {% endif %}
-            " style="font-size: 24px;">storefront</i>
-            <div>
-                <strong class="text-gray-700">Já recebeu Seguro Defeso alguma vez?</strong>
-                <div class="mt-1 text-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+            <!-- Já recebeu defeso alguma vez? -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons 
                     {% if associado.ja_recebeu_defeso_algumavez == 'Sim' %}
-                        <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Sim</span>
+                        text-green-500
                     {% elif associado.ja_recebeu_defeso_algumavez == 'Não' %}
-                        <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Não</span>
+                        text-red-500
                     {% else %}
-                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                        text-gray-500
                     {% endif %}
+                " style="font-size: 24px;">storefront</i>
+                <div>
+                    <strong class="text-gray-700">Já recebeu Seguro Defeso alguma vez?</strong>
+                    <div class="mt-1 text-sm">
+                        {% if associado.ja_recebeu_defeso_algumavez == 'Sim' %}
+                            <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Sim</span>
+                        {% elif associado.ja_recebeu_defeso_algumavez == 'Não' %}
+                            <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Não</span>
+                        {% else %}
+                            <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Comercializa Produtos -->
-        <div class="flex items-center space-x-3">
-            <i class="material-icons 
-                {% if associado.comercializa_produtos == 'Sim' %}
-                    text-green-500
-                {% elif associado.comercializa_produtos == 'Não' %}
-                    text-red-500
-                {% else %}
-                    text-gray-500
-                {% endif %}
-            " style="font-size: 24px;">storefront</i>
-            <div>
-                <strong class="text-gray-700">Comercializa Produtos:</strong>
-                <div class="mt-1 text-sm">
+            <!-- Comercializa Produtos -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons 
                     {% if associado.comercializa_produtos == 'Sim' %}
-                        <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Sim</span>
+                        text-green-500
                     {% elif associado.comercializa_produtos == 'Não' %}
-                        <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Não</span>
+                        text-red-500
                     {% else %}
-                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                        text-gray-500
                     {% endif %}
+                " style="font-size: 24px;">storefront</i>
+                <div>
+                    <strong class="text-gray-700">Comercializa Produtos:</strong>
+                    <div class="mt-1 text-sm">
+                        {% if associado.comercializa_produtos == 'Sim' %}
+                            <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Sim</span>
+                        {% elif associado.comercializa_produtos == 'Não' %}
+                            <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Não</span>
+                        {% else %}
+                            <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Outra Fonte de Renda -->
-        <div class="flex items-center space-x-3 mt-4">
-            <i class="material-icons 
-                {% if associado.outra_fonte_renda == 'Não Possui' %}
-                    text-blue-500
-                {% elif associado.outra_fonte_renda == 'Não declarado' or not associado.outra_fonte_renda %}
-                    text-gray-500
-                {% else %}
-                    text-yellow-500
-                {% endif %}
-            " style="font-size: 24px;">payments</i>
-
-            <div>
-                <strong class="text-gray-700">Outra Fonte de Renda:</strong>
-                <div class="mt-1 text-sm">
+            
+            <!-- Outra Fonte de Renda -->
+            <div class="flex items-center space-x-3 mt-4">
+                <i class="material-icons 
                     {% if associado.outra_fonte_renda == 'Não Possui' %}
-                        <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 font-medium">
-                            Não Possui
-                        </span>
+                        text-blue-500
                     {% elif associado.outra_fonte_renda == 'Não declarado' or not associado.outra_fonte_renda %}
-                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
-                            Não declarado
-                        </span>
+                        text-gray-500
                     {% else %}
-                        <span class="inline-block px-2 py-1 rounded bg-yellow-100 text-yellow-800 font-medium">
-                            {{ associado.outra_fonte_renda }}
-                        </span>
+                        text-yellow-500
                     {% endif %}
+                " style="font-size: 24px;">payments</i>
+
+                <div>
+                    <strong class="text-gray-700">Outra Fonte de Renda:</strong>
+                    <div class="mt-1 text-sm">
+                        {% if associado.outra_fonte_renda == 'Não Possui' %}
+                            <span class="inline-block px-2 py-1 rounded bg-blue-100 text-blue-800 font-medium">
+                                Não Possui
+                            </span>
+                        {% elif associado.outra_fonte_renda == 'Não declarado' or not associado.outra_fonte_renda %}
+                            <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                                Não declarado
+                            </span>
+                        {% else %}
+                            <span class="inline-block px-2 py-1 rounded bg-yellow-100 text-yellow-800 font-medium">
+                                {{ associado.outra_fonte_renda }}
+                            </span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
 
 
 
-        <!-- Bolsa Família -->
-        <div class="flex items-center space-x-3">
-            <i class="material-icons 
-                {% if associado.bolsa_familia == 'Já recebeu' %}
-                    text-green-500
-                {% elif associado.bolsa_familia == 'Nunca recebeu' %}
-                    text-red-500
-                {% else %}
-                    text-gray-500
-                {% endif %}
-            " style="font-size: 24px;">payments</i>
-            <div>
-                <strong class="text-gray-700">Bolsa Família:</strong>
-                <div class="mt-1 text-sm">
+            <!-- Bolsa Família -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons 
                     {% if associado.bolsa_familia == 'Já recebeu' %}
-                        <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Já recebeu</span>
+                        text-green-500
                     {% elif associado.bolsa_familia == 'Nunca recebeu' %}
-                        <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Nunca recebeu</span>
+                        text-red-500
                     {% else %}
-                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                        text-gray-500
                     {% endif %}
+                " style="font-size: 24px;">payments</i>
+                <div>
+                    <strong class="text-gray-700">Bolsa Família:</strong>
+                    <div class="mt-1 text-sm">
+                        {% if associado.bolsa_familia == 'Já recebeu' %}
+                            <span class="inline-block px-2 py-1 rounded bg-green-100 text-green-700 font-medium">Já recebeu</span>
+                        {% elif associado.bolsa_familia == 'Nunca recebeu' %}
+                            <span class="inline-block px-2 py-1 rounded bg-red-100 text-red-700 font-medium">Nunca recebeu</span>
+                        {% else %}
+                            <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">Não declarado</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Relação de Trabalho -->
-        <div class="flex items-center space-x-3">
-            <i class="material-icons text-gray-500" style="font-size: 24px;">work</i>
-            <div>
-                <strong class="text-gray-700">Relação de Trabalho:</strong>
-                <div class="mt-1 text-sm">
-                    {% if associado.relacao_trabalho %}
-                        <span class="inline-block px-2 py-1 rounded bg-gray-50 text-gray-700  font-semibold shadow-sm">
-                            {{ associado.relacao_trabalho }}
-                        </span>
-                    {% else %}
-                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
-                            Não declarado
-                        </span>
-                    {% endif %}
+            <!-- Relação de Trabalho -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-gray-500" style="font-size: 24px;">work</i>
+                <div>
+                    <strong class="text-gray-700">Relação de Trabalho:</strong>
+                    <div class="mt-1 text-sm">
+                        {% if associado.relacao_trabalho %}
+                            <span class="inline-block px-2 py-1 rounded bg-gray-50 text-gray-700  font-semibold shadow-sm">
+                                {{ associado.relacao_trabalho }}
+                            </span>
+                        {% else %}
+                            <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                                Não declarado
+                            </span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Casa Onde Mora -->
-        <div class="flex items-center space-x-3">
-            <i class="material-icons text-gray-500" style="font-size: 24px;">home</i>
-            <div>
-                <strong class="text-gray-700">Casa Onde Mora</strong>
-                <div class="mt-1 text-sm">
-                    {% if associado.casa_onde_mora %}
-                        <span class="inline-block px-2 py-1 rounded bg-gray-50 text-gray-700  font-semibold shadow-sm">
-                            {{ associado.casa_onde_mora }}
-                        </span>
-                    {% else %}
-                        <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
-                            Não declarado
-                        </span>
-                    {% endif %}
+            <!-- Casa Onde Mora -->
+            <div class="flex items-center space-x-3">
+                <i class="material-icons text-gray-500" style="font-size: 24px;">home</i>
+                <div>
+                    <strong class="text-gray-700">Casa Onde Mora</strong>
+                    <div class="mt-1 text-sm">
+                        {% if associado.casa_onde_mora %}
+                            <span class="inline-block px-2 py-1 rounded bg-gray-50 text-gray-700  font-semibold shadow-sm">
+                                {{ associado.casa_onde_mora }}
+                            </span>
+                        {% else %}
+                            <span class="inline-block px-2 py-1 rounded bg-gray-100 text-gray-700 font-medium">
+                                Não declarado
+                            </span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
     <!-- Seção: Documentos Cidadão -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentos do Cidadão</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-5 gap-6">
             <!-- NIT -->
             <div class="flex items-center space-x-3">
                 <i class="material-icons text-yellow-500" style="font-size: 24px;">account_balance_wallet</i>
@@ -1316,7 +1320,7 @@
     <!-- Seção: Documentação Profissional - RGP -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentação Profissional - RGP</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
 
             <!-- RGP -->
             <div class="flex items-center space-x-3">
@@ -1380,7 +1384,7 @@
     <!-- Seção: Documentação Trabalho - CTPS -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Documentação Trabalho - CTPS</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
 
             <!-- CTPS -->
             <div class="flex items-center space-x-3">
@@ -1480,7 +1484,7 @@
     <!-- Seção: Endereço -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Endereço</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 gap-6">
 
             <!-- Logradouro -->
             <div class="flex items-center space-x-3">
@@ -1586,7 +1590,7 @@
     <!-- Seção: Produção Média Anual -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-6 border-b pb-2">Produção Média Anual</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-6">
 
             <!-- Espécie 1 -->
             <div class="flex items-center space-x-3">
@@ -1740,7 +1744,7 @@
         </div>
     </div>
 </div>
-    <!-- Seção: Documentos -->
+    <!-- Seção: Declarações -->
     <div class="bg-white p-6 rounded-lg shadow-md mb-6">
         <h2 class="text-base font-semibold text-gray-700 mb-4">Geração de Declarações e Documentos</h2>
         <p class="text-sm text-gray-600 mb-4">
@@ -1769,8 +1773,7 @@
     <!-- Seção: Automação e Geração de Declarações-->
     <div class="flex flex-col items-center space-y-6 mb-6">
         <h2 class="text-2xl font-bold text-gray-700 mb-4">GERAR DECLARAÇÕES</h2>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-5xl">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-6xl">
             <!-- Declaração de Filiação -->
             <a href="{% url 'app_automacoes:gerar_declaracao_filiado' associado.id %}"
                class="bg-white shadow-md rounded-lg p-6 hover:shadow-lg transform hover:bg-green-200 transition-all duration-300">
@@ -1924,7 +1927,7 @@
         {{ quantidade_documentos }}
         </span>
     </h2>
-    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-sm text-gray-700">
+    <ul class="grid grid-cols-1 sm:grid-cols-4 lg:grid-cols-5 gap-4 text-sm text-gray-700">
         {% for tipo, presente in status_documentos.items %}
         <li class="flex items-center gap-2">
             {% if presente %}
@@ -1937,84 +1940,97 @@
         {% endfor %}
     </ul>
     </div>
-</div>
-<br>
-    <div class="items-center space-y-6 mb-6">
+
+    <br>
+    <div class="space-y-4">
         {% if documentos %}
-            <ul class="space-y-4">
+            <ul class="space-y-3">
                 {% for documento in documentos %}
-                <li id="documento-{{ documento.id }}"  data-id="{{ documento.id }}"  class="bg-white p-4 rounded-lg shadow-md flex items-center justify-between">
-                    <div class="flex items-center">
-                        <i class="material-icons text-gray-500 mr-2" style="font-size: 20px;">insert_drive_file</i>
-                        <div>
-                            <a href="{{ documento.arquivo.url }}" target="_blank" class="text-blue-500 font-semibold hover:underline">
-                            {{ documento.nome }}
-                            </a>
-                            <p class="text-gray-600 text-sm mt-1">Data de Upload: <strong> {{ documento.data_upload|date:"d/m/Y H:i" }}</strong></p>
-                            <p class="text-gray-600 text-sm mt-1">Extensão do Documento: <strong>{{ documento.arquivo.url|slice:"-3:" }}</strong></p> <!-- Novo -->
-                            <p class="text-gray-600 text-sm mt-1">* {{ documento.descricao|truncatechars:71 }}</p>
+                    <li id="documento-{{ documento.id }}" data-id="{{ documento.id }}"
+                        class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
-                        </div>
-                    </div>
-
-                    <div x-data="{ openDelete_{{ documento.pk }}: false }" class="flex items-center space-x-3">
-
-                        <!-- Link para Download do Documento -->
-                        <a href="{% url 'app_documentos:download_documento' documento.pk %}" class="hover:text-green-500" title="Baixar Documento">
-
-                            <i class="material-icons" style="font-size: 20px; color:green;">cloud_download</i>
-                        </a>
-
-                        <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="Enviar por WhatsApp" class="hover:text-green-600" target="#">
-                            <i class="material-icons" style="font-size: 18px; color:green"> phone_android</i>
-                        </a>
-                        <a href="{% url 'app_documentos:criar_copia_pdf' documento.pk %}" title="Fazer Cópia em PDF" onclick="suaFuncaoAutomatizar()"> <!-- Adicione o link para a sua função -->
-                            <i class="material-icons" style="font-size: 20px; color:orange;">picture_as_pdf</i>
-                        </a>
-                        <!-- Botão de Deletar -->
-                        <button @click="openDelete_{{ documento.pk }} = true"
-                                title="Excluir Documento"
-                                class="hover:text-red-600 focus:outline-none">
-                            <i class="material-icons" style="font-size: 20px; color:red;">delete</i>
-                        </button>
-                        <!-- Modal de Confirmação -->
-                        <div x-show="openDelete_{{ documento.pk }}"
-                            x-cloak
-                            class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-md text-center">
-                                <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirmar Exclusão</h2>
-                                <p class="text-gray-600 mb-6">
-                                    Deseja realmente excluir o documento <strong>{{ documento.nome|default:documento.tipo_doc }}</strong>?
+                        <!-- 📄 Info do Documento -->
+                        <div class="flex items-start sm:items-center gap-3 flex-1">
+                            <i class="material-icons text-blue-400 mt-1 sm:mt-0" style="font-size: 20px;">description</i>
+                            <div class="text-sm text-gray-700 leading-snug">
+                                <a href="{{ documento.arquivo.url }}" target="_blank" class="text-blue-600 font-semibold hover:underline">
+                                    {{ documento.nome }}
+                                </a>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    📅 Upload: <strong>{{ documento.data_upload|date:"d/m/Y H:i" }}</strong> &nbsp;|&nbsp;
+                                    📄 Extensão: <strong>{{ documento.arquivo.url|slice:"-3:"|upper }}</strong>
                                 </p>
-
-                                <form method="post" action="{% url 'app_documentos:delete_documento' documento.pk %}">
-                                    {% csrf_token %}
-                                    <div class="flex justify-center gap-4">
-                                        <button type="submit"
-                                                class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md font-semibold">
-                                            Sim, Excluir
-                                        </button>
-                                        <button type="button" @click="openDelete_{{ documento.pk }} = false"
-                                                class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md font-medium">
-                                            Cancelar
-                                        </button>
-                                    </div>
-                                </form>
+                                <p class="text-xs text-gray-500 mt-1 italic truncate max-w-md">
+                                    ✏️ {{ documento.descricao|truncatechars:85 }}
+                                </p>
                             </div>
                         </div>
 
-                    </div>
-                </li>
+                        <!-- 🔧 Ações -->
+                        <div x-data="{ openDelete_{{ documento.pk }}: false }"
+                            class="flex items-center justify-end gap-2 shrink-0">
+
+                            <!-- Download -->
+                            <a href="{% url 'app_documentos:download_documento' documento.pk %}" title="Baixar"
+                            class="text-green-500 hover:text-green-600 transition">
+                                <i class="material-icons text-base">cloud_download</i>
+                            </a>
+
+                            <!-- WhatsApp -->
+                            <a href="{% url 'app_documentos:documento_detail' documento.pk %}" title="WhatsApp"
+                            class="text-green-600 hover:text-green-700 transition">
+                                <i class="material-icons text-sm">phone_android</i>
+                            </a>
+
+                            <!-- PDF -->
+                            <a href="{% url 'app_documentos:criar_copia_pdf' documento.pk %}" title="Gerar PDF"
+                            onclick="suaFuncaoAutomatizar()" class="text-orange-500 hover:text-orange-600 transition">
+                                <i class="material-icons text-base">picture_as_pdf</i>
+                            </a>
+
+                            <!-- Deletar -->
+                            <button @click="openDelete_{{ documento.pk }} = true" title="Excluir"
+                                    class="text-red-500 hover:text-red-700 transition focus:outline-none">
+                                <i class="material-icons text-base">delete</i>
+                            </button>
+
+                            <!-- ❗Modal de Exclusão -->
+                            <div x-show="openDelete_{{ documento.pk }}"
+                                x-cloak
+                                class="fixed inset-0 z-50 bg-black bg-opacity-40 flex items-center justify-center">
+                                <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+                                    <h2 class="text-lg font-semibold text-gray-800 mb-3">Confirmar Exclusão</h2>
+                                    <p class="text-sm text-gray-600 mb-5">
+                                        Deseja excluir o documento <strong>{{ documento.nome|default:documento.tipo_doc }}</strong>?
+                                    </p>
+
+                                    <form method="post" action="{% url 'app_documentos:delete_documento' documento.pk %}">
+                                        {% csrf_token %}
+                                        <div class="flex justify-center gap-3">
+                                            <button type="submit"
+                                                    class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-semibold">
+                                                Sim, excluir
+                                            </button>
+                                            <button type="button"
+                                                    @click="openDelete_{{ documento.pk }} = false"
+                                                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-md text-sm">
+                                                Cancelar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
                 {% endfor %}
             </ul>
-
         {% else %}
-            <p class="text-gray-600">Nenhum documento disponível para este associado.</p>
+            <p class="text-sm text-gray-500 italic">Nenhum documento disponível para este associado.</p>
         {% endif %}
-
+    </div>
 
         <!-- Links de Ações -->
-        <div class="flex justify-center space-x-2 mb-4">
+        <div class="flex justify-center space-x-2 mb-4 py-4">
             <!-- Botão Lista -->
             <a href="{% url 'app_associados:list_geral_associado' %}"
             class="flex items-center justify-center bg-gray-200 text-blue-500 py-2 px-3 rounded-md hover:bg-blue-300"
