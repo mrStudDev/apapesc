@@ -1267,7 +1267,8 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
 
         # 📍 Guias disponíveis
         guias_disponiveis = GuiaINSSModel.objects.filter(
-            lancamento=lancamento
+            lancamento=lancamento,
+            status='pendente'
         ).exclude(
             id__in=guias_processadas_ids
         ).filter(
@@ -1351,6 +1352,19 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
         if total_guias > 0:
             percentual = (processadas / total_guias) * 100
             
+        # 📊 Estatísticas de status (novo)
+        status_counts = GuiaINSSModel.objects.filter(
+            lancamento=lancamento
+        ).values('status').annotate(
+            total=Count('id')
+        ).order_by('status')
+
+        # Transforma em um dicionário mais fácil de usar no template
+        status_distribuicao = {
+            item['status']: item['total'] 
+            for item in status_counts
+        }
+            
         return render(request, self.template_name, {
             'guia': guia,
             'lancamento': lancamento,
@@ -1368,12 +1382,22 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
             'rodada': rodada,
             'usuarios_participantes': usuarios_participantes,
             'percentual': percentual,
+            'status_distribuicao': status_distribuicao,
+            'status_choices_dict': dict(GuiaINSSModel.STATUS_CHOICES),
         })
 
 
     def post(self, request, lancamento_id):
         guia_id = request.POST.get('guia_id')
         guia = get_object_or_404(GuiaINSSModel, id=guia_id)
+
+        # 1️⃣ VALIDAÇÃO DO STATUS RECEBIDO
+        status_recebido = request.POST.get('status')
+        status_validos = dict(GuiaINSSModel.STATUS_CHOICES).keys()
+        
+        if status_recebido not in status_validos:
+            messages.error(request, "Status inválido selecionado.")
+            return redirect(f"{request.path}?guia={guia_id}")
 
         # Registrar guia como processada nesta rodada
         rodada = RodadaProcessamentoINSS.objects.filter(lancamento_id=lancamento_id, ativa=True).first()
@@ -1388,38 +1412,38 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
                 gpp.processado_por = request.user
                 gpp.save()
 
-                
-        # Salva a guia atual
-        guia.status = request.POST.get('status')
+        # Salva a guia atual (agora com status validado)
+        guia.status = status_recebido
         guia.observacoes = request.POST.get('observacoes') or 'certo'
         guia.save()
 
-        # 📌 Registrar guia como processada nesta rodada
+        # Registrar guia como processada
         GuiaRodadaProcessada.objects.get_or_create(
             rodada=rodada,
             guia=guia,
             defaults={
-                'user': guia.associado.user,  # Ou use o user certo conforme a estrutura do seu modelo
+                'user': guia.associado.user,
                 'processado_por': request.user,
             }
-        )        
+        )
 
-        # Atualiza guias anteriores (se vieram no form)
+        # Atualiza guias anteriores (com validação de status)
         for key in request.POST:
             if key.startswith("status_anterior_"):
                 guia_anterior_id = key.replace("status_anterior_", "")
                 status_val = request.POST.get(key)
                 observacoes_val = request.POST.get(f"obs_anterior_{guia_anterior_id}")
 
-                try:
-                    g = GuiaINSSModel.objects.get(id=guia_anterior_id)
-                    g.status = status_val
-                    g.observacoes = observacoes_val or 'certo'
-                    g.save()
-                except GuiaINSSModel.DoesNotExist:
-                    continue
+                if status_val in status_validos:  # Só atualiza se status for válido
+                    try:
+                        g = GuiaINSSModel.objects.get(id=guia_anterior_id)
+                        g.status = status_val
+                        g.observacoes = observacoes_val or 'certo'
+                        g.save()
+                    except GuiaINSSModel.DoesNotExist:
+                        continue
 
-        # ✅ Libera a guia
+        # Libera a guia
         guia.em_processamento_por = None
         guia.iniciou_em = None
         guia.save()
@@ -1431,7 +1455,7 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
             defaults={'ultima_guia': guia}
         )
 
-        # 🔚 Verifica se todas foram processadas
+        # Verifica conclusão
         total_guias = GuiaINSSModel.objects.filter(lancamento_id=lancamento_id).count()
         guias_processadas = GuiaRodadaProcessada.objects.filter(rodada=rodada).count()
 
@@ -1444,10 +1468,11 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
             messages.info(request, "Processamento pausado.")
             return redirect('app_tarefas:list_lancamentos')
 
-        # 🔄 Buscar próxima guia DISPONÍVEL na rodada
+        # 🔄 Buscar próxima guia DISPONÍVEL E PENDENTE (modificado)
         tempo_expiracao = now() - timedelta(minutes=15)
         proxima_guia = GuiaINSSModel.objects.filter(
-            lancamento_id=lancamento_id
+            lancamento_id=lancamento_id,
+            status='pendente'  # Filtro adicionado para pegar apenas pendentes
         ).exclude(
             id__in=GuiaRodadaProcessada.objects.filter(rodada=rodada).values_list('guia_id', flat=True)
         ).filter(

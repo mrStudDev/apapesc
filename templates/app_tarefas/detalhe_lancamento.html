@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Controle Mês: {{lancamento.mes}}{% endblock title %}
+{% block title %}Detalhes/Cont. Mês: {{lancamento.mes}}{% endblock title %}
 
 {% load custom_filters %}
 
@@ -35,7 +35,7 @@
         <!-- Cabeçalho -->
         <div class="mb-6">
             <h1 class="text-3xl font-bold text-gray-800 mb-2">
-              📄 Controle de Emissão de Guias INSS
+              📄 Detalhes Controle de Emissão de Guias INSS
             </h1>
             <p class="text-sm text-gray-600">Guias INSS por Associado</p>
             <p class="text-sm text-gray-600">Lançamento: <strong>{{ lancamento.mes }}/{{ lancamento.ano }}</strong></p>
@@ -97,7 +97,7 @@
             class="inline-block mb-4 bg-green-600 text-white text-sm px-4 py-2 rounded hover:bg-green-700">
             ▶ Iniciar/Retomar Processo
         </a>
-       
+       <span>Roda enquanto houver guias Pendentes</span>
          <!-- Tabela -->
         <div class="overflow-x-auto bg-white rounded-lg shadow border border-gray-200">
             <table class="min-w-full text-xs text-gray-700">
