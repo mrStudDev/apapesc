@@ -81,25 +81,28 @@
                     <select name="associacao" id="id_associacao" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
                         <option value="">--- Selecione ---</option>
                         {% for associacao in associacoes %}
-                            <option value="{{ associacao.id }}" {% if form.instance.associacao.id == associacao.id %}selected{% endif %}>
+                            <option value="{{ associacao.id }}" 
+                                {% if form.associacao.value|stringformat:"s" == associacao.id|stringformat:"s" or get_params.associacao == associacao.id|stringformat:"s" %}selected{% endif %}>
                                 {{ associacao.nome_fantasia }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
-        
-                <!-- Repartição -->
+                        
+                                <!-- Repartição -->
                 <div class="mb-4">
                     <label for="id_reparticao" class="block text-sm font-medium text-gray-700 mb-1">Repartição</label>
                     <select name="reparticao" id="id_reparticao" class="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500">
                         <option value="">--- Selecione ---</option>
                         {% for reparticao in reparticoes %}
-                            <option value="{{ reparticao.id }}" {% if form.instance.reparticao.id == reparticao.id %}selected{% endif %}>
+                            <option value="{{ reparticao.id }}" 
+                                {% if form.reparticao.value|stringformat:"s" == reparticao.id|stringformat:"s" or get_params.reparticao == reparticao.id|stringformat:"s" %}selected{% endif %}>
                                 {{ reparticao.nome_reparticao }}
                             </option>
                         {% endfor %}
                     </select>
                 </div>
+
         
                 <!-- Tipo de Serviço -->
                 <div class="mb-4">
@@ -325,7 +328,53 @@
         atualizarResumoParcelamento();  // Chama ao carregar a página
     });
 </script>
-
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Campos que devem ser desabilitados se preenchidos
+    const fieldsToDisable = ['associacao', 'reparticao', 'tipo_servico'];
+    
+    fieldsToDisable.forEach(fieldName => {
+        const field = document.getElementById(`id_${fieldName}`);
+        if (field && field.value && field.value !== "") {
+            // Desabilita o campo
+            field.disabled = true;
+            field.classList.add('bg-gray-100', 'cursor-not-allowed');
+            
+            // Adiciona campo hidden para envio do valor
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = fieldName;
+            hiddenInput.value = field.value;
+            field.parentNode.appendChild(hiddenInput);
+            
+            console.log(`Campo ${fieldName} desabilitado com valor:`, field.value);
+        }
+    });
+    
+    // Atualiza repartições quando a associação muda
+    const associacaoSelect = document.getElementById('id_associacao');
+    if (associacaoSelect && !associacaoSelect.disabled) {
+        associacaoSelect.addEventListener('change', function() {
+            const associacaoId = this.value;
+            const reparticaoSelect = document.getElementById('id_reparticao');
+            
+            if (associacaoId && reparticaoSelect) {
+                fetch(`/api/reparticoes/?associacao_id=${associacaoId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        reparticaoSelect.innerHTML = '<option value="">--- Selecione ---</option>';
+                        data.forEach(reparticao => {
+                            const option = document.createElement('option');
+                            option.value = reparticao.id;
+                            option.textContent = reparticao.nome_reparticao;
+                            reparticaoSelect.appendChild(option);
+                        });
+                    });
+            }
+        });
+    }
+});
+</script>
 
     {% include 'components/footer_associacao.html' %}
 {% endblock create_entrada %}

@@ -391,12 +391,16 @@ class CreateServicoExtraAssociadoView(LoginRequiredMixin, GroupPermissionRequire
 
         # Monta a URL de criação de entrada com os dados via GET
         query_params = {
-            'servico_extra_id': servico.id,
-            'associacao': servico.associacao.id if servico.associacao else '',
-            'reparticao': servico.reparticao.id if servico.reparticao else '',
-            'tipo_servico': servico.tipo_servico.id if servico.tipo_servico else '',
-            'content': servico.content,
+            'servico_extra_id': str(servico.id),  # Convertendo para string para garantir
         }
+        
+        # Adiciona apenas os IDs dos relacionamentos se existirem
+        if servico.associacao:
+            query_params['associacao'] = str(servico.associacao.id)
+        if servico.reparticao:
+            query_params['reparticao'] = str(servico.reparticao.id)
+        if servico.tipo_servico:
+            query_params['tipo_servico'] = str(servico.tipo_servico.id)
 
         url = reverse('app_finances:create_entrada') + '?' + urlencode(query_params)
         return redirect(url)

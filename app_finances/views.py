@@ -35,6 +35,7 @@ from .models import (
 
 from app_associados.models import AssociadoModel
 from app_associacao.models import AssociacaoModel, ReparticoesModel
+from app_servicos.models import ServicoExtraAssociadoModel
 
 
 from .forms import (
@@ -572,28 +573,65 @@ class EntradaCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, Succes
     ]
 
     def get_form_kwargs(self):
-        """
-        Passa o usuário logado e a associação selecionada para o formulário.
-        """
         kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user  # ✅ Passa o usuário autenticado
+        kwargs['user'] = self.request.user
 
-        # 🔹 Obtém a associação selecionada via GET
-        associacao_id = self.request.GET.get('associacao')
-        if associacao_id:
-            kwargs['associacao'] = get_object_or_404(AssociacaoModel, pk=associacao_id)
+        # Acessa os parâmetros via GET em vez de kwargs
+        servico_extra_id = self.request.GET.get('servico_extra_id')
+        if servico_extra_id:
+            from app_servicos.models import ServicoExtraAssociadoModel
+            try:
+                servico = ServicoExtraAssociadoModel.objects.get(pk=servico_extra_id)
+                kwargs['associacao'] = servico.associacao
+            except ServicoExtraAssociadoModel.DoesNotExist:
+                pass
 
         return kwargs
-
+    
     def get_initial(self):
         initial = super().get_initial()
-        initial.update({
-            'associacao': self.request.GET.get('associacao'),
-            'reparticao': self.request.GET.get('reparticao'),
-            'tipo_servico': self.request.GET.get('tipo_servico'),
-            'descricao': self.request.GET.get('descricao'),
-        })
+        
+        # Tenta pegar primeiro do serviço extra
+        servico_extra_id = self.request.GET.get('servico_extra_id')
+        if servico_extra_id:
+            from app_servicos.models import ServicoExtraAssociadoModel
+            try:
+                servico = ServicoExtraAssociadoModel.objects.get(pk=servico_extra_id)
+                initial.update({
+                    'associacao': servico.associacao,
+                    'reparticao': servico.reparticao,
+                    'tipo_servico': servico.tipo_servico,
+                    'descricao': servico.content,
+                })
+                return initial
+            except ServicoExtraAssociadoModel.DoesNotExist:
+                pass
+        
+        # Se não tiver serviço extra, tenta pegar dos parâmetros GET
+        associacao_id = self.request.GET.get('associacao')
+        reparticao_id = self.request.GET.get('reparticao')
+        tipo_servico_id = self.request.GET.get('tipo_servico')
+        
+        if associacao_id:
+            try:
+                initial['associacao'] = AssociacaoModel.objects.get(pk=associacao_id)
+            except (ValueError, AssociacaoModel.DoesNotExist):
+                pass
+                
+        if reparticao_id:
+            try:
+                initial['reparticao'] = ReparticoesModel.objects.get(pk=reparticao_id)
+            except (ValueError, ReparticoesModel.DoesNotExist):
+                pass
+                
+        if tipo_servico_id:
+            try:
+                initial['tipo_servico'] = TipoServicoModel.objects.get(pk=tipo_servico_id)
+            except (ValueError, TipoServicoModel.DoesNotExist):
+                pass
+        
         return initial
+
 
     def form_valid(self, form):
         """Garante que a entrada será salva corretamente."""
@@ -638,22 +676,40 @@ class EntradaCreateView(LoginRequiredMixin, GroupPermissionRequiredMixin, Succes
         messages.error(self.request, "Erro ao cadastrar entrada. Verifique os campos obrigatórios.")
         print("🔴 ERROS NO FORMULÁRIO:", form.errors)  # ✅ Exibe os erros no terminal para depuração
         return self.render_to_response(self.get_context_data(form=form))
+    
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # Carrega associações
         context['associacoes'] = AssociacaoModel.objects.all().order_by('nome_fantasia')
-        context['reparticoes'] = ReparticoesModel.objects.none()
-
-        # ✅ Se estiver criando a entrada a partir de um serviço extra
+        
+        # Carrega repartições baseado na associação selecionada
+        associacao_id = self.request.GET.get('associacao')
+        if associacao_id:
+            context['reparticoes'] = ReparticoesModel.objects.filter(
+                associacao__id=associacao_id
+            ).order_by('nome_reparticao')
+        else:
+            context['reparticoes'] = ReparticoesModel.objects.none()
+        
+        # Adiciona serviço relacionado se existir
         servico_extra_id = self.request.GET.get('servico_extra_id')
         if servico_extra_id:
-            from app_servicos.models import ServicoExtraAssociadoModel
             try:
-                servico = ServicoExtraAssociadoModel.objects.get(pk=servico_extra_id)
-                context['servico_relacionado'] = servico
+                context['servico_relacionado'] = ServicoExtraAssociadoModel.objects.get(
+                    pk=servico_extra_id
+                )
             except ServicoExtraAssociadoModel.DoesNotExist:
                 context['servico_relacionado'] = None
-
+        
+        # Adiciona IDs dos parâmetros GET para o template
+        context['get_params'] = {
+            'associacao': self.request.GET.get('associacao'),
+            'reparticao': self.request.GET.get('reparticao'),
+            'tipo_servico': self.request.GET.get('tipo_servico'),
+        }
+        
         return context
 
 
