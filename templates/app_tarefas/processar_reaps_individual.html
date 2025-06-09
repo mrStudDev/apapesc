@@ -44,9 +44,19 @@
         {% endif %}
 
         <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200">
-            <h2 class="text-2xl font-semibold mb-4 text-gray-800">
-                👤 Processando REAPS — <span class="text-blue-700">{{ item.associado.user.get_full_name }}</span>
-            </h2>
+
+        <h2 class="text-2xl font-semibold mb-1 text-gray-800">
+            👤 Processando REAPS — 
+            <a href="{% url 'app_associados:single_associado' item.associado.pk %}" 
+            class="text-blue-700 hover:underline inline-flex items-center gap-1"
+            target="_blank" rel="noopener noreferrer">
+                {{ item.associado.user.get_full_name }}
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 3h7v7m0 0L10 21l-7-7L17 3z" />
+                </svg>
+            </a>
+        </h2>
+        <p class="text-sm text-gray-500 ml-8">Abrir em nova guia</p>
 
             <div class="space-y-2 text-gray-700 text-base">
                 <p>
@@ -128,12 +138,19 @@
                 <button type="submit" name="acao" value="concluir_proximo"
                         class="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded">
                     ✅ Concluir e Ir para Próximo
-                </button>                
+                </button>
+                
+                <button type="submit" name="acao" value="pular_proximo"
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded">
+                    ⏭️ Voltar para Pendente e Ir para Próximo
+                </button>
+                
                 <button type="submit" name="acao" value="concluir"
                         class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded">
                     ✅ Marcar como Concluído
                 </button>
                 {% endif %}
+                
                 {% if item.status == 'PROCESSANDO' %}
                 <button type="submit" name="acao" value="pausar"
                         class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded">
@@ -146,6 +163,7 @@
                 </button>
                 {% endif %}
             </form>
+
             {% else %}
             <form method="post" class="mt-6 space-y-3">
                 {% csrf_token %}

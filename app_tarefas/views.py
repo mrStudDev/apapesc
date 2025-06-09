@@ -1567,56 +1567,44 @@ class ReapsProcessarView(LoginRequiredMixin, GroupPermissionRequiredMixin, Detai
         'Presidente da Associação',
         'Auxiliar da Associação',
         'Auxiliar da Repartição',
-    ]    
-    
+    ]
+
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
         acao = request.POST.get('acao')
+        reaps = self.object.reaps
 
-        if acao == 'concluir' or acao == 'concluir_proximo':
+        # Sessões da rodada
+        session_key_visitados = f"reaps_visitados_{reaps.pk}"
+        session_key_pulados = f"reaps_pulados_{reaps.pk}"
+
+        visitados = request.session.get(session_key_visitados, [])
+        pulados = request.session.get(session_key_pulados, [])
+
+        # Adiciona atual aos visitados
+        if self.object.pk not in visitados:
+            visitados.append(self.object.pk)
+            request.session[session_key_visitados] = visitados
+
+        # AÇÕES DE USUÁRIO
+        if acao in ['concluir', 'concluir_proximo']:
             self.object.status = 'CONCLUIDO'
             self.object.data_realizado = now().date()
             self.object.processado_por = request.user
             self.object.save()
-            
-            nome_associado = self.object.associado.user.get_full_name()
-            messages.success(request, f"✅ REAPS de {nome_associado} concluído com sucesso.")
+            messages.success(request, f"✅ REAPS de {self.object.associado.user.get_full_name()} concluído com sucesso.")
 
-            if acao == 'concluir_proximo':
-                reaps = self.object.reaps
-                proximo_item = (
-                    ReapsAssociadoItem.objects
-                    .filter(
-                        reaps=reaps,
-                        status='PENDENTE'
-                    )
-                    .exclude(
-                        Q(status='PROCESSANDO') & ~Q(processado_por=request.user)
-                    )
-                    .order_by(
-                        'associado__user__first_name',
-                        'associado__user__last_name'
-                    )
-                    .first()
-                )
+        elif acao == 'pular_proximo':
+            self.object.status = 'PENDENTE'
+            self.object.processado_por = None
+            self.object.pulado_na_rodada = True  # 🔁 Persistente no banco
+            self.object.save()
 
-                if proximo_item:
-                    updated = ReapsAssociadoItem.objects.filter(
-                        pk=proximo_item.pk,
-                        status='PENDENTE'
-                    ).update(
-                        status='PROCESSANDO',
-                        processado_por=request.user
-                    )
+            if self.object.pk not in pulados:
+                pulados.append(self.object.pk)
+                request.session[session_key_pulados] = pulados
 
-                    if updated:
-                        return redirect(
-                            f"{reverse('app_tarefas:processar_reaps', kwargs={'pk': proximo_item.pk})}?pela_rodada=1"
-                        )
-                    else:
-                        messages.warning(request, "⚠️ Outro usuário começou a processar esse item.")
-                else:
-                    messages.info(request, "🎉 Nenhum outro REAPS disponível no momento.")
+            messages.info(request, "⏭️ Item retornado para pendente e indo para o próximo.")
 
         elif acao == 'pausar':
             self.object.status = 'PENDENTE'
@@ -1633,15 +1621,67 @@ class ReapsProcessarView(LoginRequiredMixin, GroupPermissionRequiredMixin, Detai
                 messages.info(request, "🔄 Iniciado o processamento do REAPS.")
             else:
                 messages.warning(request, "⚠️ Este item já está em processamento por outro usuário.")
- 
-        # ✅ Fallback seguro: sempre redirecionar para o detalhe do lançamento
-        return redirect('app_tarefas:reaps_detalhe', pk=self.object.reaps.pk)
 
-    
+        # Lógica para avançar para próximo
+        if acao in ['concluir_proximo', 'pular_proximo']:
+            proximo_item = (
+                ReapsAssociadoItem.objects
+                .filter(
+                    reaps=reaps,
+                    status='PENDENTE',
+                    pulado_na_rodada=False
+                )
+                .exclude(pk__in=visitados + pulados)
+                .exclude(Q(status='PROCESSANDO') & ~Q(processado_por=request.user))
+                .order_by('associado__user__first_name', 'associado__user__last_name')
+                .first()
+            )
+
+            if proximo_item:
+                updated = ReapsAssociadoItem.objects.filter(
+                    pk=proximo_item.pk,
+                    status='PENDENTE'
+                ).update(
+                    status='PROCESSANDO',
+                    processado_por=request.user
+                )
+
+                if updated:
+                    return redirect(
+                        f"{reverse('app_tarefas:processar_reaps', kwargs={'pk': proximo_item.pk})}?pela_rodada=1"
+                    )
+                else:
+                    messages.warning(request, "⚠️ Outro usuário começou a processar esse item.")
+
+            # ✅ Final da rodada
+            # ✅ Remove sessão do usuário
+            request.session.pop(session_key_visitados, None)
+            request.session.pop(session_key_pulados, None)
+
+            # 🔍 Verifica se ainda há usuários processando
+            tem_usuarios_processando = ReapsAssociadoItem.objects.filter(
+                reaps=reaps,
+                status='PROCESSANDO'
+            ).exists()
+
+            if not tem_usuarios_processando:
+                # 🔚 Rodada ENCERRADA para todos
+                ReapsAssociadoItem.objects.filter(
+                    reaps=reaps,
+                    pulado_na_rodada=True
+                ).update(pulado_na_rodada=False)
+
+                messages.info(request, "🎉 Todos os usuários concluíram. Rodada finalizada.")
+
+            else:
+                messages.info(request, "✅ Você finalizou sua rodada. Outros usuários ainda estão processando.")
+
+            return redirect('app_tarefas:reaps_detalhe', pk=reaps.pk)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         associado = self.object.associado
-        reaps = self.object.reaps  # ✅ Agora sim!
+        reaps = self.object.reaps
 
         usuarios_ativos = User.objects.filter(
             reaps_processados__reaps=reaps,
@@ -1665,6 +1705,12 @@ class ReapsProcessarView(LoginRequiredMixin, GroupPermissionRequiredMixin, Detai
 def iniciar_reaps_rodada_view(request, pk):
     reaps = get_object_or_404(ReapsAnualModel, pk=pk)
 
+    # 🔁 Limpa histórico da rodada atual na sessão
+    session_key_visitados = f"reaps_visitados_{reaps.pk}"
+    session_key_pulados = f"reaps_pulados_{reaps.pk}"
+    request.session.pop(session_key_visitados, None)
+    request.session.pop(session_key_pulados, None)
+
     try:
         with transaction.atomic():
             proximo_item = (
@@ -1672,7 +1718,8 @@ def iniciar_reaps_rodada_view(request, pk):
                 .select_related('associado__user')
                 .filter(
                     reaps=reaps,
-                    status='PENDENTE'
+                    status='PENDENTE',
+                    pulado_na_rodada=False  # 🛡️ ESSENCIAL: evita reaparecimento dos pulados
                 )
                 .exclude(
                     Q(status='PROCESSANDO') & ~Q(processado_por=request.user)
@@ -1685,7 +1732,6 @@ def iniciar_reaps_rodada_view(request, pk):
             )
 
             if proximo_item:
-                # Tenta marcar o item como PROCESSANDO apenas se ninguém já fez
                 updated = ReapsAssociadoItem.objects.filter(
                     pk=proximo_item.pk,
                     status='PENDENTE'
@@ -1706,8 +1752,6 @@ def iniciar_reaps_rodada_view(request, pk):
         messages.error(request, f"❌ Erro ao iniciar rodada: {str(e)}")
         return redirect('app_tarefas:reaps_detalhe', pk=reaps.pk)
 
-    # ✅ Todos os itens estão processados
-    messages.info(request, "🎉 Todos os REAPS deste lançamento já foram concluídos. Nada mais a processar.")
     messages.info(request, "🎉 Todos os itens disponíveis já estão sendo processados ou concluídos.")
     return redirect('app_tarefas:reaps_detalhe', pk=reaps.pk)
 

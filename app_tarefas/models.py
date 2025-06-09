@@ -531,6 +531,7 @@ class ReapsAssociadoItem(models.Model):
         on_delete=models.SET_NULL,
         related_name='reaps_processados'
     )
+    pulado_na_rodada = models.BooleanField(default=False)
     atualizado_em = models.DateTimeField(auto_now=True)
 
     class Meta:
