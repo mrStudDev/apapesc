@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Gerar/Lista T.Massa{% endblock title %}
 
@@ -30,22 +31,45 @@
     <div class="container mx-auto py-6 px-4 max-w-3xl">
         <!-- Título -->
         <h2 class="text-xl font-bold mb-4">Gerar Tarefas em Massa</h2>
-            {% if messages %}
-        <div class="mb-4">
+        {% if messages %}
+        <div class="space-y-4 mb-6">
             {% for message in messages %}
-                <div class="p-4 rounded-md text-white 
-                    {% if message.tags == 'success' %}
-                        bg-green-500
-                    {% elif message.tags == 'error' %}
-                        bg-red-500
-                    {% elif message.tags == 'info' %}
-                        bg-blue-500
-                    {% else %}
-                        bg-gray-500
-                    {% endif %}
-                ">
-                    {{ message }}
+            <div class="flex items-start gap-3 p-4 rounded-lg shadow-md border-l-4 transition-all duration-300
+                {% if message.tags == 'success' %}
+                bg-green-50 border-green-500 text-green-800
+                {% elif message.tags == 'error' %}
+                bg-red-50 border-red-500 text-red-800
+                {% elif message.tags == 'info' %}
+                bg-blue-50 border-blue-500 text-blue-800
+                {% else %}
+                bg-gray-50 border-gray-500 text-gray-800
+                {% endif %}
+            ">
+                <div class="pt-1">
+                {% if message.tags == 'success' %}
+                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                    </svg>
+                {% elif message.tags == 'error' %}
+                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                {% elif message.tags == 'info' %}
+                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 12h.01"/>
+                    </svg>
+                {% else %}
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" stroke-width="2"
+                        viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 20h.01M12 4h.01"/>
+                    </svg>
+                {% endif %}
                 </div>
+                <div class="text-sm leading-relaxed">{{ message }}</div>
+            </div>
             {% endfor %}
         </div>
         {% endif %}
@@ -55,23 +79,64 @@
             <div class="text-center">
 
 
-            <form method="post">
-              {% csrf_token %}
-            {% if rodada_id %}
-                <input type="hidden" name="rodada_id" value="{{ rodada_id }}">
-            {% endif %}
-            <div class="mb-4">
-                {{ form.tipo.label_tag }}<br>
-                {{ form.tipo }}
-            </div>
+                <div x-data="{ showModal: false, erroTipo: false }">
+                <form method="post" x-ref="form">
+                    {% csrf_token %}
+                    {% if rodada_id %}
+                    <input type="hidden" name="rodada_id" value="{{ rodada_id }}">
+                    {% endif %}
 
-            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                🚀 Gerar Tarefas
-            </button>
-            </form>
-            </div>
+                    <div class="mb-4">
+                    {{ form.tipo.label_tag }}<br>
+                    {{ form.tipo }}
+                    <template x-if="erroTipo">
+                        <p class="text-red-600 text-sm mt-1">⚠️ Selecione um tipo de tarefa.</p>
+                    </template>
+                    </div>
 
+                    <!-- Botão que abre o modal -->
+                    <button type="button"
+                            @click="
+                            const tipoSelecionado = $refs.form.querySelector('[name=tipo]').value;
+                            if (!tipoSelecionado) {
+                                erroTipo = true;
+                            } else {
+                                erroTipo = false;
+                                showModal = true;
+                            }
+                            "
+                            class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                    🚀 Gerar Tarefas
+                    </button>
+                </form>
+
+                <!-- Modal de Confirmação -->
+                <div x-show="showModal"
+                    class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+                    x-cloak
+                    x-transition>
+                    <div class="bg-white rounded-md p-6 max-w-md w-full shadow-xl">
+                    <h2 class="text-lg font-semibold mb-4">Confirmar geração de tarefas?</h2>
+                    <p class="mb-6 text-sm text-gray-600">
+                        Deseja realmente gerar tarefas para esta rodada?
+                    </p>
+                    <div class="flex justify-end gap-4">
+                        <button type="button"
+                                @click="showModal = false"
+                                class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                        Cancelar
+                        </button>
+                        <button type="button"
+                                @click="$refs.form.submit()"
+                                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                        Confirmar
+                        </button>
+                    </div>
+                    </div>
+                </div>
+            </div>
         </div>
+        
         {% if historico %}
         <div class="mt-8">
             <h3 class="text-lg font-semibold mb-4">📋 Últimos Lançamentos de Tarefas em Massa</h3>
@@ -131,6 +196,8 @@
 
     </div>
 </main>
+<script src="//unpkg.com/alpinejs" defer></script>
+
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}
 {% endblock tarefas_emMassa %}

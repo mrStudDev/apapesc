@@ -51,12 +51,43 @@
       </div>
     {% endif %}
 
-    <form method="post" class="mb-8">
-      {% csrf_token %}
-      <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">
-        ➕ Criar Lançamento de {% now "Y" %}
-      </button>
-    </form>
+    <div x-data="{ showModal: false }">
+      <form method="post" x-ref="form" class="mb-8">
+        {% csrf_token %}
+        <button 
+          type="button"
+          @click="showModal = true"
+          class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded shadow">
+          ➕ Criar Lançamento de {% now "Y" %}
+        </button>
+      </form>
+
+      <!-- Modal de Confirmação -->
+      <div x-show="showModal"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+          x-cloak
+          x-transition>
+        <div class="bg-white rounded-md p-6 max-w-md w-full shadow-xl">
+          <h2 class="text-lg font-semibold mb-4">Confirmar criação de lançamento?</h2>
+          <p class="mb-6 text-sm text-gray-600">
+            Deseja realmente criar um novo lançamento de {% now "Y" %}?
+          </p>
+          <div class="flex justify-end gap-4">
+            <button type="button"
+                    @click="showModal = false"
+                    class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+              Cancelar
+            </button>
+            <button type="button"
+                    @click="$refs.form.submit()"
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+              Confirmar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
 
     <div class="mt-10 space-y-6">
       
@@ -99,7 +130,7 @@
 
   </div>
 </main>
-
+<script src="//unpkg.com/alpinejs" defer></script>
 <!-- Footer -->
 {% include "components/footer_associacao.html" %}        
 {% endblock Lista_GerarReaps %}

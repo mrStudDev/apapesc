@@ -63,7 +63,17 @@
                         <!-- 🔹 Campo: Ano da Anuidade -->
                         <div>
                             <label for="{{ form.ano.id_for_label }}" class="block text-sm font-medium text-gray-700">Ano da Anuidade</label>
-                            {{ form.ano }}
+                             <select name="{{ form.ano.name }}" id="{{ form.ano.id_for_label }}"
+                                        x-ref="anoInput"
+                                        class="mt-1 w-full border border-gray-300 rounded-md shadow-sm py-3 px-4 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                <option value="">---------</option>
+                                {% for value, label in form.fields.ano.choices %}
+                                    <option value="{{ value }}" {% if form.ano.value == value|stringformat:"s" %}selected{% endif %}>
+                                    {{ label }}
+                                    </option>
+                                {% endfor %}
+                                </select>
+
                             {% for error in form.ano.errors %}
                                 <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                             {% endfor %}
