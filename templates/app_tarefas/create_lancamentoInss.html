@@ -9,7 +9,8 @@
   <div class="max-w-xl mx-auto bg-white p-6 rounded-lg shadow mt-8">
 
     <h2 class="text-xl font-bold mb-4">📅 Novo Lançamento INSS</h2>
-    <form method="post" novalidate>
+    <form method="post" novalidate x-data="{ confirmModal: false }">
+
         {% csrf_token %}
       
         {% if messages %}
@@ -87,11 +88,41 @@
           {{ form.criado_por }}
         {% endif %}
       
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-          💾 Salvar e Gerar Guias
-        </button>
+        <!-- Botão que abre o modal -->
+          <button type="button"
+                  @click="confirmModal = true"
+                  class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+            💾 Salvar e Gerar Guias
+          </button>
+
+          <!-- Modal de Confirmação -->
+          <div x-show="confirmModal"
+              class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+              style="display: none;"
+              x-transition>
+            <div class="bg-white rounded-md p-6 max-w-md w-full shadow-xl">
+              <h2 class="text-lg font-semibold mb-4">Confirmar geração?</h2>
+              <p class="mb-6 text-sm text-gray-600">
+                Deseja realmente gerar guias para este mês e ano?
+              </p>
+              <div class="flex justify-end gap-4">
+                <button type="button"
+                        @click="confirmModal = false"
+                        class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                  Cancelar
+                </button>
+                <button type="submit"
+                        @click="$el.closest('form').submit()"
+                        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                  Confirmar
+                </button>
+              </div>
+            </div>
+          </div>
       </form>
   </div>
   <!-- Footer -->
+   <!-- Alpine.js CDN (já deve estar no layout, mas reforçando aqui) -->
+<script src="//unpkg.com/alpinejs" defer></script>
 {% include "components/footer_associacao.html" %}
 {% endblock create_LancamentoInss %}

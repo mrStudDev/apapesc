@@ -378,7 +378,6 @@ class GuiaINSSModel(models.Model):
         on_delete=models.CASCADE,
         related_name='guias',
         verbose_name="Lançamento",
-        null=True
     )
     associado = models.ForeignKey(
         'app_associados.AssociadoModel',
