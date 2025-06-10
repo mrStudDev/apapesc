@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load filter_campos_essenciais %}
+{% load documento_extras %}
 
 {% block title %}Serviço {{ servico.associado.user.get_full_name }}{% endblock title %}
 
@@ -541,7 +542,388 @@
               </div>
             </div>
 
-            <!-- Seção: Endereço -->
+          <!-- ACORDEÂOS app_servicos/single_servico.html -->
+          {% if servico.tipo_servico and servico.tipo_servico.nome %}
+            {% if servico.tipo_servico.nome == "Assessoria para Registro de Seguro Embarcação (DPEM)" %}
+              <div class="bg-blue-50 p-4 rounded shadow mb-6">
+                <h2 class="text-lg font-bold text-blue-800">🛥 DPEM - Orientações</h2>
+                <p class="text-sm text-blue-700 mt-1">
+                  Acesse o portal da seguradora, reúna os documentos da embarcação e RG do proprietário. Após isso, inicie o cadastro.
+                </p>
+                <p class="text-sm text-green-700 mt-1">
+                  Nada Ainda...
+                </p>                   
+              </div>
+
+            {% elif servico.tipo_servico.nome == "Auxilio Emissão Licenças (MAPA)" %}
+              <div class="bg-green-50 p-4 rounded shadow mb-6">
+                <h2 class="text-lg font-bold text-green-800">🌿 MAPA - Licenças</h2>
+                <p class="text-sm text-green-700 mt-1">
+                  Consulte a lista de produtos permitidos, acesse o sistema do MAPA e inicie a emissão com base no CPF do pescador.
+                </p>
+                <p class="text-sm text-green-700 mt-1">
+                  Nada Ainda...
+                </p>                
+              </div>
+
+            {% elif servico.tipo_servico.nome == "Auxilio Emissão e Registro de Embarcação (TIE)" %}
+              <div class="bg-yellow-50 p-4 rounded shadow mb-6">
+                <h2 class="text-lg font-bold text-yellow-800">⚓ TIE - Registro de Embarcação</h2>
+                <p class="text-sm text-yellow-700 mt-1 mb-4">
+                  Reúna os documentos da embarcação e do proprietário. Inicie o processo no site da Marinha ou Capitania dos Portos.
+                </p>
+                <!--Acordeon Registro Inicial-->
+                <div x-data="{ open: false }" class="mb-6">
+                <!-- Botão do acordeão -->
+                <button 
+                  @click="open = !open"
+                  class="w-full text-left bg-yellow-400 hover:bg-yellow-500 text-yellow-900 font-semibold px-4 py-2 rounded-md transition flex items-center justify-between">
+                  🛥 INICIAL - Inscrição de Embarcações Esporte/Recreio até 12m
+                  <span class="material-icons text-base" x-text="open ? 'expand_less' : 'expand_more'"></span>
+                </button>
+
+                <!-- Conteúdo do acordeão -->
+                <div x-show="open" x-transition x-cloak class="mt-2 bg-white border border-blue-200 rounded-md shadow p-4 text-sm space-y-4 leading-relaxed text-gray-700">
+                  
+                  <p>
+                    <strong>Inscrição de Embarcações de Esporte e Recreio</strong> na Jurisdição da Capitania dos Portos de Santa Catarina.
+                    Este documento detalha os procedimentos e requisitos para a inscrição de embarcações com comprimento de até 12 metros.
+                  </p>
+
+                  <p class="text-red-700">
+                    <strong>⚠️ Observação Importante:</strong> A partir da data de aquisição, o prazo para inscrição de embarcações de Esporte e/ou Recreio com comprimento menor que 24 metros é de <strong>60 dias</strong>, conforme item 2.4 da Normam-211/DPC. Após esse prazo, o proprietário estará sujeito a multa.
+                  </p>
+
+                  <h4 class="font-semibold text-blue-800">A) Documentação e Requisitos Necessários</h4>
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Baixe e preencha o requerimento à CPSC.</li>
+                    <li>Baixe o Modelo do BSADE e siga as instruções para preenchimento.</li>
+                    <li>Imprima o requerimento e o BSADE em duas vias.</li>
+                    <li><strong>Documentação:</strong></li>
+                    <ul class="list-disc list-inside pl-4">
+                      <li><strong>Identidade do proprietário:</strong> RG + CPF (se não constar no RG)</li>
+                      <li><strong>Pessoa Jurídica:</strong> CNPJ + Contrato Social</li>
+                      <li><strong>Representação:</strong> Procuração com firma reconhecida + RG/CPF do procurador</li>
+                      <li><strong>Prova de propriedade da embarcação:</strong> Nota fiscal do casco ou documentos específicos conforme a situação</li>
+                      <li><strong>Catálogo/Manual ou Declaração do Fabricante</strong> com: comprimento, boca, lotação, potência e registro no CREA</li>
+                      <li><strong>Motor acima de 50HP:</strong> prova de propriedade</li>
+                      <li><strong>Comprovante de residência:</strong> até 90 dias</li>
+                      <li><strong>Fotos:</strong> 2 fotos coloridas e datadas da embarcação</li>
+                    </ul>
+                    <li class="text-red-700">
+                      Desde 1º de JULHO de 2024, é exigido o pagamento do DPEM/2024 conforme Normam-211/212.
+                    </li>
+                  </ul>
+
+                  <h4 class="font-semibold text-blue-800">B) Indenização do(s) Serviço(s)</h4>
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Acesse o sistema de emissão da GRU</li>
+                    <li>Selecione <strong>Capitania dos Portos de Santa Catarina</strong></li>
+                    <li>Escolha o serviço:
+                      <ul class="pl-4 list-disc">
+                        <li>TÍTULO DE INSCRIÇÃO DE EMBARCAÇÃO (TIE) - ESPORTE E RECREIO</li>
+                      </ul>
+                    </li>
+                    <li>Preencha com os dados do interessado</li>
+                    <li class="italic text-gray-600">A guia estará disponível em até 24h após emissão</li>
+                    <li>Se aquisição for por alienação, emitir também GRU de:
+                      <ul class="pl-4 list-disc">
+                        <li>REGISTRO DE ÔNUS E AVERBAÇÕES - INSCRITA NA CP/DL/AG</li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <!-- INICIAL Download docs-->
+                  <h4 class="text-sm font-semibold text-blue-800">📎 Documentos para Download</h4>
+                  {% get_docs_padrao "Requerimento de Registro Inicial (TIE)" "Requerimento de Registro Inicial (TIE) - Modelo BSADE" as documentos %}
+
+                  {% if documentos %}
+                    <div class="bg-white p-4 rounded shadow-sm mt-4">
+                      {% for doc in documentos %}
+                        <div class="flex items-center justify-between text-sm border-b py-2">
+                          <span class="text-gray-800">{{ doc.tipo_doc.tipo }}</span>
+                          <a href="{{ doc.arquivo.url }}" class="text-blue-600 hover:underline" target="_blank">
+                            Baixar ({{ doc.arquivo|extensao }})
+                          </a>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    <p class="text-gray-500 italic text-sm">Nenhum documento padrão encontrado.</p>
+                  {% endif %}
+
+                  <div class="pt-2">
+                    🔗 <a href="https://www.marinha.mil.br/cpsc/Insc12" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
+                      Clique aqui para acessar o site da Marinha (CPSC)
+                    </a>
+                  </div>
+                  <div class="pt-2">
+                    🔗 <a href="https://sistemas.dpc.mar.mil.br/sisap/agendamento/#/" target="_blank" rel="noopener noreferrer" class="text-blue-700 hover:underline">
+                      Acessar Guia Recolhimento (GRU)
+                    </a>
+                  </div>                    
+                </div>
+              </div>
+              <!--Acordeon Renovação-->
+              <div x-data="{ open: false }" class="mb-6">
+                <!-- Botão do acordeão -->
+                <button 
+                  @click="open = !open"
+                  class="w-full text-left bg-yellow-300 hover:bg-yellow-400 text-yellow-900 font-semibold px-4 py-2 rounded-md transition flex items-center justify-between">
+                  ⚓ Renovação: TIE - Embarcação de Esporte e Recreio até 12m
+                  <span class="material-icons text-base" x-text="open ? 'expand_less' : 'expand_more'"></span>
+                </button>
+
+                <!-- Conteúdo do acordeão -->
+                <div x-show="open" x-transition x-cloak class="mt-2 bg-white border border-yellow-300 rounded-md shadow p-4 text-sm space-y-4 leading-relaxed text-gray-700">
+                  
+                  <p>
+                    <strong>Inscrição de Embarcações de Esporte e Recreio</strong> na Jurisdição da Capitania dos Portos de Santa Catarina. Este documento detalha os procedimentos e requisitos para a inscrição de embarcações com comprimento de até 12 metros.
+                  </p>
+
+                  <p class="text-red-700">
+                    <strong>⚠️ Observação Importante:</strong> O prazo para inscrição após aquisição é de <strong>60 dias</strong>, conforme item 2.4 da Normam-211/DPC. Após isso, o proprietário pode ser multado.
+                  </p>
+
+                  <h4 class="font-semibold text-yellow-800">A) Documentação e Requisitos Necessários</h4>
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Baixe e preencha o requerimento à CPSC.</li>
+                    <li>Baixe o Modelo do BSADE e siga as instruções.</li>
+                    <li>Imprima o requerimento e o BSADE (2 vias).</li>
+                    <li>Documentação pessoal:
+                      <ul class="pl-4 list-disc">
+                        <li>Pessoa Física: RG + CPF</li>
+                        <li>Pessoa Jurídica: CNPJ + Contrato Social</li>
+                        <li>Representação: Procuração + RG/CPF</li>
+                      </ul>
+                    </li>
+                    <li>Prova de propriedade da embarcação:
+                      <ul class="pl-4 list-disc">
+                        <li>Compra: Nota fiscal do casco</li>
+                        <li>Outros casos: Ver Normam-211/212 item 2.8</li>
+                      </ul>
+                    </li>
+                    <li>Catálogo ou declaração do fabricante com:
+                      <ul class="pl-4 list-disc">
+                        <li>Comprimento</li>
+                        <li>Boca (largura)</li>
+                        <li>Lotação</li>
+                        <li>Potência máxima</li>
+                        <li>Registro no CREA</li>
+                      </ul>
+                    </li>
+                    <li>Prova de propriedade do motor (caso > 50HP)</li>
+                    <li>Comprovante de residência (até 90 dias)</li>
+                    <li>Duas fotos coloridas e datadas da embarcação</li>
+                    <li class="text-red-700">A partir de 1º de JULHO de 2024, é exigido DPEM 2024 (item 2.6 das Normam-211/212)</li>
+                  </ul>
+
+                  <h4 class="font-semibold text-yellow-800">B) Emissão da GRU</h4>
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Acesse o sistema da GRU</li>
+                    <li>Selecione a <strong>Capitania dos Portos de Santa Catarina</strong></li>
+                    <li>Escolha:
+                      <ul class="pl-4 list-disc">
+                        <li><strong>TÍTULO DE INSCRIÇÃO DE EMBARCAÇÃO (TIE)</strong> - ESPORTE E RECREIO</li>
+                      </ul>
+                    </li>
+                    <li>Preencha os dados do interessado</li>
+                    <li class="italic text-gray-600">Pagamento disponível após 24h</li>
+                    <li>Se aquisição por alienação:
+                      <ul class="pl-4 list-disc">
+                        <li>Escolha: <strong>REGISTRO DE ÔNUS E AVERBAÇÕES - INSCRITA NA CP/DL/AG</strong></li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <!--RENOVAÇÃO - Download docs-->
+                  <h4 class="text-sm font-semibold text-blue-800">📎 Documentos para Download</h4>
+                  {% get_docs_padrao "Requerimento RENOVAÇÃO (TIE) - Modelo BSADE" "Requerimento RENOVAÇÃO (TIE) - Modelo BSADE (Proprietário1)" "Requerimento RENOVAÇÃO (TIE) - Modelo BSADE (Proprietário2)" "Termo Responsabilidade de Segurança da Navegação (TIE)" as documentos %}
+
+                  {% if documentos %}
+                    <div class="bg-white p-4 rounded shadow-sm mt-4">
+                      {% for doc in documentos %}
+                        <div class="flex items-center justify-between text-sm border-b py-2">
+                          <span class="text-gray-800">{{ doc.tipo_doc.tipo }}</span>
+                          <a href="{{ doc.arquivo.url }}" class="text-blue-600 hover:underline" target="_blank">
+                            Baixar ({{ doc.arquivo|extensao }})
+                          </a>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    <p class="text-gray-500 italic text-sm">Nenhum documento padrão encontrado.</p>
+                  {% endif %}
+
+                  <div class="pt-2">
+                    🔗 <a href="https://www.marinha.mil.br/cpsc/renovacao" target="_blank" rel="noopener noreferrer" class="text-yellow-700 hover:underline">
+                      Acessar site da Marinha (CPSC)
+                    </a>
+                  </div>
+                  <div class="pt-2">
+                    🔗 <a href="https://sistemas.dpc.mar.mil.br/sisap/agendamento/#/" target="_blank" rel="noopener noreferrer" class="text-yellow-700 hover:underline">
+                      Acessar Guia Recolhimento (GRU)
+                    </a>
+                  </div>                  
+                </div>
+              </div>
+              <!--Acordeon Segunda Via TIE-->
+              <div x-data="{ open: false }" class="mb-6">
+                <!-- Botão do acordeão -->
+                <button 
+                  @click="open = !open"
+                  class="w-full text-left bg-yellow-200 hover:bg-yellow-300 text-red-900 font-semibold px-4 py-2 rounded-md transition flex items-center justify-between">
+                  🧾 2ª Via do TIE - Embarcação de Esporte/Recreio
+                  <span class="material-icons text-base" x-text="open ? 'expand_less' : 'expand_more'"></span>
+                </button>
+
+                <!-- Conteúdo do acordeão -->
+                <div x-show="open" x-transition x-cloak class="mt-2 bg-white border border-red-300 rounded-md shadow p-4 text-sm space-y-4 leading-relaxed text-gray-700">
+                  
+                  <p>
+                    <strong>2ª Via do Título de Inscrição (TIE)</strong> para embarcações de esporte e/ou recreio. Este processo é válido para situações de perda, roubo ou extravio do documento.
+                  </p>
+
+                  <p class="text-red-700">
+                    <strong>⚠️ Observação Importante:</strong> Se a embarcação estiver inscrita em outra jurisdição, a renovação do TIE deve ser solicitada no órgão original de inscrição, conforme item 2.7 da Normam-211/DPC (ou 2.2 da Normam-212/DPC para motoaquáticas).
+                  </p>
+
+                  <h4 class="font-semibold text-red-800">📜 TIE emitido até 06/03/2023 (Modelo Antigo)</h4>
+                  <p>
+                    Nestes casos, o proprietário ou representante legal deve solicitar a renovação diretamente na Capitania, Delegacia ou Agência responsável. O novo documento será emitido por meio digital (aplicativo).
+                    <br>
+                    <em>Link para renovação via app: <span class="text-gray-400 italic">(não fornecido)</span></em>
+                  </p>
+
+                  <h4 class="font-semibold text-red-800">📲 TIE Digital - Consulta e Impressão</h4>
+                  <ul class="list-disc list-inside space-y-1">
+                    <li>Consulta pode ser feita a qualquer momento via aplicativo oficial</li>
+                    <li>Documento digital contém <strong>QR Code</strong> para fiscalização</li>
+                    <li>Se desejar imprimir, o proprietário pode fazê-lo direto do app — <strong>sem custos</strong> e <strong>sem necessidade de ir até a Capitania</strong></li>
+                  </ul>
+
+                  <h4 class="font-semibold text-red-800">🏢 Impressão do TIE via Capitania (caso sem acesso à internet)</h4>
+                  <p>O cidadão poderá solicitar a impressão do TIE diretamente em uma Capitania, Delegacia ou Agência. Para isso, deve:</p>
+                  <ul class="list-decimal list-inside space-y-1">
+                    <li>Apresentar um requerimento com o motivo da solicitação</li>
+                    <li>Levar a mesma documentação exigida para renovação (exceto o TIE original)</li>
+                  </ul>
+
+                  <!--Seguinda Via - Download docs-->
+                  <h4 class="text-sm font-semibold text-blue-800">📎 Documentos para Download</h4>
+                  {% get_docs_padrao "Requerimento RENOVAÇÃO (TIE) - Modelo BSADE" "Requerimento RENOVAÇÃO (TIE) - Modelo BSADE (Proprietário1)" "Requerimento RENOVAÇÃO (TIE) - Modelo BSADE (Proprietário2)" "Termo Responsabilidade de Segurança da Navegação (TIE)" as documentos %}
+
+                  {% if documentos %}
+                    <div class="bg-white p-4 rounded shadow-sm mt-4">
+                      {% for doc in documentos %}
+                        <div class="flex items-center justify-between text-sm border-b py-2">
+                          <span class="text-gray-800">{{ doc.tipo_doc.tipo }}</span>
+                          <a href="{{ doc.arquivo.url }}" class="text-blue-600 hover:underline" target="_blank">
+                            Baixar ({{ doc.arquivo|extensao }})
+                          </a>
+                        </div>
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    <p class="text-gray-500 italic text-sm">Nenhum documento padrão encontrado.</p>
+                  {% endif %}
+                  
+                  <div class="pt-2">
+                    🔗 <a href="https://www.marinha.mil.br/cpsc/2via" target="_blank" rel="noopener noreferrer" class="text-red-700 hover:underline">
+                      Acessar site da Marinha – 2ª Via do TIE / OBS: Na pág, link que redireciona para Renovação
+                    </a>
+                  </div>
+                  <div class="pt-2">
+                    🔗 <a href="https://www.marinha.mil.br/cpsc/renovacao" target="_blank" rel="noopener noreferrer" class="text-yellow-700 hover:underline">
+                      Acessar site da Marinha (CPSC) - RENOVAÇÃO/2 Via
+                    </a>
+                  </div>
+                  <div class="pt-2">
+                    🔗 <a href="https://sistemas.dpc.mar.mil.br/sisap/agendamento/#/" target="_blank" rel="noopener noreferrer" class="text-yellow-700 hover:underline">
+                      Acessar Guia Recolhimento (GRU)
+                    </a>
+                  </div>                   
+                </div>
+              </div>
+
+              </div>
+
+            {% elif servico.tipo_servico.nome == "Auxílio Emissão RGP" %}
+              <div class="bg-indigo-50 p-4 rounded shadow mb-6">
+                <h2 class="text-lg font-bold text-indigo-800">🐟 RGP - Registro Geral da Pesca</h2>
+                <p class="text-sm text-indigo-700 mt-1">
+                  Verifique os dados no Sistema do MPA, atualize informações do pescador e siga o fluxo de emissão.
+                </p>
+                <!-- Acordeão de Orientações -->
+                  <div x-data="{ open: false }" class="mt-4">
+                    <button
+                      @click="open = !open"
+                      class="w-full text-left bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-semibold px-4 py-2 rounded-md transition flex items-center justify-between">
+                      📄 Instruções para Emissão do RGP
+                      <span class="material-icons text-base" x-text="open ? 'expand_less' : 'expand_more'"></span>
+                    </button>
+
+                    <div x-show="open" x-cloak x-transition class="mt-2 bg-white border border-indigo-200 rounded-md shadow p-4 text-sm leading-relaxed text-gray-700 space-y-4">
+
+                      <h4 class="font-semibold text-indigo-800">📌 Documentação Necessária:</h4>
+                      <ul class="list-disc list-inside space-y-1">
+                        <li>📎 CPF</li>
+                        <li>📎 RG ou CNH</li>
+                        <li>📎 NIT (Número de Identificação do Trabalhador)</li>
+                        <li>📎 Comprovante de residência no nome ou <strong>Declaração de Residência modelo MAPA</strong></li>
+                        <li>📎 Foto 3x4 (pode ser tirada com celular, mostrando ombros e rosto)</li>
+                        <li>📎 Conta GOV + senha GOV.BR</li>
+                      </ul>
+
+                      <h4 class="font-semibold text-indigo-800">🧠 Perguntas obrigatórias:</h4>
+                      <ul class="list-disc list-inside space-y-1">
+                        <li>Já recebeu Seguro Defeso?</li>
+                        <li>Já recebeu Bolsa Família?</li>
+                        <li>A casa onde mora é: alugada, própria ou cedida?</li>
+                        <li>Qual a escolaridade (até que série estudou)?</li>
+                        <li>Qual a etnia (Branco, Pardo, Preto, Indígena)?</li>
+                        <li>Já teve algum registro de pesca anteriormente?</li>
+                      </ul>
+
+                      <!--RGP - Download docs-->
+                      <h4 class="text-sm font-semibold text-blue-800">📎 Documentos para Download</h4>
+                      {% get_docs_padrao "Declaração Residência - MAPA" as documentos %}
+
+                      {% if documentos %}
+                        <div class="bg-white p-4 rounded shadow-sm mt-4">
+                          {% for doc in documentos %}
+                            <div class="flex items-center justify-between text-sm border-b py-2">
+                              <span class="text-gray-800">{{ doc.tipo_doc.tipo }}</span>
+                              <a href="{{ doc.arquivo.url }}" class="text-blue-600 hover:underline" target="_blank">
+                                Baixar ({{ doc.arquivo|extensao }})
+                              </a>
+                            </div>
+                          {% endfor %}
+                        </div>
+                      {% else %}
+                        <p class="text-gray-500 italic text-sm">Nenhum documento padrão encontrado.</p>
+                      {% endif %}        
+                      <h4 class="font-semibold text-indigo-800">🔗 Acessos Úteis:</h4>
+                      <ul class="list-disc list-inside space-y-1">
+                        <li>
+                          <a href="https://meu.inss.gov.br/#/login" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
+                            Meu INSS – Login (consulta do NIT)
+                          </a>
+                        </li>
+                        <li>
+                          <a href="https://pesqbrasil-pescadorprofissional.agro.gov.br/" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
+                            Portal RGP – Pescador Profissional
+                          </a>
+                        </li>
+                      </ul>
+
+                    </div>
+                  </div>
+                </div>
+
+            {% endif %}
+          {% endif %}
+
+
+            <!-- Seção: Embarcações-->
             <div class="bg-white p-6 rounded-lg shadow-md mt-6">
               <div class="mb-8">
                 <h2 class="text-sm font-semibold text-gray-600 border-b pb-1 mb-4 uppercase tracking-wider">
@@ -707,6 +1089,6 @@
 <link rel="stylesheet" href="{% static 'css/editor.css' %}">
 <script src="{% static 'js/copy_to_clipboard.js' %}"></script>
 <script src="//unpkg.com/alpinejs" defer></script>
-
+<script src="https://unpkg.com/alpinejs" defer></script>
 {% include "components/footer_associacao.html" %}
 {% endblock single_servico %}
