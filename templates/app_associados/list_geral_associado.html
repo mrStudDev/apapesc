@@ -278,11 +278,12 @@
                                     {% if guias %}
                                         {% with lancamento=lancamentos_por_associado|dict_get:associado.id %}
                                             {% if lancamento %}
-                                                <a href="{% url 'app_tarefas:detalhe_lancamento_inss' lancamento.pk %}"
-                                                class="text-blue-400 hover:text-green-800"
-                                                title="Ver Lançamento INSS">
-                                                    <i class="material-icons text-[16px] leading-none">account_balance</i>
-                                                </a>
+<a href="{% url 'app_tarefas:lancamentos_inss_por_associado' associado.id %}"
+   class="text-blue-400 hover:text-green-800"
+   title="Ver Lançamento INSS">
+    <i class="material-icons text-[16px] leading-none">account_balance</i>
+</a>
+
                                             {% else %}
                                                 <span class="text-gray-400" title="Sem Lançamento">
                                                     <i class="material-icons text-[16px] leading-none">account_balance_wallet</i>

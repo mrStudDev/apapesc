@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}INSS Associado {% endblock title %}
+
+
+{% block Lancamento_inssPorAssociado %}
+    {% include "components/navbar_associacao.html" %}
+
+<main class="flex-grow">
+    <div class="max-w-6xl mx-auto px-4 py-5">
+        
+        <!-- Cabeçalho da Página -->
+        <div class="mb-8 border-b pb-4">
+            <h1 class="text-3xl font-extrabold text-gray-800 flex items-center gap-2">
+                📄 INSS - Associado - Meses 
+            </h1>
+
+            <p class="text-xl text-gray-700 mt-2">
+                Lançamentos de INSS para <span class="font-semibold text-blue-700">{{ associado.user.get_full_name }}</span>
+            </p>
+
+            <!-- Ações de Navegação -->
+            <div class="mt-4 flex gap-4 flex-wrap text-sm">
+                <a href="{% url 'app_associados:single_associado' associado.id %}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">
+                    👤 Página do Associado
+                </a>
+
+                <a href="{% url 'app_associados:list_geral_associado' %}" class="text-blue-600 hover:underline">
+                    ← Voltar para Lista Geral
+                </a>
+            </div>
+        </div>
+
+
+        {% if lancamentos %}
+            {% for chave, guias in lancamentos.items %}
+            {% with ano=chave.0 mes=chave.1 %}
+                <div class="border p-4 mb-4 shadow-md">
+                    <h3 class="font-semibold text-lg mb-2">🗓️ {{ mes|stringformat:"02d" }}/{{ ano }}</h3>
+
+                    <table class="w-full text-sm border border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-left">
+                                <th class="border px-2 py-1">Associado</th>
+                                <th class="border px-2 py-1">Status</th>
+                                <th class="border px-2 py-1">Observações</th>
+                                <th class="border px-2 py-1">Data Emissão</th>
+                                <th class="border px-2 py-1">CPF</th>
+                                <th class="border px-2 py-1">Senha Gov</th>
+                                <th class="border px-2 py-1">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for guia in guias %}
+                            <form method="post" action="{% url 'app_tarefas:atualizar_guia' guia.id %}">
+                            {% csrf_token %}
+                            <tr>
+                                <td class="border px-2 py-1">
+                                    {{ guia.associado.user.get_full_name }}
+                                </td>
+                                <td class="border px-2 py-1">
+                                    <select name="status" class="w-full border border-gray-300 rounded px-2 py-1 text-xs">
+                                        {% for key, label in status_choices %}
+                                            <option value="{{ key }}" {% if guia.status == key %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="border px-2 py-1">
+                                    <select name="observacoes" class="w-full border border-gray-300 rounded px-2 py-1 text-xs">
+                                        {% for key, label in observacoes_choices %}
+                                            <option value="{{ key }}" {% if guia.observacoes == key %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td class="border px-2 py-1">
+                                    {{ guia.data_emissao|date:"d/m/Y H:i" }}
+                                </td>
+                                <td class="border px-2 py-1">
+                                    <span id="cpf-{{ guia.id }}">{{ guia.associado.cpf }}</span>
+                                    <button type="button" onclick="copyToClipboard('cpf-{{ guia.id }}')" class="text-blue-500">
+                                        <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                                    </button>
+                                </td>
+                                <td class="border px-2 py-1">
+                                    <span id="senha-{{ guia.id }}">{{ guia.associado.senha_gov }}</span>
+                                    <button type="button" onclick="copyToClipboard('senha-{{ guia.id }}')" class="text-blue-500">
+                                        <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                                    </button>
+                                </td>
+                                <td class="border px-2 py-1 text-center">
+                                    <button type="submit" class="bg-blue-600 text-white text-xs px-3 py-1 rounded hover:bg-blue-700">
+                                        Salvar
+                                    </button>
+                                </td>
+                            </tr>
+                            </form>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endwith %}
+            {% endfor %}
+        {% else %}
+            <p class="text-gray-600">Nenhum lançamento encontrado para este associado.</p>
+        {% endif %}
+    </main>
+<!-- Footer -->
+{% include "components/footer_associacao.html" %}
+<script src="{% static 'js/copy_to_clipboard.js' %}"></script>
+
+{% endblock Lancamento_inssPorAssociado %}

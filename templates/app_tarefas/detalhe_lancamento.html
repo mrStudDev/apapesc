@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
-
+{% load filters_inss %}
 {% block title %}Detalhes/Cont. Mês: {{lancamento.mes}}{% endblock title %}
 
 {% load custom_filters %}
@@ -29,21 +29,42 @@
     </div>
     {% endif %}
 
-    <main class="flex-grow bg-gray-50 min-h-screen py-8">
-        <div class="max-w-6xl mx-auto px-4">
-          
-        <!-- Cabeçalho -->
-        <div class="mb-6">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">
-              📄 Detalhes Controle de Emissão de Guias INSS
-            </h1>
-            <p class="text-sm text-gray-600">Guias INSS por Associado</p>
-            <p class="text-sm text-gray-600">Lançamento: <strong>{{ lancamento.mes }}/{{ lancamento.ano }}</strong></p>
-            <br>
-            <a href="{% url 'app_tarefas:list_lancamentos' %}?status=aguardando" class="text-sm text-blue-600 hover:underline">
-                Voltar para lista de lançamentos
-            </a>
+<main class="flex-grow bg-gray-50 min-h-screen py-8">
+    <div class="max-w-6xl mx-auto px-4">
+        
+        <!-- ✅ Cabeçalho da Página -->
+        <div class="mb-6 border-b pb-4 flex flex-col lg:flex-row lg:justify-between lg:items-center">
+            <div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-gray-800 flex items-center gap-2">
+                    📄 Detalhes do Controle de Guias INSS
+                </h1>
+                <p class="text-sm text-gray-600 mt-1">
+                    Associados(as) | Mês de <strong>{{ lancamento.mes|nome_do_mes }}</strong> / {{ lancamento.ano }}
+                </p>
+            </div>
+
+            <!-- Link de navegação -->
+            <div class="mt-4 lg:mt-0">
+                <a href="{% url 'app_tarefas:list_lancamentos' %}?status=aguardando"
+                   class="inline-block text-blue-600 hover:underline text-sm">
+                    ← Voltar para lista de lançamentos
+                </a>
+            </div>
         </div>
+
+        <!-- ✅ Explicação / Dica de uso -->
+        <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded text-sm text-blue-800 mb-6">
+            <p>
+                Esta tela permite o <strong>controle</strong> das guias do de cada associado no mês de 
+                <strong>{{ lancamento.mes|nome_do_mes }}</strong>. 
+                Você está visualizando o lançamento de 
+                <strong>{{ lancamento.mes|stringformat:"02d" }}/{{ lancamento.ano }}</strong>.
+            </p>
+            <p class="mt-2">
+                É possível atualizar os dados singularmente ou clicar em <strong>"Iniciar/Retomar Processo"</strong> para processar e percorrer um a um.
+            </p>
+        </div>
+
 
 
         <form method="get" 
@@ -117,7 +138,12 @@
                 <form method="post" action="{% url 'app_tarefas:atualizar_guia' guia.id %}">
                 {% csrf_token %}
                 <tr class="border-t hover:bg-gray-50 transition">
-                    <td class="px-4 py-2">{{ guia.associado.user.get_full_name }}</td>
+                    <td class="px-4 py-2">
+                    <a href="{% url 'app_associados:single_associado' guia.associado.id %}" class="text-blue-600 hover:underline">
+                        {{ guia.associado.user.get_full_name }}
+                    </a>
+                    </td>
+
         
                     <!-- Status -->
                     <td class="px-6 py-2">

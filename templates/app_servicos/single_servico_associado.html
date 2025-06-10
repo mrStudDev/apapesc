@@ -115,10 +115,12 @@
                       <p class="text-sm">{{ servico.associado.user.get_full_name }}</p>
                       <a href="{% url 'app_associados:single_associado' servico.associado.id %}" 
                         class="text-blue-600 hover:text-blue-800 text-sm flex items-center gap-1"
-                        title="Ver detalhes do associado">
-                        <span class="material-icons text-sm">visibility</span> Ver
+                        title="Ver detalhes do associado (abre em nova guia)"
+                        target="_blank" rel="noopener noreferrer">
+                        <span class="material-icons text-sm">visibility</span> Ver (nova guia)
                       </a>
                     </div>
+
                   </div>
                 {% else %}
                   <span class="text-gray-400 italic">Proprietário não informado</span>

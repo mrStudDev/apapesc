@@ -527,12 +527,13 @@ class CreateExtraAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin,
     
     def get_success_url(self):
         messages.success(self.request, "Extra-associado cadastrado com sucesso!")
-        return reverse_lazy('app_servicos:list_extraassociados')  # ou outra view
+        return reverse_lazy('app_servicos:detail_extraassociado', kwargs={'pk': self.object.pk}) # ou outra view
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = "Novo Extra-associado"
         return context
+
 
 class EditExtraAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, UpdateView):
     model = ExtraAssociadoModel
@@ -551,7 +552,7 @@ class EditExtraAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, U
 
     def get_success_url(self):
         messages.success(self.request, "Extra-associado atualizado com sucesso!")
-        return reverse_lazy('app_servicos:list_extraassociados')
+        return reverse_lazy('app_servicos:detail_extraassociado', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

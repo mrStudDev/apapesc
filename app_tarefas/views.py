@@ -1485,6 +1485,39 @@ class ProcessarGuiaView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
             messages.success(request, "Processo de emissão finalizado com sucesso!")
             request.session.pop(f'ultima_guia_{lancamento_id}', None)
             return redirect('app_tarefas:list_lancamentos')
+#--------------------------
+
+class LancamentosINSSPorAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, View):
+    template_name = 'app_tarefas/lancamento_inss_por_associado.html'
+    group_required = [
+        'Superuser',
+        'Admin da Associação',
+        'Delegado(a) da Repartição',
+        'Diretor(a) da Associação',
+        'Presidente da Associação',
+        'Auxiliar da Associação',
+        'Auxiliar da Repartição',
+    ]
+
+    def get(self, request, associado_id):
+        associado = get_object_or_404(AssociadoModel, id=associado_id)
+
+        guias = GuiaINSSModel.objects.select_related('lancamento') \
+            .filter(associado=associado) \
+            .order_by('-lancamento__ano', '-lancamento__mes')
+
+        lancamentos = {}
+        for guia in guias:
+            key = (guia.lancamento.ano, guia.lancamento.mes)
+            lancamentos.setdefault(key, []).append(guia)
+
+        context = {
+            'associado': associado,
+            'lancamentos': dict(sorted(lancamentos.items(), reverse=True)),
+            'status_choices': GuiaINSSModel.get_status_choices(),
+            'observacoes_choices': GuiaINSSModel.get_observacoes_choices()
+        }
+        return render(request, self.template_name, context)
 
 # ====================
 

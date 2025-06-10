@@ -22,7 +22,8 @@ from .views import (
     ReapsAssociadosListView,
     ReapsProcessarView,
     ReapsDeleteView,
-    MinhasTarefasView
+    MinhasTarefasView,
+    LancamentosINSSPorAssociadoView
     
 
     )
@@ -45,6 +46,9 @@ urlpatterns = [
     path('inss/guias/<int:guia_id>/atualizar/', views.atualizar_guia, name='atualizar_guia'),
     path('inss/lancamento/<int:lancamento_id>/processar/', ProcessarGuiaView.as_view(), name='processar_guia'),
     path('lancamento/novo/', CriarLancamentoINSSView.as_view(), name='create_lancamentoInss'),
+    path('inss/associado/<int:associado_id>/', LancamentosINSSPorAssociadoView.as_view(), name='lancamentos_inss_por_associado'),
+
+
 
     path('starus/<int:pk>/alterar-status/', views.alterar_status_tarefa, name='alterar_status'),
     path('responsaveis/<int:pk>/alterar-responsaveis/', views.alterar_responsaveis_tarefa, name='alterar_responsaveis'),
