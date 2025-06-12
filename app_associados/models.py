@@ -611,7 +611,13 @@ class AssociadoModel(models.Model):
         null=True,
         verbose_name="Quantidade 1 (Kg)"
     )
-
+    preco1 = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Preço por Kg - Espécie 1 (R$)"
+    )    
     especie2 = models.CharField(
         max_length=50, 
         choices=ESPECIES_MARITIMAS, 
@@ -626,7 +632,13 @@ class AssociadoModel(models.Model):
         null=True,
         verbose_name="Quantidade 2 (Kg)"
     )
-
+    preco2 = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Preço por Kg - Espécie 2 (R$)"
+    )
     especie3 = models.CharField(
         max_length=50, 
         choices=ESPECIES_MARITIMAS, 
@@ -641,7 +653,13 @@ class AssociadoModel(models.Model):
         null=True,
         verbose_name="Quantidade 3 (Kg)"
     )
-
+    preco3 = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Preço por Kg - Espécie 3 (R$)"
+    )
     especie4 = models.CharField(
         max_length=50, choices=ESPECIES_MARITIMAS, 
         blank=True, 
@@ -654,6 +672,13 @@ class AssociadoModel(models.Model):
         null=True,
         verbose_name="Quantidade 4 (Kg)"
     )
+    preco4 = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Preço por Kg - Espécie 4 (R$)"
+    )    
     especie5 = models.CharField(
         max_length=50, 
         choices=ESPECIES_MARITIMAS, 
@@ -667,7 +692,13 @@ class AssociadoModel(models.Model):
         null=True,
         verbose_name="Quantidade 5 (Kg)"
     )
-    
+    preco5 = models.DecimalField(
+        max_digits=6,
+        decimal_places=2,
+        blank=True,
+        null=True,
+        verbose_name="Preço por Kg - Espécie 5 (R$)"
+    )    
     data_atualizacao = models.DateField(
         auto_now=True
     )

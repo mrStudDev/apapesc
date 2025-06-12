@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load filter_producao_anual %}
 {% block title %}{{ item.associado.user.get_full_name }} | REAPS {{ item.reaps.ano }}{% endblock title %}
 
 {% block processar_reapsIndividual %}
@@ -46,7 +47,7 @@
         <div class="bg-white shadow-md rounded-lg p-6 border border-gray-200">
 
         <h2 class="text-2xl font-semibold mb-1 text-gray-800">
-            👤 Processando REAPS — 
+            👤 Processando REAPS —
             <a href="{% url 'app_associados:single_associado' item.associado.pk %}" 
             class="text-blue-700 hover:underline inline-flex items-center gap-1"
             target="_blank" rel="noopener noreferrer">
@@ -56,7 +57,19 @@
                 </svg>
             </a>
         </h2>
-        <p class="text-sm text-gray-500 ml-8">Abrir em nova guia</p>
+
+        <!-- Link para editar associado -->
+        <div class="text-sm text-gray-600 py-8">
+            <a href="{% url 'app_associados:edit_associado' item.associado.pk %}" 
+            class="inline-flex items-center text-blue-600 hover:underline"
+            target="_blank" rel="noopener noreferrer">
+                ✏️ Editar dados do associado
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536M9 11l6-6m2 2L9 18H6v-3L17.232 7.232z" />
+                </svg>
+            </a>
+        </div>
+
 
             <div class="space-y-2 text-gray-700 text-base">
                 <p>
@@ -90,6 +103,11 @@
 
                 <ul class="space-y-2 text-gray-700 text-sm">
                     <li>
+                        <strong>Nome:</strong>
+                        <span id="user-text">{{ associado.user.first_name }}</span>
+                        <button onclick="copyToClipboard('user-text')" class="ml-2 text-blue-600 text-xs">📋 Copiar</button>
+                    </li>                    
+                    <li>
                         <strong>CPF:</strong>
                         <span id="cpf-text">{{ cpf }}</span>
                         <button onclick="copyToClipboard('cpf-text')" class="ml-2 text-blue-600 text-xs">📋 Copiar</button>
@@ -99,10 +117,79 @@
                         <span id="senha-gov-text">{{ senha_gov }}</span>
                         <button onclick="copyToClipboard('senha-gov-text')" class="ml-2 text-blue-600 text-xs">📋 Copiar</button>
                     </li>
-                    <li><strong>Relação de Trabalho:</strong> {{ relacao_trabalho }}</li>
-                    <li><strong>Comercializa Produtos:</strong> {{ comercializa_produtos }}</li>
-                    <li><strong>Bolsa Família:</strong> {{ bolsa_familia }}</li>
                 </ul>
+
+                <div class="mt-4 bg-blue-50 border border-blue-100 rounded-md p-4 shadow-sm">
+                    <h4 class="text-sm font-semibold text-blue-700 mb-2">📌 Informações Complementares</h4>
+                    <!-- Versão com botão mais visível -->
+                    <button type="button"
+                            onclick="location.reload()"
+                            class="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md bg-blue-400 text-sm text-white hover:bg-blue-50 hover:text-blue-600 transition">
+                        🔄 Atualizar dados
+                    </button>
+                    <br><br>
+                    <ul class="space-y-2 text-sm text-gray-700">
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium text-gray-600">Relação de Trabalho:</span>
+                            <span class="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                {{ relacao_trabalho|default:"—" }}
+                            </span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium text-gray-600">Comercializa Produtos:</span>
+                            <span class="inline-block bg-green-100 text-green-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                {{ comercializa_produtos|default:"—" }}
+                            </span>
+                        </li>
+                        <li class="flex items-center justify-between">
+                            <span class="font-medium text-gray-600">Bolsa Família:</span>
+                            <span class="inline-block bg-yellow-100 text-yellow-800 text-xs font-semibold px-3 py-1 rounded-full">
+                                {{ bolsa_familia|default:"—" }}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+
+                <h4 class="text-sm font-semibold text-gray-800 mb-2 py-4">🎣 Produção Declarada</h4>
+                <table class="min-w-full text-sm text-left text-gray-700 border border-gray-300 rounded-md">
+                    <thead class="bg-gray-100 text-xs uppercase text-gray-600">
+                        <tr>
+                            <th class="px-4 py-2">Espécie</th>
+                            <th class="px-4 py-2">Quantidade (Kg)</th>
+                            <th class="px-4 py-2">Preço por Kg</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="px-4 py-2">{{ associado.especie1|default:"—" }}</td>
+                            <td class="px-4 py-2">{{ associado.quantidade1|default:"—" }}</td>
+                            <td class="px-4 py-2">R$ {{ associado.preco1|floatformat:2|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-2">{{ associado.especie2|default:"—" }}</td>
+                            <td class="px-4 py-2">{{ associado.quantidade2|default:"—" }}</td>
+                            <td class="px-4 py-2">R$ {{ associado.preco2|floatformat:2|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-2">{{ associado.especie3|default:"—" }}</td>
+                            <td class="px-4 py-2">{{ associado.quantidade3|default:"—" }}</td>
+                            <td class="px-4 py-2">R$ {{ associado.preco3|floatformat:2|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-2">{{ associado.especie4|default:"—" }}</td>
+                            <td class="px-4 py-2">{{ associado.quantidade4|default:"—" }}</td>
+                            <td class="px-4 py-2">R$ {{ associado.preco4|floatformat:2|default:"—" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-2">{{ associado.especie5|default:"—" }}</td>
+                            <td class="px-4 py-2">{{ associado.quantidade5|default:"—" }}</td>
+                            <td class="px-4 py-2">R$ {{ associado.preco5|floatformat:2|default:"—" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+
+             
             </div>
 
 

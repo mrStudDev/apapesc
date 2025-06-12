@@ -1748,6 +1748,7 @@ class ReapsProcessarView(LoginRequiredMixin, GroupPermissionRequiredMixin, Detai
         ).distinct()
 
         context.update({
+            'associado': associado,
             'associado_user': associado.user,
             'cpf': associado.cpf,
             'senha_gov': associado.senha_gov,

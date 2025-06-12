@@ -232,6 +232,11 @@ class AssociadoForm(forms.ModelForm):
                 'placeholder': '000.000,00',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             }),
+            'preco1': forms.TextInput(attrs={
+                'placeholder': 'Preço por Kg (R$)',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            
             'especie2': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
@@ -239,6 +244,11 @@ class AssociadoForm(forms.ModelForm):
                 'placeholder': '000.000,00',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             }),
+            'preco2': forms.TextInput(attrs={
+                'placeholder': 'Preço por Kg (R$)',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            
             'especie3': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
@@ -246,6 +256,11 @@ class AssociadoForm(forms.ModelForm):
                 'placeholder': '000.000,00',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             }),
+            'preco3': forms.TextInput(attrs={
+                'placeholder': 'Preço por Kg (R$)',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            
             'especie4': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
@@ -253,11 +268,20 @@ class AssociadoForm(forms.ModelForm):
                 'placeholder': '000.000,00',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             }),
+            'preco4': forms.TextInput(attrs={
+                'placeholder': 'Preço por Kg (R$)',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            
             'especie5': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'quantidade5': forms.TextInput(attrs={
                 'placeholder': '000.000,00',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+            }),
+            'preco5': forms.TextInput(attrs={
+                'placeholder': 'Preço por Kg (R$)',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             }),
             
@@ -359,6 +383,23 @@ class AssociadoForm(forms.ModelForm):
         self.fields['nome_mae'].initial = self.instance.nome_mae
         self.fields['nome_pai'].initial = self.instance.nome_pai
 
+    def clean(self):
+        cleaned_data = super().clean()
+
+        for i in range(1, 6):
+            key = f'preco{i}'
+            valor = cleaned_data.get(key)
+
+            if isinstance(valor, str) and valor.strip() != "":
+                try:
+                    # Converte '19,88' → Decimal('19.88')
+                    cleaned_data[key] = Decimal(valor.replace('.', '').replace(',', '.'))
+                except InvalidOperation:
+                    self.add_error(key, "Preço inválido. Use o formato 00,00.")
+            elif valor == "":
+                cleaned_data[key] = None  # Se quiser limpar caso o campo esteja vazio
+
+        return cleaned_data
 
     def clean_user(self):
         # Não permitir alteração do campo `user` na edição
@@ -477,6 +518,14 @@ class AssociadoForm(forms.ModelForm):
         # Retorna o CEP formatado com o hífen
         return f"{numeros[:5]}-{numeros[5:]}"
 
+    def clean_precos(self):
+        cleaned_data = super().clean()
+        for i in range(1, 6):
+            key = f'preco{i}'
+            valor = cleaned_data.get(key)
+            if isinstance(valor, str):
+                cleaned_data[key] = Decimal(valor.replace('.', '').replace(',', '.'))
+        return cleaned_data
 
 class ProfissaoForm(forms.ModelForm):
     class Meta:
