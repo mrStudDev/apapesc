@@ -270,34 +270,34 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
 
 
     def post(self, request, pk):
-        tarefa = get_object_or_404(TarefaModel, pk=pk)  # <- TEM que vir aqui antes de tudo!
+        tarefa = get_object_or_404(TarefaModel, pk=pk)
+        acao = request.POST.get("acao")
+        rodada_id = request.POST.get("rodada_id")
 
-        # ✅ PAUSAR a tarefa e voltar
-        if request.POST.get("acao") == "pausar":
-            rodada_id = request.POST.get("rodada_id")
-            if rodada_id:
-                try:
-                    rodada = RodadaProcessamentoTarefaMassa.objects.get(pk=rodada_id)
-                    proc = ProcessamentoTarefaMassa.objects.get(tarefa=tarefa, rodada=rodada)
+        # ✅ PAUSAR
+        if acao == "pausar" and rodada_id:
+            try:
+                rodada = RodadaProcessamentoTarefaMassa.objects.get(pk=rodada_id)
+                proc = ProcessamentoTarefaMassa.objects.get(tarefa=tarefa, rodada=rodada)
 
-                    if proc.status == 'em_processamento' and proc.processado_por == request.user:
-                        proc.status = 'nao_processada'
-                        proc.processado_por = None
-                        proc.iniciado_em = None
-                        proc.save()
-                        messages.info(request, "Tarefa pausada com sucesso.")
-                except Exception as e:
-                    messages.warning(request, f"Erro ao tentar pausar a tarefa: {str(e)}")
+                if proc.status == 'em_processamento' and proc.processado_por == request.user:
+                    proc.status = 'nao_processada'
+                    proc.processado_por = None
+                    proc.iniciado_em = None
+                    proc.save()
+                    messages.info(request, "Tarefa pausada com sucesso.")
+            except Exception as e:
+                messages.warning(request, f"Erro ao tentar pausar a tarefa: {str(e)}")
 
             return redirect('app_tarefas:gerar_tarefa_massa')
 
-        # Atualizar responsáveis
+        # ✅ Atualizar responsáveis
         if 'responsaveis' in request.POST:
             novos_responsaveis = request.POST.getlist('responsaveis')
             tarefa.responsaveis.set(novos_responsaveis)
             messages.success(request, "Responsáveis atualizados com sucesso!")
 
-        # Atualizar checklist
+        # ✅ Atualizar checklist
         for item in tarefa.checklist_itens.all():
             checkbox_name = f"item_{item.id}"
             item.concluido = checkbox_name in request.POST
@@ -309,7 +309,6 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
             item.save()
 
         # ✅ Processamento da rodada
-        rodada_id = request.POST.get("rodada_id")
         if rodada_id and rodada_id.isdigit():
             try:
                 rodada = RodadaProcessamentoTarefaMassa.objects.get(pk=rodada_id)
@@ -322,7 +321,7 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
                 proc.status = 'processada'
                 proc.save()
 
-                # 🔍 Busca próxima tarefa disponível
+                # Buscar próxima
                 proxima_proc = rodada.tarefas_processadas.filter(
                     status='nao_processada',
                     tarefa__status__in=['pendente', 'em_andamento']
@@ -334,17 +333,33 @@ class TarefaDetailView(LoginRequiredMixin, GroupPermissionRequiredMixin, DetailV
                     return redirect(
                         f"{reverse('app_tarefas:single_tarefa', kwargs={'pk': proxima_proc.tarefa.pk})}?rodada_id={rodada.pk}"
                     )
-                else:
-                    # ✅ Encerrando a rodada corretamente
-                    rodada.encerrada = True
-                    rodada.save()
-                    messages.success(request, "Todas as tarefas da rodada foram processadas. Rodada encerrada.")
-                    return redirect('app_tarefas:list_tarefas')
+
+                rodada.encerrada = True
+                rodada.save()
+                messages.success(request, "Todas as tarefas da rodada foram processadas. Rodada encerrada.")
+                return redirect('app_tarefas:list_tarefas')
 
             except (RodadaProcessamentoTarefaMassa.DoesNotExist, ProcessamentoTarefaMassa.DoesNotExist):
                 messages.error(request, "Erro ao atualizar o processamento da tarefa.")
                 return redirect('app_tarefas:gerar_tarefa_massa')
+
+        # ✅ Fallback para ações genéricas como "concluir"
+        if acao == "concluir":
+            tarefa.status = 'concluida'
+            tarefa.save()
+            messages.success(request, "Tarefa concluída com sucesso.")
+            return redirect('app_tarefas:single_tarefa', pk=tarefa.pk)
+
+        if acao == "iniciar":
+            tarefa.status = 'em_andamento'
+            tarefa.save()
+            messages.success(request, "Tarefa iniciada.")
+            return redirect('app_tarefas:single_tarefa', pk=tarefa.pk)
+
+        # 🛑 Fallback garantido para *qualquer* request.post
+        messages.info(request, "Nenhuma ação definida. Nenhuma alteração feita.")
         return redirect('app_tarefas:single_tarefa', pk=tarefa.pk)
+
 
         
     def get_object(self, queryset=None):
@@ -1619,13 +1634,23 @@ class ReapsProcessarView(LoginRequiredMixin, GroupPermissionRequiredMixin, Detai
             visitados.append(self.object.pk)
             request.session[session_key_visitados] = visitados
 
-        # AÇÕES DE USUÁRIO
-        if acao in ['concluir', 'concluir_proximo']:
+        # AÇÕES DE USUÁRIO - unitário - singularmente
+        if acao in ['concluir']:
             self.object.status = 'CONCLUIDO'
             self.object.data_realizado = now().date()
             self.object.processado_por = request.user
             self.object.save()
             messages.success(request, f"✅ REAPS de {self.object.associado.user.get_full_name()} concluído com sucesso.")
+            return redirect('app_tarefas:reaps_detalhe', pk=reaps.pk)
+        
+        # AÇÕES DE USUÁRIO
+        if acao in ['concluir_proximo']:
+            self.object.status = 'CONCLUIDO'
+            self.object.data_realizado = now().date()
+            self.object.processado_por = request.user
+            self.object.save()
+            messages.success(request, f"✅ REAPS de {self.object.associado.user.get_full_name()} concluído com sucesso.")
+
 
         elif acao == 'pular_proximo':
             self.object.status = 'PENDENTE'
@@ -1645,7 +1670,8 @@ class ReapsProcessarView(LoginRequiredMixin, GroupPermissionRequiredMixin, Detai
             self.object.data_realizado = None
             self.object.save()
             messages.info(request, "⏸️ REAPS pausado.")
-
+            return redirect('app_tarefas:reaps_detalhe', pk=reaps.pk)
+        
         elif acao == 'iniciar':
             if self.object.status != 'CONCLUIDO' and (self.object.status != 'PROCESSANDO' or self.object.processado_por is None):
                 self.object.status = 'PROCESSANDO'

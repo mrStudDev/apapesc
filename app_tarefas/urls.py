@@ -70,7 +70,10 @@ urlpatterns = [
     # Reaps Anual
     path('', GerarListarReapsView.as_view(), name='lista_reaps'),
     path('<int:pk>/', ReapsAssociadosListView.as_view(), name='reaps_detalhe'),
+    
     path('processar/<int:pk>/', ReapsProcessarView.as_view(), name='processar_reaps'),
+    path('tarefas/processar/<int:pk>/', TarefaDetailView.as_view(), name='processar_tarefa'),
+
     # Rodadas de Processamento REAPS
     path('reaps/<int:pk>/iniciar/', views.iniciar_reaps_rodada_view, name='iniciar_reaps_rodada'),
     path('reaps/<int:pk>/deletar/', ReapsDeleteView.as_view(), name='reaps_deletar'),
