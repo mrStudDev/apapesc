@@ -23,15 +23,16 @@ class AssociadoForm(forms.ModelForm):
             }),
             'data_filiacao': forms.DateInput(attrs={
                 'type': 'date',
-                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 bg-gray-50 text-gray-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             }, format='%Y-%m-%d'),
+
             'status': forms.Select(attrs={
-                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
             }),
             'data_desfiliacao': forms.DateInput(
                 attrs={
                     'type': 'date',
-                    'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                    'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                     'id': 'id_data_desfiliacao',
                 },
                 format='%Y-%m-%d'
@@ -40,12 +41,12 @@ class AssociadoForm(forms.ModelForm):
             #Informações de Contato - Documentos e informações de Principais
             'celular': forms.TextInput(attrs={
                 'placeholder': '(99)99999-9999',
-                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 bg-gray-50 text-gray-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'oninput': 'mascaraTelefone(this)',  # Chama a função de máscara para celular
             }),
             'celular_correspondencia': forms.TextInput(attrs={
                 'placeholder': '(99)99999-9999',
-                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 bg-gray-50 text-gray-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'oninput': 'mascaraTelefone(this)',  # Chama a função de máscara para celular
             }),
             'drive_folder_id': forms.TextInput(attrs={
@@ -56,26 +57,26 @@ class AssociadoForm(forms.ModelForm):
             'cpf': forms.TextInput(attrs={
                 'id': 'id_cpf',
                 'placeholder': '000.000.000-00',
-                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+                'class': 'appearance-none border border-yellow-300 rounded-md w-full py-2 px-3 bg-gray-50 text-gray-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
                 'oninput': 'mascaraCPF(this)',  # Chama a função de máscara para CPF
             }),
             'senha_gov': forms.TextInput(attrs={
-                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                'class': 'appearance-none border border-yellow-300 rounded-md w-full py-2 px-3 bg-gray-50 text-gray-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'email': forms.EmailInput(attrs={
                 'placeholder': 'exemplo@email.com',
-                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-blue-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 bg-gray-50 text-gray-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'senha_google': forms.TextInput(attrs={
-                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 bg-gray-50 text-gray-400 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'senha_site': forms.TextInput(attrs={
-                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 bg-gray-50 text-gray-500 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),                   
             # Documento RG
             'rg_numero': forms.TextInput(attrs={
                 'placeholder': 'Digite somente números 0123456789',
-                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-blue-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
             'rg_orgao': forms.Select(attrs={
                 'placeholder': 'SSP/UF',
@@ -92,8 +93,7 @@ class AssociadoForm(forms.ModelForm):
             'data_nascimento': forms.DateInput(attrs={
                 'type': 'date',
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
-            }, format='%Y-%m-%d'),
-            
+            }, format='%Y-%m-%d'),          
             # Documentação de Habilitação CNH
             'cnh': forms.TextInput(attrs={
                 'placeholder': '00000000',

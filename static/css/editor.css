@@ -4,6 +4,10 @@
     text-align: justify;
 
 }
+input::placeholder {
+    color: #d5dad9;
+    opacity: 1;
+}
 /* Títulos */
 #editor h1 {
     margin-top: 10px;
