@@ -113,7 +113,11 @@ class EmbarcacoesModel(models.Model):
     numero_serie_4 = models.CharField(max_length=100, blank=True, null=True)
     potencia_hp4 = models.CharField(max_length=100, blank=True, null=True)
     
-
+    ano_construcao = models.PositiveIntegerField(
+        blank=True,
+        null=True,
+        verbose_name="Ano de Construção"
+    )
     construtor_nome = models.CharField(max_length=100, blank=True, null=True)
     material_construcao = models.CharField(max_length=100, blank=True, null=True)
     arqueacao_bruta = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)

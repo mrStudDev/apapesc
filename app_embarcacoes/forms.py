@@ -36,7 +36,7 @@ class EmbarcacaoForm(forms.ModelForm):
             }),
             'atividade': forms.TextInput(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700',
-                'placeholder': 'Atividade da embarcação'
+                'placeholder': 'Pesca, Passeio, Transporte'
             }),
             'area_navegacao': forms.TextInput(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700',
