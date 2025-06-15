@@ -431,6 +431,20 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
         context = super().get_context_data(**kwargs)
         associado = self.object  # Associado atual
 
+        # Lógica de INSS
+        guias = GuiaINSSModel.objects.select_related('lancamento') \
+            .filter(associado=associado) \
+            .order_by('-lancamento__ano', '-lancamento__mes')
+
+        lancamentos = {}
+        for guia in guias:
+            key = (guia.lancamento.ano, guia.lancamento.mes)
+            lancamentos.setdefault(key, []).append(guia)
+
+        context['lancamentos'] = dict(sorted(lancamentos.items(), reverse=True))
+        context['status_choices'] = GuiaINSSModel.get_status_choices()
+        context['observacoes_choices'] = GuiaINSSModel.get_observacoes_choices()
+
         # Listagem dos nomes dos tipos que devem ser verificados
         tipos_a_verificar = [
             'RG', 'RGP', 'NIT', 'CPF', 'CNH', 'TIE', 'CEI', 'CAEPF', 'Foto3x4',
@@ -595,25 +609,6 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
 
         return redirect('app_associados:single_associado', pk=associado.pk)
 
-    def get(self, request, pk):
-        associado = get_object_or_404(AssociadoModel, pk=pk)
-
-        guias = GuiaINSSModel.objects.select_related('lancamento') \
-            .filter(associado=associado) \
-            .order_by('-lancamento__ano', '-lancamento__mes')
-
-        lancamentos = {}
-        for guia in guias:
-            key = (guia.lancamento.ano, guia.lancamento.mes)
-            lancamentos.setdefault(key, []).append(guia)
-
-        context = {
-            'associado': associado,
-            'lancamentos': dict(sorted(lancamentos.items(), reverse=True)),
-            'status_choices': GuiaINSSModel.get_status_choices(),
-            'observacoes_choices': GuiaINSSModel.get_observacoes_choices()
-        }
-        return render(request, self.template_name, context)
 
 
 # Editar Associado
