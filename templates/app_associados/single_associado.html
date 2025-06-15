@@ -524,7 +524,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Coluna 2: Painel Financeiro (3/4) -->
                 <div class="col-span-3 bg-white rounded-lg border border-gray-200 shadow-sm p-5">
                     <div class="flex items-center justify-between mb-4">
@@ -562,6 +561,93 @@
                     </div>
                 </div>
             </div><br>
+        </div>
+        
+        <!--INSS-->
+        <div class="mt-6 bg-white border rounded-lg p-4 shadow">
+            <h3 class="text-lg font-semibold mb-3 text-gray-800">🗂️ Último Lançamento INSS</h3>
+
+            {% if lancamentos %}
+                {% for chave, guias in lancamentos.items %}
+                    {% if forloop.first %}
+                        {% with ano=chave.0 mes=chave.1 %}
+                                <div class="flex items-center justify-between mb-2">
+                                    <h4 class="font-semibold text-base text-blue-800">
+                                        🗓️ {{ mes|stringformat:"02d" }}/{{ ano }}
+                                    </h4>
+                                    <a href="{% url 'app_tarefas:lancamentos_inss_por_associado' associado.id %}"
+                                        class="text-blue-400 hover:text-green-800"
+                                        title="Ver Lançamento INSS">
+                                        <i class="material-icons text-[16px] leading-none">account_balance</i>
+                                    </a>
+                                </div>
+                                <div class="bg-white p-6 rounded-lg shadow-md mb-6">
+                                <table class="w-full text-sm border border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-100 text-left">
+                                            <th class="border px-2 py-1">Associado</th>
+                                            <th class="border px-2 py-1">Status</th>
+                                            <th class="border px-2 py-1">Observações</th>
+                                            <th class="border px-2 py-1">Data Emissão</th>
+                                            <th class="border px-2 py-1">CPF</th>
+                                            <th class="border px-2 py-1">Senha Gov</th>
+                                            <th class="border px-2 py-1">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for guia in guias %}
+                                        <form method="post" action="{% url 'app_tarefas:atualizar_guia' guia.id %}">
+                                        {% csrf_token %}
+                                        <tr>
+                                            <td class="border px-2 py-1">
+                                                {{ guia.associado.user.get_full_name }}
+                                            </td>
+                                            <td class="border px-2 py-1">
+                                                <select name="status" class="w-full border border-gray-300 rounded px-2 py-1 text-xs">
+                                                    {% for key, label in status_choices %}
+                                                        <option value="{{ key }}" {% if guia.status == key %}selected{% endif %}>{{ label }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                            <td class="border px-2 py-1">
+                                                <select name="observacoes" class="w-full border border-gray-300 rounded px-2 py-1 text-xs">
+                                                    {% for key, label in observacoes_choices %}
+                                                        <option value="{{ key }}" {% if guia.observacoes == key %}selected{% endif %}>{{ label }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </td>
+                                            <td class="border px-2 py-1">
+                                                {{ guia.data_emissao|date:"d/m/Y H:i" }}
+                                            </td>
+                                            <td class="border px-2 py-1">
+                                                <span id="cpf-{{ guia.id }}">{{ guia.associado.cpf }}</span>
+                                                <button type="button" onclick="copyToClipboard('cpf-{{ guia.id }}')" class="text-blue-500">
+                                                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                                                </button>
+                                            </td>
+                                            <td class="border px-2 py-1">
+                                                <span id="senha-{{ guia.id }}">{{ guia.associado.senha_gov }}</span>
+                                                <button type="button" onclick="copyToClipboard('senha-{{ guia.id }}')" class="text-blue-500">
+                                                    <i class="material-icons" style="font-size: 16px;">content_copy</i>
+                                                </button>
+                                            </td>
+                                            <td class="border px-2 py-1 text-center">
+                                                <button type="submit" class="bg-blue-600 text-white text-xs px-3 py-1 rounded hover:bg-blue-700">
+                                                    Salvar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        </form>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% endwith %}
+                    {% endif %}
+                {% endfor %}
+            {% else %}
+                <p class="text-gray-600">Nenhum lançamento encontrado para este associado.</p>
+            {% endif %}
         </div>
 
         <section class="mb-1 py-4">

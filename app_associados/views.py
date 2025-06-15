@@ -3,7 +3,7 @@ from django.views.generic import CreateView, ListView, DetailView, UpdateView
 from .models import AssociadoModel
 from .forms import AssociadoForm, ProfissaoForm
 from django.contrib.auth import get_user_model
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404, render
 from django.contrib import messages
 from django.urls import reverse
 from django.db.models import Q, Count, Sum
@@ -595,6 +595,25 @@ class SingleAssociadoView(LoginRequiredMixin, GroupPermissionRequiredMixin, Deta
 
         return redirect('app_associados:single_associado', pk=associado.pk)
 
+    def get(self, request, pk):
+        associado = get_object_or_404(AssociadoModel, pk=pk)
+
+        guias = GuiaINSSModel.objects.select_related('lancamento') \
+            .filter(associado=associado) \
+            .order_by('-lancamento__ano', '-lancamento__mes')
+
+        lancamentos = {}
+        for guia in guias:
+            key = (guia.lancamento.ano, guia.lancamento.mes)
+            lancamentos.setdefault(key, []).append(guia)
+
+        context = {
+            'associado': associado,
+            'lancamentos': dict(sorted(lancamentos.items(), reverse=True)),
+            'status_choices': GuiaINSSModel.get_status_choices(),
+            'observacoes_choices': GuiaINSSModel.get_observacoes_choices()
+        }
+        return render(request, self.template_name, context)
 
 
 # Editar Associado
