@@ -24,11 +24,12 @@ class TipoPropulsaoModel(models.Model):
 class EmbarcacoesModel(models.Model):
 
     COMBUSTIVEL_CHOICES = [
+        ('alcool', 'Álcool'),        
+        ('bateria', 'Bateria'),  
+        ('diesel', 'Diesel'),              
         ('gasolina', 'Gasolina'),
-        ('alcool', 'Álcool'),
-        ('diesel', 'Diesel'),
         ('gas', 'Gás'),
-
+        ('nao usa','Não Usa')
     ]
 
     ALIENACAO_CHOICES = [
@@ -112,7 +113,7 @@ class EmbarcacoesModel(models.Model):
     numero_serie_4 = models.CharField(max_length=100, blank=True, null=True)
     potencia_hp4 = models.CharField(max_length=100, blank=True, null=True)
     
-    ano_construcao = models.DateField(blank=True, null=True)
+
     construtor_nome = models.CharField(max_length=100, blank=True, null=True)
     material_construcao = models.CharField(max_length=100, blank=True, null=True)
     arqueacao_bruta = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True)

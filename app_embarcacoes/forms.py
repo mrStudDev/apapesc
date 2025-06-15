@@ -119,13 +119,14 @@ class EmbarcacaoForm(forms.ModelForm):
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700',
                 'placeholder': 'Potência HP'
             }),
-            'ano_construcao': forms.DateInput(
+            'ano_construcao': forms.NumberInput(
                 attrs={
-                    'type': 'date',
+                    'min': 1900,
+                    'max': 2100,
+                    'step': 1,
                     'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700'
-                },
-                format='%Y-%m-%d'  # 💡 isso garante que o valor apareça no input type="date"
-            ),            
+                }
+            ),        
             'construtor_nome': forms.TextInput(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700',
                 'placeholder': 'Construtor'
