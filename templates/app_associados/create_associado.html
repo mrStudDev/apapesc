@@ -25,6 +25,12 @@
     {% else %}
         {% include "components/navbar_aux_reparticao.html" %} 
     {% endif %}
+<style>
+    input::placeholder {
+        color: #d5dad9;
+        opacity: 1;
+    }
+</style>
 
 <div class="container mx-auto mt-8 bg-gray-100" style="max-width: 980px;">
     <h1 class="text-2xl font-bold mb-4 text-center py-2">Cadastrar Associado</h1>
@@ -150,7 +156,7 @@
             </div>
                 
                 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
                 <div class="mb-4">
                     <label for="{{ form.data_filiacao.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
@@ -172,6 +178,17 @@
                     </div>
                     <small class="text-gray-400 text-xs mt-1"> Obrigatório</small>
                     {% for error in form.cpf.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                <div class="mb-4">
+                    <label for="{{ form.senha_gov.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.senha_gov.label }}
+                    </label>
+                    <div class="mt-1">
+                        {{ form.senha_gov }}
+                    </div>
+                    {% for error in form.senha_gov.errors %}
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
@@ -199,8 +216,20 @@
                     {% endfor %}
                 </div>
                 <div class="mb-4">
+                    <label for="{{ form.senha_google.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                        {{ form.senha_google.label }} - <small class="text-red-500">Smente se Validado</small>
+                    </label>
+                    <div class="mt-1">
+                        {{ form.senha_google }}
+                    </div>
+                    {% for error in form.senha_google.errors %}
+                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                    {% endfor %}
+                </div>                
+                <div class="mb-4">
                     <label for="{{ form.email.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.email.label }} - <small class="text-red-500">Conta Apapesc</small>
+                        {{ form.email.label }} - <small class="text-red-500">Usuário Site</small>
+                                                
                     </label>
                     <div class="mt-1">
                         {{ form.email }}
@@ -209,31 +238,10 @@
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>
-                <div class="mb-4">
-                    <label for="{{ form.senha_gov.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.senha_gov.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.senha_gov }}
-                    </div>
-                    {% for error in form.senha_gov.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
-                <div class="mb-4">
-                    <label for="{{ form.senha_google.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.senha_google.label }}
-                    </label>
-                    <div class="mt-1">
-                        {{ form.senha_google }}
-                    </div>
-                    {% for error in form.senha_google.errors %}
-                        <p class="text-red-500 text-xs mt-1">{{ error }}</p>
-                    {% endfor %}
-                </div>
+
                 <div class="mb-4">
                     <label for="{{ form.senha_site.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
-                        {{ form.senha_site.label }} - <small class="text-red-500">Site Apapesc</small>
+                        {{ form.senha_site.label }} - <small class="text-red-500">Usuário Site</small>
                     </label>
                     <div class="mt-1">
                         {{ form.senha_site }}

@@ -481,7 +481,7 @@
                 </div>                                                                               
             </div>
 
-            <hr class="my-6 border-t-2 border-gray-200">
+        <hr class="my-6 border-t-2 border-gray-200">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="flex items-start space-x-3">
              
@@ -638,7 +638,35 @@
                         <p class="text-red-500 text-xs mt-1">{{ error }}</p>
                     {% endfor %}
                 </div>                                                                
-            </div> 
+           </div> 
+            <div class="p-4 bg-yellow-50 border border-yellow-200 rounded-md shadow-sm">
+                <!-- Mensagem de instrução -->
+                <p class="text-sm text-blue-800 font-medium mb-3">
+                    ✅ Selecione um ou mais apetrechos de pesca abaixo:
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-y-2 gap-x-4 max-h-[300px] overflow-y-auto bg-white border border-gray-300 p-3 rounded">
+                    {% for choice in form.petrechos_pesca.field.queryset %}
+                        <label class="flex items-start space-x-2 text-sm text-gray-700 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                name="{{ form.petrechos_pesca.name }}"
+                                value="{{ choice.id }}"
+                                {% if choice.id|stringformat:"s" in form.petrechos_pesca.value|stringformat:"s" %}checked{% endif %}
+                                class="mt-1 form-checkbox text-blue-600 rounded focus:ring-blue-500"
+                            >
+                            <span>{{ choice }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+
+                <!-- Mensagem de erro, se houver -->
+                {% for error in form.petrechos_pesca.errors %}
+                    <p class="text-red-500 text-xs mt-2 italic">{{ error }}</p>
+                {% endfor %}
+            </div>
+
+
             <br>
             <hr class="my-6 border-t-2 border-gray-200">
             <!--Documentos Oficiais - Cidadão -->

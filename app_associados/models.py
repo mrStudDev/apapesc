@@ -19,6 +19,7 @@ from app_associacao.models import(
     ReparticoesModel,
     MunicipiosModel,
 )
+
 # Choices para reutilização
 SEXO_CHOICES = [
     ('Masculino', 'Masculino'),
@@ -195,6 +196,12 @@ class ProfissoesModel(models.Model):
     def __str__(self):
         return self.nome
 
+class PetrechoPesca(models.Model):
+    nome = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.nome
+    
 # Create your models here.
 class AssociadoModel(models.Model):
     user = models.OneToOneField(
@@ -373,7 +380,12 @@ class AssociadoModel(models.Model):
         null=True, 
         verbose_name="Casa Onde Mora",
         default="Não declarado"
-    )           
+    )  
+    petrechos_pesca = models.ManyToManyField(
+        'PetrechoPesca',
+        blank=True,
+        verbose_name="Petrechos de Pesca"
+    )       
     # Documento RG
     rg_numero = models.CharField(
         max_length=20, 

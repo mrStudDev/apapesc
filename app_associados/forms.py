@@ -1,11 +1,23 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from decimal import Decimal, InvalidOperation
-from .models import AssociadoModel, ProfissoesModel
+from .models import AssociadoModel, ProfissoesModel, PetrechoPesca
 import bleach
 from app_associacao.models import AssociacaoModel, ReparticoesModel, MunicipiosModel
 
-
+class AssociadoModelForm(forms.ModelForm):
+    petrechos_pesca = forms.ModelMultipleChoiceField(
+        queryset=PetrechoPesca.objects.all(),
+        widget=forms.CheckboxSelectMultiple(
+            attrs={
+                # Aqui os estilos do UL (não dos inputs individuais)
+                "class": "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2",
+            }
+        ),
+        required=False,
+        label="Petrechos de Pesca"
+    )
+        
 class AssociadoForm(forms.ModelForm):
     class Meta:
         model = AssociadoModel
@@ -167,6 +179,9 @@ class AssociadoForm(forms.ModelForm):
             'bolsa_familia': forms.Select(attrs={
                 'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
             }),
+            'petrechos_pesca': forms.CheckboxSelectMultiple(attrs={
+                'class': 'appearance-none border border-gray-300 rounded-md w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent'
+            }),            
             # Identificacoes Oficiais/Números Cidadão INSS/NIT/PIS/TITULO
             'nit': forms.TextInput(attrs={
                 'placeholder': '0123456789',
